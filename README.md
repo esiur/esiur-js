@@ -1,2 +1,2 @@
-# esiur-js
+# Esiur.JS
 Esiur Library for Javascript
