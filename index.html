@@ -1,0 +1,73 @@
+<html>
+<head>
+    <script src="sha256.min.js"></script>
+    <script src="IEventHandler.js"></script>
+    <script src="IDestructible.js"></script>
+    <script src="AutoList.js"></script>
+
+    <script src="IResource.js"></script>
+    <script src="IStore.js"></script>
+    <script src="Structure.js"></script>
+
+    <script src="StructureArray.js"></script>
+    <script src="ResourceArray.js"></script>
+
+    <script src="MemberTemplate.js"></script>
+    <script src="AsyncReply.js"></script>
+
+    <script src="AsyncBag.js"></script>
+    <script src="AsyncQueue.js"></script>
+    <script src="BinaryList.js"></script>
+    <script src="Codec.js"></script>
+    <script src="DataConverter.js"></script>
+    <script src="DataType.js"></script>
+    <script src="DistributedConnection.js"></script>
+    <script src="DistributedResource.js"></script>
+    <script src="DistributedResourceQueueItem.js"></script>
+    <script src="EventTemplate.js"></script>
+    <script src="FunctionTemplate.js"></script>
+    <script src="Guid.js"></script>
+    <script src="IIPAuthPacket.js"></script>
+    <script src="IIPPacket.js"></script>
+    <script src="Instance.js"></script>
+    <script src="NetworkBuffer.js"></script>
+    <script src="NotModified.js"></script>
+    <script src="PropertyTemplate.js"></script>
+
+    <script src="ResourceTemplate.js"></script>
+    <script src="SendList.js"></script>
+    <script src="Warehouse.js"></script>
+    <script>
+        var demo;
+
+        class MyStore extends IStore
+        {
+
+        }
+
+        function init() {
+
+            var con = new DistributedConnection("ws://localhost:5001/iip/root/main", "localhost", "ahmed", "password");
+            Warehouse.put(con, "remote");
+
+            con.on("ready", function (d) {
+              con.get("root/demo").then(function(rt){
+                  console.log("hiiii");
+                  demo = rt;
+                  rt.on("LevelUp", function(v){
+                     console.log("LevelUp", v);
+                  });
+
+                  rt.Add(3);
+              });
+            }).on("error", function(sender, code, msg){
+                console.log(sender, code, msg);
+            });
+        }
+    </script>
+</head>
+
+<body onload="init()">
+
+</body>
+</html>
