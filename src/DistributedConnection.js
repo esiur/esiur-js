@@ -24,22 +24,26 @@
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
-var AuthenticationType =
-{
-    Host: 0,
-    CoHost: 1,
-    Client: 2,
-    Alien: 3
-};
+"use strict";  
 
 class DistributedConnection extends IStore {
 
     send(data) {
+        console.log("Send", data.length);
         this.socket.send(data.buffer);
     }
 
-    sendParams() {
-        return new SendList(this);
+    sendParams(doneReply) {
+        return new SendList(this, doneReply);
+    }
+
+    generateNonce(length)
+    {
+        var rt = new Uint8Array(length);
+        for(var i = 0; i < length; i++)
+            rt[i] = Math.random() * 255;
+
+        return rt;
     }
 
     constructor(url, domain, username, password, checkInterval = 30, connectionTimeout = 600, revivingTime = 120) {
@@ -47,9 +51,20 @@ class DistributedConnection extends IStore {
         super();
 
         //Instance.Name = Global.GenerateCode(12);
-        this.hostType = AuthenticationType.Client;
-        this.domain = domain;
-        this.localUsername = username;
+        
+        //this.hostType = AuthenticationType.Client;
+        //this.domain = domain;
+        //this.localUsername = username;
+        
+        this._register("ready");
+        this._register("error");
+        this._register("close");
+
+        this.session = new Session(new Authentication(AuthenticationType.Client), new Authentication(AuthenticationType.Host));
+
+        this.session.localAuthentication.domain = domain;
+        this.session.localAuthentication.username = username;
+
         this.localPassword = DC.stringToBytes(password);
 
         this.socket = new WebSocket(url, "iip");
@@ -70,10 +85,10 @@ class DistributedConnection extends IStore {
         this.authPacket = new IIPAuthPacket();
 
         this.resources = {};
-        this.templates = {};
+        this.templates = new KeyList();
         this.requests = {};
         this.pathRequests = {};
-        this.templateRequests = {};
+        this.templateRequests = new KeyList();
         this.resourceRequests = {};
         this.callbackCounter = 0;
 
@@ -88,8 +103,8 @@ class DistributedConnection extends IStore {
             }
         });
 
-        this.localNonce = new Uint8Array(32);
-        window.crypto.getRandomValues(this.localNonce);
+        this.localNonce = this.generateNonce(32);// new Uint8Array(32);
+        //window.crypto.getRandomValues(this.localNonce);
 
         // declare (Credentials -> No Auth, No Enctypt)
         var un = DC.stringToBytes(username);
@@ -104,7 +119,7 @@ class DistributedConnection extends IStore {
 
         this.socket.onmessage = function (msg) {
 
-            //console.log(msg);
+            console.log("Rec", msg.data.byteLength);
 
             this.networkBuffer.writeAll(msg.data);
 
@@ -115,247 +130,387 @@ class DistributedConnection extends IStore {
 
 
         };
+
+        this.socket.onclose = function(event)
+        {
+            self.close(event);
+        };
+
+        //this.socket.onerror = function(event)
+        //{
+        //    self.close(event);
+        //};
     }
 
+
+    processPacket(msg, offset, ends, data)
+    {
+
+        
+        var authPacket = this.authPacket;
+        
+        if (this.ready) {
+            var packet = new IIPPacket();
+
+            var rt = packet.parse(msg, offset, ends);
+            if (rt <= 0) {
+                data.holdFor(msg, offset, ends - offset, -rt);
+                return ends;
+            }
+            else {
+                offset += rt;
+
+                if (packet.command == IIPPacketCommand.Event) {
+                    switch (packet.event) {
+                        case IIPPacketEvent.ResourceReassigned:
+                            this.IIPEventResourceReassigned(packet.resourceId, packet.newResourceId);
+                            break;
+                        case IIPPacketEvent.ResourceDestroyed:
+                            this.IIPEventResourceDestroyed(packet.resourceId);
+                            break;
+                        case IIPPacketEvent.PropertyUpdated:
+                            this.IIPEventPropertyUpdated(packet.resourceId, packet.methodIndex, packet.content);
+                            break;
+                        case IIPPacketEvent.EventOccurred:
+                            this.IIPEventEventOccurred(packet.resourceId, packet.methodIndex, packet.content);
+                            break;
+
+                        case IIPPacketEvent.ChildAdded:
+                            this.IIPEventChildAdded(packet.resourceId, packet.childId);
+                            break;
+                        case IIPPacketEvent.ChildRemoved:
+                            this.IIPEventChildRemoved(packet.resourceId, packet.childId);
+                            break;
+                        case IIPPacketEvent.Renamed:
+                            this.IIPEventRenamed(packet.resourceId, packet.content);
+                            break;
+                        case IIPPacketEvent.AttributesUpdated:
+                            this.IIPEventAttributesUpdated(packet.resourceId, packet.content);
+                            break;
+
+                    }
+                }
+                else if (packet.command == IIPPacketCommand.Request) {
+                    switch (packet.action) {
+
+                        // Manage
+                        case IIPPacketAction.AttachResource:
+                            this.IIPRequestAttachResource(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.ReattachResource:
+                            this.IIPRequestReattachResource(packet.callbackId, packet.resourceId, packet.resourceAge);
+                            break;
+                        case IIPPacketAction.DetachResource:
+                            this.IIPRequestDetachResource(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.CreateResource:
+                            this.IIPRequestCreateResource(packet.callbackId, packet.storeId, packet.resourceId, packet.content);
+                            break;
+                        case IIPPacketAction.DeleteResource:
+                            this.IIPRequestDeleteResource(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.AddChild:
+                            this.IIPRequestAddChild(packet.callbackId, packet.resourceId, packet.childId);
+                            break;
+                        case IIPPacketAction.RemoveChild:
+                            this.IIPRequestRemoveChild(packet.callbackId, packet.resourceId, packet.childId);
+                            break;
+                        case IIPPacketAction.RenameResource:
+                            this.IIPRequestRenameResource(packet.callbackId, packet.resourceId, packet.content);
+                            break;
+
+                        // Inquire
+                        case IIPPacketAction.TemplateFromClassName:
+                            this.IIPRequestTemplateFromClassName(packet.callbackId, packet.className);
+                            break;
+                        case IIPPacketAction.TemplateFromClassId:
+                            this.IIPRequestTemplateFromClassId(packet.callbackId, packet.classId);
+                            break;
+                        case IIPPacketAction.TemplateFromResourceId:
+                            this.IIPRequestTemplateFromResourceId(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.QueryLink:
+                            this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
+                            break;
+                        case IIPPacketAction.ResourceChildren:
+                            this.IIPRequestResourceChildren(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.ResourceParents:
+                            this.IIPRequestResourceParents(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.ResourceHistory:
+                            this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
+                            break;
+
+                        // Invoke
+                        case IIPPacketAction.InvokeFunction:
+                            this.IIPRequestInvokeFunction(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                            break;
+                        case IIPPacketAction.GetProperty:
+                            this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
+                            break;
+                        case IIPPacketAction.GetPropertyIfModified:
+                            this.IIPRequestGetPropertyIfModifiedSince(packet.callbackId, packet.resourceId, packet.methodIndex, packet.resourceAge);
+                            break;
+                        case IIPPacketAction.SetProperty:
+                            this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                            break;
+                        case IIPPacketAction.ResourceHistory:
+                            this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
+                            break;
+                        case IIPPacketAction.QueryLink:
+                            this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
+                            break;
+
+                            // Attribute
+                        case IIPPacketAction.GetAllAttributes:
+                            this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                            break;
+                        case IIPPacketAction.UpdateAllAttributes:
+                            this.IIPRequestUpdateAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                            break;
+                        case IIPPacketAction.ClearAllAttributes:
+                            this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                            break;
+                        case IIPPacketAction.GetAttributes:
+                            this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                            break;
+                        case IIPPacketAction.UpdateAttributes:
+                            this.IIPRequestUpdateAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                            break;
+                        case IIPPacketAction.ClearAttributes:
+                            this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                            break;
+
+                    }
+                }
+                else if (packet.command == IIPPacketCommand.Reply) {
+                    switch (packet.action) {
+                        case IIPPacketAction.AttachResource:
+                            this.IIPReply(packet.callbackId, packet.classId, packet.resourceAge, packet.resourceLink, packet.content);
+                            break;
+                        case IIPPacketAction.ReattachResource:
+                            this.IIPReply(packet.callbackId, packet.resourceAge, packet.content);
+                            break;
+                        case IIPPacketAction.DetachResource:
+                            this.IIPReply(packet.callbackId);
+                            break;
+                        case IIPPacketAction.CreateResource:
+                            this.IIPReply(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.DeleteResource:
+                        case IIPPacketAction.AddChild:
+                        case IIPPacketAction.RemoveChild:
+                        case IIPPacketAction.RenameResource:
+                            this.IIPReply(packet.callbackId);
+                            break;
+                        case IIPPacketAction.TemplateFromClassName:
+                        case IIPPacketAction.TemplateFromClassId:
+                        case IIPPacketAction.TemplateFromResourceId:
+                            this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
+                            break;
+
+                        case IIPPacketAction.QueryLink:
+                        case IIPPacketAction.ResourceChildren:
+                        case IIPPacketAction.ResourceParents:
+                        case IIPPacketAction.ResourceHistory:
+                            this.IIPReply(packet.callbackId, packet.content);
+                            break;
+
+                        case IIPPacketAction.InvokeFunction:
+                            this.IIPReplyInvoke(packet.callbackId, packet.content);
+                            break;
+                        case IIPPacketAction.GetProperty:
+                            this.IIPReply(packet.callbackId, packet.content);
+                            break;
+                        case IIPPacketAction.GetPropertyIfModified:
+                            this.IIPReply(packet.callbackId, packet.content);
+                            break;
+                        case IIPPacketAction.SetProperty:
+                            this.IIPReply(packet.callbackId);
+                            break;
+
+                        // Attribute
+                        case IIPPacketAction.GetAllAttributes:
+                        case IIPPacketAction.GetAttributes:
+                            this.IIPReply(packet.callbackId, packet.content);
+                            break;
+
+                        case IIPPacketAction.UpdateAllAttributes:
+                        case IIPPacketAction.UpdateAttributes:
+                        case IIPPacketAction.ClearAllAttributes:
+                        case IIPPacketAction.ClearAttributes:
+                            this.IIPReply(packet.callbackId);
+                            break;
+
+                        }
+
+                }
+                else if (packet.command == IIPPacketCommand.Report)
+                {
+                    switch (packet.report)
+                    {
+                        case IIPPacketReport.ManagementError:
+                            this.IIPReportError(packet.callbackId, ErrorType.Management, packet.errorCode, null);
+                            break;
+                        case IIPPacketReport.ExecutionError:
+                            this.IIPReportError(packet.callbackId, ErrorType.Exception, packet.errorCode, packet.errorMessage);
+                            break;
+                        case IIPPacketReport.ProgressReport:
+                            this.IIPReportProgress(packet.callbackId, ProgressType.Execution, packet.progressValue, packet.progressMax);
+                            break;
+                        case IIPPacketReport.ChunkStream:
+                            this.IIPReportChunk(packet.callbackId, packet.content);
+
+                            break;
+                    }
+                }
+
+            }
+        }
+
+        else {
+            var rt = authPacket.parse(msg, offset, ends);
+
+
+            if (rt <= 0) {
+                data.holdAllFor(msg, ends - rt);
+                return ends;
+            }
+            else {
+                offset += rt;
+
+                if (this.session.localAuthentication.type == AuthenticationType.Host) {
+                    if (authPacket.command == IIPAuthPacketCommand.Declare) {
+                        if (authPacket.remoteMethod == IIPAuthPacketMethod.credentials
+                            && authPacket.localMethod == IIPAuthPacketMethod.None) {
+                            this.session.remoteAuthentication.username = authPacket.remoteUsername;
+                            this.remoteNonce = authPacket.remoteNonce;
+                            this.domain = authPacket.domain;
+                            this.sendParams().addUint8(0xa0).addUint8Array(this.localNonce).done();
+                        }
+                    }
+                    else if (authPacket.command == IIPAuthPacketCommand.Action) {
+                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
+                            var remoteHash = authPacket.hash;
+
+                            this.server.membership.getPassword(this.session.remoteAuthentication.username, this.domain).then(function (pw) {
+                                if (pw != null) {
+
+                                    //var hash = new DC(sha256.arrayBuffer(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toArray()));
+                                    var hash = SHA256.compute(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toDC());
+                                    
+
+                                    if (hash.sequenceEqual(remoteHash)) {
+                                        // send our hash
+                                        //var localHash = new DC(sha256.arrayBuffer((new BinaryList()).addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toArray()));
+                                        var localHash = SHA256.compute(BL().addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toDC());
+                                        this.sendParams().addUint8(0).addUint8Array(localHash).done();
+
+                                        this.readyToEstablish = true;
+                                    }
+                                    else {
+                                        // incorrect password
+                                        this.sendParams().addUint8(0xc0).addInt32(1).addUint16(5).addString("Error").done();
+                                    }
+                                }
+                            });
+                        }
+                        else if (authPacket.action == IIPAuthPacketAction.NewConnection) {
+                            if (readyToEstablish) {
+                                this.session.id = this.generateNonce(32);// new DC(32);
+                                //window.crypto.getRandomValues(this.session.id);
+
+                                this.sendParams().addUint8(0x28).addUint8Array(this.session.id).done();
+                                this.ready = true;
+                                this._emit("ready", this);
+                            }
+                        }
+                    }
+                }
+                else if (this.session.localAuthentication.type == AuthenticationType.Client) {
+                    if (authPacket.command == IIPAuthPacketCommand.Acknowledge) {
+                        this.remoteNonce = authPacket.remoteNonce;
+
+                        // send our hash
+
+                        //var localHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.localPassword)
+                        //    .addUint8Array(this.localNonce)
+                        //    .addUint8Array(this.remoteNonce).toArray()));
+
+                        var localHash = SHA256.compute(BL().addUint8Array(this.localPassword)
+                            .addUint8Array(this.localNonce)
+                            .addUint8Array(this.remoteNonce).toDC());
+
+                        this.sendParams().addUint8(0).addUint8Array(localHash).done();
+                    }
+                    else if (authPacket.command == IIPAuthPacketCommand.Action) {
+                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
+                            // check if the server knows my password
+                            //var remoteHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.remoteNonce)
+                            //    .addUint8Array(this.localNonce)
+                            //    .addUint8Array(this.localPassword).toArray()
+                            //));
+
+                            var remoteHash = SHA256.compute(BL().addUint8Array(this.remoteNonce)
+                                .addUint8Array(this.localNonce)
+                                .addUint8Array(this.localPassword).toDC());
+
+
+                            if (remoteHash.sequenceEqual(authPacket.hash)) {
+                                // send establish request
+                                this.sendParams().addUint8(0x20).addUint16(0).done();
+                            }
+                            else {
+                                this.sendParams().addUint8(0xc0).addUint32(1).addUint16(5).addString("Error").done();
+                            }
+                        }
+                        else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished) {
+                            this.session.id = authPacket.sessionId;
+                            this.ready = true;
+                            this._emit("ready", this);
+                        }
+                    }
+                    else if (authPacket.command == IIPAuthPacketCommand.Error)
+                    {
+                        this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
+                        this.close();
+                    }
+                }
+            }
+        }
+
+        return offset;
+
+        //if (offset < ends)
+        //    this.processPacket(msg, offset, ends, data);
+    }
 
     receive(data) {
         var msg = data.read();
         var offset = 0;
         var ends = msg.length;
         var packet = this.packet;
-        var authPacket = this.authPacket;
 
         //console.log("Data");
 
         while (offset < ends) {
-
-            if (this.ready) {
-                var rt = packet.parse(msg, offset, ends);
-                if (rt <= 0) {
-                    data.holdFor(msg, offset, ends - offset, -rt);
-                    return;
-                }
-                else {
-                    offset += rt;
-
-                    if (packet.command == IIPPacketCommand.Event) {
-                        switch (packet.event) {
-                            case IIPPacketEvent.ResourceReassigned:
-                                this.IIPEventResourceReassigned(packet.resourceId, packet.newResourceId);
-                                break;
-                            case IIPPacketEvent.ResourceDestroyed:
-                                this.IIPEventResourceDestroyed(packet.resourceId);
-                                break;
-                            case IIPPacketEvent.PropertyUpdated:
-                                this.IIPEventPropertyUpdated(packet.resourceId, packet.methodIndex, packet.content);
-                                break;
-                            case IIPPacketEvent.EventOccured:
-                                this.IIPEventEventOccured(packet.resourceId, packet.methodIndex, packet.content);
-                                break;
-                        }
-                    }
-                    else if (packet.command == IIPPacketCommand.Request) {
-                        switch (packet.action) {
-                            case IIPPacketAction.AttachResource:
-                                this.IIPRequestAttachResource(packet.callbackId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.ReattachResource:
-                                this.IIPRequestReattachResource(packet.callbackId, packet.resourceId, packet.resourceAge);
-                                break;
-                            case IIPPacketAction.DetachResource:
-                                this.IIPRequestDetachResource(packet.callbackId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.CreateResource:
-                                this.IIPRequestCreateResource(packet.callbackId, packet.className);
-                                break;
-                            case IIPPacketAction.DeleteResource:
-                                this.IIPRequestDeleteResource(packet.callbackId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.TemplateFromClassName:
-                                this.IIPRequestTemplateFromClassName(packet.callbackId, packet.className);
-                                break;
-                            case IIPPacketAction.TemplateFromClassId:
-                                this.IIPRequestTemplateFromClassId(packet.callbackId, packet.classId);
-                                break;
-                            case IIPPacketAction.TemplateFromResourceLink:
-                                this.IIPRequestTemplateFromResourceLink(packet.callbackId, packet.resourceLink);
-                                break;
-                            case IIPPacketAction.TemplateFromResourceId:
-                                this.IIPRequestTemplateFromResourceId(packet.callbackId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.ResourceIdFromResourceLink:
-                                this.IIPRequestResourceIdFromResourceLink(packet.callbackId, packet.resourceLink);
-                                break;
-                            case IIPPacketAction.InvokeFunction:
-                                this.IIPRequestInvokeFunction(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
-                                break;
-                            case IIPPacketAction.GetProperty:
-                                this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
-                                break;
-                            case IIPPacketAction.GetPropertyIfModified:
-                                this.IIPRequestGetPropertyIfModifiedSince(packet.callbackId, packet.resourceId, packet.methodIndex, packet.resourceAge);
-                                break;
-                            case IIPPacketAction.SetProperty:
-                                this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
-                                break;
-                        }
-                    }
-                    else if (packet.command == IIPPacketCommand.Reply) {
-                        switch (packet.action) {
-                            case IIPPacketAction.AttachResource:
-                                this.IIPReply(packet.callbackId, packet.classId, packet.resourceAge, packet.resourceLink, packet.content);
-                                break;
-                            case IIPPacketAction.ReattachResource:
-                                this.IIPReply(packet.callbackId, packet.resourceAge, packet.content);
-                                break;
-                            case IIPPacketAction.DetachResource:
-                                this.IIPReply(packet.callbackId);
-                                break;
-                            case IIPPacketAction.CreateResource:
-                                this.IIPReply(packet.callbackId, packet.classId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.DeleteResource:
-                                this.IIPReply(packet.callbackId);
-                                break;
-                            case IIPPacketAction.TemplateFromClassName:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
-                                break;
-                            case IIPPacketAction.TemplateFromClassId:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
-                                break;
-                            case IIPPacketAction.TemplateFromResourceLink:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
-                                break;
-                            case IIPPacketAction.TemplateFromResourceId:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
-                                break;
-                            case IIPPacketAction.ResourceIdFromResourceLink:
-                                this.IIPReply(packet.callbackId, packet.classId, packet.resourceId, packet.resourceAge);
-                                break;
-                            case IIPPacketAction.InvokeFunction:
-                                this.IIPReply(packet.callbackId, packet.content);
-                                break;
-                            case IIPPacketAction.GetProperty:
-                                this.IIPReply(packet.callbackId, packet.content);
-                                break;
-                            case IIPPacketAction.GetPropertyIfModified:
-                                this.IIPReply(packet.callbackId, packet.content);
-                                break;
-                            case IIPPacketAction.SetProperty:
-                                this.IIPReply(packet.callbackId);
-                                break;
-                        }
-
-                    }
-
-                }
-            }
-
-            else {
-                var rt = authPacket.parse(msg, offset, ends);
-
-
-                if (rt <= 0) {
-                    data.holdAllFor(msg, ends - rt);
-                    return;
-                }
-                else {
-                    offset += rt;
-
-                    if (this.hostType == AuthenticationType.Host) {
-                        if (authPacket.command == IIPAuthPacketCommand.Declare) {
-                            if (authPacket.remoteMethod == IIPAuthPacketMethod.credentials
-                                && authPacket.localMethod == IIPAuthPacketMethod.None) {
-                                this.remoteUsername = authPacket.remoteUsername;
-                                this.remoteNonce = authPacket.remoteNonce;
-                                this.domain = authPacket.domain;
-                                this.sendParams().addUint8(0xa0).addUint8Array(this.localNonce).done();
-                            }
-                        }
-                        else if (authPacket.command == IIPAuthPacketCommand.Action) {
-                            if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-                                var remoteHash = authPacket.hash;
-
-                                this.server.membership.getPassword(this.remoteUsername, this.domain).then(function (pw) {
-                                    if (pw != null) {
-
-                                        var hash = new DC(sha256.arrayBuffer(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toArray()));
-
-
-                                        if (hash.sequenceEqual(remoteHash)) {
-                                            // send our hash
-                                            var localHash = new DC(sha256.arrayBuffer((new BinaryList()).addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toArray()));
-                                            this.sendParams().addUint8(0).addUint8Array(localHash).done();
-
-                                            this.readyToEstablish = true;
-                                        }
-                                        else {
-                                            // incorrect password
-                                            this.sendParams().addUint8(0xc0).addInt32(1).addUint16(5).addString("Error").done();
-                                        }
-                                    }
-                                });
-                            }
-                            else if (authPacket.action == IIPAuthPacketAction.NewConnection) {
-                                if (readyToEstablish) {
-                                    this.sessionId = new DC(32);
-                                    window.crypto.getRandomValues(this.sessionId);
-
-                                    this.sendParams().addUint8(0x28).addUint8Array(this.sessionId).done();
-                                    this.ready = true;
-                                    this._emit("ready", this);
-                                }
-                            }
-                        }
-                    }
-                    else if (this.hostType == AuthenticationType.Client) {
-                        if (authPacket.command == IIPAuthPacketCommand.Acknowledge) {
-                            this.remoteNonce = authPacket.remoteNonce;
-
-                            // send our hash
-
-                            var localHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.localPassword)
-                                .addUint8Array(this.localNonce)
-                                .addUint8Array(this.remoteNonce).toArray()));
-                            this.sendParams().addUint8(0).addUint8Array(localHash).done();
-                        }
-                        else if (authPacket.command == IIPAuthPacketCommand.Action) {
-                            if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-                                // check if the server knows my password
-                                var remoteHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.remoteNonce)
-                                    .addUint8Array(this.localNonce)
-                                    .addUint8Array(this.localPassword).toArray()
-                                ));
-
-                                if (remoteHash.sequenceEqual(authPacket.hash)) {
-                                    // send establish request
-                                    this.sendParams().addUint8(0x20).addUint16(0).done();
-                                }
-                                else {
-                                    this.sendParams().addUint8(0xc0).addUint32(1).addUint16(5).addString("Error").done();
-                                }
-                            }
-                            else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished) {
-                                this.sessionId = authPacket.sessionId;
-                                this.ready = true;
-                                this._emit("ready", this);
-                            }
-                        }
-                        else if (authPacket.command == IIPAuthPacketCommand.Error)
-                        {
-                            this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
-                            this.close();
-                        }
-                    }
-                }
-            }
+            offset = this.processPacket(msg, offset, ends, data);   
         }
 
+        
     }
 
-    close()
+    close(event)
     {
-        this.socket.close();
+        this._emit("close", event);
+        
+        Warehouse.remove(this);
+
+        if (this.socket.readyState != this.socket.CLOSED)
+        {
+            this.socket.close();
+        }
     }
 
     trigger(trigger) {
@@ -367,10 +522,14 @@ class DistributedConnection extends IStore {
         return true;
     }
 
+    remove(resource)
+    {
+        // nothing to do (IStore interface)
+    }
 
     // Protocol Implementation
 
-    sendRequest(action, binaryList) {
+    sendRequest2(action, binaryList) {
         var reply = new AsyncReply();
         this.callbackCounter++;
         this.sendParams().addUint8(0x40 | action).addUint32(this.callbackCounter).addRange(binaryList).done();
@@ -378,11 +537,117 @@ class DistributedConnection extends IStore {
         return reply;
     }
 
+    sendRequest(action) {
+        var reply = new AsyncReply();
+        this.callbackCounter++;
+        this.requests[this.callbackCounter] = reply;
+        return this.sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);        
+    }
+
+    sendInvoke(instanceId, index, parameters)
+    {
+        var reply = new AsyncReply();
+        
+        var pb = Codec.composeVarArray(parameters, this, true);
+
+        this.callbackCounter++;
+        this.sendParams()
+                        .addUint8(0x40 | IIPPacketAction.InvokeFunction)
+                        .addUint32(this.callbackCounter)
+                        .addUint32(instanceId)
+                        .addUint8(index)
+                        .addUint8Array(pb)
+                        .done();
+
+        this.requests[this.callbackCounter] = reply;
+
+        return reply; 
+    }
+
+    sendError(type, callbackId, errorCode, errorMessage = "")
+    {
+        var msg = DC.stringToBytes(errorMessage);
+        if (type == ErrorType.Management)
+            this.sendParams()
+                            .addUint8(0xC0 | IIPPacketReport.ManagementError)
+                            .addUint32(callbackId)
+                            .addUint16(errorCode)
+                            .done();
+        else if (type == ErrorType.Exception)
+            this.sendParams()
+                            .addUint8(0xC0 | IIPPacketReport.ExecutionError)
+                            .addUint32(callbackId)
+                            .addUint16(errorCode)
+                            .addUint16(msg.length)
+                            .addUint8Array(msg)
+                            .done();
+    }
+
+    sendProgress(callbackId, value, max)
+    {
+        this.sendParams()
+                        .addUint8(0xC0 | IIPPacketReport.ProgressReport)
+                        .addUint32(callbackId)
+                        .addInt32(value)
+                        .addInt32(max)
+                        .done();
+    }
+
+    sendChunk(callbackId, chunk)
+    {
+        var c = Codec.compose(chunk, this, true);
+        this.sendParams()
+                        .addUint8(0xC0 | IIPPacketReport.ChunkStream)
+                        .addUint32(callbackId)
+                        .addUint8Array(c)
+                        .done();
+    }
+
     IIPReply(callbackId) {
+
         var results = Array.prototype.slice.call(arguments, 1);
         var req = this.requests[callbackId];
+
+        //console.log("Reply " + callbackId, req);
+
         delete this.requests[callbackId];
         req.trigger(results);
+    }
+
+    IIPReplyInvoke(callbackId, result)
+    {
+        var req = this.requests[callbackId];
+        delete this.requests[callbackId];
+
+        Codec.parse(result, 0, {}, this).then(function(rt)
+        {
+            req.trigger(rt);
+        });
+    }
+
+    IIPReportError(callbackId, errorType, errorCode, errorMessage)
+    {
+        var req = this.requests[callbackId];
+        delete this.requests[callbackId];
+        req.triggerError(errorType, errorCode, errorMessage);
+    }
+
+    IIPReportProgress(callbackId, type, value, max)
+    {
+        var req = this.requests[callbackId];
+        req.triggerProgress(type, value, max);
+    }
+
+    IIPReportChunk(callbackId, data)
+    {
+        if (this.requests[callbackId])
+        {
+            var req = this.requests[callbackId];
+            Codec.parse(data, 0, {}, this).then(function(x)
+            {
+                req.triggerChunk(x);
+            });
+        }
     }
 
     IIPEventResourceReassigned(resourceId, newResourceId) {
@@ -398,203 +663,367 @@ class DistributedConnection extends IStore {
     }
 
     IIPEventPropertyUpdated(resourceId, index, content) {
-        if (this.resources[resourceId]) {
-            // push to the queue to gaurantee serialization
-            var reply = new AsyncReply();
-            this.queue.add(reply);
 
-            var r = this.resources[resourceId];
-            Codec.parse(content, 0, this).then(function (args) {
-                var pt = r._p.template.getPropertyTemplateByIndex(index);
-                if (pt != null) {
-                    reply.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Propery, args, index));
-                }
-                else {    // ft found, fi not found, this should never happen
-                    this.queue.remove(reply);
-                }
-            });
-        }
+        var self = this;
+        
+        this.fetch(resourceId).then(function(r){
+                // push to the queue to gaurantee serialization
+                var item = new AsyncReply();
+                self.queue.add(item);
+    
+                Codec.parse(content, 0, {}, self).then(function (args) {
+                    var pt = r.instance.template.getPropertyTemplateByIndex(index);
+                    if (pt != null) {
+                        item.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Propery, args, index));
+                    }
+                    else {    // ft found, fi not found, this should never happen
+                        self.queue.remove(item);
+                    }
+                });
+        });
     }
 
 
-    IIPEventEventOccured(resourceId, index, content) {
-        if (this.resources[resourceId]) {
+    IIPEventEventOccurred(resourceId, index, content) {
+        var self = this;
+
+        this.fetch(resourceId).then(function(r){
             // push to the queue to guarantee serialization
-            var reply = new AsyncReply();
-            var r = this.resources[resourceId];
+            var item = new AsyncReply();
+            var r = self.resources[resourceId];
 
-            this.queue.add(reply);
+            self.queue.add(item);
 
-            Codec.parseVarArray(content, 0, content.length, this).then(function (args) {
-                var et = r._p.template.getEventTemplateByIndex(index);
+            Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
+                var et = r.instance.template.getEventTemplateByIndex(index);
                 if (et != null) {
-                    reply.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Event, args, index));
+                    item.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Event, args, index));
                 }
                 else {    // ft found, fi not found, this should never happen
-                    this.queue.remove(reply);
+                    self.queue.remove(item);
                 }
             });
-        }
+        });
+    }
+
+    IIPEventChildAdded(resourceId, childId)
+    {
+        var self = this;
+
+        this.fetch(resourceId).then(function(parent)
+        {
+            self.fetch(childId).then(function(child)
+            {
+                parent.instance.children.add(child);
+            });
+        });
+    }
+
+    IIPEventChildRemoved(resourceId, childId)
+    {
+        var self = this;
+
+        this.fetch(resourceId).then(function(parent)
+        {
+            self.fetch(childId).then(function(child)
+            {
+                parent.instance.children.remove(child);
+            });
+        });
+    }
+
+    IIPEventRenamed(resourceId, name)
+    {
+        this.fetch(resourceId).then(function(resource)
+        {
+            resource.instance.attributes.set("name", name.getString(0, name.length));
+        });
+    }
+
+
+    IIPEventAttributesUpdated(resourceId, attributes)
+    {
+        var self = this;
+
+        this.fetch(resourceId).then(function(resource)
+        {
+            var attrs = attributes.getStringArray(0, attributes.length);
+
+            self.getAttributes(resource, attrs).then(function(s)
+            {
+                resource.instance.setAttributes(s);
+            });
+        });
+    }
+
+    sendReply(action, callbackId)
+    {
+        return this.sendParams().addUint8(0x80 | action).addUint32(callbackId);
+    }
+
+    sendEvent(evt)
+    {
+        return this.sendParams().addUint8(evt);
     }
 
     IIPRequestAttachResource(callback, resourceId) {
 
-        var sl = this.sendParams();
+        //var sl = this.sendParams();
+        var self = this;
+
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
-                r.instance.on("ResourceEventOccured", this.instance_eventOccured);
-                r.instance.on("ResourceModified", this.instance_propertyModified);
-                r.instance.on("ResourceDestroyed", this.instance_resourceDestroyed);
+
+                if (r.instance.applicable(self.session, ActionType.Attach, null) == Ruling.Denied)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AttachDenied);
+                    return;
+                }
+
+                r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
+                r.instance.on("ResourceModified", self.instance_propertyModified, self);
+                r.instance.on("ResourceDestroyed", self.instance_resourceDestroyed, self);
                 // reply ok
 
                 var link = DC.stringToBytes(r.instance.link);
 
-                sl.addUint8(0x80)
-                    .addUint32(callback)
-                    .addUint8Array(r.instance.template.classId.value)
-                    .addUint32(r.instance.age)
-                    .addUint16(link.length)
-                    .addUint8Array(link)
-                    .addUint8Array(Codec.composeVarArray(r.instance.serialize(), this, true))
-                    .done();
+                if (r instanceof DistributedResource)
+                    self.sendReply(IIPPacketAction.AttachResource, callback)
+                        .addUint8Array(r.instance.template.classId.value)
+                        .addUint64(r.instance.age)
+                        .addUint16(link.length)
+                        .addUint8Array(link)
+                        .addUint8Array(Codec.composePropertyValueArray(r._serialize(), self, true))
+                        .done();
+                else
+                    self.sendReply(IIPPacketAction.AttachResource, callback)
+                        .addUint8Array(r.instance.template.classId.value)
+                        .addUint64(r.instance.age)
+                        .addUint16(link.length)
+                        .addUint8Array(link)
+                        .addUint8Array(Codec.composePropertyValueArray(r.instance.serialize(), self, true))
+                        .done();
             }
             else {
                 // reply failed
-                //SendParams(0x80, r.Instance.Id, r.Instance.Age, r.Instance.Serialize(false, this));
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);                
             }
         });
     }
 
     IIPRequestReattachResource(callback, resourceId, resourceAge) {
-        var sl = this.sendParams();
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (res != null) {
-                r.instance.on("ResourceEventOccured", this.instance_eventOccured);
-                r.instance.on("ResourceModified", this.instance_propertyModified);
-                r.instance.on("ResourceDestroyed", this.instance_resourceDestroyed);
+                r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
+                r.instance.on("ResourceModified", self.instance_propertyModified, self);
+                r.instance.on("ResourceDestroyed", self.instance_resourceDestroyed, self);
                 // reply ok
-                sl.addUint8(0x81)
-                    .addUint32(callback)
-                    .addUint32(r.instance.age)
-                    .addUint8Array(Codec.composeVarArray(r.instance.serialize(), this, true))
-                    .done();
+                self.sendReply(IIPPacketAction.ReattachResource, callback)
+                        .addUint64(r.instance.age)
+                        .addUint8Array(Codec.composePropertyValueArray(r.instance.serialize(), self, true))
+                        .done();
             }
             else {
                 // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
 
     IIPRequestDetachResource(callback, resourceId) {
-        var sl = this.sendParams();
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
-                r.instance.off("ResourceEventOccured", this.instance_eventOccured);
-                r.instance.off("ResourceModified", this.instance_propertyModified);
-                r.instance.off("ResourceDestroyed", this.instance_resourceDestroyed);
+                r.instance.off("ResourceEventOccurred", self.instance_eventOccurred);
+                r.instance.off("ResourceModified", self.instance_propertyModified);
+                r.instance.off("ResourceDestroyed", self.instance_resourceDestroyed);
 
                 // reply ok
-                sl.addUint8(0x82).addUint32(callback).done();
+                self.sendReply(IIPPacketAction.DetachResource, callback).done();
             }
             else {
                 // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
 
-    IIPRequestCreateResource(callback, className) {
-        // not implemented
+    IIPRequestCreateResource(callback, storeId, parentId, content) {
+        var self = this;
+        Warehouse.get(storeId).then(function(store)
+            {
+                if (store == null)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.StoreNotFound);
+                    return;
+                }
+
+                if (!(store instanceof IStore))
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceIsNotStore);
+                    return;
+                }
+
+                // check security
+                if (store.instance.applicable(self.session, ActionType.CreateResource, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.CreateDenied);
+                    return;
+                }
+
+                Warehouse.get(parentId).then(function(parent)
+                {
+
+                    // check security
+
+                    if (parent != null)
+                        if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed)
+                        {
+                            self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                            return;
+                        }
+
+                    var offset = 0;
+
+                    var className = content.getString(offset + 1, content[0]);
+                    offset += 1 + content[0];
+
+                    var nameLength = content.getUint16(offset);
+                    offset += 2;
+                    var name = content.getString(offset, nameLength);
+
+                    var cl = content.getUint32(offset);
+                    offset += 4;
+
+                    var type = window[className];
+
+                    if (type == null)
+                    {
+                        self.sendError(ErrorType.Management, callback, ExceptionCode.ClassNotFound);
+                        return;
+                    }
+
+                    Codec.parseVarArray(content, offset, cl, self).then(function(parameters)
+                    {
+                        offset += cl;
+                        cl = content.getUint32(offset);
+                        Codec.parseStructure(content, offset, cl, self).then(function(attributes)
+                        {
+                            offset += cl;
+                            cl = content.length - offset;
+
+                            Codec.parseStructure(content, offset, cl, self).then(function(values)
+                            {
+
+
+                                var resource = new (Function.prototype.bind.apply(type, values));
+                            
+                                Warehouse.put(resource, name, store, parent);
+
+
+                                self.sendReply(IIPPacketAction.CreateResource, callback)
+                                            .addUint32(resource.Instance.Id)
+                                            .done();
+                               
+                            });
+                        });
+                    });
+                });
+            });
     }
 
     IIPRequestDeleteResource(callback, resourceId) {
-        // not implemented
+        var self = this;
+        Warehouse.get(resourceId).then(function(r)
+            {
+                if (r == null)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    return;
+                }
+
+                if (r.instance.store.instance.applicable(session, ActionType.Delete, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.DeleteDenied);
+                    return;
+                }
+
+                if (Warehouse.remove(r))
+                    self.sendReply(IIPPacketAction.DeleteResource, callback).done();
+                else
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.DeleteFailed);
+            });
     }
 
     IIPRequestTemplateFromClassName(callback, className) {
-        var sl = this.sendParams();
+        
+        var self = this;
 
         Warehouse.getTemplateByClassName(className).then(function (t) {
             if (t != null)
-                sl.addUint8(0x88).addUint32(callback).addUint8Array(t.content).done();
+                self.sendReply(IIPPacketAction.TemplateFromClassName, callback)
+                                .addUint32(t.content.length)
+                                .addUint8Array(t.content)
+                                .done();
             else {
                 // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
             }
         });
     }
 
     IIPRequestTemplateFromClassId(callback, classId) {
-        var sl = this.sendParams();
-
+        var self = this;
         Warehouse.getTemplateByClassId(classId).then(function (t) {
             if (t != null)
-                sl.addUint8(0x89)
-                    .addUint32(callback)
-                    .addUint32(t.content.length)
-                    .addUint8Array(t.content)
-                    .done();
+                self.sendReply(IIPPacketAction.TemplateFromClassId, callback)
+                            .addUint32(t.content.length)
+                            .addUint8Array(t.content)
+                            .done();
             else {
                 // reply failed
-            }
-        });
-    }
-
-    IIPRequestTemplateFromResourceLink(callback, resourceLink) {
-        var sl = this.sendParams();
-
-        Warehouse.getTemplate(resourceLink).then(function (t) {
-            if (t != null)
-                sl.addUint8(0x8a).addUint32(callback).addUint8Array(t.content).done();
-            else {
-                // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
             }
         });
     }
 
     IIPRequestTemplateFromResourceId(callback, resourceId) {
-        var sl = this.sendParams();
+
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null)
-                sl.addUint8(0x8b).addUint32(callback).addUint8Array(r.instance.template.content).done();
+                self.sendReply(IIPPacketAction.TemplateFromResourceId, callback)
+                            .addUint32(r.instance.template.content.length)
+                            .addUint8Array(r.instance.template.content)
+                            .done();
             else {
                 // reply failed
-            }
-        });
-    }
-
-    IIPRequestResourceIdFromResourceLink(callback, resourceLink) {
-
-        var sl = this.sendParams();
-
-        Warehouse.get(resourceLink).then(function (r) {
-            if (r != null)
-                sl.addUint8(0x8c)
-                    .addUint32(callback)
-                    .addUint8Array(r.instance.template.classId.value)
-                    .addUint32(r.instance.id)
-                    .addUint32(r.instance.age).done();
-            else {
-                // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);                
             }
         });
     }
 
     IIPRequestInvokeFunction(callback, resourceId, index, content) {
-        var sl = this.sendParams();
+
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
-                Codec.parseVarArray(content, 0, content.length, sl.connection).then(function (args) {
+                Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
                     var ft = r.instance.template.getFunctionTemplateByIndex(index);
                     if (ft != null) {
                         if (r instanceof DistributedResource) {
                             var rt = r._invoke(index, args);
                             if (rt != null) {
                                 rt.then(function (res) {
-                                    sl.addUint8(0x90).addUint32(callback).addUint8Array(Codec.compose(res, sl.connection)).done();
+                                    self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                                    .addUint8Array(Codec.compose(res, self))
+                                                    .done();
                                 });
                             }
                             else {
@@ -604,19 +1033,30 @@ class DistributedConnection extends IStore {
                         else {
 
                             var fi = r[ft.name];
+
+                            if (r.instance.applicable(self.session, ActionType.Execute, ft) == Ruling.Denied)
+                            {
+                                self.sendError(ErrorType.Management, callback, ExceptionCode.InvokeDenied);
+                                return;
+                            }
+
                             if (fi instanceof Function) {
-                                args.push(sl.connection);
+                                args.push(self);
 
                                 var rt = fi.apply(r, args);
 
 
                                 if (rt instanceof AsyncReply) {
                                     rt.then(function (res) {
-                                        sl.addUint8(0x90).addUint32(callback).addUint8Array(Codec.compose(res, sl.connection)).done();
+                                        self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                                      .addUint8Array(Codec.compose(res, self))
+                                                      .done();
                                     });
                                 }
                                 else {
-                                    sl.addUint8(0x90).addUint32(callback).addUint8Array(Codec.compose(rt, sl.connection)).done();
+                                    self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                                    .addUint8Array(Codec.compose(rt, self))
+                                                    .done();
                                 }
                             }
                             else {
@@ -636,18 +1076,23 @@ class DistributedConnection extends IStore {
     }
 
     IIPRequestGetProperty(callback, resourceId, index) {
-        var sl = this.sendParams();
+        
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
                 var pt = r.instance.template.getFunctionTemplateByIndex(index);
                 if (pt != null) {
                     if (r instanceof DistributedResource) {
-                        sl.addUint8(0x91).addUint32(callback).addUint8Array(Codec.compose(r._get(pt.index), sl.connection)).done();
+                        self.sendReply(IIPPacketAction.GetProperty, callback)
+                                        .addUint8Array(Codec.compose(r._get(pt.index), self))
+                                        .done();
                     }
                     else {
                         var pv = r[pt.name];
-                        sl.addUint8(0x91).addUint32(callback).addUint8Array(Codec.compose(pv, sl.connection)).done();
+                        self.sendReply(IIPPacketAction.GetProperty)
+                                    .addUint8Array(Codec.compose(pv, self))
+                                    .done();
                     }
                 }
                 else {
@@ -661,7 +1106,8 @@ class DistributedConnection extends IStore {
     }
 
     IIPRequestGetPropertyIfModifiedSince(callback, resourceId, index, age) {
-        var sl = this.sendParams();
+        
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
@@ -669,10 +1115,15 @@ class DistributedConnection extends IStore {
                 if (pt != null) {
                     if (r.instance.getAge(index) > age) {
                         var pv = r[pt.name];
-                        sl.addUint8(0x92).addUint32(callback).addUint8Array(Codec.compose(pv, sl.connection)).done();
+                        self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+                                        .addUint8Array(Codec.compose(pv, self))
+                                        .done();
                     }
-                    else {
-                        sl.addUint8(0x92).addUint32(callback).addUint8(DataType.NotModified).done();
+                    else 
+                    {
+                        self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+                                        .addUint8(DataType.NotModified)
+                                        .done();
                     }
                 }
                 else {
@@ -686,7 +1137,8 @@ class DistributedConnection extends IStore {
     }
 
     IIPRequestSetProperty(callback, resourceId, index, content) {
-        var sl = this.sendParams();
+        
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
@@ -694,53 +1146,181 @@ class DistributedConnection extends IStore {
 
                 var pt = r.instance.template.getPropertyTemplateByIndex(index);
                 if (pt != null) {
-                    Codec.parse(content, 0, this).then(function (value) {
+                    Codec.parse(content, 0, {}, this).then(function (value) {
                         if (r instanceof DistributedResource) {
                             // propagation
                             r._set(index, value).then(function (x) {
-                                sl.addUint8(0x93).addUint32(callback).done();
+                                self.sendReply(IIPPacketAction.SetProperty, callback)
+                                                .done();
+                            }).error(function(x){
+                                self.sendError(x.type, callback, x.code, x.message)
+                                    .done();
                             });
                         }
-                        else {
-                            r[pt.name] = value;
-                            sl.addUint8(0x93).addUint32(callback).done();
+                        else 
+                        {
+                            if (r.instance.applicable(self.session, ActionType.SetProperty, pt) == Ruling.Denied)
+                            {
+                                self.sendError(AsyncReply.ErrorType.Exception, callback, ExceptionCode.SetPropertyDenied);
+                                return;
+                            }
+                            
+                            try
+                            {
+                                if (r[pt.name] instanceof DistributedPropertyContext)
+                                    value = new DistributedPropertyContext(this, value);
+
+                                r[pt.name] = value;
+                                self.sendReply(IIPPacketAction.SetProperty, callback).done();
+                            }
+                            catch(ex)
+                            {
+                                self.sendError(AsyncReply.ErrorType.Exception, callback, 0, ex.toString()).done();
+                            }
                         }
 
                     });
                 }
                 else {
                     // property not found
+                    self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
                 }
             }
             else {
                 // resource not found
+                self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
             }
         });
     }
 
+    IIPRequestInquireResourceHistory(callback, resourceId, fromDate, toDate)
+    {
+        var self = this;
+        Warehouse.get(resourceId).then(function(r)
+        {
+            if (r != null)
+            {
+                r.instance.store.getRecord(r, fromDate, toDate).then(function(results)
+                {
+                    var history = Codec.composeHistory(results, self, true);
+                    self.sendReply(IIPPacketAction.ResourceHistory, callback)
+                                    .addUint8Array(history)
+                                    .done();
+                });
+            }
+        });
+    }
+
+    IIPRequestQueryResources(callback, resourceLink)
+    {
+        var self = this;
+
+        Warehouse.query(resourceLink).then(function(resources)
+        {
+
+            var list = resources.filter(function(r){return r.instance.applicable(self.session, ActionType.Attach, null) !=  Ruling.Denied});
+
+            if (list.length == 0)
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+            else
+                self.sendReply(IIPPacketAction.QueryLink, callback)
+                    .addUint8Array(Codec.composeResourceArray(list, self, true))
+                    .done();
+        });
+    }
+
+    create(store, parent, className, parameters, attributes, values)
+    {
+        var reply = new AsyncReply();
+        var sb = DC.stringToBytes(className);
+
+        var pkt = BL().addUint32(store.instance.id)
+                      .addUint32(parent.instance.id)
+                      .addUint32(sb.length)
+                      .addUint8Array(sb)
+                      .addUint8Array(Codec.composeVarArray(parameters, this, true))
+                      .addUint8Array(Codec.composeStructure(attributes, this, true, true, true))
+                      .addUint8Array(Codec.composeStructure(values, this));
+
+        pkt.addUint32(pkt.length, 8);
+
+        this.sendRequest(IIPPacket.IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function(args)
+        {
+            var rid = args[0];
+
+            self.fetch(rid).then(function(r)
+            {
+                reply.trigger(r);
+            });
+
+        });
+
+        return reply;
+    }
+
+    query(resourceLink)
+    {
+        var reply = new AsyncReply();
+        var self = this;
+
+        var sb = DC.stringToBytes(resourceLink);
+
+        this.sendRequest(IIPPacketAction.QueryLink)
+                        .addUint16(sb.length)
+                        .addUint8Array(sb)
+                        .done()
+                        .then(function(args)
+        {
+            Codec.parseResourceArray(args[0], 0, args[0].length, self).then(function(resources) {
+                reply.trigger(resources);
+            });
+        }).error(function(ex){
+            reply.triggerError(ex);
+        });
+
+        return reply;
+    }
 
     getTemplate(classId) {
-        if (this.templates[classId])
-            return new AsyncReply(this.templates[classId]);
-        else if (this.templateRequests[classId])
-            return this.templateRequests[classId];
+        if (this.templates.contains(classId))
+            return new AsyncReply(this.templates.item(classId));
+        else if (this.templateRequests.contains(classId))
+            return this.templateRequests.item(classId);
 
         var reply = new AsyncReply();
-        this.templateRequests[classId] = reply;
+        this.templateRequests.add(classId.valueOf(), reply);
 
         var self = this;
 
-        this.sendRequest(IIPPacketAction.TemplateFromClassId, BL().addUint8Array(classId.value)).then(function (rt) {
-            delete self.templateRequests[classId];
-            self.templates[rt[0].classId] = rt[0];
-            reply.trigger(rt[0]);
-        });
+        this.sendRequest(IIPPacketAction.TemplateFromClassId)
+                        .addUint8Array(classId.value)
+                        .done()
+                        .then(function (rt) {
+                            self.templateRequests.remove(classId);
+                            self.templates.add(rt[0].classId.valueOf(), rt[0]);
+                            Warehouse.putTemplate(rt[0]);
+                            reply.trigger(rt[0]);
+                        });
 
         return reply;
     }
 
 // IStore interface
     get(path) {
+
+        var rt = new AsyncReply();
+        
+        this.query(path).then(function(ar)
+        {
+            if (ar != null && ar.length > 0)
+                rt.trigger(ar[0]);
+            else
+                rt.trigger(null);
+        }).error(function(ex) {rt.triggerError(ex);});
+
+        return rt;
+        
+        /*
         if (this.pathRequests[path])
             return this.pathRequests[path];
 
@@ -751,9 +1331,11 @@ class DistributedConnection extends IStore {
         bl.addString(path);
         bl.addUint16(bl.length, 0);
 
+        var link = data.get
         var self = this;
 
-        this.sendRequest(IIPPacketAction.ResourceIdFromResourceLink, bl).then(function (rt) {
+        this.sendRequest(IIPPacketAction.ResourceIdFromResourceLink)
+                        .addUint16(.then(function (rt) {
             delete self.pathRequests[path];
 
             self.fetch(rt[1]).then(function (r) {
@@ -763,6 +1345,7 @@ class DistributedConnection extends IStore {
 
 
         return reply;
+        */
     }
 
     retrieve(iid) {
@@ -776,7 +1359,9 @@ class DistributedConnection extends IStore {
     fetch(id) {
         if (this.resourceRequests[id] && this.resources[id]) {
             // dig for dead locks
-            return this.resourceRequests[id];
+            // or not
+            return new AsyncReply(this.resources[id]);
+            //return this.resourceRequests[id];
         }
         else if (this.resourceRequests[id])
             return this.resourceRequests[id];
@@ -785,76 +1370,452 @@ class DistributedConnection extends IStore {
 
         var reply = new AsyncReply();
 
+        this.resourceRequests[id] = reply;
+
         var self = this;
 
-        this.sendRequest(IIPPacketAction.AttachResource, BL().addUint32(id)).then(function (rt) {
-                self.getTemplate(rt[0]).then(function (tmp) {
+        this.sendRequest(IIPPacketAction.AttachResource)
+                    .addUint32(id)
+                    .done()
+                    .then(function (rt) {
+                        var dr = new DistributedResource(self, id, rt[1], rt[2]);
+                        //var dr = new DistributedResource(self, tmp, id, rt[1], rt[2]);
 
-                var dr = new DistributedResource(self, tmp, id, rt[1], rt[2]);
-                Warehouse.put(dr, id.toString(), self);
+                            self.getTemplate(rt[0]).then(function (tmp) {
 
-                Codec.parseVarArray(rt[3], 0, rt[3].length, self).then(function (ar) {
-                    dr._attached(ar);
-                    delete self.resourceRequests[id];
-                    reply.trigger(dr);
-                });
-            });
-        });
+                            // ClassId, ResourceAge, ResourceLink, Content
+                            Warehouse.put(dr, id.toString(), self, null, tmp);
+
+                    
+                            Codec.parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
+                                dr._attached(ar);
+                                delete self.resourceRequests[id];
+                                reply.trigger(dr);
+                            });
+                        });
+                    });
 
         return reply;
     }
 
-    instance_resourceDestroyed(resource) {
-        // compose the packet
-        this.sendParams().addUint8(0x1).addUint32(resource.instance.id).done();
+    getRecord(resource, fromDate, toDate)
+    {
+        if (resource instanceof DistributedResource)
+        {
+
+            if (resource._p.connection != this)
+                return new AsyncReply(null);
+
+            var reply = new AsyncReply();
+
+            var self = this;
+
+            this.sendRequest(IIPPacketAction.ResourceHistory)
+                            .addUint32(resource._p.instanceId)
+                            .addDateTime(fromDate).addDateTime(toDate)
+                            .done()
+                            .then(function(rt)
+                            {
+                                Codec.parseHistory(rt[0], 0, rt[0].length, resource, self).then(function(history)
+                                {
+                                    reply.trigger(history);
+                                });
+                            });
+
+            return reply;
+        }
+        else
+            return new AsyncReply(null);
     }
 
-    instance_propertyModified(resource, name, newValue, oldValue) {
+    instance_resourceDestroyed(resource) {
+        // compose the packet
+        this.sendEvent(IIPPacketEvent.ResourceDestroyed)
+                        .addUint32(resource.instance.id)
+                        .done();
+    }
+
+    instance_propertyModified(resource, name, newValue) {
         var pt = resource.instance.template.getPropertyTemplateByName(name);
 
         if (pt == null)
             return;
 
-        // compose the packet
-        if (newValue instanceof Function)
-            sendParams().addUint8(0x10)
-                .addUint32(resource.instance.id)
-                .addUint8(pt.index)
-                .addUint8Array(Codec.compose(newValue(this), this))
-                .done();
-        else
-            sendParams().addUint8(0x10)
-                .addUint32(resource.instance.id)
-                .addUint8(pt.index)
-                .addUint8Array(Codec.compose(newValue, this))
-                .done();
+        this.sendEvent(IIPPacketEvent.PropertyUpdated)
+                            .addUint32(resource.instance.id)
+                            .addUint8(pt.index)
+                            .addUint8Array(Codec.compose(newValue, this))
+                            .done();
     }
 
-    instance_eventOccured(resource, name, receivers, args) {
+    instance_eventOccurred(resource, issuer, receivers, name, args) {
         var et = resource.instance.template.getEventTemplateByName(name);
 
         if (et == null)
             return;
 
         if (receivers != null)
-            if (receivers.indexOf(this.remoteUsername) < 0)
+            if (receivers.indexOf(this.session) < 0)
                 return;
 
-        var clientArgs = [];//new object[args.Length];
-        for (var i = 0; i < args.Length; i++)
-            if (args[i] instanceof Function)
-                clientArgs[i] = args[i](this);
-            else
-                clientArgs[i] = args[i];
-
+        if (resource.instance.applicable(this.session, ActionType.ReceiveEvent, et, issuer) == Ruling.Denied)
+            return;
 
         // compose the packet
-        sendParams().addUint8(0x11)
-            .addUint32(resource.instance.id)
-            .addUint8(et.index)
-            .addUint8Array(Codec.composeVarArray(args, this, true))
-            .done();
+        this.sendEvent(IIPPacketEvent.EventOccurred)
+                        .addUint32(resource.instance.id)
+                        .addUint8(et.index)
+                        .addUint8Array(Codec.composeVarArray(args, this, true))
+                        .done();
 
+    }
+
+
+
+    IIPRequestAddChild(callback, parentId, childId)
+    {
+        var self = this;
+        Warehouse.get(parentId).then(function(parent)
+        {
+            if (parent == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            Warehouse.get(childId).then(function(child)
+            {
+                if (child == null)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    return;
+                }
+
+                if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                    return;
+                }
+
+                if (child.instance.applicable(self.session, ActionType.AddParent, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
+                    return;
+                }
+
+                parent.instance.children.add(child);
+
+                self.sendReply(IIPPacketAction.AddChild, callback)
+                                .done();
+                //child.Instance.Parents
+            });
+
+        });
+    }
+
+    IIPRequestRemoveChild(callback, parentId, childId)
+    {
+        var self = this;
+
+        Warehouse.get(parentId).then(function(parent)
+        {
+            if (parent == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            Warehouse.get(childId).then(function(child)
+            {
+                if (child == null)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    return;
+                }
+
+                if (parent.instance.applicable(self.session, ActionType.RemoveChild, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                    return;
+                }
+
+                if (child.instance.applicable(self.session, ActionType.RemoveParent, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
+                    return;
+                }
+
+                parent.instance.children.remove(child);
+
+                self.sendReply(IIPPacketAction.RemoveChild, callback)
+                                .done();
+                //child.Instance.Parents
+            });
+
+        });
+    }
+
+    IIPRequestRenameResource(callback, resourceId, name)
+    {
+        var self = this;
+        Warehouse.get(resourceId).then(function(resource)
+        {
+            if (resource == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            if (resource.instance.applicable(self.session, ActionType.Rename, null) != Ruling.Allowed)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.RenameDenied);
+                return;
+            }
+
+            resource.instance.name = name.getString(0, name.length);
+            self.sendReply(IIPPacketAction.RenameResource, callback)
+                            .done();
+        });
+     }
+
+    IIPRequestResourceChildren(callback, resourceId)
+    {
+        var self = this;
+        Warehouse.get(resourceId).then(function(resource)
+        {
+            if (resource == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            self.sendReply(IIPPacketAction.ResourceChildren, callback)
+                        .addUint8Array(Codec.composeResourceArray(resource.instance.children.toArray(), this, true))
+                        .done();
+            
+        });
+    }
+
+    IIPRequestResourceParents(callback, resourceId)
+    {
+        var self = this;
+
+        Warehouse.get(resourceId).then(function(resource)
+        {
+            if (resource == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            self.sendReply(IIPPacketAction.ResourceParents, callback)
+                            .addUint8Array(Codec.composeResourceArray(resource.instance.parents.toArray(), this, true))
+                            .done();
+        });
+    }
+
+    IIPRequestClearAttributes(callback, resourceId, attributes, all = false)
+    {
+        Warehouse.get(resourceId).then(function(r)
+        {
+            if (r == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
+                return;
+            }
+
+            var attrs = [];
+
+            if (!all)
+                attrs = attributes.getStringArray(0, attributes.length);
+
+            if (r.instance.removeAttributes(attrs))
+                self.sendReply(all ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes, callback)
+                              .done();
+            else
+                self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
+
+        });
+    }
+
+    IIPRequestUpdateAttributes(callback, resourceId, attributes, clearAttributes = false)
+    {
+        var self = this;
+
+        Warehouse.get(resourceId).then(function(r)
+        {
+            if (r == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
+                return;
+            }
+
+            Codec.parseStructure(attributes, 0, attributes.Length, this).then(function(attrs) {
+                if (r.instance.setAttributes(attrs, clearAttributes))
+                    self.sendReply(clearAttributes ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes,
+                              callback)
+                              .done();
+                else
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
+            });
+           
+        });
+
+    }
+
+
+    
+    getChildren(resource)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+        var self = this;
+
+        this.sendRequest(IIPPacketAction.ResourceChildren)
+                        .addUint32(resource._p.instanceId)
+                        .done()
+                        .then(function(d)
+        {
+            
+            Codec.parseResourceArray(d, 0, d.length, self).then(function(resources)
+            {
+                rt.trigger(resources);
+            }).error(function(ex) { rt.triggerError(ex); });
+        });
+
+        return rt;
+    }
+
+    getParents(resource)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+        var self = this;
+
+        this.sendRequest(IIPPacketAction.ResourceParents)
+                        .addUint32(resource._p.instanceId)
+                        .done()
+                        .then(function(d)
+        {
+            Codec.parseResourceArray(d, 0, d.length, this).then(function(resources)
+            {
+                rt.trigger(resources);
+            }).error(function(ex) { rt.triggerError(ex);});
+        });
+
+        return rt;
+    }
+
+    removeAttributes(resource, attributes = null)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+
+        if (attributes == null)
+            this.sendRequest(IIPPacketAction.ClearAllAttributes)
+                            .addUint32(resource._p.instanceId)
+                            .done()
+                            .then(function(ar)
+            {
+                rt.trigger(true);
+            }).error(function(ex) { rt.triggerError(ex); });
+        else
+        {
+            var attrs = DC.stringArrayToBytes(attributes);
+            this.sendRequest(IIPPacketAction.ClearAttributes)
+                            .addUint32(resource.instance.id)
+                            .addUint32(attrs.length)
+                            .addUint8Array(attrs)
+                            .done()
+                            .then(function(ar)
+            {
+                rt.trigger(true);
+            }).error(function(ex) { rt.triggerChunk(ex); });
+        }
+
+        return rt;
+    }
+
+    setAttributes(resource, attributes, clearAttributes = false)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+        
+        this.sendRequest(clearAttributes ? IIPPacketAction.UpdateAllAttributes : IIPPacketAction.UpdateAttributes)
+                        .addUint32(resource._p.instanceId)
+                        .addUint8Array(Codec.composeStructure(attributes, this, true, true, true))
+                        .done()
+                        .then(function(ar)
+                                {
+                                    rt.trigger(true);
+                                }).error(function(ex) {rt.triggerError(ex);});
+    
+        return rt;
+    }
+
+    getAttributes(resource, attributes = null)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+        var self = this;
+
+        if (attributes == null)
+        {
+            this.sendRequest(IIPPacketAction.GetAllAttributes)
+                            .addUint32(resource._p.instanceId)
+                            .done()
+                            .then(function(ar)
+                            {
+                                Codec.parseStructure(ar[0], 0, ar[0].length, this).then(function(st)
+                                {
+                                    for (var a in st)
+                                       resource.instance.attributes.set(a, st[a]);
+                                    rt.trigger(st);
+                                }).error(function(ex) { rt.triggerError(ex); });
+                            });
+        }
+        else
+        {
+            var attrs = DC.stringArrayToBytes(attributes);
+            this.sendRequest(IIPPacketAction.GetAttributes)
+                            .addUint32(resource._p.instanceId)
+                            .addUint32(attrs.length)
+                            .addUint8Array(attrs)
+                            .done()
+                            .then(function(ar)
+            {
+                Codec.parseStructure(ar[0], 0, ar[0].length, self).then(function(st)
+                {
+                    for (var a in st)
+                        resource.instance.attributes.set(a, st[a]);
+                    rt.trigger(st);
+                }).error(function(ex) { rt.triggerError(ex); });
+            });
+        }
+
+        return rt;
     }
 
 }

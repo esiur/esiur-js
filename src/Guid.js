@@ -23,6 +23,9 @@
 /**
  * Created by Ahmed Zamil on 02/09/2017.
  */
+
+"use strict";  
+
 class Guid
 {
     constructor(dc)

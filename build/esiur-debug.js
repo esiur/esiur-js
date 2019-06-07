@@ -1,4 +1,613 @@
 /*
+* Copyright (c) 2017-2018 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 10/11/2018.
+ */
+
+"use strict";  
+
+class CustomResourceEvent
+{
+    constructor(issuer, receivers, params)
+    {
+        this.issuer = issuer;
+        this.receivers = receivers;
+        this.params = params;
+    }
+}  
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 01/09/2017.
+ */
+
+"use strict";  
+
+class NetworkBuffer {
+    constructor() {
+        this.neededDataLength = 0;
+        this.data = new DC(0);
+    }
+
+    get protected() {
+        return this.neededDataLength > this.data.length;
+    }
+
+    get available() {
+
+        return this.data.length;
+    }
+
+    holdAllForNextWrite(src) {
+        this.holdFor(src, src.length + 1);
+    }
+
+    holdForNextWrite(src, offset, size) {
+        this.holdFor(src, offset, size, size + 1);
+    }
+
+
+    holdFor(src, offset, size, needed) {
+        if (size >= needed)
+            throw new Exception("Size >= Needed !");
+
+        this.data = DC.combine(src, offset, size, this.data, 0, this.data.length);
+        this.neededDataLength = needed;
+    }
+
+    holdAllFor(src, needed) {
+        this.holdFor(src, 0, src.length, needed);
+    }
+
+    protect(data, offset, needed) {
+        var dataLength = data.length - offset;
+
+        // protection
+        if (dataLength < needed) {
+            this.holdFor(data, offset, dataLength, needed);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    writeAll(src) {
+        this.write(src, 0, src.length ? src.length : src.byteLength);
+    }
+
+    write(src, offset, length) {
+        this.data = this.data.append(src, offset, length);
+    }
+
+    get canRead() {
+        if (this.data.length == 0)
+            return false;
+        else if (this.data.length < this.neededDataLength)
+            return false;
+        return true;
+    }
+
+    read() {
+        if (this.data.length == 0)
+            return null;
+
+        var rt = null;
+
+        if (this.neededDataLength == 0) {
+            rt = this.data;
+            this.data = new DC(0);
+        }
+        else {
+            if (this.data.length >= this.neededDataLength) {
+                rt = this.data;
+                this.data = new DC(0);
+                this.neededDataLength = 0;
+                return rt;
+            }
+            else {
+                return null;
+            }
+        }
+
+        return rt;
+    }
+}
+  
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/ 
+/**
+ * Created by Ahmed Zamil on 18/11/2017.
+ */
+"use strict";  
+
+const ExceptionCode = 
+{
+    HostNotReachable: 0,
+    AccessDenied: 1,
+    ResourceNotFound: 2,
+    AttachDenied: 3,
+    InvalidMethod: 4,
+    InvokeDenied: 5,
+    CreateDenied: 6,
+    AddParentDenied: 7,
+    AddChildDenied: 8,
+    ViewAttributeDenied: 9,
+    UpdateAttributeDenied: 10,
+    StoreNotFound: 11,
+    ParentNotFound: 12,
+    ChildNotFound: 13,
+    ResourceIsNotStore: 14,
+    DeleteDenied: 15,
+    DeleteFailed: 16,
+    UpdateAttributeFailed: 17,
+    GetAttributesFailed: 18,
+    ClearAttributesFailed: 19,
+    TemplateNotFound: 20,
+    RenameDenied: 21,
+    ClassNotFound: 22,
+    MethodNotFound: 23,
+    PropertyNotFound: 24,
+    SetPropertyDenied: 25,
+    ReadOnlyProperty: 26
+};
+
+class AsyncException extends Error
+ {
+     constructor()
+     {
+         super();
+         this.raised = false;
+     }
+
+     raise(type, code, message)
+     {
+         this.type = (type == 0 ? "Management" : "Execusion");
+         this.code = code;
+
+         if (type == 0)
+            for(var i in ExceptionCode)
+                if (ExceptionCode[i] == code)
+                {
+                    this.message = i;
+                    break;
+                }
+        else
+            this.message = message;
+
+        this.raised = true;
+     }
+
+     toString()
+     {
+         return this.type + " " + this.code + " " + this.message;
+     }
+ }  
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** 
+ * Created by Ahmed Zamil on 16/11/2017.
+ */
+
+"use strict";  
+
+ const AuthenticationType = {
+    Host: 0,
+    CoHost: 1,
+    Client: 2,
+    Alien: 3
+ };
+
+ class Authentication
+{
+    constructor(type)
+    {
+        this.type = type;
+        this.state = 0;
+        this.domain = null;
+        this.username = null;
+    }
+
+    get fullName()
+    {
+        return this.domain + "@" + this.username;
+    }
+}
+  
+
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** 
+ * Created by Ahmed Zamil on 16/11/2017.
+ */
+
+"use strict";  
+
+class Session
+{
+    constructor(localAuthentication, remoteAuthentication)
+    {
+         
+        this.localAuthentication = localAuthentication;
+        this.remoteAuthentication = remoteAuthentication;
+        this.id = null;
+        this.creation = null;
+        this.modification = null;
+    }
+}
+  
+/*
+* Copyright (c) 2017-2018 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 27/10/2018.
+ */
+
+"use strict";  
+
+class DistributedPropertyContext
+{
+    constructor(p1, p2)
+    {
+        if(arguments.length == 1)
+        {
+            this.method = p1;
+        }
+        else if (arguments.length == 2)
+        {
+            this.connection = p1;
+            this.value = p2;
+        }
+    }
+}
+  
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** 
+ * Created by Ahmed Zamil on 16/11/2017.
+ */
+
+"use strict";
+
+const ActionType =
+{
+    Attach: 0,
+    Delete: 1,
+    Execute: 2,
+    GetProperty: 3,
+    SetProperty: 4,
+    CreateResource: 5,
+    UpdateAttributes: 6,
+    InquireAttributes: 7,
+    AddParent: 8,
+    RemoveParent: 9,
+    AddChild: 10,
+    RemoveChild: 11,
+    Rename: 12,
+    ReceiveEvent: 13
+};
+
+const Ruling = {
+    Denied: 0,
+    Allowed: 1,
+    DontCare: 2,
+};
+
+class IPermissionsManager
+{
+    /// <summary>
+    /// Check for permission.
+    /// </summary>
+    /// <param name="resource">IResource.</param>
+    /// <param name="session">Caller sessions.</param>
+    /// <param name="action">Action type</param>
+    /// <param name="member">Function or property to check for permission.</param>
+    /// <returns>Allowed or denined.</returns>
+    applicable(resource, session, action, member, inquirer)
+    {
+
+    }
+
+    initialize(settings, resource)
+    {
+
+    }
+
+    get settings()
+    {
+
+    }
+}  
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 06/11/2017.
+ */
+
+"use strict";  
+
+class KeyList
+ {
+     constructor()
+     {
+         this.keys = [];
+         this.values = [];
+     }
+
+     at(index)
+     {
+        return this.values[index];
+     }
+
+     item(key)
+     {
+        for(var i = 0; i < this.keys.length; i++)
+            if (this.keys[i] == key)
+                return this.values[i];
+     }
+
+     get(key)
+     {
+        for(var i = 0; i < this.keys.length; i++)
+            if (this.keys[i] == key)
+                return this.values[i];
+     }
+
+     _item_destroyed(sender)
+     {
+         for(var i = 0; i < this.values.length; i++)
+            if (sender == this.values[i])
+            {
+                this.removeAt(i);
+                break;
+            }
+     }
+ 
+     add(key, value)
+     {
+        this.remove(key);
+
+        if (value instanceof IDestructible)
+            value.on("destroy", this._item_destroyed, this);
+
+        this.keys.push(key);
+        this.values.push(value);
+     }
+
+     contains(key)
+     {
+        for(var i = 0; i < this.keys.length; i++)
+            if (this.keys[i] == key)
+                return true;
+
+        return false;
+     }
+
+     set(key, value)
+     {
+        this.remove(key);
+        this.add(key, value);
+     }
+
+     remove(key)
+     {
+        for(var i = 0; i < this.keys.length; i++)
+            if (key == this.keys[i])
+            {
+                this.removeAt(i);
+                break;
+            }   
+     }
+
+     removeAt(index)
+     {
+        if (this.values[index] instanceof IDestructible)
+            this.values[index].off("destroy", this._item_destroyed);
+
+        this.keys.splice(index, 1);
+        this.values.splice(index, 1);
+     }
+
+     get length()
+     {
+         return this.keys.length;
+     }
+ }  
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 06/11/2017.
+ */
+
+"use strict";  
+
+class PropertyValue
+ {
+     constructor(value, age, date)
+     {
+         this.value = value;
+         this.age = age;
+         this.date = date;
+     }
+ }  
+/*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,6 +632,7 @@
 /**
  * Created by Ahmed Zamil on 30/08/2017.
  */
+"use strict";  
 
 class IEventHandler
 {
@@ -42,19 +652,32 @@ class IEventHandler
         var args = Array.prototype.slice.call(arguments, 1);
         if (this._events[event])
             for(var i = 0; i < this._events[event].length; i++)
-                if (this._events[event][i].apply(this, args))
+                if (this._events[event][i].f.apply(this._events[event][i].i, args))
                     return true;
 
         return false;
     }
 
-    on(event, fn)
+    _emitArgs(event, args)
     {
+        event = event.toLowerCase();
+        if (this._events[event])
+            for(var i = 0; i < this._events[event].length; i++)
+                if (this._events[event][i].f.apply(this._events[event][i].i, args))
+                    return true;
+        return this;
+    }
+
+    on(event, fn, issuer)
+    {
+        if (!(fn instanceof Function))
+            return this;
+
         event = event.toLowerCase();
         // add
         if (!this._events[event])
             this._events[event] = [];
-        this._events[event].push(fn);
+        this._events[event].push({f: fn, i: issuer == null ? this: issuer});
         return this;
     }
 
@@ -65,9 +688,13 @@ class IEventHandler
         {
             if (fn)
             {
-                var index = this._events[event].indexOf(fn);
-                if (index > -1)
-                this._events[event].splice(index, 1);
+                for(var i = 0; i < this._events[event].length; i++)
+                    if (this._events[event][i].f == fn)
+                        this._events[event].splice(i--, 1);
+
+                //var index = this._events[event].indexOf(fn);
+                //if (index > -1)
+                //this._events[event].splice(index, 1);
             }
             else
             {
@@ -76,15 +703,183 @@ class IEventHandler
         }
     }
 }  
-/**
- * [js-sha256]{@link https://github.com/emn178/js-sha256}
- *
- * @version 0.6.0
- * @author Chen, Yi-Cyuan [emn178@gmail.com]
- * @copyright Chen, Yi-Cyuan 2014-2017
- * @license MIT
+
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** 
+ * Created by Ahmed Zamil on 25/12/2017.
+ * Ref: https://en.wikipedia.org/wiki/SHA-2
  */
-!function(){"use strict";function t(t,i){i?(p[0]=p[16]=p[1]=p[2]=p[3]=p[4]=p[5]=p[6]=p[7]=p[8]=p[9]=p[10]=p[11]=p[12]=p[13]=p[14]=p[15]=0,this.blocks=p):this.blocks=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],t?(this.h0=3238371032,this.h1=914150663,this.h2=812702999,this.h3=4144912697,this.h4=4290775857,this.h5=1750603025,this.h6=1694076839,this.h7=3204075428):(this.h0=1779033703,this.h1=3144134277,this.h2=1013904242,this.h3=2773480762,this.h4=1359893119,this.h5=2600822924,this.h6=528734635,this.h7=1541459225),this.block=this.start=this.bytes=0,this.finalized=this.hashed=!1,this.first=!0,this.is224=t}function i(i,r,e){var n="string"!=typeof i;if(n){if(null===i||void 0===i)throw h;i.constructor===s.ArrayBuffer&&(i=new Uint8Array(i))}var o=i.length;if(n){if("number"!=typeof o||!Array.isArray(i)&&(!a||!ArrayBuffer.isView(i)))throw h}else{for(var f,u=[],o=i.length,c=0,y=0;o>y;++y)f=i.charCodeAt(y),128>f?u[c++]=f:2048>f?(u[c++]=192|f>>6,u[c++]=128|63&f):55296>f||f>=57344?(u[c++]=224|f>>12,u[c++]=128|f>>6&63,u[c++]=128|63&f):(f=65536+((1023&f)<<10|1023&i.charCodeAt(++y)),u[c++]=240|f>>18,u[c++]=128|f>>12&63,u[c++]=128|f>>6&63,u[c++]=128|63&f);i=u}i.length>64&&(i=new t(r,!0).update(i).array());for(var p=[],l=[],y=0;64>y;++y){var d=i[y]||0;p[y]=92^d,l[y]=54^d}t.call(this,r,e),this.update(l),this.oKeyPad=p,this.inner=!0,this.sharedMemory=e}var h="input is invalid type",s="object"==typeof window?window:{},r=!s.JS_SHA256_NO_NODE_JS&&"object"==typeof process&&process.versions&&process.versions.node;r&&(s=global);var e=!s.JS_SHA256_NO_COMMON_JS&&"object"==typeof module&&module.exports,n="function"==typeof define&&define.amd,a="undefined"!=typeof ArrayBuffer,o="0123456789abcdef".split(""),f=[-2147483648,8388608,32768,128],u=[24,16,8,0],c=[1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298],y=["hex","array","digest","arrayBuffer"],p=[];(s.JS_SHA256_NO_NODE_JS||!Array.isArray)&&(Array.isArray=function(t){return"[object Array]"===Object.prototype.toString.call(t)});var l=function(i,h){return function(s){return new t(h,!0).update(s)[i]()}},d=function(i){var h=l("hex",i);r&&(h=v(h,i)),h.create=function(){return new t(i)},h.update=function(t){return h.create().update(t)};for(var s=0;s<y.length;++s){var e=y[s];h[e]=l(e,i)}return h},v=function(t,i){var s=require("crypto"),r=require("buffer").Buffer,e=i?"sha224":"sha256",n=function(i){if("string"==typeof i)return s.createHash(e).update(i,"utf8").digest("hex");if(null===i||void 0===i)throw h;return i.constructor===ArrayBuffer&&(i=new Uint8Array(i)),Array.isArray(i)||ArrayBuffer.isView(i)||i.constructor===r?s.createHash(e).update(new r(i)).digest("hex"):t(i)};return n},A=function(t,h){return function(s,r){return new i(s,h,!0).update(r)[t]()}},w=function(t){var h=A("hex",t);h.create=function(h){return new i(h,t)},h.update=function(t,i){return h.create(t).update(i)};for(var s=0;s<y.length;++s){var r=y[s];h[r]=A(r,t)}return h};t.prototype.update=function(t){if(!this.finalized){var i="string"!=typeof t;if(i){if(null===t||void 0===t)throw h;t.constructor===s.ArrayBuffer&&(t=new Uint8Array(t))}var r=t.length;if(!(!i||"number"==typeof r&&(Array.isArray(t)||a&&ArrayBuffer.isView(t))))throw h;for(var e,n,o=0,f=this.blocks;r>o;){if(this.hashed&&(this.hashed=!1,f[0]=this.block,f[16]=f[1]=f[2]=f[3]=f[4]=f[5]=f[6]=f[7]=f[8]=f[9]=f[10]=f[11]=f[12]=f[13]=f[14]=f[15]=0),i)for(n=this.start;r>o&&64>n;++o)f[n>>2]|=t[o]<<u[3&n++];else for(n=this.start;r>o&&64>n;++o)e=t.charCodeAt(o),128>e?f[n>>2]|=e<<u[3&n++]:2048>e?(f[n>>2]|=(192|e>>6)<<u[3&n++],f[n>>2]|=(128|63&e)<<u[3&n++]):55296>e||e>=57344?(f[n>>2]|=(224|e>>12)<<u[3&n++],f[n>>2]|=(128|e>>6&63)<<u[3&n++],f[n>>2]|=(128|63&e)<<u[3&n++]):(e=65536+((1023&e)<<10|1023&t.charCodeAt(++o)),f[n>>2]|=(240|e>>18)<<u[3&n++],f[n>>2]|=(128|e>>12&63)<<u[3&n++],f[n>>2]|=(128|e>>6&63)<<u[3&n++],f[n>>2]|=(128|63&e)<<u[3&n++]);this.lastByteIndex=n,this.bytes+=n-this.start,n>=64?(this.block=f[16],this.start=n-64,this.hash(),this.hashed=!0):this.start=n}return this}},t.prototype.finalize=function(){if(!this.finalized){this.finalized=!0;var t=this.blocks,i=this.lastByteIndex;t[16]=this.block,t[i>>2]|=f[3&i],this.block=t[16],i>=56&&(this.hashed||this.hash(),t[0]=this.block,t[16]=t[1]=t[2]=t[3]=t[4]=t[5]=t[6]=t[7]=t[8]=t[9]=t[10]=t[11]=t[12]=t[13]=t[14]=t[15]=0),t[15]=this.bytes<<3,this.hash()}},t.prototype.hash=function(){var t,i,h,s,r,e,n,a,o,f,u,y=this.h0,p=this.h1,l=this.h2,d=this.h3,v=this.h4,A=this.h5,w=this.h6,b=this.h7,g=this.blocks;for(t=16;64>t;++t)r=g[t-15],i=(r>>>7|r<<25)^(r>>>18|r<<14)^r>>>3,r=g[t-2],h=(r>>>17|r<<15)^(r>>>19|r<<13)^r>>>10,g[t]=g[t-16]+i+g[t-7]+h<<0;for(u=p&l,t=0;64>t;t+=4)this.first?(this.is224?(a=300032,r=g[0]-1413257819,b=r-150054599<<0,d=r+24177077<<0):(a=704751109,r=g[0]-210244248,b=r-1521486534<<0,d=r+143694565<<0),this.first=!1):(i=(y>>>2|y<<30)^(y>>>13|y<<19)^(y>>>22|y<<10),h=(v>>>6|v<<26)^(v>>>11|v<<21)^(v>>>25|v<<7),a=y&p,s=a^y&l^u,n=v&A^~v&w,r=b+h+n+c[t]+g[t],e=i+s,b=d+r<<0,d=r+e<<0),i=(d>>>2|d<<30)^(d>>>13|d<<19)^(d>>>22|d<<10),h=(b>>>6|b<<26)^(b>>>11|b<<21)^(b>>>25|b<<7),o=d&y,s=o^d&p^a,n=b&v^~b&A,r=w+h+n+c[t+1]+g[t+1],e=i+s,w=l+r<<0,l=r+e<<0,i=(l>>>2|l<<30)^(l>>>13|l<<19)^(l>>>22|l<<10),h=(w>>>6|w<<26)^(w>>>11|w<<21)^(w>>>25|w<<7),f=l&d,s=f^l&y^o,n=w&b^~w&v,r=A+h+n+c[t+2]+g[t+2],e=i+s,A=p+r<<0,p=r+e<<0,i=(p>>>2|p<<30)^(p>>>13|p<<19)^(p>>>22|p<<10),h=(A>>>6|A<<26)^(A>>>11|A<<21)^(A>>>25|A<<7),u=p&l,s=u^p&d^f,n=A&w^~A&b,r=v+h+n+c[t+3]+g[t+3],e=i+s,v=y+r<<0,y=r+e<<0;this.h0=this.h0+y<<0,this.h1=this.h1+p<<0,this.h2=this.h2+l<<0,this.h3=this.h3+d<<0,this.h4=this.h4+v<<0,this.h5=this.h5+A<<0,this.h6=this.h6+w<<0,this.h7=this.h7+b<<0},t.prototype.hex=function(){this.finalize();var t=this.h0,i=this.h1,h=this.h2,s=this.h3,r=this.h4,e=this.h5,n=this.h6,a=this.h7,f=o[t>>28&15]+o[t>>24&15]+o[t>>20&15]+o[t>>16&15]+o[t>>12&15]+o[t>>8&15]+o[t>>4&15]+o[15&t]+o[i>>28&15]+o[i>>24&15]+o[i>>20&15]+o[i>>16&15]+o[i>>12&15]+o[i>>8&15]+o[i>>4&15]+o[15&i]+o[h>>28&15]+o[h>>24&15]+o[h>>20&15]+o[h>>16&15]+o[h>>12&15]+o[h>>8&15]+o[h>>4&15]+o[15&h]+o[s>>28&15]+o[s>>24&15]+o[s>>20&15]+o[s>>16&15]+o[s>>12&15]+o[s>>8&15]+o[s>>4&15]+o[15&s]+o[r>>28&15]+o[r>>24&15]+o[r>>20&15]+o[r>>16&15]+o[r>>12&15]+o[r>>8&15]+o[r>>4&15]+o[15&r]+o[e>>28&15]+o[e>>24&15]+o[e>>20&15]+o[e>>16&15]+o[e>>12&15]+o[e>>8&15]+o[e>>4&15]+o[15&e]+o[n>>28&15]+o[n>>24&15]+o[n>>20&15]+o[n>>16&15]+o[n>>12&15]+o[n>>8&15]+o[n>>4&15]+o[15&n];return this.is224||(f+=o[a>>28&15]+o[a>>24&15]+o[a>>20&15]+o[a>>16&15]+o[a>>12&15]+o[a>>8&15]+o[a>>4&15]+o[15&a]),f},t.prototype.toString=t.prototype.hex,t.prototype.digest=function(){this.finalize();var t=this.h0,i=this.h1,h=this.h2,s=this.h3,r=this.h4,e=this.h5,n=this.h6,a=this.h7,o=[t>>24&255,t>>16&255,t>>8&255,255&t,i>>24&255,i>>16&255,i>>8&255,255&i,h>>24&255,h>>16&255,h>>8&255,255&h,s>>24&255,s>>16&255,s>>8&255,255&s,r>>24&255,r>>16&255,r>>8&255,255&r,e>>24&255,e>>16&255,e>>8&255,255&e,n>>24&255,n>>16&255,n>>8&255,255&n];return this.is224||o.push(a>>24&255,a>>16&255,a>>8&255,255&a),o},t.prototype.array=t.prototype.digest,t.prototype.arrayBuffer=function(){this.finalize();var t=new ArrayBuffer(this.is224?28:32),i=new DataView(t);return i.setUint32(0,this.h0),i.setUint32(4,this.h1),i.setUint32(8,this.h2),i.setUint32(12,this.h3),i.setUint32(16,this.h4),i.setUint32(20,this.h5),i.setUint32(24,this.h6),this.is224||i.setUint32(28,this.h7),t},i.prototype=new t,i.prototype.finalize=function(){if(t.prototype.finalize.call(this),this.inner){this.inner=!1;var i=this.array();t.call(this,this.is224,this.sharedMemory),this.update(this.oKeyPad),this.update(i),t.prototype.finalize.call(this)}};var b=d();b.sha256=b,b.sha224=d(!0),b.sha256.hmac=w(),b.sha224.hmac=w(!0),e?module.exports=b:(s.sha256=b.sha256,s.sha224=b.sha224,n&&define(function(){return b}))}();  
+
+class SHA256
+{
+ 
+    static RROT(n, d)
+    {
+        return (n >>> d)|(n << (32 - d));        
+    }
+
+    static compute(msg)
+    {
+        /*
+        Note 1: All variables are 32 bit unsigned integers and addition is calculated modulo 2^32
+        Note 2: For each round, there is one round constant k[i] and one entry in the message schedule array w[i], 0 ≤ i ≤ 63
+        Note 3: The compression function uses 8 working variables, a through h
+        Note 4: Big-endian convention is used when expressing the constants in this pseudocode,
+            and when parsing message block data from bytes to words, for example,
+            the first word of the input message "abc" after padding is 0x61626380
+        */
+
+        // Initialize hash values:
+        // (first 32 bits of the fractional parts of the square roots of the first 8 primes 2..19):
+        
+        const hash = new Uint32Array([0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19]);
+        
+        // Initialize array of round constants:
+        // (first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311):
+        const k = new Uint32Array([
+           0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+           0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+           0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+           0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+           0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+           0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+           0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+           0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2]);
+
+           
+
+        // Pre-processing:
+        // begin with the original message of length L bits
+        var L = msg.length * 8;
+        
+        // append a single '1' bit
+        // append K '0' bits, where K is the minimum number >= 0 such that L + 1 + K + 64 is a multiple of 512
+
+        var K = 512 - ((L + 1 + 64) % 512);
+        
+        if (K == 512)
+            K = 0;
+
+        var paddingLength = (K + 1) / 8;
+        var paddingBytes = new Uint8Array(paddingLength);
+        paddingBytes[0] = 0x80;
+
+        var data = new DC(BL().addUint8Array(msg).addUint8Array(paddingBytes).addUint64(L).toArray());
+
+        
+        
+        // append L as a 64-bit big-endian integer, making the total post-processed length a multiple of 512 bits
+        
+        //  Process the message in successive 512-bit chunks:
+        // break message into 512-bit chunks
+        // for each chunk
+
+        for(var chunk = 0; chunk < data.length; chunk+=64)
+        {    
+            // create a 64-entry message schedule array w[0..63] of 32-bit words
+            // (The initial values in w[0..63] don't matter, so many implementations zero them here)
+            // copy chunk into first 16 words w[0..15] of the message schedule array
+
+            var w = new Uint32Array(64);
+            for(var i = 0; i < 16; i++)
+                w[i] = data.getInt32(chunk + (i * 4));
+
+            //for(var i = 16; i < 64; i++)
+              //  w[i] = 0;
+
+            // Extend the first 16 words into the remaining 48 words w[16..63] of the message schedule array:
+            //    for i from 16 to 63
+            //        s0 := (w[i-15] rightrotate 7) xor (w[i-15] rightrotate 18) xor (w[i-15] rightshift 3)
+            //        s1 := (w[i-2] rightrotate 17) xor (w[i-2] rightrotate 19) xor (w[i-2] rightshift 10)
+            //        w[i] := w[i-16] + s0 + w[i-7] + s1
+            
+            for (var i = 16; i < 64; i++)
+            {
+                    var s0 = SHA256.RROT(w[i-15], 7) ^ SHA256.RROT(w[i-15], 18) ^ (w[i-15] >>> 3);
+                    var s1 = SHA256.RROT(w[i-2], 17) ^ SHA256.RROT(w[i-2], 19) ^ (w[i-2] >>> 10);
+                    w[i] = w[i-16] + s0 + w[i-7] + s1;
+            }
+
+            // Initialize working variables to current hash value:
+            var a = hash[0];
+            var b = hash[1];
+            var c = hash[2];
+            var d = hash[3];
+            var e = hash[4];
+            var f = hash[5];
+            var g = hash[6];
+            var h = hash[7];
+
+                    
+            // Compression function main loop:
+            for (var i = 0; i < 64; i++)
+            {
+                var S1 = SHA256.RROT(e, 6) ^ SHA256.RROT(e, 11) ^ SHA256.RROT(e, 25);
+                var ch = (e & f) ^ ((~e) & g);
+                var temp1 = h + S1 + ch + k[i] + w[i];
+                var S0 = SHA256.RROT(a, 2) ^ SHA256.RROT(a, 13) ^ SHA256.RROT(a, 22);
+                var maj = (a & b) ^ (a & c) ^ (b & c);
+                var temp2 = S0 + maj;
+         
+                h = g;
+                g = f;
+                f = e;
+                e = (d + temp1) >>> 0;
+                d = c;
+                c = b;
+                b = a;
+                a = (temp1 + temp2) >>> 0;
+            }
+
+            // Add the compressed chunk to the current hash value:
+
+            hash[0] = (hash[0] + a) >>> 0;
+            hash[1] = (hash[1] + b) >>> 0;
+            hash[2] = (hash[2] + c) >>> 0;
+            hash[3] = (hash[3] + d) >>> 0;
+            hash[4] = (hash[4] + e) >>> 0;
+            hash[5] = (hash[5] + f) >>> 0;
+            hash[6] = (hash[6] + g) >>> 0;
+            hash[7] = (hash[7] + h) >>> 0;
+
+
+        }
+
+
+ 
+
+        // Produce the final hash value (big-endian):
+        //digest := hash := h0 append h1 append h2 append h3 append h4 append h5 append h6 append h7
+
+        var results = new BinaryList();
+        for(var i = 0; i < 8; i++)
+            results.addUint32(hash[i]);
+        
+
+        return results.toDC();
+     }
+}  
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -110,6 +905,9 @@ class IEventHandler
 /**
  * Created by Ahmed Zamil on 31/08/2017.
  */
+
+"use strict";  
+
 class IDestructible extends IEventHandler
 {
     destroy()
@@ -149,6 +947,8 @@ class IDestructible extends IEventHandler
  * Created by Ahmed Zamil on 05/09/2017.
  */
 
+"use strict";  
+
 class AutoList extends IEventHandler
 {
     constructor()
@@ -157,10 +957,15 @@ class AutoList extends IEventHandler
         this.list = [];
     }
 
+    get length()
+    {
+        return this.list.length;
+    }
+
     add(value)
     {
         if (value instanceof IDestructible)
-            value.on("destroy", this._item_destroyed);
+            value.on("destroy", this._item_destroyed, this);
 
         this.list.push(value);
 
@@ -173,7 +978,7 @@ class AutoList extends IEventHandler
             return;
 
         if (value instanceof IDestructible)
-            value.on("destroy", this._item_destroyed);
+            value.on("destroy", this._item_destroyed, this);
 
         if (this.list[index] instanceof IDestructible)
             this.list[index].off("destroy", this._item_destroyed);
@@ -181,6 +986,16 @@ class AutoList extends IEventHandler
         this.list[index] = value;
     }
 
+    at(index)
+    {
+        return this.list[index];
+    }
+
+    item(index)
+    {
+        return this.list[index];
+    }
+    
     remove(value)
     {
         this.removeAt(this.list.indexOf(value));
@@ -189,6 +1004,11 @@ class AutoList extends IEventHandler
     contains(value)
     {
         return this.list.indexOf(value) > -1;
+    }
+
+    toArray()
+    {
+        return this.list.slice(0);
     }
 
     removeAt(index)
@@ -237,7 +1057,9 @@ class AutoList extends IEventHandler
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
-var ResourceTrigger =
+"use strict";  
+
+const ResourceTrigger =
 {
     Loaded : 0,
         Initialize: 1,
@@ -297,6 +1119,8 @@ class IResource extends IDestructible
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
+"use strict";  
+
 class IStore extends IResource {
     get(path) {
 
@@ -310,6 +1134,21 @@ class IStore extends IResource {
 
     }
 
+    record(resource, propertyName, value, age, dateTime)
+    {
+
+    }
+
+    getRecord(resource, fromDate, toDate)
+    {
+
+    }
+    
+    remove(resource)
+    {
+
+    }
+    
     constructor()
     {
         super();
@@ -341,6 +1180,8 @@ class IStore extends IResource {
 /**
  * Created by Ahmed Zamil on 26/08/2017.
  */
+
+"use strict";  
 
 class Structure
 {
@@ -379,6 +1220,8 @@ class Structure
  * Created by Ahmed Zamil on 06/09/2017.
  */
 
+"use strict";  
+
 class StructureArray extends Array
 {
     push(value)
@@ -414,6 +1257,8 @@ class StructureArray extends Array
 /**
  * Created by Ahmed Zamil on 26/08/2017.
  */
+
+"use strict";  
 
 class ResourceArray extends Array
 {
@@ -451,8 +1296,9 @@ class ResourceArray extends Array
  * Created by Ahmed Zamil on 24/08/2017.
  */
 
+"use strict";  
 
-var MemberType = {
+const MemberType = {
     Function: 0,
     Property: 1,
     Event: 2
@@ -488,13 +1334,72 @@ class MemberTemplate {
 /** 
  * Created by Ahmed Zamil on 25/07/2017.
  */
+
+"use strict";  
+
+const ErrorType = {
+    Management: 0,
+    Exception: 1
+};
+
+const ProgressType =  {
+    Execution: 0,
+    Network: 1
+};
+
 class AsyncReply
 {
     then(callback)
     {
         this.callbacks.push(callback);
+        
         if (this.ready)
+        {
             callback(this.result, this);
+
+            if (!this.taskExpired)
+            {
+                this.taskExpired = true;
+                this.resolveTask(this.result);
+            }
+        }
+
+        return this;
+    }
+
+    catch(callback)
+    {
+        return error(callback);
+    }
+    
+    error(callback)
+    {
+        this.errorCallbacks.push(callback);
+
+        if (this.exception.raised)
+        {
+            callback(this.exception);
+            
+            if (!this.taskExpired)
+            {   
+                this.taskExpired = true; 
+                this.rejectTask(this.exception);
+            }
+        }
+
+        return this;
+    }
+
+    progress(callback)
+    {
+        this.progressCallbacks.push(callback);
+        return this;
+    }
+
+    chunk(callback)
+    {
+        this.chunkCallbacks.push(callback);
+        return this;
     }
 
     trigger(result)
@@ -504,15 +1409,79 @@ class AsyncReply
 
         for(var i = 0; i < this.callbacks.length; i++)
             this.callbacks[i](result, this);
+
+        
+        if (!this.taskExpired)
+        {
+            this.taskExpired = true;
+            this.resolveTask(this.result);
+        }
+    }
+
+
+    triggerError(type, code, message)//exception)
+    {
+        if (this.ready)
+            return;
+
+        this.exception.raise(type, code, message);// = exception;
+
+        for(var i = 0; i < this.errorCallbacks.length; i++)
+            this.errorCallbacks[i](this.exception, this);
+
+            
+        if (!this.taskExpired)
+        {   
+            this.taskExpired = true; 
+            this.rejectTask(this.exception);
+        }
+    }
+
+    triggerProgress(type, value, max)
+    {
+        if (this.ready)
+            return;
+
+        for(var i = 0; i < this.progressCallbacks.length; i++)
+            this.progressCallbacks[i](type, value, max, this);
+    }
+
+    triggerChunk(value)
+    {
+        if (this.ready)
+            return;
+
+        for(var i = 0; i < this.chunkCallbacks.length; i++)
+            this.chunkCallbacks[i](value, this);
     }
 
     constructor(result)
     {
         this.callbacks = [];
+        this.errorCallbacks = [];
+        this.progressCallbacks = [];
+        this.chunkCallbacks = [];
+        this.exception = new AsyncException();// null;
 
-        if (result) {
+        var self = this;
+
+        this.task = new Promise(function(resolve, reject){
+            self.resolveTask = resolve;
+            self.rejectTask = reject;    
+        });
+
+
+        if (result !== undefined) {
             this.result = result;
             this.ready = true;
+            this.taskExpired = true;            
+            this.resolveTask(result);
+        }
+        else
+        {
+            this.taskExpired = false;            
+            this.ready = false;
+            this.result = null;
         }
     }
 }  
@@ -541,6 +1510,8 @@ class AsyncReply
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
+"use strict";
+
 class AsyncBag extends AsyncReply
 {
     constructor() {
@@ -560,13 +1531,27 @@ class AsyncBag extends AsyncReply
 
         var self = this;
 
+        var singleTaskCompleted = function(taskIndex)
+        {
+            return function(results, reply){
+                self.results[taskIndex] = results;
+                self.count++;
+                if (self.count == self.results.length)
+                    self.trigger(self.results);
+            };
+        };
+
         for(var i = 0; i < this.results.length; i++)
+            this.replies[i].then(singleTaskCompleted(i));
+
+        /*
             this.replies[i].then(function(r, reply){
                 self.results[self.replies.indexOf(reply)] = r;
                 self.count++;
                 if (self.count == self.results.length)
                     self.trigger(self.results);
             });
+        */
      }
 
      add(reply)
@@ -601,6 +1586,9 @@ class AsyncBag extends AsyncReply
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
+
+"use strict";  
+
 class AsyncQueue extends AsyncReply
 {
 
@@ -669,7 +1657,9 @@ class AsyncQueue extends AsyncReply
  * Created by Ahmed Zamil on 25/08/2017.
  */
 
-var BL = function(){
+"use strict";  
+
+function BL(){
     return new BinaryList();
 };
 
@@ -785,6 +1775,16 @@ class BinaryList
         return rt;
     }
 
+    toDC()
+    {
+        return new DC(this.toArray());
+    }
+    
+    addDateTime(value, position)
+    {
+        return this.add({type: DataType.DateTime, value: value}, position);
+    }
+
     addUint8Array(value, position)
     {
         return this.add({type: DataType.UInt8Array, value: value}, position);
@@ -883,16 +1883,17 @@ class BinaryList
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
-var ResourceComparisonResult =
+"use strict";  
+
+const ResourceComparisonResult =
     {
         Null: 0,
         Distributed: 1,
-        DistributedSameClass: 2,
-        Local: 3,
-        Same: 4
+        Local: 2,
+        Same: 3
     };
 
-var StructureComparisonResult =
+const StructureComparisonResult =
     {
         Null: 0,
         Structure: 1,
@@ -903,6 +1904,7 @@ var StructureComparisonResult =
 
 class Codec {
 
+    
     static parse(data, offset, sizeObject, connection, dataType = DataType.Unspecified) {
 
         var size;
@@ -1074,16 +2076,251 @@ class Codec {
         return connection.fetch(iid);// Warehouse.Get(iid);
     }
 
+            /// <summary>
+        /// Parse an array of bytes into array of resources
+        /// </summary>
+        /// <param name="data">Array of bytes.</param>
+        /// <param name="length">Number of bytes to parse.</param>
+        /// <param name="offset">Zero-indexed offset.</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <returns>Array of resources.</returns>
+        static parseResourceArray(data, offset, length, connection)
+        {
+            var reply = new AsyncBag();
+            if (length == 0)
+            {
+                reply.seal();
+                return reply;
+            }
 
-    static parseStructure(data, offset, contentLength, connection, keylist = null, typelist = null, keys = null, types = null) {
-        var reply = new AsyncReply();
-        var bag = new AsyncBag();
+            var end = offset + length;
+
+            // 
+            var result = data[offset++];
+
+            var previous = null;
+
+            if (result == ResourceComparisonResult.Null)
+                previous = new AsyncReply(null);
+            else if (result == ResourceComparisonResult.Local)
+            {
+                previous = Warehouse.get(data.getUint32(offset));
+                offset += 4;
+            }
+            else if (result == ResourceComparisonResult.Distributed)
+            {
+                previous = connection.fetch(data.getUint32(offset));
+                offset += 4;
+            }
+
+            reply.add(previous);
 
 
-        if (keylist == null)
-            keylist = [];
-        if (typelist == null)
-            typelist = [];
+            while (offset < end)
+            {
+                result = data[offset++];
+
+                var current = null;
+
+                if (result == ResourceComparisonResult.Null)
+                {
+                    current = new AsyncReply(null);
+                }
+                else if (result == ResourceComparisonResult.Same)
+                {
+                    current = previous;
+                }
+                else if (result == ResourceComparisonResult.Local)
+                {
+                    current = Warehouse.get(data.getUint32(offset));
+                    offset += 4;
+                }
+                else if (result == ResourceComparisonResult.Distributed)
+                {
+                    current = connection.fetch(data.getUint32(offset));
+                    offset += 4;
+                }
+
+                reply.add(current);
+
+                previous = current;
+            }
+
+            reply.seal();
+            return reply;
+        }
+
+        /// <summary>
+        /// Compose an array of property values.
+        /// </summary>
+        /// <param name="array">PropertyValue array.</param>
+        /// <param name="connection">DistributedConnection is required to check locality.</param>
+        /// <param name="prependLength">If True, prepend the length as UInt32 at the beginning of the output.</param>
+        /// <returns>Array of bytes in the network byte order.</returns>
+    
+        static composePropertyValueArray(array, connection, prependLength = false)
+        {
+            var rt = BL();
+            for (var i = 0; i < array.Length; i++)
+                rt.addUint8Array(Codec.composePropertyValue(array[i], connection));
+            if (prependLength)
+                rt.addUint32(rt.length, 0);
+            return rt.toArray();
+        }
+
+        /// <summary>
+        /// Compose a property value.
+        /// </summary>
+        /// <param name="propertyValue">Property value</param>
+        /// <param name="connection">DistributedConnection is required to check locality.</param>
+        /// <returns>Array of bytes in the network byte order.</returns>
+        static composePropertyValue(propertyValue, connection)
+        {
+            // age, date, value
+            return BL().addUint64(propertyValue.age)
+                       .addDateTime(propertyValue.date)
+                       .addUint8Array(Codec.compose(propertyValue.value, connection))
+                       .toArray();
+        }
+
+
+        /// <summary>
+        /// Parse property value.
+        /// </summary>
+        /// <param name="data">Array of bytes.</param>
+        /// <param name="offset">Zero-indexed offset.</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <param name="cs">Output content size.</param>
+        /// <returns>PropertyValue.</returns>
+        static parsePropertyValue(data, offset, sizeObject, connection)
+        {
+            var reply = new AsyncReply();
+            
+            var age = data.getUint64(offset);
+            offset += 8;
+    
+            var date = data.getDateTime(offset);
+            offset += 8;
+
+            var cs = {};
+
+            Codec.parse(data, offset, cs, connection).then(function(value)
+            {
+                reply.trigger(new PropertyValue(value, age, date));
+            });
+
+            sizeObject.size = 16 + cs.size;
+            return reply;
+        }
+
+
+        /// <summary>
+        /// Parse resource history
+        /// </summary>
+        /// <param name="data">Array of bytes.</param>
+        /// <param name="offset">Zero-indexed offset.</param>
+        /// <param name="length">Number of bytes to parse.</param>
+        /// <param name="resource">Resource</param>
+        /// <param name="fromAge">Starting age.</param>
+        /// <param name="toAge">Ending age.</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <returns></returns>
+        static parseHistory(data, offset, length, resource, connection)
+        {
+            var list = new KeyList();
+
+            var reply = new AsyncReply();
+
+            var bagOfBags = new AsyncBag();
+
+            var ends = offset + length;
+            while (offset < ends)
+            {
+                var index = data[offset++];
+                var pt = resource.instance.template.getPropertyTemplateByIndex(index);
+
+                list.add(pt, null);
+
+                
+                var cs = data.getUint32(offset);
+                offset += 4;
+                bagOfBags.add(Codec.parsePropertyValueArray(data, offset, cs, connection));
+                offset += cs;
+            }
+
+            bagOfBags.seal();
+
+            bagOfBags.then(x =>
+            {
+                for(var i = 0; i < list.length; i++)
+                    list.values[i] = x[i];
+
+                reply.trigger(list);
+            });
+
+            return reply;
+            
+        }
+
+        /// <summary>
+        /// Compose resource history
+        /// </summary>
+        /// <param name="history">History</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <returns></returns>
+        static composeHistory(history, connection, prependLength = false)
+        {
+            var rt = new BinaryList();
+
+            for (var i = 0; i < history.length; i++)
+                rt.addUint8(history.keys[i].index).addUint8Array(Codec.composePropertyValueArray(history.values[i], connection, true));
+
+            if (prependLength)
+                rt.addUint32(rt.length, 0);
+                
+            return rt.toArray();
+        }
+
+        /// <summary>
+        /// Parse an array of ProperyValue.
+        /// </summary>
+        /// <param name="data">Array of bytes.</param>
+        /// <param name="offset">Zero-indexed offset.</param>
+        /// <param name="length">Number of bytes to parse.</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <returns></returns>
+        static parsePropertyValueArray(data, offset, length, connection)
+        {
+            var rt = new AsyncBag();
+
+            while (length > 0)
+            {
+                var cs = {};
+
+                rt.add(Codec.parsePropertyValue(data, offset, cs, connection));
+                
+                if (cs.size > 0)
+                {
+                    offset += cs.size;
+                    length -= cs.size;
+                }
+                else
+                    throw new Exception("Error while parsing ValueInfo structured data");
+            }
+
+            rt.seal();
+            return rt;
+        }
+
+        static parseStructure(data, offset, contentLength, connection, metadata = null, keys = null, types = null) 
+        {
+            var reply = new AsyncReply();
+            var bag = new AsyncBag();
+
+
+            var keylist = [];
+            var typelist = [];
+
 
         if (keys == null) {
             while (contentLength > 0) {
@@ -1108,11 +2345,12 @@ class Codec {
 
                 var rt = {};
                 bag.add(Codec.parse(data, offset, rt, connection));
-                contentLength -= rt.size + 1;
-                offset += rt.size + 1;
+                contentLength -= rt.size;
+                offset += rt.size;
             }
         }
         else {
+            
             for (var i = 0; i < keys.length; i++) {
                 keylist.push(keys[i]);
                 typelist.push(types[i]);
@@ -1138,7 +2376,12 @@ class Codec {
             reply.trigger(s);
         });
 
-
+        if (metadata != null)
+        {
+            metadata.keys = keylist;
+            metadata.types = typelist;
+        }
+        
         return reply;
     }
 
@@ -1167,6 +2410,11 @@ class Codec {
 
     static compose(value, connection, prependType = true) {
 
+        if (value instanceof Function)
+            value = value(connection);
+        else if (value instanceof DistributedPropertyContext)
+            value = value.method(this);
+        
         var type = Codec.getDataType(value, connection);
         var rt = new BinaryList();
 
@@ -1181,7 +2429,7 @@ class Codec {
                 break;
 
             case DataType.Resource:
-                rt.addUint32(value.instance.id);
+                rt.addUint32(value._p.instanceId);
                 break;
 
             case DataType.DistributedResource:
@@ -1321,7 +2569,7 @@ class Codec {
 
 static isLocalResource(resource, connection) {
     if (resource instanceof DistributedResource)
-        if (resource.connection == connection)
+        if (resource._p.connection == connection)
             return true;
 
     return false;
@@ -1336,58 +2584,47 @@ static isLocalResource(resource, connection) {
     }
 
     static compareResource(previous, next, connection) {
+
         if (next == null)
             return ResourceComparisonResult.Null;
-
-        if (next == previous)
+        else if (next == previous)
             return ResourceComparisonResult.Same;
-
-        if (Codec.isLocalResource(next, connection))
+        else if (Codec.isLocalResource(next, connection))
             return ResourceComparisonResult.Local;
-
-        if (previous == null)
+        else
             return ResourceComparisonResult.Distributed;
-
-        if (previous.instance.template.classId.valueOf() == next.instance.template.classId.valueOf())
-            return ResourceComparisonResult.DistributedSameClass;
-
-        return ResourceComparisonResult.Distributed;
     }
 
  static composeResourceArray(resources, connection, prependLength = false) {
-     if (resources == null || resources.length == 0 || !(resources instanceof ResourceArray))
-         return new DC(0);
 
-     var rt = new BinaryList();
-     var comparsion = Codec.compareResource(null, resources[0], connection);
+    if (resources == null || resources.length == 0)// || !(resources instanceof ResourceArray))
+        return prependLength ? new DC(4) : new DC(0);
 
-     rt.addUint8(comparsion);
+    var rt = new BinaryList();
+    var comparsion = Codec.compareResource(null, resources[0], connection);
 
-     if (comparsion == ResourceComparisonResult.Local)
-         rt.addUint32(resources[0].id);
-     else if (comparsion == ResourceComparisonResult.Distributed) {
-         rt.addUint8Array(resources[0].instance.template.classId.value);
-         rt.addUint32(resources[0].instance.id);
-     }
+    rt.addUint8(comparsion);
 
-     for (var i = 1; i < resources.length; i++) {
-         comparsion = Codec.compareResource(resources[i - 1], resources[i], connection);
-         rt.addUint8(comparsion);
-         if (comparsion == ResourceComparisonResult.Local)
-             rt.addUint32(resources[0].id);
-         else if (comparsion == ResourceComparisonResult.Distributed) {
-             rt.addUint8Array(resources[0].instance.template.classId.value);
-             rt.addUint32(resources[0].instance.id);
-         }
-         else if (comparsion == ResourceComparisonResult.DistributedSameClass) {
-             rt.addUint32(resources[0].instance.id);
-         }
-     }
+    if (comparsion == ResourceComparisonResult.Local)
+        rt.addUint32(resources[0]._p.instanceId);
+    else if (comparsion == ResourceComparisonResult.Distributed)
+        rt.addUint32(resources[0].instance.id);
 
-     if (prependLength)
-         rt.addUint32(0, rt.length);
+    for (var i = 1; i < resources.Length; i++)
+    {
+        comparsion = Codec.compareResource(resources[i - 1], resources[i], connection);
+        rt.addUint8(comparsion);
+        if (comparsion == ResourceComparisonResult.Local)
+            rt.addUint32(resources[i]._p.instanceId);
+        else if (comparsion == ResourceComparisonResult.Distributed)
+            rt.addUint32(resources[i].instance.id);
+    }
 
-     return rt.toArray();
+    if (prependLength)
+        rt.addUint32(rt.length, 0);
+    
+
+    return rt.toArray();
  }
 
 
@@ -1478,6 +2715,85 @@ static getDataType(value) {
                 return DataType.Void;
         }
     }
+
+
+            /// <summary>
+        /// Parse an array of structures
+        /// </summary>
+        /// <param name="data">Bytes array</param>
+        /// <param name="offset">Zero-indexed offset</param>
+        /// <param name="length">Number of bytes to parse</param>
+        /// <param name="connection">DistributedConnection is required in case a structure in the array holds items at the other end</param>
+        /// <returns>Array of structures</returns>
+        static parseStructureArray(data, offset, length, connection)
+        {
+            var reply = new AsyncBag();
+            if (length == 0)
+            {
+                reply.seal();
+                return reply;
+            }
+
+            var end = offset + length;
+
+            var result = data[offset++];
+
+            var previous = null;
+            //var previousKeys = [];
+            //var previousTypes = [];
+
+            var metadata = {keys: null, types: null};
+             
+
+            if (result == StructureComparisonResult.Null)
+                previous = new AsyncReply(null);
+            else if (result == StructureComparisonResult.Structure)
+            {
+                var cs = data.getUint32(offset);
+                offset += 4;          
+                previous = this.parseStructure(data, offset, cs, connection, metadata);
+                offset += cs;
+            }
+ 
+            reply.add(previous);
+
+
+            while (offset < end)
+            {
+                result = data[offset++];
+
+                if (result == StructureComparisonResult.Null)
+                    previous = new AsyncReply(null);
+                else if (result == StructureComparisonResult.Structure)
+                {
+                    var cs = data.getUint32(offset);
+                    offset += 4;
+                    previous = this.parseStructure(data, offset, cs, connection, metadata);
+                    offset += cs;
+                }
+                else if (result == StructureComparisonResult.StructureSameKeys)
+                {
+                    var cs = data.getUint32(offset);
+                    offset += 4;
+                    previous = this.parseStructure(data, offset, cs, connection, metadata, metadata.keys);
+                    offset += cs;
+                }
+                else if (result == StructureComparisonResult.StructureSameTypes)
+                {
+                    var cs = data.getUint32(offset);
+                    offset += 4;
+                    previous = this.parseStructure(data, offset, cs, connection, metadata, metadata.keys, metadata.types);
+                    offset += cs;
+                }
+
+                reply.add(previous);
+            }
+
+            reply.seal();
+            return reply;
+        }
+
+
 }  
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
@@ -1505,8 +2821,10 @@ static getDataType(value) {
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
-var UNIX_EPOCH = 621355968000000000;
-var TWO_PWR_32 = (1 << 16) * (1 << 16);
+"use strict";  
+
+const UNIX_EPOCH = 621355968000000000;
+const TWO_PWR_32 = (1 << 16) * (1 << 16);
 
 class DC extends Uint8Array// extends DataView // Data Converter
 {
@@ -1636,7 +2954,17 @@ class DC extends Uint8Array// extends DataView // Data Converter
         return new DC(rt);
     }
 
+    static stringArrayToBytes(values)
+    {
+        var list = new BinaryList();
+        for(var i = 0; i < values.length; i++)
+        {
+            var s = DC.stringToBytes(values[i]);
+            list.addUint32(s.length).addUint8Array(s);
+        }
 
+        return list.toArray();
+    }
 
     append(src, offset, length)
     {
@@ -1919,7 +3247,7 @@ class DC extends Uint8Array// extends DataView // Data Converter
     getDateTime(offset)
     {
         var ticks = this.getUint64(offset);
-        return new Date(Math.round((ticks-DCStatic.UNIX_EPOCH)/10000));
+        return new Date(Math.round((ticks-UNIX_EPOCH)/10000));
     }
 
     getDateTimeArray(offset)
@@ -1932,7 +3260,7 @@ class DC extends Uint8Array// extends DataView // Data Converter
 
     getGuid(offset)
     {
-        return new Guid(this.getUint8Array(offset, 16));
+        return new Guid(this.clip(offset, 16));
 
         /*
         var d = this.getUint8Array(offset, 16);
@@ -1995,7 +3323,11 @@ class DC extends Uint8Array// extends DataView // Data Converter
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
-DataType = {
+
+"use strict";  
+
+const DataType =
+{ 
     Void: 0x0,
     //Variant,
     Bool: 1,
@@ -2107,22 +3439,26 @@ DataType = {
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
-var AuthenticationType =
-{
-    Host: 0,
-    CoHost: 1,
-    Client: 2,
-    Alien: 3
-};
+"use strict";  
 
 class DistributedConnection extends IStore {
 
     send(data) {
+        console.log("Send", data.length);
         this.socket.send(data.buffer);
     }
 
-    sendParams() {
-        return new SendList(this);
+    sendParams(doneReply) {
+        return new SendList(this, doneReply);
+    }
+
+    generateNonce(length)
+    {
+        var rt = new Uint8Array(length);
+        for(var i = 0; i < length; i++)
+            rt[i] = Math.random() * 255;
+
+        return rt;
     }
 
     constructor(url, domain, username, password, checkInterval = 30, connectionTimeout = 600, revivingTime = 120) {
@@ -2130,9 +3466,20 @@ class DistributedConnection extends IStore {
         super();
 
         //Instance.Name = Global.GenerateCode(12);
-        this.hostType = AuthenticationType.Client;
-        this.domain = domain;
-        this.localUsername = username;
+        
+        //this.hostType = AuthenticationType.Client;
+        //this.domain = domain;
+        //this.localUsername = username;
+        
+        this._register("ready");
+        this._register("error");
+        this._register("close");
+
+        this.session = new Session(new Authentication(AuthenticationType.Client), new Authentication(AuthenticationType.Host));
+
+        this.session.localAuthentication.domain = domain;
+        this.session.localAuthentication.username = username;
+
         this.localPassword = DC.stringToBytes(password);
 
         this.socket = new WebSocket(url, "iip");
@@ -2153,10 +3500,10 @@ class DistributedConnection extends IStore {
         this.authPacket = new IIPAuthPacket();
 
         this.resources = {};
-        this.templates = {};
+        this.templates = new KeyList();
         this.requests = {};
         this.pathRequests = {};
-        this.templateRequests = {};
+        this.templateRequests = new KeyList();
         this.resourceRequests = {};
         this.callbackCounter = 0;
 
@@ -2171,8 +3518,8 @@ class DistributedConnection extends IStore {
             }
         });
 
-        this.localNonce = new Uint8Array(32);
-        window.crypto.getRandomValues(this.localNonce);
+        this.localNonce = this.generateNonce(32);// new Uint8Array(32);
+        //window.crypto.getRandomValues(this.localNonce);
 
         // declare (Credentials -> No Auth, No Enctypt)
         var un = DC.stringToBytes(username);
@@ -2187,7 +3534,7 @@ class DistributedConnection extends IStore {
 
         this.socket.onmessage = function (msg) {
 
-            //console.log(msg);
+            console.log("Rec", msg.data.byteLength);
 
             this.networkBuffer.writeAll(msg.data);
 
@@ -2198,247 +3545,387 @@ class DistributedConnection extends IStore {
 
 
         };
+
+        this.socket.onclose = function(event)
+        {
+            self.close(event);
+        };
+
+        //this.socket.onerror = function(event)
+        //{
+        //    self.close(event);
+        //};
     }
 
+
+    processPacket(msg, offset, ends, data)
+    {
+
+        
+        var authPacket = this.authPacket;
+        
+        if (this.ready) {
+            var packet = new IIPPacket();
+
+            var rt = packet.parse(msg, offset, ends);
+            if (rt <= 0) {
+                data.holdFor(msg, offset, ends - offset, -rt);
+                return ends;
+            }
+            else {
+                offset += rt;
+
+                if (packet.command == IIPPacketCommand.Event) {
+                    switch (packet.event) {
+                        case IIPPacketEvent.ResourceReassigned:
+                            this.IIPEventResourceReassigned(packet.resourceId, packet.newResourceId);
+                            break;
+                        case IIPPacketEvent.ResourceDestroyed:
+                            this.IIPEventResourceDestroyed(packet.resourceId);
+                            break;
+                        case IIPPacketEvent.PropertyUpdated:
+                            this.IIPEventPropertyUpdated(packet.resourceId, packet.methodIndex, packet.content);
+                            break;
+                        case IIPPacketEvent.EventOccurred:
+                            this.IIPEventEventOccurred(packet.resourceId, packet.methodIndex, packet.content);
+                            break;
+
+                        case IIPPacketEvent.ChildAdded:
+                            this.IIPEventChildAdded(packet.resourceId, packet.childId);
+                            break;
+                        case IIPPacketEvent.ChildRemoved:
+                            this.IIPEventChildRemoved(packet.resourceId, packet.childId);
+                            break;
+                        case IIPPacketEvent.Renamed:
+                            this.IIPEventRenamed(packet.resourceId, packet.content);
+                            break;
+                        case IIPPacketEvent.AttributesUpdated:
+                            this.IIPEventAttributesUpdated(packet.resourceId, packet.content);
+                            break;
+
+                    }
+                }
+                else if (packet.command == IIPPacketCommand.Request) {
+                    switch (packet.action) {
+
+                        // Manage
+                        case IIPPacketAction.AttachResource:
+                            this.IIPRequestAttachResource(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.ReattachResource:
+                            this.IIPRequestReattachResource(packet.callbackId, packet.resourceId, packet.resourceAge);
+                            break;
+                        case IIPPacketAction.DetachResource:
+                            this.IIPRequestDetachResource(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.CreateResource:
+                            this.IIPRequestCreateResource(packet.callbackId, packet.storeId, packet.resourceId, packet.content);
+                            break;
+                        case IIPPacketAction.DeleteResource:
+                            this.IIPRequestDeleteResource(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.AddChild:
+                            this.IIPRequestAddChild(packet.callbackId, packet.resourceId, packet.childId);
+                            break;
+                        case IIPPacketAction.RemoveChild:
+                            this.IIPRequestRemoveChild(packet.callbackId, packet.resourceId, packet.childId);
+                            break;
+                        case IIPPacketAction.RenameResource:
+                            this.IIPRequestRenameResource(packet.callbackId, packet.resourceId, packet.content);
+                            break;
+
+                        // Inquire
+                        case IIPPacketAction.TemplateFromClassName:
+                            this.IIPRequestTemplateFromClassName(packet.callbackId, packet.className);
+                            break;
+                        case IIPPacketAction.TemplateFromClassId:
+                            this.IIPRequestTemplateFromClassId(packet.callbackId, packet.classId);
+                            break;
+                        case IIPPacketAction.TemplateFromResourceId:
+                            this.IIPRequestTemplateFromResourceId(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.QueryLink:
+                            this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
+                            break;
+                        case IIPPacketAction.ResourceChildren:
+                            this.IIPRequestResourceChildren(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.ResourceParents:
+                            this.IIPRequestResourceParents(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.ResourceHistory:
+                            this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
+                            break;
+
+                        // Invoke
+                        case IIPPacketAction.InvokeFunction:
+                            this.IIPRequestInvokeFunction(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                            break;
+                        case IIPPacketAction.GetProperty:
+                            this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
+                            break;
+                        case IIPPacketAction.GetPropertyIfModified:
+                            this.IIPRequestGetPropertyIfModifiedSince(packet.callbackId, packet.resourceId, packet.methodIndex, packet.resourceAge);
+                            break;
+                        case IIPPacketAction.SetProperty:
+                            this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                            break;
+                        case IIPPacketAction.ResourceHistory:
+                            this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
+                            break;
+                        case IIPPacketAction.QueryLink:
+                            this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
+                            break;
+
+                            // Attribute
+                        case IIPPacketAction.GetAllAttributes:
+                            this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                            break;
+                        case IIPPacketAction.UpdateAllAttributes:
+                            this.IIPRequestUpdateAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                            break;
+                        case IIPPacketAction.ClearAllAttributes:
+                            this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                            break;
+                        case IIPPacketAction.GetAttributes:
+                            this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                            break;
+                        case IIPPacketAction.UpdateAttributes:
+                            this.IIPRequestUpdateAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                            break;
+                        case IIPPacketAction.ClearAttributes:
+                            this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                            break;
+
+                    }
+                }
+                else if (packet.command == IIPPacketCommand.Reply) {
+                    switch (packet.action) {
+                        case IIPPacketAction.AttachResource:
+                            this.IIPReply(packet.callbackId, packet.classId, packet.resourceAge, packet.resourceLink, packet.content);
+                            break;
+                        case IIPPacketAction.ReattachResource:
+                            this.IIPReply(packet.callbackId, packet.resourceAge, packet.content);
+                            break;
+                        case IIPPacketAction.DetachResource:
+                            this.IIPReply(packet.callbackId);
+                            break;
+                        case IIPPacketAction.CreateResource:
+                            this.IIPReply(packet.callbackId, packet.resourceId);
+                            break;
+                        case IIPPacketAction.DeleteResource:
+                        case IIPPacketAction.AddChild:
+                        case IIPPacketAction.RemoveChild:
+                        case IIPPacketAction.RenameResource:
+                            this.IIPReply(packet.callbackId);
+                            break;
+                        case IIPPacketAction.TemplateFromClassName:
+                        case IIPPacketAction.TemplateFromClassId:
+                        case IIPPacketAction.TemplateFromResourceId:
+                            this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
+                            break;
+
+                        case IIPPacketAction.QueryLink:
+                        case IIPPacketAction.ResourceChildren:
+                        case IIPPacketAction.ResourceParents:
+                        case IIPPacketAction.ResourceHistory:
+                            this.IIPReply(packet.callbackId, packet.content);
+                            break;
+
+                        case IIPPacketAction.InvokeFunction:
+                            this.IIPReplyInvoke(packet.callbackId, packet.content);
+                            break;
+                        case IIPPacketAction.GetProperty:
+                            this.IIPReply(packet.callbackId, packet.content);
+                            break;
+                        case IIPPacketAction.GetPropertyIfModified:
+                            this.IIPReply(packet.callbackId, packet.content);
+                            break;
+                        case IIPPacketAction.SetProperty:
+                            this.IIPReply(packet.callbackId);
+                            break;
+
+                        // Attribute
+                        case IIPPacketAction.GetAllAttributes:
+                        case IIPPacketAction.GetAttributes:
+                            this.IIPReply(packet.callbackId, packet.content);
+                            break;
+
+                        case IIPPacketAction.UpdateAllAttributes:
+                        case IIPPacketAction.UpdateAttributes:
+                        case IIPPacketAction.ClearAllAttributes:
+                        case IIPPacketAction.ClearAttributes:
+                            this.IIPReply(packet.callbackId);
+                            break;
+
+                        }
+
+                }
+                else if (packet.command == IIPPacketCommand.Report)
+                {
+                    switch (packet.report)
+                    {
+                        case IIPPacketReport.ManagementError:
+                            this.IIPReportError(packet.callbackId, ErrorType.Management, packet.errorCode, null);
+                            break;
+                        case IIPPacketReport.ExecutionError:
+                            this.IIPReportError(packet.callbackId, ErrorType.Exception, packet.errorCode, packet.errorMessage);
+                            break;
+                        case IIPPacketReport.ProgressReport:
+                            this.IIPReportProgress(packet.callbackId, ProgressType.Execution, packet.progressValue, packet.progressMax);
+                            break;
+                        case IIPPacketReport.ChunkStream:
+                            this.IIPReportChunk(packet.callbackId, packet.content);
+
+                            break;
+                    }
+                }
+
+            }
+        }
+
+        else {
+            var rt = authPacket.parse(msg, offset, ends);
+
+
+            if (rt <= 0) {
+                data.holdAllFor(msg, ends - rt);
+                return ends;
+            }
+            else {
+                offset += rt;
+
+                if (this.session.localAuthentication.type == AuthenticationType.Host) {
+                    if (authPacket.command == IIPAuthPacketCommand.Declare) {
+                        if (authPacket.remoteMethod == IIPAuthPacketMethod.credentials
+                            && authPacket.localMethod == IIPAuthPacketMethod.None) {
+                            this.session.remoteAuthentication.username = authPacket.remoteUsername;
+                            this.remoteNonce = authPacket.remoteNonce;
+                            this.domain = authPacket.domain;
+                            this.sendParams().addUint8(0xa0).addUint8Array(this.localNonce).done();
+                        }
+                    }
+                    else if (authPacket.command == IIPAuthPacketCommand.Action) {
+                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
+                            var remoteHash = authPacket.hash;
+
+                            this.server.membership.getPassword(this.session.remoteAuthentication.username, this.domain).then(function (pw) {
+                                if (pw != null) {
+
+                                    //var hash = new DC(sha256.arrayBuffer(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toArray()));
+                                    var hash = SHA256.compute(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toDC());
+                                    
+
+                                    if (hash.sequenceEqual(remoteHash)) {
+                                        // send our hash
+                                        //var localHash = new DC(sha256.arrayBuffer((new BinaryList()).addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toArray()));
+                                        var localHash = SHA256.compute(BL().addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toDC());
+                                        this.sendParams().addUint8(0).addUint8Array(localHash).done();
+
+                                        this.readyToEstablish = true;
+                                    }
+                                    else {
+                                        // incorrect password
+                                        this.sendParams().addUint8(0xc0).addInt32(1).addUint16(5).addString("Error").done();
+                                    }
+                                }
+                            });
+                        }
+                        else if (authPacket.action == IIPAuthPacketAction.NewConnection) {
+                            if (readyToEstablish) {
+                                this.session.id = this.generateNonce(32);// new DC(32);
+                                //window.crypto.getRandomValues(this.session.id);
+
+                                this.sendParams().addUint8(0x28).addUint8Array(this.session.id).done();
+                                this.ready = true;
+                                this._emit("ready", this);
+                            }
+                        }
+                    }
+                }
+                else if (this.session.localAuthentication.type == AuthenticationType.Client) {
+                    if (authPacket.command == IIPAuthPacketCommand.Acknowledge) {
+                        this.remoteNonce = authPacket.remoteNonce;
+
+                        // send our hash
+
+                        //var localHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.localPassword)
+                        //    .addUint8Array(this.localNonce)
+                        //    .addUint8Array(this.remoteNonce).toArray()));
+
+                        var localHash = SHA256.compute(BL().addUint8Array(this.localPassword)
+                            .addUint8Array(this.localNonce)
+                            .addUint8Array(this.remoteNonce).toDC());
+
+                        this.sendParams().addUint8(0).addUint8Array(localHash).done();
+                    }
+                    else if (authPacket.command == IIPAuthPacketCommand.Action) {
+                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
+                            // check if the server knows my password
+                            //var remoteHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.remoteNonce)
+                            //    .addUint8Array(this.localNonce)
+                            //    .addUint8Array(this.localPassword).toArray()
+                            //));
+
+                            var remoteHash = SHA256.compute(BL().addUint8Array(this.remoteNonce)
+                                .addUint8Array(this.localNonce)
+                                .addUint8Array(this.localPassword).toDC());
+
+
+                            if (remoteHash.sequenceEqual(authPacket.hash)) {
+                                // send establish request
+                                this.sendParams().addUint8(0x20).addUint16(0).done();
+                            }
+                            else {
+                                this.sendParams().addUint8(0xc0).addUint32(1).addUint16(5).addString("Error").done();
+                            }
+                        }
+                        else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished) {
+                            this.session.id = authPacket.sessionId;
+                            this.ready = true;
+                            this._emit("ready", this);
+                        }
+                    }
+                    else if (authPacket.command == IIPAuthPacketCommand.Error)
+                    {
+                        this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
+                        this.close();
+                    }
+                }
+            }
+        }
+
+        return offset;
+
+        //if (offset < ends)
+        //    this.processPacket(msg, offset, ends, data);
+    }
 
     receive(data) {
         var msg = data.read();
         var offset = 0;
         var ends = msg.length;
         var packet = this.packet;
-        var authPacket = this.authPacket;
 
         //console.log("Data");
 
         while (offset < ends) {
-
-            if (this.ready) {
-                var rt = packet.parse(msg, offset, ends);
-                if (rt <= 0) {
-                    data.holdFor(msg, offset, ends - offset, -rt);
-                    return;
-                }
-                else {
-                    offset += rt;
-
-                    if (packet.command == IIPPacketCommand.Event) {
-                        switch (packet.event) {
-                            case IIPPacketEvent.ResourceReassigned:
-                                this.IIPEventResourceReassigned(packet.resourceId, packet.newResourceId);
-                                break;
-                            case IIPPacketEvent.ResourceDestroyed:
-                                this.IIPEventResourceDestroyed(packet.resourceId);
-                                break;
-                            case IIPPacketEvent.PropertyUpdated:
-                                this.IIPEventPropertyUpdated(packet.resourceId, packet.methodIndex, packet.content);
-                                break;
-                            case IIPPacketEvent.EventOccured:
-                                this.IIPEventEventOccured(packet.resourceId, packet.methodIndex, packet.content);
-                                break;
-                        }
-                    }
-                    else if (packet.command == IIPPacketCommand.Request) {
-                        switch (packet.action) {
-                            case IIPPacketAction.AttachResource:
-                                this.IIPRequestAttachResource(packet.callbackId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.ReattachResource:
-                                this.IIPRequestReattachResource(packet.callbackId, packet.resourceId, packet.resourceAge);
-                                break;
-                            case IIPPacketAction.DetachResource:
-                                this.IIPRequestDetachResource(packet.callbackId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.CreateResource:
-                                this.IIPRequestCreateResource(packet.callbackId, packet.className);
-                                break;
-                            case IIPPacketAction.DeleteResource:
-                                this.IIPRequestDeleteResource(packet.callbackId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.TemplateFromClassName:
-                                this.IIPRequestTemplateFromClassName(packet.callbackId, packet.className);
-                                break;
-                            case IIPPacketAction.TemplateFromClassId:
-                                this.IIPRequestTemplateFromClassId(packet.callbackId, packet.classId);
-                                break;
-                            case IIPPacketAction.TemplateFromResourceLink:
-                                this.IIPRequestTemplateFromResourceLink(packet.callbackId, packet.resourceLink);
-                                break;
-                            case IIPPacketAction.TemplateFromResourceId:
-                                this.IIPRequestTemplateFromResourceId(packet.callbackId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.ResourceIdFromResourceLink:
-                                this.IIPRequestResourceIdFromResourceLink(packet.callbackId, packet.resourceLink);
-                                break;
-                            case IIPPacketAction.InvokeFunction:
-                                this.IIPRequestInvokeFunction(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
-                                break;
-                            case IIPPacketAction.GetProperty:
-                                this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
-                                break;
-                            case IIPPacketAction.GetPropertyIfModified:
-                                this.IIPRequestGetPropertyIfModifiedSince(packet.callbackId, packet.resourceId, packet.methodIndex, packet.resourceAge);
-                                break;
-                            case IIPPacketAction.SetProperty:
-                                this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
-                                break;
-                        }
-                    }
-                    else if (packet.command == IIPPacketCommand.Reply) {
-                        switch (packet.action) {
-                            case IIPPacketAction.AttachResource:
-                                this.IIPReply(packet.callbackId, packet.classId, packet.resourceAge, packet.resourceLink, packet.content);
-                                break;
-                            case IIPPacketAction.ReattachResource:
-                                this.IIPReply(packet.callbackId, packet.resourceAge, packet.content);
-                                break;
-                            case IIPPacketAction.DetachResource:
-                                this.IIPReply(packet.callbackId);
-                                break;
-                            case IIPPacketAction.CreateResource:
-                                this.IIPReply(packet.callbackId, packet.classId, packet.resourceId);
-                                break;
-                            case IIPPacketAction.DeleteResource:
-                                this.IIPReply(packet.callbackId);
-                                break;
-                            case IIPPacketAction.TemplateFromClassName:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
-                                break;
-                            case IIPPacketAction.TemplateFromClassId:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
-                                break;
-                            case IIPPacketAction.TemplateFromResourceLink:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
-                                break;
-                            case IIPPacketAction.TemplateFromResourceId:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
-                                break;
-                            case IIPPacketAction.ResourceIdFromResourceLink:
-                                this.IIPReply(packet.callbackId, packet.classId, packet.resourceId, packet.resourceAge);
-                                break;
-                            case IIPPacketAction.InvokeFunction:
-                                this.IIPReply(packet.callbackId, packet.content);
-                                break;
-                            case IIPPacketAction.GetProperty:
-                                this.IIPReply(packet.callbackId, packet.content);
-                                break;
-                            case IIPPacketAction.GetPropertyIfModified:
-                                this.IIPReply(packet.callbackId, packet.content);
-                                break;
-                            case IIPPacketAction.SetProperty:
-                                this.IIPReply(packet.callbackId);
-                                break;
-                        }
-
-                    }
-
-                }
-            }
-
-            else {
-                var rt = authPacket.parse(msg, offset, ends);
-
-
-                if (rt <= 0) {
-                    data.holdAllFor(msg, ends - rt);
-                    return;
-                }
-                else {
-                    offset += rt;
-
-                    if (this.hostType == AuthenticationType.Host) {
-                        if (authPacket.command == IIPAuthPacketCommand.Declare) {
-                            if (authPacket.remoteMethod == IIPAuthPacketMethod.credentials
-                                && authPacket.localMethod == IIPAuthPacketMethod.None) {
-                                this.remoteUsername = authPacket.remoteUsername;
-                                this.remoteNonce = authPacket.remoteNonce;
-                                this.domain = authPacket.domain;
-                                this.sendParams().addUint8(0xa0).addUint8Array(this.localNonce).done();
-                            }
-                        }
-                        else if (authPacket.command == IIPAuthPacketCommand.Action) {
-                            if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-                                var remoteHash = authPacket.hash;
-
-                                this.server.membership.getPassword(this.remoteUsername, this.domain).then(function (pw) {
-                                    if (pw != null) {
-
-                                        var hash = new DC(sha256.arrayBuffer(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toArray()));
-
-
-                                        if (hash.sequenceEqual(remoteHash)) {
-                                            // send our hash
-                                            var localHash = new DC(sha256.arrayBuffer((new BinaryList()).addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toArray()));
-                                            this.sendParams().addUint8(0).addUint8Array(localHash).done();
-
-                                            this.readyToEstablish = true;
-                                        }
-                                        else {
-                                            // incorrect password
-                                            this.sendParams().addUint8(0xc0).addInt32(1).addUint16(5).addString("Error").done();
-                                        }
-                                    }
-                                });
-                            }
-                            else if (authPacket.action == IIPAuthPacketAction.NewConnection) {
-                                if (readyToEstablish) {
-                                    this.sessionId = new DC(32);
-                                    window.crypto.getRandomValues(this.sessionId);
-
-                                    this.sendParams().addUint8(0x28).addUint8Array(this.sessionId).done();
-                                    this.ready = true;
-                                    this._emit("ready", this);
-                                }
-                            }
-                        }
-                    }
-                    else if (this.hostType == AuthenticationType.Client) {
-                        if (authPacket.command == IIPAuthPacketCommand.Acknowledge) {
-                            this.remoteNonce = authPacket.remoteNonce;
-
-                            // send our hash
-
-                            var localHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.localPassword)
-                                .addUint8Array(this.localNonce)
-                                .addUint8Array(this.remoteNonce).toArray()));
-                            this.sendParams().addUint8(0).addUint8Array(localHash).done();
-                        }
-                        else if (authPacket.command == IIPAuthPacketCommand.Action) {
-                            if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-                                // check if the server knows my password
-                                var remoteHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.remoteNonce)
-                                    .addUint8Array(this.localNonce)
-                                    .addUint8Array(this.localPassword).toArray()
-                                ));
-
-                                if (remoteHash.sequenceEqual(authPacket.hash)) {
-                                    // send establish request
-                                    this.sendParams().addUint8(0x20).addUint16(0).done();
-                                }
-                                else {
-                                    this.sendParams().addUint8(0xc0).addUint32(1).addUint16(5).addString("Error").done();
-                                }
-                            }
-                            else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished) {
-                                this.sessionId = authPacket.sessionId;
-                                this.ready = true;
-                                this._emit("ready", this);
-                            }
-                        }
-                        else if (authPacket.command == IIPAuthPacketCommand.Error)
-                        {
-                            this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
-                            this.close();
-                        }
-                    }
-                }
-            }
+            offset = this.processPacket(msg, offset, ends, data);   
         }
 
+        
     }
 
-    close()
+    close(event)
     {
-        this.socket.close();
+        this._emit("close", event);
+        
+        Warehouse.remove(this);
+
+        if (this.socket.readyState != this.socket.CLOSED)
+        {
+            this.socket.close();
+        }
     }
 
     trigger(trigger) {
@@ -2450,10 +3937,14 @@ class DistributedConnection extends IStore {
         return true;
     }
 
+    remove(resource)
+    {
+        // nothing to do (IStore interface)
+    }
 
     // Protocol Implementation
 
-    sendRequest(action, binaryList) {
+    sendRequest2(action, binaryList) {
         var reply = new AsyncReply();
         this.callbackCounter++;
         this.sendParams().addUint8(0x40 | action).addUint32(this.callbackCounter).addRange(binaryList).done();
@@ -2461,11 +3952,117 @@ class DistributedConnection extends IStore {
         return reply;
     }
 
+    sendRequest(action) {
+        var reply = new AsyncReply();
+        this.callbackCounter++;
+        this.requests[this.callbackCounter] = reply;
+        return this.sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);        
+    }
+
+    sendInvoke(instanceId, index, parameters)
+    {
+        var reply = new AsyncReply();
+        
+        var pb = Codec.composeVarArray(parameters, this, true);
+
+        this.callbackCounter++;
+        this.sendParams()
+                        .addUint8(0x40 | IIPPacketAction.InvokeFunction)
+                        .addUint32(this.callbackCounter)
+                        .addUint32(instanceId)
+                        .addUint8(index)
+                        .addUint8Array(pb)
+                        .done();
+
+        this.requests[this.callbackCounter] = reply;
+
+        return reply; 
+    }
+
+    sendError(type, callbackId, errorCode, errorMessage = "")
+    {
+        var msg = DC.stringToBytes(errorMessage);
+        if (type == ErrorType.Management)
+            this.sendParams()
+                            .addUint8(0xC0 | IIPPacketReport.ManagementError)
+                            .addUint32(callbackId)
+                            .addUint16(errorCode)
+                            .done();
+        else if (type == ErrorType.Exception)
+            this.sendParams()
+                            .addUint8(0xC0 | IIPPacketReport.ExecutionError)
+                            .addUint32(callbackId)
+                            .addUint16(errorCode)
+                            .addUint16(msg.length)
+                            .addUint8Array(msg)
+                            .done();
+    }
+
+    sendProgress(callbackId, value, max)
+    {
+        this.sendParams()
+                        .addUint8(0xC0 | IIPPacketReport.ProgressReport)
+                        .addUint32(callbackId)
+                        .addInt32(value)
+                        .addInt32(max)
+                        .done();
+    }
+
+    sendChunk(callbackId, chunk)
+    {
+        var c = Codec.compose(chunk, this, true);
+        this.sendParams()
+                        .addUint8(0xC0 | IIPPacketReport.ChunkStream)
+                        .addUint32(callbackId)
+                        .addUint8Array(c)
+                        .done();
+    }
+
     IIPReply(callbackId) {
+
         var results = Array.prototype.slice.call(arguments, 1);
         var req = this.requests[callbackId];
+
+        //console.log("Reply " + callbackId, req);
+
         delete this.requests[callbackId];
         req.trigger(results);
+    }
+
+    IIPReplyInvoke(callbackId, result)
+    {
+        var req = this.requests[callbackId];
+        delete this.requests[callbackId];
+
+        Codec.parse(result, 0, {}, this).then(function(rt)
+        {
+            req.trigger(rt);
+        });
+    }
+
+    IIPReportError(callbackId, errorType, errorCode, errorMessage)
+    {
+        var req = this.requests[callbackId];
+        delete this.requests[callbackId];
+        req.triggerError(errorType, errorCode, errorMessage);
+    }
+
+    IIPReportProgress(callbackId, type, value, max)
+    {
+        var req = this.requests[callbackId];
+        req.triggerProgress(type, value, max);
+    }
+
+    IIPReportChunk(callbackId, data)
+    {
+        if (this.requests[callbackId])
+        {
+            var req = this.requests[callbackId];
+            Codec.parse(data, 0, {}, this).then(function(x)
+            {
+                req.triggerChunk(x);
+            });
+        }
     }
 
     IIPEventResourceReassigned(resourceId, newResourceId) {
@@ -2481,203 +4078,367 @@ class DistributedConnection extends IStore {
     }
 
     IIPEventPropertyUpdated(resourceId, index, content) {
-        if (this.resources[resourceId]) {
-            // push to the queue to gaurantee serialization
-            var reply = new AsyncReply();
-            this.queue.add(reply);
 
-            var r = this.resources[resourceId];
-            Codec.parse(content, 0, this).then(function (args) {
-                var pt = r._p.template.getPropertyTemplateByIndex(index);
-                if (pt != null) {
-                    reply.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Propery, args, index));
-                }
-                else {    // ft found, fi not found, this should never happen
-                    this.queue.remove(reply);
-                }
-            });
-        }
+        var self = this;
+        
+        this.fetch(resourceId).then(function(r){
+                // push to the queue to gaurantee serialization
+                var item = new AsyncReply();
+                self.queue.add(item);
+    
+                Codec.parse(content, 0, {}, self).then(function (args) {
+                    var pt = r.instance.template.getPropertyTemplateByIndex(index);
+                    if (pt != null) {
+                        item.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Propery, args, index));
+                    }
+                    else {    // ft found, fi not found, this should never happen
+                        self.queue.remove(item);
+                    }
+                });
+        });
     }
 
 
-    IIPEventEventOccured(resourceId, index, content) {
-        if (this.resources[resourceId]) {
+    IIPEventEventOccurred(resourceId, index, content) {
+        var self = this;
+
+        this.fetch(resourceId).then(function(r){
             // push to the queue to guarantee serialization
-            var reply = new AsyncReply();
-            var r = this.resources[resourceId];
+            var item = new AsyncReply();
+            var r = self.resources[resourceId];
 
-            this.queue.add(reply);
+            self.queue.add(item);
 
-            Codec.parseVarArray(content, 0, content.length, this).then(function (args) {
-                var et = r._p.template.getEventTemplateByIndex(index);
+            Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
+                var et = r.instance.template.getEventTemplateByIndex(index);
                 if (et != null) {
-                    reply.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Event, args, index));
+                    item.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Event, args, index));
                 }
                 else {    // ft found, fi not found, this should never happen
-                    this.queue.remove(reply);
+                    self.queue.remove(item);
                 }
             });
-        }
+        });
+    }
+
+    IIPEventChildAdded(resourceId, childId)
+    {
+        var self = this;
+
+        this.fetch(resourceId).then(function(parent)
+        {
+            self.fetch(childId).then(function(child)
+            {
+                parent.instance.children.add(child);
+            });
+        });
+    }
+
+    IIPEventChildRemoved(resourceId, childId)
+    {
+        var self = this;
+
+        this.fetch(resourceId).then(function(parent)
+        {
+            self.fetch(childId).then(function(child)
+            {
+                parent.instance.children.remove(child);
+            });
+        });
+    }
+
+    IIPEventRenamed(resourceId, name)
+    {
+        this.fetch(resourceId).then(function(resource)
+        {
+            resource.instance.attributes.set("name", name.getString(0, name.length));
+        });
+    }
+
+
+    IIPEventAttributesUpdated(resourceId, attributes)
+    {
+        var self = this;
+
+        this.fetch(resourceId).then(function(resource)
+        {
+            var attrs = attributes.getStringArray(0, attributes.length);
+
+            self.getAttributes(resource, attrs).then(function(s)
+            {
+                resource.instance.setAttributes(s);
+            });
+        });
+    }
+
+    sendReply(action, callbackId)
+    {
+        return this.sendParams().addUint8(0x80 | action).addUint32(callbackId);
+    }
+
+    sendEvent(evt)
+    {
+        return this.sendParams().addUint8(evt);
     }
 
     IIPRequestAttachResource(callback, resourceId) {
 
-        var sl = this.sendParams();
+        //var sl = this.sendParams();
+        var self = this;
+
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
-                r.instance.on("ResourceEventOccured", this.instance_eventOccured);
-                r.instance.on("ResourceModified", this.instance_propertyModified);
-                r.instance.on("ResourceDestroyed", this.instance_resourceDestroyed);
+
+                if (r.instance.applicable(self.session, ActionType.Attach, null) == Ruling.Denied)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AttachDenied);
+                    return;
+                }
+
+                r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
+                r.instance.on("ResourceModified", self.instance_propertyModified, self);
+                r.instance.on("ResourceDestroyed", self.instance_resourceDestroyed, self);
                 // reply ok
 
                 var link = DC.stringToBytes(r.instance.link);
 
-                sl.addUint8(0x80)
-                    .addUint32(callback)
-                    .addUint8Array(r.instance.template.classId.value)
-                    .addUint32(r.instance.age)
-                    .addUint16(link.length)
-                    .addUint8Array(link)
-                    .addUint8Array(Codec.composeVarArray(r.instance.serialize(), this, true))
-                    .done();
+                if (r instanceof DistributedResource)
+                    self.sendReply(IIPPacketAction.AttachResource, callback)
+                        .addUint8Array(r.instance.template.classId.value)
+                        .addUint64(r.instance.age)
+                        .addUint16(link.length)
+                        .addUint8Array(link)
+                        .addUint8Array(Codec.composePropertyValueArray(r._serialize(), self, true))
+                        .done();
+                else
+                    self.sendReply(IIPPacketAction.AttachResource, callback)
+                        .addUint8Array(r.instance.template.classId.value)
+                        .addUint64(r.instance.age)
+                        .addUint16(link.length)
+                        .addUint8Array(link)
+                        .addUint8Array(Codec.composePropertyValueArray(r.instance.serialize(), self, true))
+                        .done();
             }
             else {
                 // reply failed
-                //SendParams(0x80, r.Instance.Id, r.Instance.Age, r.Instance.Serialize(false, this));
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);                
             }
         });
     }
 
     IIPRequestReattachResource(callback, resourceId, resourceAge) {
-        var sl = this.sendParams();
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (res != null) {
-                r.instance.on("ResourceEventOccured", this.instance_eventOccured);
-                r.instance.on("ResourceModified", this.instance_propertyModified);
-                r.instance.on("ResourceDestroyed", this.instance_resourceDestroyed);
+                r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
+                r.instance.on("ResourceModified", self.instance_propertyModified, self);
+                r.instance.on("ResourceDestroyed", self.instance_resourceDestroyed, self);
                 // reply ok
-                sl.addUint8(0x81)
-                    .addUint32(callback)
-                    .addUint32(r.instance.age)
-                    .addUint8Array(Codec.composeVarArray(r.instance.serialize(), this, true))
-                    .done();
+                self.sendReply(IIPPacketAction.ReattachResource, callback)
+                        .addUint64(r.instance.age)
+                        .addUint8Array(Codec.composePropertyValueArray(r.instance.serialize(), self, true))
+                        .done();
             }
             else {
                 // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
 
     IIPRequestDetachResource(callback, resourceId) {
-        var sl = this.sendParams();
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
-                r.instance.off("ResourceEventOccured", this.instance_eventOccured);
-                r.instance.off("ResourceModified", this.instance_propertyModified);
-                r.instance.off("ResourceDestroyed", this.instance_resourceDestroyed);
+                r.instance.off("ResourceEventOccurred", self.instance_eventOccurred);
+                r.instance.off("ResourceModified", self.instance_propertyModified);
+                r.instance.off("ResourceDestroyed", self.instance_resourceDestroyed);
 
                 // reply ok
-                sl.addUint8(0x82).addUint32(callback).done();
+                self.sendReply(IIPPacketAction.DetachResource, callback).done();
             }
             else {
                 // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
 
-    IIPRequestCreateResource(callback, className) {
-        // not implemented
+    IIPRequestCreateResource(callback, storeId, parentId, content) {
+        var self = this;
+        Warehouse.get(storeId).then(function(store)
+            {
+                if (store == null)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.StoreNotFound);
+                    return;
+                }
+
+                if (!(store instanceof IStore))
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceIsNotStore);
+                    return;
+                }
+
+                // check security
+                if (store.instance.applicable(self.session, ActionType.CreateResource, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.CreateDenied);
+                    return;
+                }
+
+                Warehouse.get(parentId).then(function(parent)
+                {
+
+                    // check security
+
+                    if (parent != null)
+                        if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed)
+                        {
+                            self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                            return;
+                        }
+
+                    var offset = 0;
+
+                    var className = content.getString(offset + 1, content[0]);
+                    offset += 1 + content[0];
+
+                    var nameLength = content.getUint16(offset);
+                    offset += 2;
+                    var name = content.getString(offset, nameLength);
+
+                    var cl = content.getUint32(offset);
+                    offset += 4;
+
+                    var type = window[className];
+
+                    if (type == null)
+                    {
+                        self.sendError(ErrorType.Management, callback, ExceptionCode.ClassNotFound);
+                        return;
+                    }
+
+                    Codec.parseVarArray(content, offset, cl, self).then(function(parameters)
+                    {
+                        offset += cl;
+                        cl = content.getUint32(offset);
+                        Codec.parseStructure(content, offset, cl, self).then(function(attributes)
+                        {
+                            offset += cl;
+                            cl = content.length - offset;
+
+                            Codec.parseStructure(content, offset, cl, self).then(function(values)
+                            {
+
+
+                                var resource = new (Function.prototype.bind.apply(type, values));
+                            
+                                Warehouse.put(resource, name, store, parent);
+
+
+                                self.sendReply(IIPPacketAction.CreateResource, callback)
+                                            .addUint32(resource.Instance.Id)
+                                            .done();
+                               
+                            });
+                        });
+                    });
+                });
+            });
     }
 
     IIPRequestDeleteResource(callback, resourceId) {
-        // not implemented
+        var self = this;
+        Warehouse.get(resourceId).then(function(r)
+            {
+                if (r == null)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    return;
+                }
+
+                if (r.instance.store.instance.applicable(session, ActionType.Delete, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.DeleteDenied);
+                    return;
+                }
+
+                if (Warehouse.remove(r))
+                    self.sendReply(IIPPacketAction.DeleteResource, callback).done();
+                else
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.DeleteFailed);
+            });
     }
 
     IIPRequestTemplateFromClassName(callback, className) {
-        var sl = this.sendParams();
+        
+        var self = this;
 
         Warehouse.getTemplateByClassName(className).then(function (t) {
             if (t != null)
-                sl.addUint8(0x88).addUint32(callback).addUint8Array(t.content).done();
+                self.sendReply(IIPPacketAction.TemplateFromClassName, callback)
+                                .addUint32(t.content.length)
+                                .addUint8Array(t.content)
+                                .done();
             else {
                 // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
             }
         });
     }
 
     IIPRequestTemplateFromClassId(callback, classId) {
-        var sl = this.sendParams();
-
+        var self = this;
         Warehouse.getTemplateByClassId(classId).then(function (t) {
             if (t != null)
-                sl.addUint8(0x89)
-                    .addUint32(callback)
-                    .addUint32(t.content.length)
-                    .addUint8Array(t.content)
-                    .done();
+                self.sendReply(IIPPacketAction.TemplateFromClassId, callback)
+                            .addUint32(t.content.length)
+                            .addUint8Array(t.content)
+                            .done();
             else {
                 // reply failed
-            }
-        });
-    }
-
-    IIPRequestTemplateFromResourceLink(callback, resourceLink) {
-        var sl = this.sendParams();
-
-        Warehouse.getTemplate(resourceLink).then(function (t) {
-            if (t != null)
-                sl.addUint8(0x8a).addUint32(callback).addUint8Array(t.content).done();
-            else {
-                // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
             }
         });
     }
 
     IIPRequestTemplateFromResourceId(callback, resourceId) {
-        var sl = this.sendParams();
+
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null)
-                sl.addUint8(0x8b).addUint32(callback).addUint8Array(r.instance.template.content).done();
+                self.sendReply(IIPPacketAction.TemplateFromResourceId, callback)
+                            .addUint32(r.instance.template.content.length)
+                            .addUint8Array(r.instance.template.content)
+                            .done();
             else {
                 // reply failed
-            }
-        });
-    }
-
-    IIPRequestResourceIdFromResourceLink(callback, resourceLink) {
-
-        var sl = this.sendParams();
-
-        Warehouse.get(resourceLink).then(function (r) {
-            if (r != null)
-                sl.addUint8(0x8c)
-                    .addUint32(callback)
-                    .addUint8Array(r.instance.template.classId.value)
-                    .addUint32(r.instance.id)
-                    .addUint32(r.instance.age).done();
-            else {
-                // reply failed
+                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);                
             }
         });
     }
 
     IIPRequestInvokeFunction(callback, resourceId, index, content) {
-        var sl = this.sendParams();
+
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
-                Codec.parseVarArray(content, 0, content.length, sl.connection).then(function (args) {
+                Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
                     var ft = r.instance.template.getFunctionTemplateByIndex(index);
                     if (ft != null) {
                         if (r instanceof DistributedResource) {
                             var rt = r._invoke(index, args);
                             if (rt != null) {
                                 rt.then(function (res) {
-                                    sl.addUint8(0x90).addUint32(callback).addUint8Array(Codec.compose(res, sl.connection)).done();
+                                    self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                                    .addUint8Array(Codec.compose(res, self))
+                                                    .done();
                                 });
                             }
                             else {
@@ -2687,19 +4448,30 @@ class DistributedConnection extends IStore {
                         else {
 
                             var fi = r[ft.name];
+
+                            if (r.instance.applicable(self.session, ActionType.Execute, ft) == Ruling.Denied)
+                            {
+                                self.sendError(ErrorType.Management, callback, ExceptionCode.InvokeDenied);
+                                return;
+                            }
+
                             if (fi instanceof Function) {
-                                args.push(sl.connection);
+                                args.push(self);
 
                                 var rt = fi.apply(r, args);
 
 
                                 if (rt instanceof AsyncReply) {
                                     rt.then(function (res) {
-                                        sl.addUint8(0x90).addUint32(callback).addUint8Array(Codec.compose(res, sl.connection)).done();
+                                        self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                                      .addUint8Array(Codec.compose(res, self))
+                                                      .done();
                                     });
                                 }
                                 else {
-                                    sl.addUint8(0x90).addUint32(callback).addUint8Array(Codec.compose(rt, sl.connection)).done();
+                                    self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                                    .addUint8Array(Codec.compose(rt, self))
+                                                    .done();
                                 }
                             }
                             else {
@@ -2719,18 +4491,23 @@ class DistributedConnection extends IStore {
     }
 
     IIPRequestGetProperty(callback, resourceId, index) {
-        var sl = this.sendParams();
+        
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
                 var pt = r.instance.template.getFunctionTemplateByIndex(index);
                 if (pt != null) {
                     if (r instanceof DistributedResource) {
-                        sl.addUint8(0x91).addUint32(callback).addUint8Array(Codec.compose(r._get(pt.index), sl.connection)).done();
+                        self.sendReply(IIPPacketAction.GetProperty, callback)
+                                        .addUint8Array(Codec.compose(r._get(pt.index), self))
+                                        .done();
                     }
                     else {
                         var pv = r[pt.name];
-                        sl.addUint8(0x91).addUint32(callback).addUint8Array(Codec.compose(pv, sl.connection)).done();
+                        self.sendReply(IIPPacketAction.GetProperty)
+                                    .addUint8Array(Codec.compose(pv, self))
+                                    .done();
                     }
                 }
                 else {
@@ -2744,7 +4521,8 @@ class DistributedConnection extends IStore {
     }
 
     IIPRequestGetPropertyIfModifiedSince(callback, resourceId, index, age) {
-        var sl = this.sendParams();
+        
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
@@ -2752,10 +4530,15 @@ class DistributedConnection extends IStore {
                 if (pt != null) {
                     if (r.instance.getAge(index) > age) {
                         var pv = r[pt.name];
-                        sl.addUint8(0x92).addUint32(callback).addUint8Array(Codec.compose(pv, sl.connection)).done();
+                        self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+                                        .addUint8Array(Codec.compose(pv, self))
+                                        .done();
                     }
-                    else {
-                        sl.addUint8(0x92).addUint32(callback).addUint8(DataType.NotModified).done();
+                    else 
+                    {
+                        self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+                                        .addUint8(DataType.NotModified)
+                                        .done();
                     }
                 }
                 else {
@@ -2769,7 +4552,8 @@ class DistributedConnection extends IStore {
     }
 
     IIPRequestSetProperty(callback, resourceId, index, content) {
-        var sl = this.sendParams();
+        
+        var self = this;
 
         Warehouse.get(resourceId).then(function (r) {
             if (r != null) {
@@ -2777,53 +4561,181 @@ class DistributedConnection extends IStore {
 
                 var pt = r.instance.template.getPropertyTemplateByIndex(index);
                 if (pt != null) {
-                    Codec.parse(content, 0, this).then(function (value) {
+                    Codec.parse(content, 0, {}, this).then(function (value) {
                         if (r instanceof DistributedResource) {
                             // propagation
                             r._set(index, value).then(function (x) {
-                                sl.addUint8(0x93).addUint32(callback).done();
+                                self.sendReply(IIPPacketAction.SetProperty, callback)
+                                                .done();
+                            }).error(function(x){
+                                self.sendError(x.type, callback, x.code, x.message)
+                                    .done();
                             });
                         }
-                        else {
-                            r[pt.name] = value;
-                            sl.addUint8(0x93).addUint32(callback).done();
+                        else 
+                        {
+                            if (r.instance.applicable(self.session, ActionType.SetProperty, pt) == Ruling.Denied)
+                            {
+                                self.sendError(AsyncReply.ErrorType.Exception, callback, ExceptionCode.SetPropertyDenied);
+                                return;
+                            }
+                            
+                            try
+                            {
+                                if (r[pt.name] instanceof DistributedPropertyContext)
+                                    value = new DistributedPropertyContext(this, value);
+
+                                r[pt.name] = value;
+                                self.sendReply(IIPPacketAction.SetProperty, callback).done();
+                            }
+                            catch(ex)
+                            {
+                                self.sendError(AsyncReply.ErrorType.Exception, callback, 0, ex.toString()).done();
+                            }
                         }
 
                     });
                 }
                 else {
                     // property not found
+                    self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
                 }
             }
             else {
                 // resource not found
+                self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
             }
         });
     }
 
+    IIPRequestInquireResourceHistory(callback, resourceId, fromDate, toDate)
+    {
+        var self = this;
+        Warehouse.get(resourceId).then(function(r)
+        {
+            if (r != null)
+            {
+                r.instance.store.getRecord(r, fromDate, toDate).then(function(results)
+                {
+                    var history = Codec.composeHistory(results, self, true);
+                    self.sendReply(IIPPacketAction.ResourceHistory, callback)
+                                    .addUint8Array(history)
+                                    .done();
+                });
+            }
+        });
+    }
+
+    IIPRequestQueryResources(callback, resourceLink)
+    {
+        var self = this;
+
+        Warehouse.query(resourceLink).then(function(resources)
+        {
+
+            var list = resources.filter(function(r){return r.instance.applicable(self.session, ActionType.Attach, null) !=  Ruling.Denied});
+
+            if (list.length == 0)
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+            else
+                self.sendReply(IIPPacketAction.QueryLink, callback)
+                    .addUint8Array(Codec.composeResourceArray(list, self, true))
+                    .done();
+        });
+    }
+
+    create(store, parent, className, parameters, attributes, values)
+    {
+        var reply = new AsyncReply();
+        var sb = DC.stringToBytes(className);
+
+        var pkt = BL().addUint32(store.instance.id)
+                      .addUint32(parent.instance.id)
+                      .addUint32(sb.length)
+                      .addUint8Array(sb)
+                      .addUint8Array(Codec.composeVarArray(parameters, this, true))
+                      .addUint8Array(Codec.composeStructure(attributes, this, true, true, true))
+                      .addUint8Array(Codec.composeStructure(values, this));
+
+        pkt.addUint32(pkt.length, 8);
+
+        this.sendRequest(IIPPacket.IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function(args)
+        {
+            var rid = args[0];
+
+            self.fetch(rid).then(function(r)
+            {
+                reply.trigger(r);
+            });
+
+        });
+
+        return reply;
+    }
+
+    query(resourceLink)
+    {
+        var reply = new AsyncReply();
+        var self = this;
+
+        var sb = DC.stringToBytes(resourceLink);
+
+        this.sendRequest(IIPPacketAction.QueryLink)
+                        .addUint16(sb.length)
+                        .addUint8Array(sb)
+                        .done()
+                        .then(function(args)
+        {
+            Codec.parseResourceArray(args[0], 0, args[0].length, self).then(function(resources) {
+                reply.trigger(resources);
+            });
+        }).error(function(ex){
+            reply.triggerError(ex);
+        });
+
+        return reply;
+    }
 
     getTemplate(classId) {
-        if (this.templates[classId])
-            return new AsyncReply(this.templates[classId]);
-        else if (this.templateRequests[classId])
-            return this.templateRequests[classId];
+        if (this.templates.contains(classId))
+            return new AsyncReply(this.templates.item(classId));
+        else if (this.templateRequests.contains(classId))
+            return this.templateRequests.item(classId);
 
         var reply = new AsyncReply();
-        this.templateRequests[classId] = reply;
+        this.templateRequests.add(classId.valueOf(), reply);
 
         var self = this;
 
-        this.sendRequest(IIPPacketAction.TemplateFromClassId, BL().addUint8Array(classId.value)).then(function (rt) {
-            delete self.templateRequests[classId];
-            self.templates[rt[0].classId] = rt[0];
-            reply.trigger(rt[0]);
-        });
+        this.sendRequest(IIPPacketAction.TemplateFromClassId)
+                        .addUint8Array(classId.value)
+                        .done()
+                        .then(function (rt) {
+                            self.templateRequests.remove(classId);
+                            self.templates.add(rt[0].classId.valueOf(), rt[0]);
+                            Warehouse.putTemplate(rt[0]);
+                            reply.trigger(rt[0]);
+                        });
 
         return reply;
     }
 
 // IStore interface
     get(path) {
+
+        var rt = new AsyncReply();
+        
+        this.query(path).then(function(ar)
+        {
+            if (ar != null && ar.length > 0)
+                rt.trigger(ar[0]);
+            else
+                rt.trigger(null);
+        }).error(function(ex) {rt.triggerError(ex);});
+
+        return rt;
+        
+        /*
         if (this.pathRequests[path])
             return this.pathRequests[path];
 
@@ -2834,9 +4746,11 @@ class DistributedConnection extends IStore {
         bl.addString(path);
         bl.addUint16(bl.length, 0);
 
+        var link = data.get
         var self = this;
 
-        this.sendRequest(IIPPacketAction.ResourceIdFromResourceLink, bl).then(function (rt) {
+        this.sendRequest(IIPPacketAction.ResourceIdFromResourceLink)
+                        .addUint16(.then(function (rt) {
             delete self.pathRequests[path];
 
             self.fetch(rt[1]).then(function (r) {
@@ -2846,6 +4760,7 @@ class DistributedConnection extends IStore {
 
 
         return reply;
+        */
     }
 
     retrieve(iid) {
@@ -2859,7 +4774,9 @@ class DistributedConnection extends IStore {
     fetch(id) {
         if (this.resourceRequests[id] && this.resources[id]) {
             // dig for dead locks
-            return this.resourceRequests[id];
+            // or not
+            return new AsyncReply(this.resources[id]);
+            //return this.resourceRequests[id];
         }
         else if (this.resourceRequests[id])
             return this.resourceRequests[id];
@@ -2868,76 +4785,452 @@ class DistributedConnection extends IStore {
 
         var reply = new AsyncReply();
 
+        this.resourceRequests[id] = reply;
+
         var self = this;
 
-        this.sendRequest(IIPPacketAction.AttachResource, BL().addUint32(id)).then(function (rt) {
-                self.getTemplate(rt[0]).then(function (tmp) {
+        this.sendRequest(IIPPacketAction.AttachResource)
+                    .addUint32(id)
+                    .done()
+                    .then(function (rt) {
+                        var dr = new DistributedResource(self, id, rt[1], rt[2]);
+                        //var dr = new DistributedResource(self, tmp, id, rt[1], rt[2]);
 
-                var dr = new DistributedResource(self, tmp, id, rt[1], rt[2]);
-                Warehouse.put(dr, id.toString(), self);
+                            self.getTemplate(rt[0]).then(function (tmp) {
 
-                Codec.parseVarArray(rt[3], 0, rt[3].length, self).then(function (ar) {
-                    dr._attached(ar);
-                    delete self.resourceRequests[id];
-                    reply.trigger(dr);
-                });
-            });
-        });
+                            // ClassId, ResourceAge, ResourceLink, Content
+                            Warehouse.put(dr, id.toString(), self, null, tmp);
+
+                    
+                            Codec.parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
+                                dr._attached(ar);
+                                delete self.resourceRequests[id];
+                                reply.trigger(dr);
+                            });
+                        });
+                    });
 
         return reply;
     }
 
-    instance_resourceDestroyed(resource) {
-        // compose the packet
-        this.sendParams().addUint8(0x1).addUint32(resource.instance.id).done();
+    getRecord(resource, fromDate, toDate)
+    {
+        if (resource instanceof DistributedResource)
+        {
+
+            if (resource._p.connection != this)
+                return new AsyncReply(null);
+
+            var reply = new AsyncReply();
+
+            var self = this;
+
+            this.sendRequest(IIPPacketAction.ResourceHistory)
+                            .addUint32(resource._p.instanceId)
+                            .addDateTime(fromDate).addDateTime(toDate)
+                            .done()
+                            .then(function(rt)
+                            {
+                                Codec.parseHistory(rt[0], 0, rt[0].length, resource, self).then(function(history)
+                                {
+                                    reply.trigger(history);
+                                });
+                            });
+
+            return reply;
+        }
+        else
+            return new AsyncReply(null);
     }
 
-    instance_propertyModified(resource, name, newValue, oldValue) {
+    instance_resourceDestroyed(resource) {
+        // compose the packet
+        this.sendEvent(IIPPacketEvent.ResourceDestroyed)
+                        .addUint32(resource.instance.id)
+                        .done();
+    }
+
+    instance_propertyModified(resource, name, newValue) {
         var pt = resource.instance.template.getPropertyTemplateByName(name);
 
         if (pt == null)
             return;
 
-        // compose the packet
-        if (newValue instanceof Function)
-            sendParams().addUint8(0x10)
-                .addUint32(resource.instance.id)
-                .addUint8(pt.index)
-                .addUint8Array(Codec.compose(newValue(this), this))
-                .done();
-        else
-            sendParams().addUint8(0x10)
-                .addUint32(resource.instance.id)
-                .addUint8(pt.index)
-                .addUint8Array(Codec.compose(newValue, this))
-                .done();
+        this.sendEvent(IIPPacketEvent.PropertyUpdated)
+                            .addUint32(resource.instance.id)
+                            .addUint8(pt.index)
+                            .addUint8Array(Codec.compose(newValue, this))
+                            .done();
     }
 
-    instance_eventOccured(resource, name, receivers, args) {
+    instance_eventOccurred(resource, issuer, receivers, name, args) {
         var et = resource.instance.template.getEventTemplateByName(name);
 
         if (et == null)
             return;
 
         if (receivers != null)
-            if (receivers.indexOf(this.remoteUsername) < 0)
+            if (receivers.indexOf(this.session) < 0)
                 return;
 
-        var clientArgs = [];//new object[args.Length];
-        for (var i = 0; i < args.Length; i++)
-            if (args[i] instanceof Function)
-                clientArgs[i] = args[i](this);
-            else
-                clientArgs[i] = args[i];
-
+        if (resource.instance.applicable(this.session, ActionType.ReceiveEvent, et, issuer) == Ruling.Denied)
+            return;
 
         // compose the packet
-        sendParams().addUint8(0x11)
-            .addUint32(resource.instance.id)
-            .addUint8(et.index)
-            .addUint8Array(Codec.composeVarArray(args, this, true))
-            .done();
+        this.sendEvent(IIPPacketEvent.EventOccurred)
+                        .addUint32(resource.instance.id)
+                        .addUint8(et.index)
+                        .addUint8Array(Codec.composeVarArray(args, this, true))
+                        .done();
 
+    }
+
+
+
+    IIPRequestAddChild(callback, parentId, childId)
+    {
+        var self = this;
+        Warehouse.get(parentId).then(function(parent)
+        {
+            if (parent == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            Warehouse.get(childId).then(function(child)
+            {
+                if (child == null)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    return;
+                }
+
+                if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                    return;
+                }
+
+                if (child.instance.applicable(self.session, ActionType.AddParent, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
+                    return;
+                }
+
+                parent.instance.children.add(child);
+
+                self.sendReply(IIPPacketAction.AddChild, callback)
+                                .done();
+                //child.Instance.Parents
+            });
+
+        });
+    }
+
+    IIPRequestRemoveChild(callback, parentId, childId)
+    {
+        var self = this;
+
+        Warehouse.get(parentId).then(function(parent)
+        {
+            if (parent == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            Warehouse.get(childId).then(function(child)
+            {
+                if (child == null)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    return;
+                }
+
+                if (parent.instance.applicable(self.session, ActionType.RemoveChild, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                    return;
+                }
+
+                if (child.instance.applicable(self.session, ActionType.RemoveParent, null) != Ruling.Allowed)
+                {
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
+                    return;
+                }
+
+                parent.instance.children.remove(child);
+
+                self.sendReply(IIPPacketAction.RemoveChild, callback)
+                                .done();
+                //child.Instance.Parents
+            });
+
+        });
+    }
+
+    IIPRequestRenameResource(callback, resourceId, name)
+    {
+        var self = this;
+        Warehouse.get(resourceId).then(function(resource)
+        {
+            if (resource == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            if (resource.instance.applicable(self.session, ActionType.Rename, null) != Ruling.Allowed)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.RenameDenied);
+                return;
+            }
+
+            resource.instance.name = name.getString(0, name.length);
+            self.sendReply(IIPPacketAction.RenameResource, callback)
+                            .done();
+        });
+     }
+
+    IIPRequestResourceChildren(callback, resourceId)
+    {
+        var self = this;
+        Warehouse.get(resourceId).then(function(resource)
+        {
+            if (resource == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            self.sendReply(IIPPacketAction.ResourceChildren, callback)
+                        .addUint8Array(Codec.composeResourceArray(resource.instance.children.toArray(), this, true))
+                        .done();
+            
+        });
+    }
+
+    IIPRequestResourceParents(callback, resourceId)
+    {
+        var self = this;
+
+        Warehouse.get(resourceId).then(function(resource)
+        {
+            if (resource == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            self.sendReply(IIPPacketAction.ResourceParents, callback)
+                            .addUint8Array(Codec.composeResourceArray(resource.instance.parents.toArray(), this, true))
+                            .done();
+        });
+    }
+
+    IIPRequestClearAttributes(callback, resourceId, attributes, all = false)
+    {
+        Warehouse.get(resourceId).then(function(r)
+        {
+            if (r == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
+                return;
+            }
+
+            var attrs = [];
+
+            if (!all)
+                attrs = attributes.getStringArray(0, attributes.length);
+
+            if (r.instance.removeAttributes(attrs))
+                self.sendReply(all ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes, callback)
+                              .done();
+            else
+                self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
+
+        });
+    }
+
+    IIPRequestUpdateAttributes(callback, resourceId, attributes, clearAttributes = false)
+    {
+        var self = this;
+
+        Warehouse.get(resourceId).then(function(r)
+        {
+            if (r == null)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                return;
+            }
+
+            if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed)
+            {
+                self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
+                return;
+            }
+
+            Codec.parseStructure(attributes, 0, attributes.Length, this).then(function(attrs) {
+                if (r.instance.setAttributes(attrs, clearAttributes))
+                    self.sendReply(clearAttributes ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes,
+                              callback)
+                              .done();
+                else
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
+            });
+           
+        });
+
+    }
+
+
+    
+    getChildren(resource)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+        var self = this;
+
+        this.sendRequest(IIPPacketAction.ResourceChildren)
+                        .addUint32(resource._p.instanceId)
+                        .done()
+                        .then(function(d)
+        {
+            
+            Codec.parseResourceArray(d, 0, d.length, self).then(function(resources)
+            {
+                rt.trigger(resources);
+            }).error(function(ex) { rt.triggerError(ex); });
+        });
+
+        return rt;
+    }
+
+    getParents(resource)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+        var self = this;
+
+        this.sendRequest(IIPPacketAction.ResourceParents)
+                        .addUint32(resource._p.instanceId)
+                        .done()
+                        .then(function(d)
+        {
+            Codec.parseResourceArray(d, 0, d.length, this).then(function(resources)
+            {
+                rt.trigger(resources);
+            }).error(function(ex) { rt.triggerError(ex);});
+        });
+
+        return rt;
+    }
+
+    removeAttributes(resource, attributes = null)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+
+        if (attributes == null)
+            this.sendRequest(IIPPacketAction.ClearAllAttributes)
+                            .addUint32(resource._p.instanceId)
+                            .done()
+                            .then(function(ar)
+            {
+                rt.trigger(true);
+            }).error(function(ex) { rt.triggerError(ex); });
+        else
+        {
+            var attrs = DC.stringArrayToBytes(attributes);
+            this.sendRequest(IIPPacketAction.ClearAttributes)
+                            .addUint32(resource.instance.id)
+                            .addUint32(attrs.length)
+                            .addUint8Array(attrs)
+                            .done()
+                            .then(function(ar)
+            {
+                rt.trigger(true);
+            }).error(function(ex) { rt.triggerChunk(ex); });
+        }
+
+        return rt;
+    }
+
+    setAttributes(resource, attributes, clearAttributes = false)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+        
+        this.sendRequest(clearAttributes ? IIPPacketAction.UpdateAllAttributes : IIPPacketAction.UpdateAttributes)
+                        .addUint32(resource._p.instanceId)
+                        .addUint8Array(Codec.composeStructure(attributes, this, true, true, true))
+                        .done()
+                        .then(function(ar)
+                                {
+                                    rt.trigger(true);
+                                }).error(function(ex) {rt.triggerError(ex);});
+    
+        return rt;
+    }
+
+    getAttributes(resource, attributes = null)
+    {
+        if (resource._p.connection != this)
+            return new AsyncReply(null);
+
+        var rt = new AsyncReply();
+        var self = this;
+
+        if (attributes == null)
+        {
+            this.sendRequest(IIPPacketAction.GetAllAttributes)
+                            .addUint32(resource._p.instanceId)
+                            .done()
+                            .then(function(ar)
+                            {
+                                Codec.parseStructure(ar[0], 0, ar[0].length, this).then(function(st)
+                                {
+                                    for (var a in st)
+                                       resource.instance.attributes.set(a, st[a]);
+                                    rt.trigger(st);
+                                }).error(function(ex) { rt.triggerError(ex); });
+                            });
+        }
+        else
+        {
+            var attrs = DC.stringArrayToBytes(attributes);
+            this.sendRequest(IIPPacketAction.GetAttributes)
+                            .addUint32(resource._p.instanceId)
+                            .addUint32(attrs.length)
+                            .addUint8Array(attrs)
+                            .done()
+                            .then(function(ar)
+            {
+                Codec.parseStructure(ar[0], 0, ar[0].length, self).then(function(st)
+                {
+                    for (var a in st)
+                        resource.instance.attributes.set(a, st[a]);
+                    rt.trigger(st);
+                }).error(function(ex) { rt.triggerError(ex); });
+            });
+        }
+
+        return rt;
     }
 
 }
@@ -2968,18 +5261,17 @@ class DistributedConnection extends IStore {
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
+"use strict";  
 
 class DistributedResource extends IResource
 {
     destroy()
     {
         this.destroyed = true;
-        this._emit("destroy");
+        this._emit("destroy", this);
     }
 
-
-
-    constructor(connection, template, instanceId, age)
+    constructor(connection, instanceId, age, link)
     {
         super();
 
@@ -2988,8 +5280,21 @@ class DistributedResource extends IResource
             connection: connection,
             instanceId: instanceId,
             age: age,
-            template: template
+            link: link,
+            properties: []
         };
+    }
+
+    _serialize()
+    {
+        var props = [];
+
+        for (var i = 0; i < this._p.properties.length; i++)
+            props.push(new PropertyValue(this._p.properties[i], 
+                                         this.instance.getAge(i), 
+                                         this.instance.getModificationDate(i)));
+        
+        return props;
     }
 
     _attached(properties)
@@ -2998,10 +5303,15 @@ class DistributedResource extends IResource
         if (this._isAttached)
             return false;
         else
-        {
-            this._p.properties = properties;
-            this._p.ages = new Uint32Array(properties.length);
-            //this.events = [];//new [this.template.events.length];
+        { 
+            for(var i = 0; i  < properties.length; i++)
+            {
+                this.instance.setAge(i, properties[i].age);
+                this.instance.setModificationDate(i, properties[i].date);
+                this._p.properties.push(properties[i].value);
+            }
+
+
             this._p.isAttached = true;
 
             var self = this;
@@ -3027,15 +5337,15 @@ class DistributedResource extends IResource
                 };
             };
 
-            for(var i = 0; i < this._p.template.functions.length; i++)
+            for(var i = 0; i < this.instance.template.functions.length; i++)
             {
-                var ft = this._p.template.functions[i];
+                var ft = this.instance.template.functions[i];
                 this[ft.name] = makeFunc(ft.index);
             }
 
-            for(var i = 0; i < this._p.template.properties.length; i++)
+            for(var i = 0; i < this.instance.template.properties.length; i++)
             {
-                var pt = this._p.template.properties[i];
+                var pt = this.instance.template.properties[i];
 
                 Object.defineProperty(this, pt.name, {
                     get: makeGetter(pt.index),
@@ -3051,18 +5361,21 @@ class DistributedResource extends IResource
 
     _emitEventByIndex(index, args)
     {
-        var et = this._p.template.getEventTemplateByIndex(index);
-        this._emit(et.name, args);
-        this.instance.emitResourceEvent(et.name, null, args);
+        var et = this.instance.template.getEventTemplateByIndex(index);
+        this._emitArgs(et.name, args);
+        this.instance._emitResourceEvent(null, null, et.name, args);
     }
 
     _invoke(index, args) {
         if (this.destroyed)
             throw new Exception("Trying to access destroyed object");
 
-        if (index >= this._p.template.functions.length)
+        if (index >= this.instance.template.functions.length)
             throw new Exception("Function index is incorrect");
 
+        return this._p.connection.sendInvoke(this._p.instanceId, index, args);
+
+        /*
         var reply = new AsyncReply();
 
         var parameters = Codec.composeVarArray(args, this._p.connection, true);
@@ -3079,7 +5392,7 @@ class DistributedResource extends IResource
 
 
         return reply;
-
+        */
     }
 
 
@@ -3091,12 +5404,11 @@ class DistributedResource extends IResource
     }
 
 
-
     _updatePropertyByIndex(index, value)
     {
-        var pt = this._p.template.getPropertyTemplateByIndex(index);
+        var pt = this.instance.template.getPropertyTemplateByIndex(index);
         this._p.properties[index] = value;
-        this.instance.modified(pt.name, value);
+        this.instance.emitModification(pt, value);
     }
 
     _set(index, value)
@@ -3109,15 +5421,15 @@ class DistributedResource extends IResource
         var parameters = Codec.compose(value, this._p.connection);
         var self = this;
 
-        this._p.connection.sendRequest(IIPPacketAction.SetProperty,
-            BL().addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters))
+        this._p.connection.sendRequest(IIPPacketAction.SetProperty)
+            .addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters)
+            .done()
             .then(function(res)
         {
             // not really needed, server will always send property modified, this only happens if the programmer forgot to emit in property setter
-            //Update(index, value);
+            self._p.properties[index] = value;
             reply.trigger(null);
-        // nothing to do here
-    });
+        });
 
         return reply;
     }
@@ -3147,7 +5459,10 @@ class DistributedResource extends IResource
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
-var DistributedResourceQueueItemType =
+
+"use strict";  
+
+const DistributedResourceQueueItemType =
     {
         Propery: 0,
         Event: 1
@@ -3188,6 +5503,8 @@ class DistributedResourceQueueItem {
 /**
  * Created by Ahmed Zamil on 24/08/2017.
  */
+
+"use strict";  
 
 class EventTemplate extends MemberTemplate
 {
@@ -3239,6 +5556,8 @@ class EventTemplate extends MemberTemplate
  * Created by Ahmed Zamil on 27/08/2017.
  */
 
+"use strict";  
+
 class FunctionTemplate extends MemberTemplate {
     compose() {
         var name = super.compose();
@@ -3247,12 +5566,12 @@ class FunctionTemplate extends MemberTemplate {
         if (this.expansion != null) {
             var exp = DC.stringToBytes(this.expansion);
 
-            return rt.addUint8(0x10 | (IsVoid ? 0x8 : 0x0))
+            return rt.addUint8(0x10 | (this.isVoid ? 0x8 : 0x0))
                 .addUint32(exp.length).addUint8Array(exp)
                 .addUint8(name.length).addUint8Array(name).toArray();
         }
         else
-            return rt.addUint8(IsVoid ? 0x8 : 0x0).addUint8(name.length).addUint8Array(name).toArray();
+            return rt.addUint8(this.isVoid ? 0x8 : 0x0).addUint8(name.length).addUint8Array(name).toArray();
     }
 
 
@@ -3287,6 +5606,9 @@ class FunctionTemplate extends MemberTemplate {
 /**
  * Created by Ahmed Zamil on 02/09/2017.
  */
+
+"use strict";  
+
 class Guid
 {
     constructor(dc)
@@ -3324,7 +5646,10 @@ class Guid
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
-var IIPAuthPacketCommand =
+
+"use strict";  
+
+const IIPAuthPacketCommand =
 {
     Action: 0,
     Declare: 1,
@@ -3332,7 +5657,7 @@ var IIPAuthPacketCommand =
     Error: 3
 };
 
-var IIPAuthPacketAction =
+const IIPAuthPacketAction =
 {
     // Authenticate
     AuthenticateHash: 0,
@@ -3342,7 +5667,7 @@ var IIPAuthPacketAction =
 };
 
 
-var IIPAuthPacketMethod =
+const IIPAuthPacketMethod =
 {
     None: 0,
     Certificate: 1,
@@ -3590,27 +5915,43 @@ class IIPAuthPacket
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
+"use strict";  
 
-var IIPPacketCommand =
+const IIPPacketCommand =
 {
     Event: 0,
     Request: 1,
     Reply: 2,
-    Error: 3
+    Report: 3
 };
 
-var IIPPacketEvent =
+const IIPPacketReport = 
+{
+    ManagementError: 0,
+    ExecutionError: 1,
+    ProgressReport: 0x8,
+    ChunkStream: 0x9
+};
+
+const IIPPacketEvent =
 {
     // Event Manage
     ResourceReassigned : 0,
     ResourceDestroyed: 1,
+    ChildAdded: 2,
+    ChildRemoved: 3,
+    Renamed: 4,
 
     // Event Invoke
     PropertyUpdated : 0x10,
-    EventOccured: 0x11
+    EventOccurred: 0x11,
+
+    // Attribute
+    AttributesUpdated: 0x18
+                
 };
 
-var IIPPacketAction =
+const IIPPacketAction =
 {
     // Request Manage
     AttachResource: 0,
@@ -3618,23 +5959,33 @@ var IIPPacketAction =
     DetachResource: 2,
     CreateResource: 3,
     DeleteResource: 4,
+    AddChild: 5,
+    RemoveChild: 6,
+    RenameResource: 7,
 
     // Request Inquire
-    TemplateFromClassName: 0x8,
-    TemplateFromClassId: 0x9,
-    TemplateFromResourceLink: 0xA,
-    TemplateFromResourceId: 0xB,
-    ResourceIdFromResourceLink: 0xC,
+    TemplateFromClassName: 8,
+    TemplateFromClassId: 9,
+    TemplateFromResourceId: 10,
+    QueryLink: 11,
+    ResourceHistory: 12,
+    ResourceChildren: 13,
+    ResourceParents: 14,
 
     // Request Invoke
-    InvokeFunction: 0x10,
-    GetProperty: 0x11,
-    GetPropertyIfModified: 0x12,
-    SetProperty: 0x13
+    InvokeFunction: 16,
+    GetProperty: 17,
+    GetPropertyIfModified: 18,
+    SetProperty: 19,
+
+    // Request Attribute
+    GetAllAttributes: 24,
+    UpdateAllAttributes: 25,
+    ClearAllAttributes: 26,
+    GetAttributes: 27,
+    UpdateAttributes: 28,
+    ClearAttributes: 29
 };
-
-
-
 
 
 class IIPPacket
@@ -3657,13 +6008,14 @@ class IIPPacket
         this.methodName = "";
         this.callbackId = 0;
         this.dataLengthNeeded = 0;
+        this.originalOffset = 0;
     }
 
     notEnough(offset, ends, needed)
     {
         if (offset + needed > ends)
         {
-            this.dataLengthNeeded = needed - (ends - offset);
+            this.dataLengthNeeded = needed - (ends - this.originalOffset);
             return true;
         }
         else
@@ -3672,7 +6024,7 @@ class IIPPacket
 
     parse(data, offset, ends)
     {
-        var oOffset = offset;
+        this.originalOffset = offset;
 
         if (this.notEnough(offset, ends, 1))
             return -this.dataLengthNeeded;
@@ -3687,6 +6039,16 @@ class IIPPacket
                 return -this.dataLengthNeeded;
 
             this.resourceId = data.getUint32(offset);
+            offset += 4;
+        }
+        else if (this.command == IIPPacketCommand.Report)
+        {
+            this.report = (data.getUint8(offset++) & 0x3f);
+            
+            if (this.notEnough(offset, ends, 4))
+                return -this.dataLengthNeeded;
+
+            this.callbackId = data.getUint32(offset);
             offset += 4;
         }
         else
@@ -3714,6 +6076,30 @@ class IIPPacket
             else if (this.event == IIPPacketEvent.ResourceDestroyed)
             {
                 // nothing to parse
+            }
+            else if (this.event == IIPPacketEvent.ChildAdded
+                || this.event == IIPPacketEvent.ChildRemoved)
+            {
+                if (this.notEnough(offset, ends, 4))
+                    return -this.dataLengthNeeded;
+
+                this.childId = data.getUint32(offset);
+                offset += 4;
+            }
+            else if(this.event == IIPPacketEvent.Renamed)
+            {
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
+
+                var cl = data.getUint16(offset);
+                offset += 2;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
+                this.content = data.clip(offset, cl);
+
+                offset += cl;
             }
             else if (this.event == IIPPacketEvent.PropertyUpdated)
             {
@@ -3748,7 +6134,7 @@ class IIPPacket
                     offset += size;
                 }
             }
-            else if (this.event == IIPPacketEvent.EventOccured)
+            else if (this.event == IIPPacketEvent.EventOccurred)
             {
                 if (this.notEnough(offset, ends, 5))
                     return -this.dataLengthNeeded;
@@ -3759,6 +6145,22 @@ class IIPPacket
                 offset += 4;
 
                 this.content = data.clip(offset, cl);
+                offset += cl;
+            }
+            // Attribute
+            else if (this.event == IIPPacketEvent.AttributesUpdated)
+            {
+                if (this.notEnough(offset, ends, 4))
+                    return -this.dataLengthNeeded;
+
+                var cl = data.getUint32(offset);
+                offset += 4;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
+                this.content = data.clip(offset, cl);
+
                 offset += cl;
             }
         }
@@ -3774,14 +6176,14 @@ class IIPPacket
             }
             else if (this.action == IIPPacketAction.ReattachResource)
             {
-                if (this.notEnough(offset, ends, 8))
+                if (this.notEnough(offset, ends, 12))
                     return -this.dataLengthNeeded;
 
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
 
-                this.resourceAge = data.getUint32(offset);
-                offset += 4;
+                this.resourceAge = data.getUint64(offset);
+                offset += 8;
             }
             else if (this.action == IIPPacketAction.DetachResource)
             {
@@ -3794,16 +6196,21 @@ class IIPPacket
             }
             else if (this.action == IIPPacketAction.CreateResource)
             {
-                if (this.notEnough(offset, ends, 1))
-                    return -this.dataLengthNeeded;
+                if (this.notEnough(offset, ends, 12))
+                    return -dataLengthNeeded;
 
-                var cl = data.getUint8(offset++);
+                this.storeId = data.getUint32(offset);
+                offset += 4;
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+
+                var cl = data.getUint32(offset);
+                offset += 4;
 
                 if (this.notEnough(offset, ends, cl))
-                    return -this.dataLengthNeeded;
+                    return -dataLengthNeeded;
 
-                this.className = data.getString(offset, cl);
-                offset += cl;
+                this.content = data.clip(offset, cl);
             }
             else if (this.action == IIPPacketAction.DeleteResource)
             {
@@ -3812,6 +6219,37 @@ class IIPPacket
 
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
+
+            }
+            else if (this.action == IIPPacketAction.AddChild
+                    || this.action == IIPPacketAction.RemoveChild)
+            {
+                if (this.notEnough(offset, ends, 8))
+                    return -this.dataLengthNeeded;
+
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+
+                this.childId = data.getUint32(offset);
+                offset += 4;
+
+            }
+            else if (this.action == IIPPacketAction.RenameResource)
+            {
+                if (this.notEnough(offset, ends, 6))
+                    return -this.dataLengthNeeded;
+                
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+
+                var cl = data.getUint16(offset);
+                offset += 2;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
+                this.content = data.clip(offset, cl);
+                offset += cl;
 
             }
             else if (this.action == IIPPacketAction.TemplateFromClassName)
@@ -3836,20 +6274,6 @@ class IIPPacket
                 this.classId = data.getGuid(offset);
                 offset += 16;
             }
-            else if (this.action == IIPPacketAction.TemplateFromResourceLink)
-            {
-                if (this.notEnough(offset, ends, 2))
-                    return -this.dataLengthNeeded;
-
-                var cl = data.getUint16(offset);
-                offset += 2;
-
-                if (this.notEnough(offset, ends, cl))
-                    return -this.dataLengthNeeded;
-
-                this.resourceLink = data.getString(offset, cl);
-                offset += cl;
-            }
             else if (this.action == IIPPacketAction.TemplateFromResourceId)
             {
                 if (this.notEnough(offset, ends, 4))
@@ -3858,7 +6282,7 @@ class IIPPacket
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
             }
-            else if (this.action == IIPPacketAction.ResourceIdFromResourceLink)
+            else if (this.action == IIPPacketAction.QueryLink)
             {
                 if (this.notEnough(offset, ends, 2))
                     return -this.dataLengthNeeded;
@@ -3871,6 +6295,30 @@ class IIPPacket
 
                 this.resourceLink = data.getString(offset, cl);
                 offset += cl;
+            }
+            else if (this.action == IIPPacketAction.ResourceChildren
+                    || this.action == IIPPacketAction.ResourceParents)
+            {
+                if (this.notEnough(offset, ends, 4))
+                    return -this.dataLengthNeeded;
+
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+            }
+            else if (this.action == IIPPacketAction.ResourceHistory)
+            {
+                if (this.notEnough(offset, ends, 20))
+                    return -this.dataLengthNeeded;
+
+                this.resourceId = data.getUint32(offset);
+                offset += 4; 
+
+                this.fromDate = data.getDateTime(offset);
+                offset += 8;
+
+                this.toDate = data.getDateTime(offset);
+                offset += 8;
+
             }
             else if (this.action == IIPPacketAction.InvokeFunction)
             {
@@ -3913,8 +6361,8 @@ class IIPPacket
 
                 this.methodIndex = data[offset++];
 
-                this.resourceAge = data.getUint32(offset);
-                offset += 4;
+                this.resourceAge = data.getUint64(offset);
+                offset += 8;
 
             }
             else if (this.action == IIPPacketAction.SetProperty)
@@ -3954,6 +6402,28 @@ class IIPPacket
                     offset += size;
                 }
             }
+
+            // Attribute
+            else if (this.action == IIPPacketAction.UpdateAllAttributes
+                || this.action == IIPPacketAction.GetAttributes
+                || this.action == IIPPacketAction.UpdateAttributes
+                || this.action == IIPPacketAction.ClearAttributes)
+            {
+                if (this.notEnough(offset, ends, 8))
+                    return -this.dataLengthNeeded;
+
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+                var cl = data.getUint32(offset);
+                offset += 4;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
+                this.content = data.clip(offset, cl);
+                offset += cl;
+            }
+
         }
         else if (this.command == IIPPacketCommand.Reply)
         {
@@ -3966,8 +6436,8 @@ class IIPPacket
                 this.classId = data.getGuid(offset);
                 offset += 16;
 
-                this.resourceAge = data.getUint32(offset);
-                offset += 4;
+                this.resourceAge = data.getUint64(offset);
+                offset += 8;
 
                 var cl = data.getUint16(offset);
                 offset+=2;
@@ -3999,9 +6469,6 @@ class IIPPacket
                 if (this.notEnough(offset, ends, 20))
                     return -this.dataLengthNeeded;
 
-                this.classId = data.GetGuid(offset);
-                offset += 16;
-
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
 
@@ -4012,8 +6479,14 @@ class IIPPacket
             }
             else if (this.action == IIPPacketAction.TemplateFromClassName
                 || this.action == IIPPacketAction.TemplateFromClassId
-                || this.action == IIPPacketAction.TemplateFromResourceLink
-                || this.action == IIPPacketAction.TemplateFromResourceId)
+                || this.action == IIPPacketAction.TemplateFromResourceId
+                || this.action == IIPPacketAction.QueryLink
+                || this.action == IIPPacketAction.ResourceChildren
+                || this.action == IIPPacketAction.ResourceParents
+                || this.action == IIPPacketAction.ResourceHistory
+                // Attribute
+                || this.action == IIPPacketAction.GetAllAttributes
+                || this.action == IIPPacketAction.GetAttributes)
             {
                 if (this.notEnough(offset, ends, 4))
                     return -this.dataLengthNeeded;
@@ -4026,20 +6499,6 @@ class IIPPacket
 
                 this.content = data.clip(offset, cl);
                 offset += cl;
-            }
-            else if (this.action == IIPPacketAction.ResourceIdFromResourceLink)
-            {
-                if (this.notEnough(offset, ends, 24))
-                    return -this.dataLengthNeeded;
-
-                this.classId = data.getGuid(offset);
-                offset += 16;
-
-                this.resourceId = data.getUint32(offset);
-                offset += 4;
-
-                this.resourceAge = data.getUint32(offset);
-                offset += 4;
             }
             else if (this.action == IIPPacketAction.InvokeFunction
                 || this.action == IIPPacketAction.GetProperty
@@ -4079,33 +6538,77 @@ class IIPPacket
                 // nothing to do
             }
         }
-        else if (this.command == IIPPacketCommand.Error)
+        else if (this.command == IIPPacketCommand.Report)
         {
-            // Error
-            if (this.notEnough(offset, ends, 4))
-                return -this.dataLengthNeeded;
+            if (this.report == IIPPacketReport.ManagementError)
+            {
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
 
-            this.callbackId = data.getUint32(offset);
+                this.errorCode = data.getUint16(offset);
+                offset += 2;
+            }
+            else if (this.report == IIPPacketReport.ExecutionError)
+            {
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
 
-            if (this.notEnough(offset, ends, 1))
-                return -this.dataLengthNeeded;
+                this.errorCode = data.getUint16(offset);
+                offset += 2;
 
-            this.errorCode = data.getUint8(offset++);
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
 
-            if (this.notEnough(offset, ends, 4))
-                return -this.dataLengthNeeded;
+                var cl = data.getUint16(offset);
+                offset += 2;
 
-            var cl = data.getUint32(offset);
-            offset += 4;
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
 
-            if (this.notEnough(offset, ends, cl))
-                return -this.dataLengthNeeded;
+                this.errorMessage = data.getString(offset, cl);
+                offset += cl;
+            }
+            else if (this.report == IIPPacketReport.ProgressReport)
+            {
+                if (this.notEnough(offset, ends, 8))
+                    return -this.dataLengthNeeded;
 
-            this.errorMessage = data.getString(offset, cl);
-            offset += cl;
+                this.progressValue = data.getInt32(offset);
+                offset += 4;
+                this.progressMax = data.getInt32(offset);
+                offset += 4;
+            }
+            else if (this.report == IIPPacketReport.ChunkStream)
+            {
+                var dt = data.getUint8(offset++);
+                var size = DataType.sizeOf(dt);
+
+                if (size < 0)
+                {
+                    if (this.notEnough(offset, ends, 4))
+                        return -this.dataLengthNeeded;
+
+                    var cl = data.getUint32(offset);
+                    offset += 4;
+
+                    if (this.notEnough(offset, ends, cl))
+                        return -this.dataLengthNeeded;
+
+                    this.content = data.clip(offset - 5, cl + 5);
+                    offset += cl;
+                }
+                else
+                {
+                    if (this.notEnough(offset, ends, size))
+                         return -this.dataLengthNeeded;
+
+                    this.content = data.clip(offset - 1, size + 1);
+                    offset += size;
+                }
+            }
         }
 
-        return offset - oOffset;
+        return offset - this.originalOffset;
     }
 }  
 /*
@@ -4133,22 +6636,77 @@ class IIPPacket
 /**
  * Created by Ahmed Zamil on 29/08/2017.
  */
+
+"use strict";  
+
 class Instance extends IEventHandler
 {
 
     getAge(index)
     {
-        if (index < this.ages.Count)
+        if (index < this.ages.length)
             return this.ages[index];
         else
             return 0;
     }
 
+    setAge(index, value)
+    {
+        if (index < this.ages.length)
+        {
+            this.ages[index] = value;
+            if (value > this.instanceAge)
+                this.instanceAge = value;
+        }
+    }
+ 
+    getModificationDate(index)
+    {
+        if (index < this.modificationDates.length)
+            return this.modificationDates[index];
+        else
+            return new Date(0);
+    }
+
+    setModificationDate(index, value)
+    {
+        if (index < this.modificationDates.length)
+        {
+            this.modificationDates[index] = value;
+
+            if (value > this.instanceModificationDate)
+                this.instanceModificationDate = value;
+        }
+    }
+
+    loadProperty(name, age, modificationDate, value)
+    {
+        var pt = this.template.getPropertyTemplateByName(name);
+
+        if (pt == null)
+            return false;
+
+        this.resource[name] = value;
+
+        this.setAge(pt.index, age);
+        this.setModificationDate(pt.index, modificationDate);
+
+        return true;
+    }
 
     deserialize(properties)
     {
-        for(var i = 0; i < this.template.properties.length; i++)
-            this.resource[this.template.properties[i].name] = properties[i];
+
+        for (var i = 0; i < properties.length; i++)
+        {
+            var pt = this.template.GetPropertyTemplateByIndex(i);
+            if (pt != null)
+            {
+                var pv = properties[i];
+                this.loadProperty(pt.name, pv.age, pv.date, pv.value);
+            }
+        }
+
         return true;
     }
 
@@ -4157,8 +6715,10 @@ class Instance extends IEventHandler
         var props = [];
 
         for (var i = 0; i < this.template.properties.length; i++)
-            props.push(this.resource[this.template.properties[i].name]);
-
+            props.push(new PropertyValue(this.resource[this.template.properties[i].name], 
+                                         this.ages[this.template.properties[i].index], 
+                                         this.modificationDates[this.template.properties[i].index]));
+        
         return props;
     }
 
@@ -4167,25 +6727,38 @@ class Instance extends IEventHandler
         return resource instanceof Storable;
     }
 
+    emitModification(pt, value)
+    {
+        this.instanceAge++;
 
-    modified(propertyName = null, newValue = null, oldValue = null)
+        var now = new Date();
+
+        this.ages[pt.index] = this.instanceAge;
+        this.modificationDates[pt.index] = now;
+        
+        if (pt.recordable)
+            this.store.record(this.resource, pt.name, value, this.ages[pt.index], now);
+
+        super._emit("ResourceModified", this.resource, pt.name, value);  
+        this.resource._emit("modified", pt.name, value);
+    }
+
+    modified(propertyName = null)
     {
         if (propertyName == null)
             propertyName = modified.caller.name;
 
-        if (newValue == null)
+        var val = {};
+        if (this.getPropertyValue(propertyName, val))
         {
-            var val = {};
-            if (this.getPropertyValue(propertyName, val))
-              super._emit("ResourceModified", this.resource, propertyName, val.value, oldValue);
+            var pt = this.template.getPropertyTemplateByName(propertyName);            
+            this.emitModification(pt, val.value)
         }
-        else
-            super._emit("ResourceModified", this.resource, propertyName, newValue, oldValue);
     }
 
-    emitResourceEvent(name, receivers, args)
+    _emitResourceEvent(issuer, receivers, name, args)
     {
-        super._emit("ResourceEventOccured", this.resource, name, receivers, args);
+        super._emit("ResourceEventOccurred", this.resource, issuer, receivers, name, args);
     }
 
     getPropertyValue(name, resultObject)
@@ -4202,7 +6775,7 @@ class Instance extends IEventHandler
 
 
 
-    constructor(id, name, resource, store)
+    constructor(id, name, resource, store, customTemplate = null, age = 0)
     {
         super();
 
@@ -4211,8 +6784,14 @@ class Instance extends IEventHandler
         this.id = id;
         this.name = name;
 
+        this.instanceAge = age;
+        this.instanceModificationDate = new Date(0);
+
         this.children = new AutoList();
         this.parents = new AutoList();
+        this.managers = new AutoList();
+
+        this.attributes = new KeyList();
 
         var self = this;
 
@@ -4229,144 +6808,160 @@ class Instance extends IEventHandler
             self._emit("ResourceDestroyed", sender);
         });
 
-        this.template = Warehouse.getTemplateByType(this.resource.constructor);
+        if (customTemplate != null)
+            this.template = customTemplate;
+        else
+            this.template = Warehouse.getTemplateByType(this.resource.constructor);
 
         // set ages
-        this.ages = new Uint32Array(this.template.properties.length);
+        this.ages = [];
+        this.modificationDates = [];
 
+        for(var i = 0; i < this.template.properties.length; i++)
+        {
+            this.ages.push(0);
+            this.modificationDates.push(new Date(0));
+        }
 
         // connect events
-        var makeHandler = function(name, receivers, args)
-        {
-            return new function(receivers, args)
-            {
-                self.emitResourceEvent(name, receivers, args);
-            };
-        };
-
         for (var i = 0; i < this.template.events.length; i++)
-           this.resource.on(this.template.events[i].name, makeHandler(this.template.events[i].name));
-
+           this.resource.on(this.template.events[i].name, this._makeHandler(this.template.events[i].name));
+        
     }
 
-}
-  
-/*
-* Copyright (c) 2017 Ahmed Kh. Zamil
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
-
-/**
- * Created by Ahmed Zamil on 01/09/2017.
- */
-
-class NetworkBuffer {
-    constructor() {
-        this.neededDataLength = 0;
-        this.data = new DC(0);
-    }
-
-    get protected() {
-        return this.neededDataLength > this.data.length;
-    }
-
-    get available() {
-
-        return this.data.length;
-    }
-
-    holdAllForNextWrite(src) {
-        this.holdFor(src, src.length + 1);
-    }
-
-    holdForNextWrite(src, offset, size) {
-        this.holdFor(src, offset, size, size + 1);
+    _makeHandler(name)
+    {
+        var self = this;
+        return function(args)
+        {
+            if (args instanceof CustomResourceEvent)
+                self._emitResourceEvent(args.issuer, args.receivers, name, args.params);
+            else
+                self._emitResourceEvent(null, null, name, args);
+        };
     }
 
 
-    holdFor(src, offset, size, needed) {
-        if (size >= needed)
-            throw new Exception("Size >= Needed !");
-
-        this.data = DC.combine(src, offset, size, this.data, 0, this.data.length);
-        this.neededDataLength = needed;
-    }
-
-    holdAllFor(src, needed) {
-        this.holdFor(src, 0, src.length, needed);
-    }
-
-    protect(data, offset, needed) {
-        var dataLength = data.length - offset;
-
-        // protection
-        if (dataLength < needed) {
-            this.holdFor(data, offset, dataLength, needed);
-            return true;
+    /// <summary>
+    /// Check for permission.
+    /// </summary>
+    /// <param name="session">Caller sessions.</param>
+    /// <param name="action">Action type</param>
+    /// <param name="member">Function or property to check for permission.</param>
+    /// <returns>Ruling.</returns>
+    applicable(session, action, member, inquirer)
+    {
+        for (var i = 0; i < this.managers.length; i++)
+        {
+            var r = this.managers.item(i).applicable(this.resource, session, action, member, inquirer);
+            if (r != Ruling.DontCare)
+                return r;
         }
+        
+        return Ruling.DontCare;
+    }
+
+
+    
+    removeAttributes(attributes = null)
+    {
+        if (attributes == null)
+            this.attributes.clear();
         else
-            return false;
-    }
+        {
+            for(var i = 0; i < attributes.length; i++)
+                this.attributes.remove(attributes[i]);
+        }
 
-    writeAll(src) {
-        this.write(src, 0, src.length ? src.length : src.byteLength);
-    }
-
-    write(src, offset, length) {
-        this.data = this.data.append(src, offset, length);
-    }
-
-    get canRead() {
-        if (this.data.length == 0)
-            return false;
-        else if (this.data.length < this.neededDataLength)
-            return false;
         return true;
     }
 
-    read() {
-        if (this.data.length == 0)
-            return null;
+    getAttributes(attributes = null)
+    {
+        var st = new Structure();
 
-        var rt = null;
-
-        if (this.neededDataLength == 0) {
-            rt = this.data;
-            this.data = new DC(0);
-        }
-        else {
-            if (this.data.length >= this.neededDataLength) {
-                rt = this.data;
-                this.data = new DC(0);
-                this.neededDataLength = 0;
-                return rt;
-            }
-            else {
-                return null;
-            }
+        if (attributes == null)
+        {
+            attributes = this.attributes.keys.slice(0);
+            attributes.push("managers");
         }
 
-        return rt;
+        for(var i = 0; i < attributes.length; i++)
+        {
+            var attr = attributes[i];
+
+            if (attr == "name")
+                st["name"] = this.name;
+
+            else if (attr == "managers")
+            {
+                var mngrs = new StructureArray();
+
+                for(var j = 0; j < this.managers.length; j++)
+                {
+                    var manager = this.managers.item(j);
+                    var sm = new Structure();
+                    sm["type"] = manager.constructor.name;
+                    sm["settings"] = manager.settings;
+                    
+                    mngrs.push(sm);
+                }
+
+                st["managers"] = mngrs;
+
+            }
+            else
+                st[attr] = this.attributes.item(attr);
+        }
+
+        return st;
     }
-}
-  
+
+
+    setAttributes(attributes, clearAttributes = false)
+    {        
+
+    if (clearAttributes)
+        this.attributes.clear();
+
+
+        for (var attr in attributes)
+            if (attr == "name")
+                this.name = attributes[attr];
+            else if (attr == "managers")
+            {
+                this.managers.clear();
+
+                var mngrs = attributes[attr];
+
+                for (var i = 0; i < mngrs.length; i++)
+                {
+                    var mngr = mngrs[i];
+                    
+                    var type = window[mngr];
+                    
+                        var settings = mngr["settings"];
+
+                        var manager = new (Function.prototype.bind.apply(type));
+
+                        if (manager instanceof IPermissionsManager)
+                        {
+                            manager.initialize(settings, this.resource);
+                            this.managers.add(manager);
+                        }
+                        else
+                            return false;
+                }
+            }
+            else
+            {
+                this.attributes.set(attr, attributes[attr]);
+            }
+            
+
+        return true;
+    }
+}  
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4392,6 +6987,8 @@ class NetworkBuffer {
 /**
  * Created by Ahmed Zamil on 26/08/2017.
  */
+
+"use strict";  
 
 class NotModified
 {
@@ -4423,12 +7020,13 @@ class NotModified
  * Created by Ahmed Zamil on 27/08/2017.
  */
 
-var PropertyPermission = {
+"use strict";  
+
+const PropertyPermission = {
     Read: 1,
     Write: 2,
     ReadWrite: 3
 };
-
 
 class PropertyTemplate extends MemberTemplate
 {
@@ -4443,12 +7041,13 @@ class PropertyTemplate extends MemberTemplate
     {
         var name = super.compose();
         var rt = new BinaryList();
+        var pv = (this.permission >> 1) | (this.recordable ? 1 : 0);
 
         if (this.writeExpansion != null && this.readExpansion != null)
         {
             var rexp = DC.stringToBytes(this.readExpansion);
             var wexp = DC.stringToBytes(this.writeExpansion);
-            return rt.addUint8(0x38 | this.permission)
+            return rt.addUint8(0x38 | pv)
                 .addUint32(wexp.length)
                 .addUint8Array(wexp)
                 .addUint32(rexp.length)
@@ -4459,7 +7058,7 @@ class PropertyTemplate extends MemberTemplate
         else if (this.writeExpansion != null)
         {
             var wexp = DC.stringToBytes(this.writeExpansion);
-            return rt.addUint8(0x30 | this.permission)
+            return rt.addUint8(0x30 | pv)
                 .addUint32(wexp.length)
                 .addUint8Array(wexp)
                 .addUint8(name.length)
@@ -4468,14 +7067,14 @@ class PropertyTemplate extends MemberTemplate
         else if (this.readExpansion != null)
         {
             var rexp = DC.stringToBytes(this.readExpansion);
-            return rt.addUint8(0x28 | this.permission)
+            return rt.addUint8(0x28 | pv)
                 .addUint32(rexp.length)
                 .addUint8Array(rexp)
                 .addUint8(name.length)
                 .addUint8Array(name).toArray();
         }
         else
-            return rt.addUint8(0x20 | this.permission)
+            return rt.addUint8(0x20 | pv)
                 .addUint32(name.length)
                 .addUint8Array(name).toArray();
     }
@@ -4503,18 +7102,9 @@ class PropertyTemplate extends MemberTemplate
 * SOFTWARE.
 */
 
-class ResourceTemplate {
+"use strict";  
 
-    getMemberTemplate(member) {
-        if (member instanceof MethodInfo)
-            return this.getFunctionTemplate(member.name);
-        else if (member instanceof EventInfo)
-            return this.getEventTemplate(member.name);
-        else if (member instanceof PropertyInfo)
-            return this.getPropertyTemplate(member.name);
-        else
-            return null;
-    }
+class ResourceTemplate {
 
     getEventTemplateByName(eventName) {
         for (var i = 0; i < this.events.length; i++)
@@ -4590,7 +7180,7 @@ class ResourceTemplate {
         // set guid
         this.className = template.namespace + "." + type.prototype.constructor.name;
 
-        this.classId = (new DC(sha256.arrayBuffer(this.className))).getGuid(0);
+        this.classId = SHA256.compute(DC.stringToBytes(this.className)).getGuid(0);
 
         //byte currentIndex = 0;
 
@@ -4600,6 +7190,7 @@ class ResourceTemplate {
             pt.index = i;
             pt.readExpansion = template.properties[i].read;
             pt.writeExpansion = template.properties[i].write;
+            pt.recordable = template.properties[i].recordable;
             this.properties.push(pt);
         }
 
@@ -4707,6 +7298,7 @@ class ResourceTemplate {
                 pt.index = propertyIndex++;
                 var readExpansion = ((data.getUint8(offset) & 0x8) == 0x8);
                 var writeExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
+                pt.recordable = ((data.getUint8(offset) & 1) == 1);
                 pt.permission = ((data.getUint8(offset++) >> 1) & 0x3);
                 pt.name = data.getString(offset + 1, data.getUint8(offset));// Encoding.ASCII.getString(data, (int)offset + 1, data.getUint8(offset));
                 offset += data.getUint8(offset) + 1;
@@ -4791,17 +7383,21 @@ class ResourceTemplate {
  * Created by Ahmed Zamil on 02/09/2017.
  */
 
+"use strict";  
+
 class SendList extends BinaryList
 {
-    constructor(connection)
+    constructor(connection, doneReply)
     {
         super();
         this.connection = connection;
+        this.reply = doneReply;
     }
 
     done()
     {
         this.connection.send(this.toArray());
+        return this.reply;
     }
 }  
 /*
@@ -4829,32 +7425,111 @@ class SendList extends BinaryList
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
-var Warehouse = {
 
-    stores: [],
-    resources: {},
-    resourceCounter: 0,
-    templates: {},
+"use strict";  
 
-    new(type, name, store = null, parent = null)
+
+class Warehouse
+{
+    static new(type, name, store = null, parent = null, manager = null)
     {
         var res = type();
-        Warehouse.put(res, name, store, parent);
+        Warehouse.put(res, name, store, parent, null, 0, manager);
         return res;
-    },
+    }
 
-get: function(id)
+    static get(id)
     {
-        if (Warehouse.resources[id])
-            return new AsyncReply(Warehouse.resources[id]);
+        if (Number.isInteger(id))
+        {
+            //if (Warehouse.resources.contains(id))
+                return new AsyncReply(Warehouse.resources.item(id));
+            //else
+            //    return null;
+        }
         else
-            return null;
-    },
+        {
+            var p = id.split('/');
+            var res = null;
 
-    put: function(resource, name, store, parent){
-        resource.instance = new Instance(Warehouse.resourceCounter++, name, resource, store);
+            for(var s = 0; s < this.stores.length; s++)
+            {
+                var d = this.stores.at(s);
+                if (p[0] == d.instance.name)
+                {
+                    var i = 1;
+                    res = d;
+                    while(p.length > i)
+                    {
+                        var si = i;
+
+                        for (var r = 0; r < res.instance.children.length; r++)
+                            if (res.instance.children.item(r).instance.name == p[i])
+                            {
+                                i++;
+                                res = res.instance.children.item(r);
+                                break;
+                            }
+
+                        if (si == i)
+                            // not found, ask the store
+                            return d.get(id.substring(p[0].length + 1));
+                    }
+
+                    return new AsyncReply(res);
+                }
+            }
+
+            return new AsyncReply(null);
+        }
+    }
+
+
+    static remove(resource)
+    {
+        
+        if (Warehouse.resources.contains(resource.instance.id))
+            Warehouse.resources.remove(resource.instance.id); 
+        else
+            return false;
+
+        if (resource instanceof IStore)
+        {
+            Warehouse.stores.remove(resource);
+
+            // remove all objects associated with the store
+            var toBeRemoved = null;
+
+            for (var i = 0; i < Warehouse.resources.length; i++)
+            {
+                var o = Warehouse.resources.at(i);
+                if (o.instance.store == resource)
+                {
+                    if (toBeRemoved == null)
+                        toBeRemoved = [];
+                    toBeRemoved.push(o);
+                }
+            }
+
+            if (toBeRemoved != null)
+                for(var i = 0; i < toBeRemoved.length; i++)
+                    Warehouse.remove(toBeRemoved[i]);
+        }
+
+        if (resource.instance.store != null)
+            resource.instance.store.remove(resource);
+        resource.destroy();
+
+        return true;
+    }
+
+    static put(resource, name, store, parent, customTemplate = null, age = 0, manager = null){
+        resource.instance = new Instance(Warehouse.resourceCounter++, name, resource, store, customTemplate, age);
         //resource.instance.children.on("add", Warehouse._onChildrenAdd).on("remove", Warehouse._onChildrenRemove);
         //resource.instance.parents.on("add", Warehouse._onParentsAdd).on("remove", Warehouse._onParentsRemove);
+
+        if (manager != null)
+            resource.instance.managers.add(manager);
 
         if (parent)
         {
@@ -4867,69 +7542,102 @@ get: function(id)
         }
 
         if (resource instanceof IStore)
-            Warehouse.stores.push(resource);
+            Warehouse.stores.add(resource);
         else
             store.put(resource);
 
-        Warehouse.resources[resource.instance.id] = resource;
-    },
+        Warehouse.resources.add(resource.instance.id, resource);
+    }
 
-    _onParentsRemove: function(value)
+    static _onParentsRemove(value)
     {
         if (value.instance.children.contains(value))
             value.instance.children.remove(value);
-    },
+    }
 
-    _onParentsAdd: function(value)
+    static _onParentsAdd(value)
     {
         if (!value.instance.children.contains(value))
             value.instance.children.add(value);
-    },
+    }
 
-    _onChildrenRemove: function(value)
+    static _onChildrenRemove(value)
     {
         if (value.instance.parents.contains(value))
             value.instance.parents.remove(value);
-    },
+    }
 
-    _onChildrenAdd: function(value)
+    static _onChildrenAdd(value)
     {
         if (!value.instance.parents.contains(value))
             value.instance.parents.add(value);
-    },
+    }
 
-    putTemplate: function(template)
+    static putTemplate(template)
     {
-        if (Warehouse.templates[template.classId])
-            Warehouse.templates[template.classId] = template;
-    },
+        Warehouse.templates.add(template.classId.valueOf(), template);
+    }
 
-    getTemplateByType: function(type)
+    static getTemplateByType(type)
     {
         // loaded ?
-        for (var t in Warehouse.templates)
-            if (Warehouse.templates[t].className == typeof(type))
-                return t;
+        for (var i = 0; i < Warehouse.templates.length; i++)
+            if (Warehouse.templates.at(i).className == typeof(type))
+                return Warehouse.templates.at(i);
 
         var template = new ResourceTemplate(type);
-        Warehouse.templates[template.classId] = template;
-
+        Warehouse.templates.add(template.classId.valueOf(), template);
+        
         return template;
-    },
-
-    getTemplateByClassId: function(classId)
-    {
-        if (Warehouse.templates[classId])
-            return new AsyncReply(Warehouse.templates[classId]);
-         return null;
-    },
-
-    getTemplateByClassName: function(className)
-    {
-        for(var t in Warehouse.templates)
-        if (Warehouse.templates[t].className == className)
-            return new AsyncReply(t);
-
-        return null;
     }
-};  
+
+    static getTemplateByClassId(classId)
+    {
+        var template = Warehouse.templates.item(classId);
+        return new AsyncReply(template);
+    }
+
+    static getTemplateByClassName(className)
+    {
+        for(var i = 0; i < Warehouse.templates.length; i++)
+            if (Warehouse.templates.at(i).className == className)
+                return new AsyncReply(Warehouse.templates.at(i));
+        
+        return new AsyncReply(null);
+    }
+
+    static _qureyIn(path, index, resources)
+    {
+        var rt = [];
+
+        if (index == path.length - 1)
+        {
+            if (path[index] == "")
+                for(var i = 0; i < resources.length; i++)
+                    rt.push(resources.at(i));
+             else
+                for(var i = 0; i < resources.length; i++)
+                    if (resources.at(i).instance.name == path[index])
+                        rt.push(resources.at(i));
+        }
+        else
+            for(var i = 0; i < resources.length; i++)
+                if (resources.at(i).instance.name == path[index])
+                    rt = rt.concat(Warehouse._qureyIn(path, index+1, resources.at(i).instance.children));
+
+        return rt;
+    }
+
+    static query(path)
+    {
+        var p = path.split('/');
+        return new AsyncReply(Warehouse._qureyIn(p, 0, Warehouse.stores));
+    }
+}
+
+// Initialize
+Warehouse.stores = new AutoList();
+Warehouse.resources = new KeyList();
+Warehouse.resourceCounter = 0;
+Warehouse.templates = new KeyList();
+  

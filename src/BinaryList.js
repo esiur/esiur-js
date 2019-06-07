@@ -24,7 +24,9 @@
  * Created by Ahmed Zamil on 25/08/2017.
  */
 
-var BL = function(){
+"use strict";  
+
+function BL(){
     return new BinaryList();
 };
 
@@ -138,6 +140,16 @@ class BinaryList
         }
 
         return rt;
+    }
+
+    toDC()
+    {
+        return new DC(this.toArray());
+    }
+    
+    addDateTime(value, position)
+    {
+        return this.add({type: DataType.DateTime, value: value}, position);
     }
 
     addUint8Array(value, position)

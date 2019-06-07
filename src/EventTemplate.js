@@ -24,6 +24,8 @@
  * Created by Ahmed Zamil on 24/08/2017.
  */
 
+"use strict";  
+
 class EventTemplate extends MemberTemplate
 {
 

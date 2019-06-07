@@ -23,7 +23,11 @@
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
-DataType = {
+
+"use strict";  
+
+const DataType =
+{ 
     Void: 0x0,
     //Variant,
     Bool: 1,

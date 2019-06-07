@@ -24,18 +24,17 @@
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
+"use strict";  
 
 class DistributedResource extends IResource
 {
     destroy()
     {
         this.destroyed = true;
-        this._emit("destroy");
+        this._emit("destroy", this);
     }
 
-
-
-    constructor(connection, template, instanceId, age)
+    constructor(connection, instanceId, age, link)
     {
         super();
 
@@ -44,8 +43,21 @@ class DistributedResource extends IResource
             connection: connection,
             instanceId: instanceId,
             age: age,
-            template: template
+            link: link,
+            properties: []
         };
+    }
+
+    _serialize()
+    {
+        var props = [];
+
+        for (var i = 0; i < this._p.properties.length; i++)
+            props.push(new PropertyValue(this._p.properties[i], 
+                                         this.instance.getAge(i), 
+                                         this.instance.getModificationDate(i)));
+        
+        return props;
     }
 
     _attached(properties)
@@ -54,10 +66,15 @@ class DistributedResource extends IResource
         if (this._isAttached)
             return false;
         else
-        {
-            this._p.properties = properties;
-            this._p.ages = new Uint32Array(properties.length);
-            //this.events = [];//new [this.template.events.length];
+        { 
+            for(var i = 0; i  < properties.length; i++)
+            {
+                this.instance.setAge(i, properties[i].age);
+                this.instance.setModificationDate(i, properties[i].date);
+                this._p.properties.push(properties[i].value);
+            }
+
+
             this._p.isAttached = true;
 
             var self = this;
@@ -83,15 +100,15 @@ class DistributedResource extends IResource
                 };
             };
 
-            for(var i = 0; i < this._p.template.functions.length; i++)
+            for(var i = 0; i < this.instance.template.functions.length; i++)
             {
-                var ft = this._p.template.functions[i];
+                var ft = this.instance.template.functions[i];
                 this[ft.name] = makeFunc(ft.index);
             }
 
-            for(var i = 0; i < this._p.template.properties.length; i++)
+            for(var i = 0; i < this.instance.template.properties.length; i++)
             {
-                var pt = this._p.template.properties[i];
+                var pt = this.instance.template.properties[i];
 
                 Object.defineProperty(this, pt.name, {
                     get: makeGetter(pt.index),
@@ -107,18 +124,21 @@ class DistributedResource extends IResource
 
     _emitEventByIndex(index, args)
     {
-        var et = this._p.template.getEventTemplateByIndex(index);
-        this._emit(et.name, args);
-        this.instance.emitResourceEvent(et.name, null, args);
+        var et = this.instance.template.getEventTemplateByIndex(index);
+        this._emitArgs(et.name, args);
+        this.instance._emitResourceEvent(null, null, et.name, args);
     }
 
     _invoke(index, args) {
         if (this.destroyed)
             throw new Exception("Trying to access destroyed object");
 
-        if (index >= this._p.template.functions.length)
+        if (index >= this.instance.template.functions.length)
             throw new Exception("Function index is incorrect");
 
+        return this._p.connection.sendInvoke(this._p.instanceId, index, args);
+
+        /*
         var reply = new AsyncReply();
 
         var parameters = Codec.composeVarArray(args, this._p.connection, true);
@@ -135,7 +155,7 @@ class DistributedResource extends IResource
 
 
         return reply;
-
+        */
     }
 
 
@@ -147,12 +167,11 @@ class DistributedResource extends IResource
     }
 
 
-
     _updatePropertyByIndex(index, value)
     {
-        var pt = this._p.template.getPropertyTemplateByIndex(index);
+        var pt = this.instance.template.getPropertyTemplateByIndex(index);
         this._p.properties[index] = value;
-        this.instance.modified(pt.name, value);
+        this.instance.emitModification(pt, value);
     }
 
     _set(index, value)
@@ -165,15 +184,15 @@ class DistributedResource extends IResource
         var parameters = Codec.compose(value, this._p.connection);
         var self = this;
 
-        this._p.connection.sendRequest(IIPPacketAction.SetProperty,
-            BL().addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters))
+        this._p.connection.sendRequest(IIPPacketAction.SetProperty)
+            .addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters)
+            .done()
             .then(function(res)
         {
             // not really needed, server will always send property modified, this only happens if the programmer forgot to emit in property setter
-            //Update(index, value);
+            self._p.properties[index] = value;
             reply.trigger(null);
-        // nothing to do here
-    });
+        });
 
         return reply;
     }

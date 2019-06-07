@@ -24,12 +24,13 @@
  * Created by Ahmed Zamil on 27/08/2017.
  */
 
-var PropertyPermission = {
+"use strict";  
+
+const PropertyPermission = {
     Read: 1,
     Write: 2,
     ReadWrite: 3
 };
-
 
 class PropertyTemplate extends MemberTemplate
 {
@@ -44,12 +45,13 @@ class PropertyTemplate extends MemberTemplate
     {
         var name = super.compose();
         var rt = new BinaryList();
+        var pv = (this.permission >> 1) | (this.recordable ? 1 : 0);
 
         if (this.writeExpansion != null && this.readExpansion != null)
         {
             var rexp = DC.stringToBytes(this.readExpansion);
             var wexp = DC.stringToBytes(this.writeExpansion);
-            return rt.addUint8(0x38 | this.permission)
+            return rt.addUint8(0x38 | pv)
                 .addUint32(wexp.length)
                 .addUint8Array(wexp)
                 .addUint32(rexp.length)
@@ -60,7 +62,7 @@ class PropertyTemplate extends MemberTemplate
         else if (this.writeExpansion != null)
         {
             var wexp = DC.stringToBytes(this.writeExpansion);
-            return rt.addUint8(0x30 | this.permission)
+            return rt.addUint8(0x30 | pv)
                 .addUint32(wexp.length)
                 .addUint8Array(wexp)
                 .addUint8(name.length)
@@ -69,14 +71,14 @@ class PropertyTemplate extends MemberTemplate
         else if (this.readExpansion != null)
         {
             var rexp = DC.stringToBytes(this.readExpansion);
-            return rt.addUint8(0x28 | this.permission)
+            return rt.addUint8(0x28 | pv)
                 .addUint32(rexp.length)
                 .addUint8Array(rexp)
                 .addUint8(name.length)
                 .addUint8Array(name).toArray();
         }
         else
-            return rt.addUint8(0x20 | this.permission)
+            return rt.addUint8(0x20 | pv)
                 .addUint32(name.length)
                 .addUint8Array(name).toArray();
     }

@@ -24,6 +24,8 @@
  * Created by Ahmed Zamil on 06/09/2017.
  */
 
+"use strict";  
+
 class StructureArray extends Array
 {
     push(value)

@@ -23,6 +23,9 @@
 /**
  * Created by Ahmed Zamil on 31/08/2017.
  */
+
+"use strict";  
+
 class IDestructible extends IEventHandler
 {
     destroy()

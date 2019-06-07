@@ -1,10 +1,11 @@
 <html>
 <head>
-    <script src="../external/sha256.min.js"></script>
     <script src="../src/IEventHandler.js"></script>
     <script src="../src/IDestructible.js"></script>
     <script src="../src/AutoList.js"></script>
-
+    <script src="../src/KeyList.js"></script>
+    <script src="../src/PropertyValue.js"></script>
+    
     <script src="../src/IResource.js"></script>
     <script src="../src/IStore.js"></script>
     <script src="../src/Structure.js"></script>
@@ -14,12 +15,19 @@
 
     <script src="../src/MemberTemplate.js"></script>
     <script src="../src/AsyncReply.js"></script>
-
+    <script src="../src/AsyncException.js"></script>
+    
+    <script src="../src/Authentication.js"></script>
+    <script src="../src/Session.js"></script>
+    <script src="../src/IPermissionsManager.js"></script>
+    
     <script src="../src/AsyncBag.js"></script>
     <script src="../src/AsyncQueue.js"></script>
     <script src="../src/BinaryList.js"></script>
     <script src="../src/Codec.js"></script>
     <script src="../src/DataConverter.js"></script>
+    <script src="../src/SHA256.js"></script>    
+
     <script src="../src/DataType.js"></script>
     <script src="../src/DistributedConnection.js"></script>
     <script src="../src/DistributedResource.js"></script>
@@ -37,34 +45,12 @@
     <script src="../src/ResourceTemplate.js"></script>
     <script src="../src/SendList.js"></script>
     <script src="../src/Warehouse.js"></script>
-    <script>
-        var demo;
+    <script src="../src/MemoryStore.js"></script>
+    
+    <script src="app.js"></script>
+<script>
 
-        class MyStore extends IStore
-        {
-
-        }
-
-        function init() {
-
-            var con = new DistributedConnection("ws://localhost:5001/iip/system/iip", "localhost", "ahmed", "password");
-            Warehouse.put(con, "remote");
-
-            con.on("ready", function (d) {
-              con.get("db/my").then(function(rt){
-                console.log("Object received.");
-                demo = rt;
-                  rt.on("LevelUp", function(v){
-                     console.log("LevelUp", v);
-                  });
-
-                  rt.Add(3);
-              });
-            }).on("error", function(sender, code, msg){
-                console.log(sender, code, msg);
-            });
-        }
-    </script>
+</script>
 </head>
 
 <body onload="init()">

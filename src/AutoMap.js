@@ -24,6 +24,8 @@
  * Created by Ahmed Zamil on 05/09/2017.
  */
 
+"use strict";  
+
 class AutoMap extends IEventHandler
 {
     constructor()

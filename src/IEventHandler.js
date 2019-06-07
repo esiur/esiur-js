@@ -23,6 +23,7 @@
 /**
  * Created by Ahmed Zamil on 30/08/2017.
  */
+"use strict";  
 
 class IEventHandler
 {
@@ -42,19 +43,32 @@ class IEventHandler
         var args = Array.prototype.slice.call(arguments, 1);
         if (this._events[event])
             for(var i = 0; i < this._events[event].length; i++)
-                if (this._events[event][i].apply(this, args))
+                if (this._events[event][i].f.apply(this._events[event][i].i, args))
                     return true;
 
         return false;
     }
 
-    on(event, fn)
+    _emitArgs(event, args)
     {
+        event = event.toLowerCase();
+        if (this._events[event])
+            for(var i = 0; i < this._events[event].length; i++)
+                if (this._events[event][i].f.apply(this._events[event][i].i, args))
+                    return true;
+        return this;
+    }
+
+    on(event, fn, issuer)
+    {
+        if (!(fn instanceof Function))
+            return this;
+
         event = event.toLowerCase();
         // add
         if (!this._events[event])
             this._events[event] = [];
-        this._events[event].push(fn);
+        this._events[event].push({f: fn, i: issuer == null ? this: issuer});
         return this;
     }
 
@@ -65,9 +79,13 @@ class IEventHandler
         {
             if (fn)
             {
-                var index = this._events[event].indexOf(fn);
-                if (index > -1)
-                this._events[event].splice(index, 1);
+                for(var i = 0; i < this._events[event].length; i++)
+                    if (this._events[event][i].f == fn)
+                        this._events[event].splice(i--, 1);
+
+                //var index = this._events[event].indexOf(fn);
+                //if (index > -1)
+                //this._events[event].splice(index, 1);
             }
             else
             {

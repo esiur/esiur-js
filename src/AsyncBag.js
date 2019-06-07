@@ -23,6 +23,8 @@
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
+"use strict";
+
 class AsyncBag extends AsyncReply
 {
     constructor() {
@@ -42,13 +44,27 @@ class AsyncBag extends AsyncReply
 
         var self = this;
 
+        var singleTaskCompleted = function(taskIndex)
+        {
+            return function(results, reply){
+                self.results[taskIndex] = results;
+                self.count++;
+                if (self.count == self.results.length)
+                    self.trigger(self.results);
+            };
+        };
+
         for(var i = 0; i < this.results.length; i++)
+            this.replies[i].then(singleTaskCompleted(i));
+
+        /*
             this.replies[i].then(function(r, reply){
                 self.results[self.replies.indexOf(reply)] = r;
                 self.count++;
                 if (self.count == self.results.length)
                     self.trigger(self.results);
             });
+        */
      }
 
      add(reply)

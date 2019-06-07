@@ -22,6 +22,9 @@
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
+
+"use strict";  
+
 class AsyncQueue extends AsyncReply
 {
 

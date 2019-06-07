@@ -20,18 +20,9 @@
 * SOFTWARE.
 */
 
-class ResourceTemplate {
+"use strict";  
 
-    getMemberTemplate(member) {
-        if (member instanceof MethodInfo)
-            return this.getFunctionTemplate(member.name);
-        else if (member instanceof EventInfo)
-            return this.getEventTemplate(member.name);
-        else if (member instanceof PropertyInfo)
-            return this.getPropertyTemplate(member.name);
-        else
-            return null;
-    }
+class ResourceTemplate {
 
     getEventTemplateByName(eventName) {
         for (var i = 0; i < this.events.length; i++)
@@ -107,7 +98,7 @@ class ResourceTemplate {
         // set guid
         this.className = template.namespace + "." + type.prototype.constructor.name;
 
-        this.classId = (new DC(sha256.arrayBuffer(this.className))).getGuid(0);
+        this.classId = SHA256.compute(DC.stringToBytes(this.className)).getGuid(0);
 
         //byte currentIndex = 0;
 
@@ -117,6 +108,7 @@ class ResourceTemplate {
             pt.index = i;
             pt.readExpansion = template.properties[i].read;
             pt.writeExpansion = template.properties[i].write;
+            pt.recordable = template.properties[i].recordable;
             this.properties.push(pt);
         }
 
@@ -224,6 +216,7 @@ class ResourceTemplate {
                 pt.index = propertyIndex++;
                 var readExpansion = ((data.getUint8(offset) & 0x8) == 0x8);
                 var writeExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
+                pt.recordable = ((data.getUint8(offset) & 1) == 1);
                 pt.permission = ((data.getUint8(offset++) >> 1) & 0x3);
                 pt.name = data.getString(offset + 1, data.getUint8(offset));// Encoding.ASCII.getString(data, (int)offset + 1, data.getUint8(offset));
                 offset += data.getUint8(offset) + 1;

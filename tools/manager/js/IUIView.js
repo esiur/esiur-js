@@ -1,0 +1,4 @@
+class IUIView extends IUIWidget
+{
+    
+}

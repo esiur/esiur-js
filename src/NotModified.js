@@ -24,6 +24,8 @@
  * Created by Ahmed Zamil on 26/08/2017.
  */
 
+"use strict";  
+
 class NotModified
 {
 

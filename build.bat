@@ -3,9 +3,27 @@
 del "build\esiur-debug.js"
 del "build\esiur.js"
 
-type "src\IEventHandler.js" > build\esiur-debug.js
+type "src\CustomResourceEvent.js" >> build\esiur-debug.js
 echo.  >> build\esiur-debug.js
-type "external\sha256.min.js" >> build\esiur-debug.js
+type "src\NetworkBuffer.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\AsyncException.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\Authentication.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\Session.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\DistributedPropertyContext.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\IPermissionsManager.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\KeyList.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\PropertyValue.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\IEventHandler.js" >> build\esiur-debug.js
+echo.  >> build\esiur-debug.js
+type "src\SHA256.js" >> build\esiur-debug.js
 echo.  >> build\esiur-debug.js
 type "src\IDestructible.js" >> build\esiur-debug.js
 echo.  >> build\esiur-debug.js
@@ -55,8 +73,7 @@ type "src\IIPPacket.js" >> build\esiur-debug.js
 echo.  >> build\esiur-debug.js
 type "src\Instance.js" >> build\esiur-debug.js
 echo.  >> build\esiur-debug.js
-type "src\NetworkBuffer.js" >> build\esiur-debug.js
-echo.  >> build\esiur-debug.js
+ 
 type "src\NotModified.js" >> build\esiur-debug.js
 echo.  >> build\esiur-debug.js
 type "src\PropertyTemplate.js" >> build\esiur-debug.js
@@ -67,6 +84,10 @@ type "src\SendList.js" >> build\esiur-debug.js
 echo.  >> build\esiur-debug.js
 type "src\Warehouse.js" >> build\esiur-debug.js
 echo.  >> build\esiur-debug.js
+
+copy build\esiur-debug.js build\esiur-debug-node.js
+type "module.js" >> build\esiur-debug-node.js
+echo. >> build\esiur-debug-node.js
 
 REM minify build/esiur-debug.js -o build/esiur.js
 uglifyjs build/esiur-debug.js -c -o build/esiur.js

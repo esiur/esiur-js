@@ -23,13 +23,72 @@
 /** 
  * Created by Ahmed Zamil on 25/07/2017.
  */
+
+"use strict";  
+
+const ErrorType = {
+    Management: 0,
+    Exception: 1
+};
+
+const ProgressType =  {
+    Execution: 0,
+    Network: 1
+};
+
 class AsyncReply
 {
     then(callback)
     {
         this.callbacks.push(callback);
+        
         if (this.ready)
+        {
             callback(this.result, this);
+
+            if (!this.taskExpired)
+            {
+                this.taskExpired = true;
+                this.resolveTask(this.result);
+            }
+        }
+
+        return this;
+    }
+
+    catch(callback)
+    {
+        return error(callback);
+    }
+    
+    error(callback)
+    {
+        this.errorCallbacks.push(callback);
+
+        if (this.exception.raised)
+        {
+            callback(this.exception);
+            
+            if (!this.taskExpired)
+            {   
+                this.taskExpired = true; 
+                this.rejectTask(this.exception);
+            }
+        }
+
+        return this;
+    }
+
+    progress(callback)
+    {
+        this.progressCallbacks.push(callback);
+        return this;
+    }
+
+    chunk(callback)
+    {
+        this.chunkCallbacks.push(callback);
+        return this;
     }
 
     trigger(result)
@@ -39,15 +98,79 @@ class AsyncReply
 
         for(var i = 0; i < this.callbacks.length; i++)
             this.callbacks[i](result, this);
+
+        
+        if (!this.taskExpired)
+        {
+            this.taskExpired = true;
+            this.resolveTask(this.result);
+        }
+    }
+
+
+    triggerError(type, code, message)//exception)
+    {
+        if (this.ready)
+            return;
+
+        this.exception.raise(type, code, message);// = exception;
+
+        for(var i = 0; i < this.errorCallbacks.length; i++)
+            this.errorCallbacks[i](this.exception, this);
+
+            
+        if (!this.taskExpired)
+        {   
+            this.taskExpired = true; 
+            this.rejectTask(this.exception);
+        }
+    }
+
+    triggerProgress(type, value, max)
+    {
+        if (this.ready)
+            return;
+
+        for(var i = 0; i < this.progressCallbacks.length; i++)
+            this.progressCallbacks[i](type, value, max, this);
+    }
+
+    triggerChunk(value)
+    {
+        if (this.ready)
+            return;
+
+        for(var i = 0; i < this.chunkCallbacks.length; i++)
+            this.chunkCallbacks[i](value, this);
     }
 
     constructor(result)
     {
         this.callbacks = [];
+        this.errorCallbacks = [];
+        this.progressCallbacks = [];
+        this.chunkCallbacks = [];
+        this.exception = new AsyncException();// null;
 
-        if (result) {
+        var self = this;
+
+        this.task = new Promise(function(resolve, reject){
+            self.resolveTask = resolve;
+            self.rejectTask = reject;    
+        });
+
+
+        if (result !== undefined) {
             this.result = result;
             this.ready = true;
+            this.taskExpired = true;            
+            this.resolveTask(result);
+        }
+        else
+        {
+            this.taskExpired = false;            
+            this.ready = false;
+            this.result = null;
         }
     }
 }

@@ -24,16 +24,17 @@
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
-var ResourceComparisonResult =
+"use strict";  
+
+const ResourceComparisonResult =
     {
         Null: 0,
         Distributed: 1,
-        DistributedSameClass: 2,
-        Local: 3,
-        Same: 4
+        Local: 2,
+        Same: 3
     };
 
-var StructureComparisonResult =
+const StructureComparisonResult =
     {
         Null: 0,
         Structure: 1,
@@ -44,6 +45,7 @@ var StructureComparisonResult =
 
 class Codec {
 
+    
     static parse(data, offset, sizeObject, connection, dataType = DataType.Unspecified) {
 
         var size;
@@ -215,16 +217,251 @@ class Codec {
         return connection.fetch(iid);// Warehouse.Get(iid);
     }
 
+            /// <summary>
+        /// Parse an array of bytes into array of resources
+        /// </summary>
+        /// <param name="data">Array of bytes.</param>
+        /// <param name="length">Number of bytes to parse.</param>
+        /// <param name="offset">Zero-indexed offset.</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <returns>Array of resources.</returns>
+        static parseResourceArray(data, offset, length, connection)
+        {
+            var reply = new AsyncBag();
+            if (length == 0)
+            {
+                reply.seal();
+                return reply;
+            }
 
-    static parseStructure(data, offset, contentLength, connection, keylist = null, typelist = null, keys = null, types = null) {
-        var reply = new AsyncReply();
-        var bag = new AsyncBag();
+            var end = offset + length;
+
+            // 
+            var result = data[offset++];
+
+            var previous = null;
+
+            if (result == ResourceComparisonResult.Null)
+                previous = new AsyncReply(null);
+            else if (result == ResourceComparisonResult.Local)
+            {
+                previous = Warehouse.get(data.getUint32(offset));
+                offset += 4;
+            }
+            else if (result == ResourceComparisonResult.Distributed)
+            {
+                previous = connection.fetch(data.getUint32(offset));
+                offset += 4;
+            }
+
+            reply.add(previous);
 
 
-        if (keylist == null)
-            keylist = [];
-        if (typelist == null)
-            typelist = [];
+            while (offset < end)
+            {
+                result = data[offset++];
+
+                var current = null;
+
+                if (result == ResourceComparisonResult.Null)
+                {
+                    current = new AsyncReply(null);
+                }
+                else if (result == ResourceComparisonResult.Same)
+                {
+                    current = previous;
+                }
+                else if (result == ResourceComparisonResult.Local)
+                {
+                    current = Warehouse.get(data.getUint32(offset));
+                    offset += 4;
+                }
+                else if (result == ResourceComparisonResult.Distributed)
+                {
+                    current = connection.fetch(data.getUint32(offset));
+                    offset += 4;
+                }
+
+                reply.add(current);
+
+                previous = current;
+            }
+
+            reply.seal();
+            return reply;
+        }
+
+        /// <summary>
+        /// Compose an array of property values.
+        /// </summary>
+        /// <param name="array">PropertyValue array.</param>
+        /// <param name="connection">DistributedConnection is required to check locality.</param>
+        /// <param name="prependLength">If True, prepend the length as UInt32 at the beginning of the output.</param>
+        /// <returns>Array of bytes in the network byte order.</returns>
+    
+        static composePropertyValueArray(array, connection, prependLength = false)
+        {
+            var rt = BL();
+            for (var i = 0; i < array.Length; i++)
+                rt.addUint8Array(Codec.composePropertyValue(array[i], connection));
+            if (prependLength)
+                rt.addUint32(rt.length, 0);
+            return rt.toArray();
+        }
+
+        /// <summary>
+        /// Compose a property value.
+        /// </summary>
+        /// <param name="propertyValue">Property value</param>
+        /// <param name="connection">DistributedConnection is required to check locality.</param>
+        /// <returns>Array of bytes in the network byte order.</returns>
+        static composePropertyValue(propertyValue, connection)
+        {
+            // age, date, value
+            return BL().addUint64(propertyValue.age)
+                       .addDateTime(propertyValue.date)
+                       .addUint8Array(Codec.compose(propertyValue.value, connection))
+                       .toArray();
+        }
+
+
+        /// <summary>
+        /// Parse property value.
+        /// </summary>
+        /// <param name="data">Array of bytes.</param>
+        /// <param name="offset">Zero-indexed offset.</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <param name="cs">Output content size.</param>
+        /// <returns>PropertyValue.</returns>
+        static parsePropertyValue(data, offset, sizeObject, connection)
+        {
+            var reply = new AsyncReply();
+            
+            var age = data.getUint64(offset);
+            offset += 8;
+    
+            var date = data.getDateTime(offset);
+            offset += 8;
+
+            var cs = {};
+
+            Codec.parse(data, offset, cs, connection).then(function(value)
+            {
+                reply.trigger(new PropertyValue(value, age, date));
+            });
+
+            sizeObject.size = 16 + cs.size;
+            return reply;
+        }
+
+
+        /// <summary>
+        /// Parse resource history
+        /// </summary>
+        /// <param name="data">Array of bytes.</param>
+        /// <param name="offset">Zero-indexed offset.</param>
+        /// <param name="length">Number of bytes to parse.</param>
+        /// <param name="resource">Resource</param>
+        /// <param name="fromAge">Starting age.</param>
+        /// <param name="toAge">Ending age.</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <returns></returns>
+        static parseHistory(data, offset, length, resource, connection)
+        {
+            var list = new KeyList();
+
+            var reply = new AsyncReply();
+
+            var bagOfBags = new AsyncBag();
+
+            var ends = offset + length;
+            while (offset < ends)
+            {
+                var index = data[offset++];
+                var pt = resource.instance.template.getPropertyTemplateByIndex(index);
+
+                list.add(pt, null);
+
+                
+                var cs = data.getUint32(offset);
+                offset += 4;
+                bagOfBags.add(Codec.parsePropertyValueArray(data, offset, cs, connection));
+                offset += cs;
+            }
+
+            bagOfBags.seal();
+
+            bagOfBags.then(x =>
+            {
+                for(var i = 0; i < list.length; i++)
+                    list.values[i] = x[i];
+
+                reply.trigger(list);
+            });
+
+            return reply;
+            
+        }
+
+        /// <summary>
+        /// Compose resource history
+        /// </summary>
+        /// <param name="history">History</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <returns></returns>
+        static composeHistory(history, connection, prependLength = false)
+        {
+            var rt = new BinaryList();
+
+            for (var i = 0; i < history.length; i++)
+                rt.addUint8(history.keys[i].index).addUint8Array(Codec.composePropertyValueArray(history.values[i], connection, true));
+
+            if (prependLength)
+                rt.addUint32(rt.length, 0);
+                
+            return rt.toArray();
+        }
+
+        /// <summary>
+        /// Parse an array of ProperyValue.
+        /// </summary>
+        /// <param name="data">Array of bytes.</param>
+        /// <param name="offset">Zero-indexed offset.</param>
+        /// <param name="length">Number of bytes to parse.</param>
+        /// <param name="connection">DistributedConnection is required to fetch resources.</param>
+        /// <returns></returns>
+        static parsePropertyValueArray(data, offset, length, connection)
+        {
+            var rt = new AsyncBag();
+
+            while (length > 0)
+            {
+                var cs = {};
+
+                rt.add(Codec.parsePropertyValue(data, offset, cs, connection));
+                
+                if (cs.size > 0)
+                {
+                    offset += cs.size;
+                    length -= cs.size;
+                }
+                else
+                    throw new Exception("Error while parsing ValueInfo structured data");
+            }
+
+            rt.seal();
+            return rt;
+        }
+
+        static parseStructure(data, offset, contentLength, connection, metadata = null, keys = null, types = null) 
+        {
+            var reply = new AsyncReply();
+            var bag = new AsyncBag();
+
+
+            var keylist = [];
+            var typelist = [];
+
 
         if (keys == null) {
             while (contentLength > 0) {
@@ -249,11 +486,12 @@ class Codec {
 
                 var rt = {};
                 bag.add(Codec.parse(data, offset, rt, connection));
-                contentLength -= rt.size + 1;
-                offset += rt.size + 1;
+                contentLength -= rt.size;
+                offset += rt.size;
             }
         }
         else {
+            
             for (var i = 0; i < keys.length; i++) {
                 keylist.push(keys[i]);
                 typelist.push(types[i]);
@@ -279,7 +517,12 @@ class Codec {
             reply.trigger(s);
         });
 
-
+        if (metadata != null)
+        {
+            metadata.keys = keylist;
+            metadata.types = typelist;
+        }
+        
         return reply;
     }
 
@@ -308,6 +551,11 @@ class Codec {
 
     static compose(value, connection, prependType = true) {
 
+        if (value instanceof Function)
+            value = value(connection);
+        else if (value instanceof DistributedPropertyContext)
+            value = value.method(this);
+        
         var type = Codec.getDataType(value, connection);
         var rt = new BinaryList();
 
@@ -322,7 +570,7 @@ class Codec {
                 break;
 
             case DataType.Resource:
-                rt.addUint32(value.instance.id);
+                rt.addUint32(value._p.instanceId);
                 break;
 
             case DataType.DistributedResource:
@@ -462,7 +710,7 @@ class Codec {
 
 static isLocalResource(resource, connection) {
     if (resource instanceof DistributedResource)
-        if (resource.connection == connection)
+        if (resource._p.connection == connection)
             return true;
 
     return false;
@@ -477,58 +725,47 @@ static isLocalResource(resource, connection) {
     }
 
     static compareResource(previous, next, connection) {
+
         if (next == null)
             return ResourceComparisonResult.Null;
-
-        if (next == previous)
+        else if (next == previous)
             return ResourceComparisonResult.Same;
-
-        if (Codec.isLocalResource(next, connection))
+        else if (Codec.isLocalResource(next, connection))
             return ResourceComparisonResult.Local;
-
-        if (previous == null)
+        else
             return ResourceComparisonResult.Distributed;
-
-        if (previous.instance.template.classId.valueOf() == next.instance.template.classId.valueOf())
-            return ResourceComparisonResult.DistributedSameClass;
-
-        return ResourceComparisonResult.Distributed;
     }
 
  static composeResourceArray(resources, connection, prependLength = false) {
-     if (resources == null || resources.length == 0 || !(resources instanceof ResourceArray))
-         return new DC(0);
 
-     var rt = new BinaryList();
-     var comparsion = Codec.compareResource(null, resources[0], connection);
+    if (resources == null || resources.length == 0)// || !(resources instanceof ResourceArray))
+        return prependLength ? new DC(4) : new DC(0);
 
-     rt.addUint8(comparsion);
+    var rt = new BinaryList();
+    var comparsion = Codec.compareResource(null, resources[0], connection);
 
-     if (comparsion == ResourceComparisonResult.Local)
-         rt.addUint32(resources[0].id);
-     else if (comparsion == ResourceComparisonResult.Distributed) {
-         rt.addUint8Array(resources[0].instance.template.classId.value);
-         rt.addUint32(resources[0].instance.id);
-     }
+    rt.addUint8(comparsion);
 
-     for (var i = 1; i < resources.length; i++) {
-         comparsion = Codec.compareResource(resources[i - 1], resources[i], connection);
-         rt.addUint8(comparsion);
-         if (comparsion == ResourceComparisonResult.Local)
-             rt.addUint32(resources[0].id);
-         else if (comparsion == ResourceComparisonResult.Distributed) {
-             rt.addUint8Array(resources[0].instance.template.classId.value);
-             rt.addUint32(resources[0].instance.id);
-         }
-         else if (comparsion == ResourceComparisonResult.DistributedSameClass) {
-             rt.addUint32(resources[0].instance.id);
-         }
-     }
+    if (comparsion == ResourceComparisonResult.Local)
+        rt.addUint32(resources[0]._p.instanceId);
+    else if (comparsion == ResourceComparisonResult.Distributed)
+        rt.addUint32(resources[0].instance.id);
 
-     if (prependLength)
-         rt.addUint32(0, rt.length);
+    for (var i = 1; i < resources.Length; i++)
+    {
+        comparsion = Codec.compareResource(resources[i - 1], resources[i], connection);
+        rt.addUint8(comparsion);
+        if (comparsion == ResourceComparisonResult.Local)
+            rt.addUint32(resources[i]._p.instanceId);
+        else if (comparsion == ResourceComparisonResult.Distributed)
+            rt.addUint32(resources[i].instance.id);
+    }
 
-     return rt.toArray();
+    if (prependLength)
+        rt.addUint32(rt.length, 0);
+    
+
+    return rt.toArray();
  }
 
 
@@ -619,4 +856,83 @@ static getDataType(value) {
                 return DataType.Void;
         }
     }
+
+
+            /// <summary>
+        /// Parse an array of structures
+        /// </summary>
+        /// <param name="data">Bytes array</param>
+        /// <param name="offset">Zero-indexed offset</param>
+        /// <param name="length">Number of bytes to parse</param>
+        /// <param name="connection">DistributedConnection is required in case a structure in the array holds items at the other end</param>
+        /// <returns>Array of structures</returns>
+        static parseStructureArray(data, offset, length, connection)
+        {
+            var reply = new AsyncBag();
+            if (length == 0)
+            {
+                reply.seal();
+                return reply;
+            }
+
+            var end = offset + length;
+
+            var result = data[offset++];
+
+            var previous = null;
+            //var previousKeys = [];
+            //var previousTypes = [];
+
+            var metadata = {keys: null, types: null};
+             
+
+            if (result == StructureComparisonResult.Null)
+                previous = new AsyncReply(null);
+            else if (result == StructureComparisonResult.Structure)
+            {
+                var cs = data.getUint32(offset);
+                offset += 4;          
+                previous = this.parseStructure(data, offset, cs, connection, metadata);
+                offset += cs;
+            }
+ 
+            reply.add(previous);
+
+
+            while (offset < end)
+            {
+                result = data[offset++];
+
+                if (result == StructureComparisonResult.Null)
+                    previous = new AsyncReply(null);
+                else if (result == StructureComparisonResult.Structure)
+                {
+                    var cs = data.getUint32(offset);
+                    offset += 4;
+                    previous = this.parseStructure(data, offset, cs, connection, metadata);
+                    offset += cs;
+                }
+                else if (result == StructureComparisonResult.StructureSameKeys)
+                {
+                    var cs = data.getUint32(offset);
+                    offset += 4;
+                    previous = this.parseStructure(data, offset, cs, connection, metadata, metadata.keys);
+                    offset += cs;
+                }
+                else if (result == StructureComparisonResult.StructureSameTypes)
+                {
+                    var cs = data.getUint32(offset);
+                    offset += 4;
+                    previous = this.parseStructure(data, offset, cs, connection, metadata, metadata.keys, metadata.types);
+                    offset += cs;
+                }
+
+                reply.add(previous);
+            }
+
+            reply.seal();
+            return reply;
+        }
+
+
 }

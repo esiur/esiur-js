@@ -23,7 +23,10 @@
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
-var DistributedResourceQueueItemType =
+
+"use strict";  
+
+const DistributedResourceQueueItemType =
     {
         Propery: 0,
         Event: 1

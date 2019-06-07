@@ -24,6 +24,8 @@
  * Created by Ahmed Zamil on 27/08/2017.
  */
 
+"use strict";  
+
 class FunctionTemplate extends MemberTemplate {
     compose() {
         var name = super.compose();
@@ -32,12 +34,12 @@ class FunctionTemplate extends MemberTemplate {
         if (this.expansion != null) {
             var exp = DC.stringToBytes(this.expansion);
 
-            return rt.addUint8(0x10 | (IsVoid ? 0x8 : 0x0))
+            return rt.addUint8(0x10 | (this.isVoid ? 0x8 : 0x0))
                 .addUint32(exp.length).addUint8Array(exp)
                 .addUint8(name.length).addUint8Array(name).toArray();
         }
         else
-            return rt.addUint8(IsVoid ? 0x8 : 0x0).addUint8(name.length).addUint8Array(name).toArray();
+            return rt.addUint8(this.isVoid ? 0x8 : 0x0).addUint8(name.length).addUint8Array(name).toArray();
     }
 
 

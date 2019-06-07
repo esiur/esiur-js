@@ -24,27 +24,43 @@
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
+"use strict";  
 
-var IIPPacketCommand =
+const IIPPacketCommand =
 {
     Event: 0,
     Request: 1,
     Reply: 2,
-    Error: 3
+    Report: 3
 };
 
-var IIPPacketEvent =
+const IIPPacketReport = 
+{
+    ManagementError: 0,
+    ExecutionError: 1,
+    ProgressReport: 0x8,
+    ChunkStream: 0x9
+};
+
+const IIPPacketEvent =
 {
     // Event Manage
     ResourceReassigned : 0,
     ResourceDestroyed: 1,
+    ChildAdded: 2,
+    ChildRemoved: 3,
+    Renamed: 4,
 
     // Event Invoke
     PropertyUpdated : 0x10,
-    EventOccured: 0x11
+    EventOccurred: 0x11,
+
+    // Attribute
+    AttributesUpdated: 0x18
+                
 };
 
-var IIPPacketAction =
+const IIPPacketAction =
 {
     // Request Manage
     AttachResource: 0,
@@ -52,23 +68,33 @@ var IIPPacketAction =
     DetachResource: 2,
     CreateResource: 3,
     DeleteResource: 4,
+    AddChild: 5,
+    RemoveChild: 6,
+    RenameResource: 7,
 
     // Request Inquire
-    TemplateFromClassName: 0x8,
-    TemplateFromClassId: 0x9,
-    TemplateFromResourceLink: 0xA,
-    TemplateFromResourceId: 0xB,
-    ResourceIdFromResourceLink: 0xC,
+    TemplateFromClassName: 8,
+    TemplateFromClassId: 9,
+    TemplateFromResourceId: 10,
+    QueryLink: 11,
+    ResourceHistory: 12,
+    ResourceChildren: 13,
+    ResourceParents: 14,
 
     // Request Invoke
-    InvokeFunction: 0x10,
-    GetProperty: 0x11,
-    GetPropertyIfModified: 0x12,
-    SetProperty: 0x13
+    InvokeFunction: 16,
+    GetProperty: 17,
+    GetPropertyIfModified: 18,
+    SetProperty: 19,
+
+    // Request Attribute
+    GetAllAttributes: 24,
+    UpdateAllAttributes: 25,
+    ClearAllAttributes: 26,
+    GetAttributes: 27,
+    UpdateAttributes: 28,
+    ClearAttributes: 29
 };
-
-
-
 
 
 class IIPPacket
@@ -91,13 +117,14 @@ class IIPPacket
         this.methodName = "";
         this.callbackId = 0;
         this.dataLengthNeeded = 0;
+        this.originalOffset = 0;
     }
 
     notEnough(offset, ends, needed)
     {
         if (offset + needed > ends)
         {
-            this.dataLengthNeeded = needed - (ends - offset);
+            this.dataLengthNeeded = needed - (ends - this.originalOffset);
             return true;
         }
         else
@@ -106,7 +133,7 @@ class IIPPacket
 
     parse(data, offset, ends)
     {
-        var oOffset = offset;
+        this.originalOffset = offset;
 
         if (this.notEnough(offset, ends, 1))
             return -this.dataLengthNeeded;
@@ -121,6 +148,16 @@ class IIPPacket
                 return -this.dataLengthNeeded;
 
             this.resourceId = data.getUint32(offset);
+            offset += 4;
+        }
+        else if (this.command == IIPPacketCommand.Report)
+        {
+            this.report = (data.getUint8(offset++) & 0x3f);
+            
+            if (this.notEnough(offset, ends, 4))
+                return -this.dataLengthNeeded;
+
+            this.callbackId = data.getUint32(offset);
             offset += 4;
         }
         else
@@ -148,6 +185,30 @@ class IIPPacket
             else if (this.event == IIPPacketEvent.ResourceDestroyed)
             {
                 // nothing to parse
+            }
+            else if (this.event == IIPPacketEvent.ChildAdded
+                || this.event == IIPPacketEvent.ChildRemoved)
+            {
+                if (this.notEnough(offset, ends, 4))
+                    return -this.dataLengthNeeded;
+
+                this.childId = data.getUint32(offset);
+                offset += 4;
+            }
+            else if(this.event == IIPPacketEvent.Renamed)
+            {
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
+
+                var cl = data.getUint16(offset);
+                offset += 2;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
+                this.content = data.clip(offset, cl);
+
+                offset += cl;
             }
             else if (this.event == IIPPacketEvent.PropertyUpdated)
             {
@@ -182,7 +243,7 @@ class IIPPacket
                     offset += size;
                 }
             }
-            else if (this.event == IIPPacketEvent.EventOccured)
+            else if (this.event == IIPPacketEvent.EventOccurred)
             {
                 if (this.notEnough(offset, ends, 5))
                     return -this.dataLengthNeeded;
@@ -193,6 +254,22 @@ class IIPPacket
                 offset += 4;
 
                 this.content = data.clip(offset, cl);
+                offset += cl;
+            }
+            // Attribute
+            else if (this.event == IIPPacketEvent.AttributesUpdated)
+            {
+                if (this.notEnough(offset, ends, 4))
+                    return -this.dataLengthNeeded;
+
+                var cl = data.getUint32(offset);
+                offset += 4;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
+                this.content = data.clip(offset, cl);
+
                 offset += cl;
             }
         }
@@ -208,14 +285,14 @@ class IIPPacket
             }
             else if (this.action == IIPPacketAction.ReattachResource)
             {
-                if (this.notEnough(offset, ends, 8))
+                if (this.notEnough(offset, ends, 12))
                     return -this.dataLengthNeeded;
 
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
 
-                this.resourceAge = data.getUint32(offset);
-                offset += 4;
+                this.resourceAge = data.getUint64(offset);
+                offset += 8;
             }
             else if (this.action == IIPPacketAction.DetachResource)
             {
@@ -228,16 +305,21 @@ class IIPPacket
             }
             else if (this.action == IIPPacketAction.CreateResource)
             {
-                if (this.notEnough(offset, ends, 1))
-                    return -this.dataLengthNeeded;
+                if (this.notEnough(offset, ends, 12))
+                    return -dataLengthNeeded;
 
-                var cl = data.getUint8(offset++);
+                this.storeId = data.getUint32(offset);
+                offset += 4;
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+
+                var cl = data.getUint32(offset);
+                offset += 4;
 
                 if (this.notEnough(offset, ends, cl))
-                    return -this.dataLengthNeeded;
+                    return -dataLengthNeeded;
 
-                this.className = data.getString(offset, cl);
-                offset += cl;
+                this.content = data.clip(offset, cl);
             }
             else if (this.action == IIPPacketAction.DeleteResource)
             {
@@ -246,6 +328,37 @@ class IIPPacket
 
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
+
+            }
+            else if (this.action == IIPPacketAction.AddChild
+                    || this.action == IIPPacketAction.RemoveChild)
+            {
+                if (this.notEnough(offset, ends, 8))
+                    return -this.dataLengthNeeded;
+
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+
+                this.childId = data.getUint32(offset);
+                offset += 4;
+
+            }
+            else if (this.action == IIPPacketAction.RenameResource)
+            {
+                if (this.notEnough(offset, ends, 6))
+                    return -this.dataLengthNeeded;
+                
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+
+                var cl = data.getUint16(offset);
+                offset += 2;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
+                this.content = data.clip(offset, cl);
+                offset += cl;
 
             }
             else if (this.action == IIPPacketAction.TemplateFromClassName)
@@ -270,20 +383,6 @@ class IIPPacket
                 this.classId = data.getGuid(offset);
                 offset += 16;
             }
-            else if (this.action == IIPPacketAction.TemplateFromResourceLink)
-            {
-                if (this.notEnough(offset, ends, 2))
-                    return -this.dataLengthNeeded;
-
-                var cl = data.getUint16(offset);
-                offset += 2;
-
-                if (this.notEnough(offset, ends, cl))
-                    return -this.dataLengthNeeded;
-
-                this.resourceLink = data.getString(offset, cl);
-                offset += cl;
-            }
             else if (this.action == IIPPacketAction.TemplateFromResourceId)
             {
                 if (this.notEnough(offset, ends, 4))
@@ -292,7 +391,7 @@ class IIPPacket
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
             }
-            else if (this.action == IIPPacketAction.ResourceIdFromResourceLink)
+            else if (this.action == IIPPacketAction.QueryLink)
             {
                 if (this.notEnough(offset, ends, 2))
                     return -this.dataLengthNeeded;
@@ -305,6 +404,30 @@ class IIPPacket
 
                 this.resourceLink = data.getString(offset, cl);
                 offset += cl;
+            }
+            else if (this.action == IIPPacketAction.ResourceChildren
+                    || this.action == IIPPacketAction.ResourceParents)
+            {
+                if (this.notEnough(offset, ends, 4))
+                    return -this.dataLengthNeeded;
+
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+            }
+            else if (this.action == IIPPacketAction.ResourceHistory)
+            {
+                if (this.notEnough(offset, ends, 20))
+                    return -this.dataLengthNeeded;
+
+                this.resourceId = data.getUint32(offset);
+                offset += 4; 
+
+                this.fromDate = data.getDateTime(offset);
+                offset += 8;
+
+                this.toDate = data.getDateTime(offset);
+                offset += 8;
+
             }
             else if (this.action == IIPPacketAction.InvokeFunction)
             {
@@ -347,8 +470,8 @@ class IIPPacket
 
                 this.methodIndex = data[offset++];
 
-                this.resourceAge = data.getUint32(offset);
-                offset += 4;
+                this.resourceAge = data.getUint64(offset);
+                offset += 8;
 
             }
             else if (this.action == IIPPacketAction.SetProperty)
@@ -388,6 +511,28 @@ class IIPPacket
                     offset += size;
                 }
             }
+
+            // Attribute
+            else if (this.action == IIPPacketAction.UpdateAllAttributes
+                || this.action == IIPPacketAction.GetAttributes
+                || this.action == IIPPacketAction.UpdateAttributes
+                || this.action == IIPPacketAction.ClearAttributes)
+            {
+                if (this.notEnough(offset, ends, 8))
+                    return -this.dataLengthNeeded;
+
+                this.resourceId = data.getUint32(offset);
+                offset += 4;
+                var cl = data.getUint32(offset);
+                offset += 4;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
+                this.content = data.clip(offset, cl);
+                offset += cl;
+            }
+
         }
         else if (this.command == IIPPacketCommand.Reply)
         {
@@ -400,8 +545,8 @@ class IIPPacket
                 this.classId = data.getGuid(offset);
                 offset += 16;
 
-                this.resourceAge = data.getUint32(offset);
-                offset += 4;
+                this.resourceAge = data.getUint64(offset);
+                offset += 8;
 
                 var cl = data.getUint16(offset);
                 offset+=2;
@@ -433,9 +578,6 @@ class IIPPacket
                 if (this.notEnough(offset, ends, 20))
                     return -this.dataLengthNeeded;
 
-                this.classId = data.GetGuid(offset);
-                offset += 16;
-
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
 
@@ -446,8 +588,14 @@ class IIPPacket
             }
             else if (this.action == IIPPacketAction.TemplateFromClassName
                 || this.action == IIPPacketAction.TemplateFromClassId
-                || this.action == IIPPacketAction.TemplateFromResourceLink
-                || this.action == IIPPacketAction.TemplateFromResourceId)
+                || this.action == IIPPacketAction.TemplateFromResourceId
+                || this.action == IIPPacketAction.QueryLink
+                || this.action == IIPPacketAction.ResourceChildren
+                || this.action == IIPPacketAction.ResourceParents
+                || this.action == IIPPacketAction.ResourceHistory
+                // Attribute
+                || this.action == IIPPacketAction.GetAllAttributes
+                || this.action == IIPPacketAction.GetAttributes)
             {
                 if (this.notEnough(offset, ends, 4))
                     return -this.dataLengthNeeded;
@@ -460,20 +608,6 @@ class IIPPacket
 
                 this.content = data.clip(offset, cl);
                 offset += cl;
-            }
-            else if (this.action == IIPPacketAction.ResourceIdFromResourceLink)
-            {
-                if (this.notEnough(offset, ends, 24))
-                    return -this.dataLengthNeeded;
-
-                this.classId = data.getGuid(offset);
-                offset += 16;
-
-                this.resourceId = data.getUint32(offset);
-                offset += 4;
-
-                this.resourceAge = data.getUint32(offset);
-                offset += 4;
             }
             else if (this.action == IIPPacketAction.InvokeFunction
                 || this.action == IIPPacketAction.GetProperty
@@ -513,32 +647,76 @@ class IIPPacket
                 // nothing to do
             }
         }
-        else if (this.command == IIPPacketCommand.Error)
+        else if (this.command == IIPPacketCommand.Report)
         {
-            // Error
-            if (this.notEnough(offset, ends, 4))
-                return -this.dataLengthNeeded;
+            if (this.report == IIPPacketReport.ManagementError)
+            {
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
 
-            this.callbackId = data.getUint32(offset);
+                this.errorCode = data.getUint16(offset);
+                offset += 2;
+            }
+            else if (this.report == IIPPacketReport.ExecutionError)
+            {
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
 
-            if (this.notEnough(offset, ends, 1))
-                return -this.dataLengthNeeded;
+                this.errorCode = data.getUint16(offset);
+                offset += 2;
 
-            this.errorCode = data.getUint8(offset++);
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
 
-            if (this.notEnough(offset, ends, 4))
-                return -this.dataLengthNeeded;
+                var cl = data.getUint16(offset);
+                offset += 2;
 
-            var cl = data.getUint32(offset);
-            offset += 4;
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
 
-            if (this.notEnough(offset, ends, cl))
-                return -this.dataLengthNeeded;
+                this.errorMessage = data.getString(offset, cl);
+                offset += cl;
+            }
+            else if (this.report == IIPPacketReport.ProgressReport)
+            {
+                if (this.notEnough(offset, ends, 8))
+                    return -this.dataLengthNeeded;
 
-            this.errorMessage = data.getString(offset, cl);
-            offset += cl;
+                this.progressValue = data.getInt32(offset);
+                offset += 4;
+                this.progressMax = data.getInt32(offset);
+                offset += 4;
+            }
+            else if (this.report == IIPPacketReport.ChunkStream)
+            {
+                var dt = data.getUint8(offset++);
+                var size = DataType.sizeOf(dt);
+
+                if (size < 0)
+                {
+                    if (this.notEnough(offset, ends, 4))
+                        return -this.dataLengthNeeded;
+
+                    var cl = data.getUint32(offset);
+                    offset += 4;
+
+                    if (this.notEnough(offset, ends, cl))
+                        return -this.dataLengthNeeded;
+
+                    this.content = data.clip(offset - 5, cl + 5);
+                    offset += cl;
+                }
+                else
+                {
+                    if (this.notEnough(offset, ends, size))
+                         return -this.dataLengthNeeded;
+
+                    this.content = data.clip(offset - 1, size + 1);
+                    offset += size;
+                }
+            }
         }
 
-        return offset - oOffset;
+        return offset - this.originalOffset;
     }
 }

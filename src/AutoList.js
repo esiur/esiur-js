@@ -24,6 +24,8 @@
  * Created by Ahmed Zamil on 05/09/2017.
  */
 
+"use strict";  
+
 class AutoList extends IEventHandler
 {
     constructor()
@@ -32,10 +34,15 @@ class AutoList extends IEventHandler
         this.list = [];
     }
 
+    get length()
+    {
+        return this.list.length;
+    }
+
     add(value)
     {
         if (value instanceof IDestructible)
-            value.on("destroy", this._item_destroyed);
+            value.on("destroy", this._item_destroyed, this);
 
         this.list.push(value);
 
@@ -48,7 +55,7 @@ class AutoList extends IEventHandler
             return;
 
         if (value instanceof IDestructible)
-            value.on("destroy", this._item_destroyed);
+            value.on("destroy", this._item_destroyed, this);
 
         if (this.list[index] instanceof IDestructible)
             this.list[index].off("destroy", this._item_destroyed);
@@ -56,6 +63,16 @@ class AutoList extends IEventHandler
         this.list[index] = value;
     }
 
+    at(index)
+    {
+        return this.list[index];
+    }
+
+    item(index)
+    {
+        return this.list[index];
+    }
+    
     remove(value)
     {
         this.removeAt(this.list.indexOf(value));
@@ -64,6 +81,11 @@ class AutoList extends IEventHandler
     contains(value)
     {
         return this.list.indexOf(value) > -1;
+    }
+
+    toArray()
+    {
+        return this.list.slice(0);
     }
 
     removeAt(index)

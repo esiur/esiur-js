@@ -24,8 +24,10 @@
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
-var UNIX_EPOCH = 621355968000000000;
-var TWO_PWR_32 = (1 << 16) * (1 << 16);
+"use strict";  
+
+const UNIX_EPOCH = 621355968000000000;
+const TWO_PWR_32 = (1 << 16) * (1 << 16);
 
 class DC extends Uint8Array// extends DataView // Data Converter
 {
@@ -155,7 +157,17 @@ class DC extends Uint8Array// extends DataView // Data Converter
         return new DC(rt);
     }
 
+    static stringArrayToBytes(values)
+    {
+        var list = new BinaryList();
+        for(var i = 0; i < values.length; i++)
+        {
+            var s = DC.stringToBytes(values[i]);
+            list.addUint32(s.length).addUint8Array(s);
+        }
 
+        return list.toArray();
+    }
 
     append(src, offset, length)
     {
@@ -438,7 +450,7 @@ class DC extends Uint8Array// extends DataView // Data Converter
     getDateTime(offset)
     {
         var ticks = this.getUint64(offset);
-        return new Date(Math.round((ticks-DCStatic.UNIX_EPOCH)/10000));
+        return new Date(Math.round((ticks-UNIX_EPOCH)/10000));
     }
 
     getDateTimeArray(offset)
@@ -451,7 +463,7 @@ class DC extends Uint8Array// extends DataView // Data Converter
 
     getGuid(offset)
     {
-        return new Guid(this.getUint8Array(offset, 16));
+        return new Guid(this.clip(offset, 16));
 
         /*
         var d = this.getUint8Array(offset, 16);

@@ -24,6 +24,8 @@
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
+"use strict";  
+
 class IStore extends IResource {
     get(path) {
 
@@ -37,6 +39,21 @@ class IStore extends IResource {
 
     }
 
+    record(resource, propertyName, value, age, dateTime)
+    {
+
+    }
+
+    getRecord(resource, fromDate, toDate)
+    {
+
+    }
+    
+    remove(resource)
+    {
+
+    }
+    
     constructor()
     {
         super();

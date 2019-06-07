@@ -24,8 +24,9 @@
  * Created by Ahmed Zamil on 24/08/2017.
  */
 
+"use strict";  
 
-var MemberType = {
+const MemberType = {
     Function: 0,
     Property: 1,
     Event: 2

@@ -24,16 +24,20 @@
  * Created by Ahmed Zamil on 02/09/2017.
  */
 
+"use strict";  
+
 class SendList extends BinaryList
 {
-    constructor(connection)
+    constructor(connection, doneReply)
     {
         super();
         this.connection = connection;
+        this.reply = doneReply;
     }
 
     done()
     {
         this.connection.send(this.toArray());
+        return this.reply;
     }
 }

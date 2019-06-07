@@ -1,0 +1,22 @@
+{
+  "name": "esiur",
+  "version": "1.0.0",
+  "description": "Distributed Object Framework",
+  "main": "build/esiur-debug-node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/esiur/esiur-js.git"
+  },
+  "author": "Ahmed Zamil",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/esiur/esiur-js/issues"
+  },
+  "homepage": "https://github.com/esiur/esiur-js#readme",
+  "dependencies": {
+    "ws": "^6.2.0"
+  }
+}

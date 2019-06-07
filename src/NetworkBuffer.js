@@ -24,6 +24,8 @@
  * Created by Ahmed Zamil on 01/09/2017.
  */
 
+"use strict";  
+
 class NetworkBuffer {
     constructor() {
         this.neededDataLength = 0;

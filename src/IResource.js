@@ -24,7 +24,9 @@
  * Created by Ahmed Zamil on 25/07/2017.
  */
 
-var ResourceTrigger =
+"use strict";  
+
+const ResourceTrigger =
 {
     Loaded : 0,
         Initialize: 1,

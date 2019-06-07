@@ -23,7 +23,10 @@
 /**
  * Created by Ahmed Zamil on 25/07/2017.
  */
-var IIPAuthPacketCommand =
+
+"use strict";  
+
+const IIPAuthPacketCommand =
 {
     Action: 0,
     Declare: 1,
@@ -31,7 +34,7 @@ var IIPAuthPacketCommand =
     Error: 3
 };
 
-var IIPAuthPacketAction =
+const IIPAuthPacketAction =
 {
     // Authenticate
     AuthenticateHash: 0,
@@ -41,7 +44,7 @@ var IIPAuthPacketAction =
 };
 
 
-var IIPAuthPacketMethod =
+const IIPAuthPacketMethod =
 {
     None: 0,
     Certificate: 1,
