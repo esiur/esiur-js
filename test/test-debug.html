@@ -11,7 +11,7 @@
 
         function init() {
 
-            var con = new DistributedConnection("ws://localhost:5001/iip/system/iip", "localhost", "ahmed", "password");
+            var con = new DistributedConnection("ws://localhost:5001/iip/system/iip", "localhost", "demo", "1234");
             Warehouse.put(con, "remote");
 
             con.on("ready", function (d) {

@@ -29,7 +29,7 @@
 class DistributedConnection extends IStore {
 
     send(data) {
-        console.log("Send", data.length);
+        //console.log("Send", data.length);
         this.socket.send(data.buffer);
     }
 
@@ -119,7 +119,7 @@ class DistributedConnection extends IStore {
 
         this.socket.onmessage = function (msg) {
 
-            console.log("Rec", msg.data.byteLength);
+            //console.log("Rec", msg.data.byteLength);
 
             this.networkBuffer.writeAll(msg.data);
 
