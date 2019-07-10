@@ -36,4 +36,11 @@ class Structure
 
         return rt;
     }
+
+    constructor(data)
+    {
+        if (data instanceof Object)
+            for(var i in data)
+                this[i] = data[i];
+    }
 }

@@ -82,7 +82,18 @@ class DistributedResource extends IResource
             var makeFunc = function(index)
             {
               return function () {
-                  return self._invoke(index, arguments);
+
+                  if (   arguments.length = 1 
+                      && arguments[0] instanceof Object 
+                      && arguments[0].constructor.name == "Object")
+                  {
+                      var namedArgs = new Structure(arguments[0]);
+                      return self._invokeByNamedArguments(index, namedArgs);
+                  }
+                  else
+                  {
+                      return self._invokeByArrayArguments(index, arguments);
+                  }
               };
             };
 
@@ -129,35 +140,25 @@ class DistributedResource extends IResource
         this.instance._emitResourceEvent(null, null, et.name, args);
     }
 
-    _invoke(index, args) {
+    _invokeByArrayArguments(index, args) {
         if (this.destroyed)
             throw new Exception("Trying to access destroyed object");
 
         if (index >= this.instance.template.functions.length)
             throw new Exception("Function index is incorrect");
 
-        return this._p.connection.sendInvoke(this._p.instanceId, index, args);
-
-        /*
-        var reply = new AsyncReply();
-
-        var parameters = Codec.composeVarArray(args, this._p.connection, true);
-
-        var self = this;
-
-        this._p.connection.sendRequest(IIPPacketAction.InvokeFunction,
-                BL().addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters))
-            .then(function (res) {
-                Codec.parse(res[0], 0, self._p.connection).then(function (rt) {
-                reply.trigger(rt);
-            });
-        });
-
-
-        return reply;
-        */
+        return this._p.connection.sendInvokeByArrayArguments(this._p.instanceId, index, args);
     }
 
+    _invokeByNamedArguments(index, namedArgs) {
+        if (this.destroyed)
+            throw new Exception("Trying to access destroyed object");
+
+        if (index >= this.instance.template.functions.length)
+            throw new Exception("Function index is incorrect");
+
+        return this._p.connection.sendInvokeByNamedArguments(this._p.instanceId, index, namedArgs);
+    }
 
     _get(index)
     {

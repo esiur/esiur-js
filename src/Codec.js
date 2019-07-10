@@ -627,12 +627,12 @@ class Codec {
         if (includeKeys) {
             for (var i = 0; i < keys.length; i++) {
                 var key = DC.stringToBytes(keys[i]);
-                rt.addUint8(key.length).addString(key).addUint8Array(DC.compose(value[i], connection));
+                rt.addUint8(key.length).addUint8Array(key).addUint8Array(Codec.compose(value[keys[i]], connection));
             }
         }
         else {
             for (var i = 0; i < keys.length; i++)
-                rt.addUint8Array(DC.compose(value[keys[i]], connection, includeTypes));
+                rt.addUint8Array(Codec.compose(value[keys[i]], connection, includeTypes));
         }
 
         if (prependLength)

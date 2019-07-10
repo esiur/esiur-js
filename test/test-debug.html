@@ -18,11 +18,16 @@
               con.get("db/my").then(function(rt){
                 console.log("Object received.");
                 demo = rt;
-                  rt.on("LevelUp", function(v){
-                     console.log("LevelUp", v);
+                  rt.on("LevelUp", function(a, b, c){
+                     console.log("LevelUp", a, b, c);
                   });
 
                   rt.Add(3);
+
+                  rt.Divide({nominator: 10, denominator: 50}).then(x=>{
+                      console.log(x);
+                  });
+                  
               });
             }).on("error", function(sender, code, msg){
                 console.log(sender, code, msg);

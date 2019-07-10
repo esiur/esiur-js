@@ -82,10 +82,11 @@ const IIPPacketAction =
     ResourceParents: 14,
 
     // Request Invoke
-    InvokeFunction: 16,
+    InvokeFunctionArrayArguments: 16,
     GetProperty: 17,
     GetPropertyIfModified: 18,
     SetProperty: 19,
+    InvokeFunctionNamedArguments: 20,
 
     // Request Attribute
     GetAllAttributes: 24,
@@ -429,7 +430,8 @@ class IIPPacket
                 offset += 8;
 
             }
-            else if (this.action == IIPPacketAction.InvokeFunction)
+            else if (  this.action == IIPPacket.InvokeFunctionArrayArguments 
+                    || this.action == IIPPacketAction.InvokeFunctionNamedArguments)
             {
                 if (this.notEnough(offset, ends, 9))
                     return -this.dataLengthNeeded;
@@ -609,7 +611,8 @@ class IIPPacket
                 this.content = data.clip(offset, cl);
                 offset += cl;
             }
-            else if (this.action == IIPPacketAction.InvokeFunction
+            else if (this.action == IIPPacketAction.InvokeFunctionArrayArguments
+                || this.action == IIPPacketAction.InvokeFunctionNamedArguments
                 || this.action == IIPPacketAction.GetProperty
                 || this.action == IIPPacketAction.GetPropertyIfModified)
             {

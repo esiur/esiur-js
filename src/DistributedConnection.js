@@ -243,9 +243,12 @@ class DistributedConnection extends IStore {
                             break;
 
                         // Invoke
-                        case IIPPacketAction.InvokeFunction:
-                            this.IIPRequestInvokeFunction(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                        case IIPPacketAction.InvokeFunctionArrayArguments:
+                            this.IIPRequestInvokeFunctionArrayArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
                             break;
+                        case IIPPacketAction.InvokeFunctionNamedArguments:
+                            this.IIPRequestInvokeFunctionNamedArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                            break;    
                         case IIPPacketAction.GetProperty:
                             this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
                             break;
@@ -317,9 +320,11 @@ class DistributedConnection extends IStore {
                             this.IIPReply(packet.callbackId, packet.content);
                             break;
 
-                        case IIPPacketAction.InvokeFunction:
+                        case IIPPacketAction.InvokeFunctionArrayArguments:
+                        case IIPPacketAction.InvokeFunctionNamedArguments:
                             this.IIPReplyInvoke(packet.callbackId, packet.content);
                             break;
+
                         case IIPPacketAction.GetProperty:
                             this.IIPReply(packet.callbackId, packet.content);
                             break;
@@ -544,7 +549,7 @@ class DistributedConnection extends IStore {
         return this.sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);        
     }
 
-    sendInvoke(instanceId, index, parameters)
+    sendInvokeByArrayArguments(instanceId, index, parameters)
     {
         var reply = new AsyncReply();
         
@@ -552,7 +557,7 @@ class DistributedConnection extends IStore {
 
         this.callbackCounter++;
         this.sendParams()
-                        .addUint8(0x40 | IIPPacketAction.InvokeFunction)
+                        .addUint8(0x40 | IIPPacketAction.InvokeFunctionArrayArguments)
                         .addUint32(this.callbackCounter)
                         .addUint32(instanceId)
                         .addUint8(index)
@@ -563,6 +568,27 @@ class DistributedConnection extends IStore {
 
         return reply; 
     }
+
+    sendInvokeByNamedArguments(instanceId, index, parameters)
+    {
+        var reply = new AsyncReply();
+        
+        var pb = Codec.composeStructure(parameters, this, true, true, true);
+
+        this.callbackCounter++;
+        this.sendParams()
+                        .addUint8(0x40 | IIPPacketAction.InvokeFunctionNamedArguments)
+                        .addUint32(this.callbackCounter)
+                        .addUint32(instanceId)
+                        .addUint8(index)
+                        .addUint8Array(pb)
+                        .done();
+
+        this.requests[this.callbackCounter] = reply;
+
+        return reply; 
+    }
+
 
     sendError(type, callbackId, errorCode, errorMessage = "")
     {
@@ -1008,7 +1034,7 @@ class DistributedConnection extends IStore {
         });
     }
 
-    IIPRequestInvokeFunction(callback, resourceId, index, content) {
+    IIPRequestInvokeFunctionArrayArguments(callback, resourceId, index, content) {
 
         var self = this;
 
@@ -1018,10 +1044,10 @@ class DistributedConnection extends IStore {
                     var ft = r.instance.template.getFunctionTemplateByIndex(index);
                     if (ft != null) {
                         if (r instanceof DistributedResource) {
-                            var rt = r._invoke(index, args);
+                            var rt = r._invokeByArrayArguments(index, args);
                             if (rt != null) {
                                 rt.then(function (res) {
-                                    self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                    self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
                                                     .addUint8Array(Codec.compose(res, self))
                                                     .done();
                                 });
@@ -1048,13 +1074,93 @@ class DistributedConnection extends IStore {
 
                                 if (rt instanceof AsyncReply) {
                                     rt.then(function (res) {
-                                        self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                        self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
                                                       .addUint8Array(Codec.compose(res, self))
                                                       .done();
                                     });
                                 }
                                 else {
-                                    self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                    self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
+                                                    .addUint8Array(Codec.compose(rt, self))
+                                                    .done();
+                                }
+                            }
+                            else {
+                                // ft found, fi not found, this should never happen
+                            }
+                        }
+                    }
+                    else {
+                        // no function at this index
+                    }
+                });
+            }
+            else {
+                // no resource with this id
+            }
+        });
+    }
+
+    
+    IIPRequestInvokeFunctionNamedArguments(callback, resourceId, index, content) {
+
+        var self = this;
+
+        Warehouse.get(resourceId).then(function (r) {
+            if (r != null) {
+                Codec.parseStructure(content, 0, content.Length, self).then(function (namedArgs) {
+                    var ft = r.instance.template.getFunctionTemplateByIndex(index);
+                    if (ft != null) {
+                        if (r instanceof DistributedResource) {
+                            var rt = r._invokeByNamedArguments(index, namedArgs);
+                            if (rt != null) {
+                                rt.then(function (res) {
+                                    self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
+                                                    .addUint8Array(Codec.compose(res, self))
+                                                    .done();
+                                });
+                            }
+                            else {
+                                // function not found on a distributed object
+                            }
+                        }
+                        else {
+
+                            var fi = r[ft.name];
+
+                            if (r.instance.applicable(self.session, ActionType.Execute, ft) == Ruling.Denied)
+                            {
+                                self.sendError(ErrorType.Management, callback, ExceptionCode.InvokeDenied);
+                                return;
+                            }
+
+                            if (fi instanceof Function) {
+
+                                var pi = ResourceTemplate.getFunctionParameters(fi);
+                                var args = new Array(pi.length);
+
+                                for (var i = 0; i < pi.Length; i++)
+                                {
+                                    if (namedArgs[pi[i]] !== undefined)
+                                        args[i] = namedArgs[pi[i]];
+                                }
+
+                                // pass this to the last argument if it is undefined
+                                if (args[args.length-1] === undefined)
+                                    args[args.length-1] = self;
+
+                                var rt = fi.apply(r, args);
+
+
+                                if (rt instanceof AsyncReply) {
+                                    rt.then(function (res) {
+                                        self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
+                                                      .addUint8Array(Codec.compose(res, self))
+                                                      .done();
+                                    });
+                                }
+                                else {
+                                    self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
                                                     .addUint8Array(Codec.compose(rt, self))
                                                     .done();
                                 }

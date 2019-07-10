@@ -1193,6 +1193,13 @@ class Structure
 
         return rt;
     }
+
+    constructor(data)
+    {
+        if (data instanceof Object)
+            for(var i in data)
+                this[i] = data[i];
+    }
 }  
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
@@ -2486,12 +2493,12 @@ class Codec {
         if (includeKeys) {
             for (var i = 0; i < keys.length; i++) {
                 var key = DC.stringToBytes(keys[i]);
-                rt.addUint8(key.length).addString(key).addUint8Array(DC.compose(value[i], connection));
+                rt.addUint8(key.length).addUint8Array(key).addUint8Array(Codec.compose(value[keys[i]], connection));
             }
         }
         else {
             for (var i = 0; i < keys.length; i++)
-                rt.addUint8Array(DC.compose(value[keys[i]], connection, includeTypes));
+                rt.addUint8Array(Codec.compose(value[keys[i]], connection, includeTypes));
         }
 
         if (prependLength)
@@ -3444,7 +3451,7 @@ const DataType =
 class DistributedConnection extends IStore {
 
     send(data) {
-        console.log("Send", data.length);
+        //console.log("Send", data.length);
         this.socket.send(data.buffer);
     }
 
@@ -3534,7 +3541,7 @@ class DistributedConnection extends IStore {
 
         this.socket.onmessage = function (msg) {
 
-            console.log("Rec", msg.data.byteLength);
+            //console.log("Rec", msg.data.byteLength);
 
             this.networkBuffer.writeAll(msg.data);
 
@@ -3658,9 +3665,12 @@ class DistributedConnection extends IStore {
                             break;
 
                         // Invoke
-                        case IIPPacketAction.InvokeFunction:
-                            this.IIPRequestInvokeFunction(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                        case IIPPacketAction.InvokeFunctionArrayArguments:
+                            this.IIPRequestInvokeFunctionArrayArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
                             break;
+                        case IIPPacketAction.InvokeFunctionNamedArguments:
+                            this.IIPRequestInvokeFunctionNamedArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                            break;    
                         case IIPPacketAction.GetProperty:
                             this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
                             break;
@@ -3732,9 +3742,11 @@ class DistributedConnection extends IStore {
                             this.IIPReply(packet.callbackId, packet.content);
                             break;
 
-                        case IIPPacketAction.InvokeFunction:
+                        case IIPPacketAction.InvokeFunctionArrayArguments:
+                        case IIPPacketAction.InvokeFunctionNamedArguments:
                             this.IIPReplyInvoke(packet.callbackId, packet.content);
                             break;
+
                         case IIPPacketAction.GetProperty:
                             this.IIPReply(packet.callbackId, packet.content);
                             break;
@@ -3959,7 +3971,7 @@ class DistributedConnection extends IStore {
         return this.sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);        
     }
 
-    sendInvoke(instanceId, index, parameters)
+    sendInvokeByArrayArguments(instanceId, index, parameters)
     {
         var reply = new AsyncReply();
         
@@ -3967,7 +3979,7 @@ class DistributedConnection extends IStore {
 
         this.callbackCounter++;
         this.sendParams()
-                        .addUint8(0x40 | IIPPacketAction.InvokeFunction)
+                        .addUint8(0x40 | IIPPacketAction.InvokeFunctionArrayArguments)
                         .addUint32(this.callbackCounter)
                         .addUint32(instanceId)
                         .addUint8(index)
@@ -3978,6 +3990,27 @@ class DistributedConnection extends IStore {
 
         return reply; 
     }
+
+    sendInvokeByNamedArguments(instanceId, index, parameters)
+    {
+        var reply = new AsyncReply();
+        
+        var pb = Codec.composeStructure(parameters, this, true, true, true);
+
+        this.callbackCounter++;
+        this.sendParams()
+                        .addUint8(0x40 | IIPPacketAction.InvokeFunctionNamedArguments)
+                        .addUint32(this.callbackCounter)
+                        .addUint32(instanceId)
+                        .addUint8(index)
+                        .addUint8Array(pb)
+                        .done();
+
+        this.requests[this.callbackCounter] = reply;
+
+        return reply; 
+    }
+
 
     sendError(type, callbackId, errorCode, errorMessage = "")
     {
@@ -4423,7 +4456,7 @@ class DistributedConnection extends IStore {
         });
     }
 
-    IIPRequestInvokeFunction(callback, resourceId, index, content) {
+    IIPRequestInvokeFunctionArrayArguments(callback, resourceId, index, content) {
 
         var self = this;
 
@@ -4433,10 +4466,10 @@ class DistributedConnection extends IStore {
                     var ft = r.instance.template.getFunctionTemplateByIndex(index);
                     if (ft != null) {
                         if (r instanceof DistributedResource) {
-                            var rt = r._invoke(index, args);
+                            var rt = r._invokeByArrayArguments(index, args);
                             if (rt != null) {
                                 rt.then(function (res) {
-                                    self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                    self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
                                                     .addUint8Array(Codec.compose(res, self))
                                                     .done();
                                 });
@@ -4463,13 +4496,93 @@ class DistributedConnection extends IStore {
 
                                 if (rt instanceof AsyncReply) {
                                     rt.then(function (res) {
-                                        self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                        self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
                                                       .addUint8Array(Codec.compose(res, self))
                                                       .done();
                                     });
                                 }
                                 else {
-                                    self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                                    self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
+                                                    .addUint8Array(Codec.compose(rt, self))
+                                                    .done();
+                                }
+                            }
+                            else {
+                                // ft found, fi not found, this should never happen
+                            }
+                        }
+                    }
+                    else {
+                        // no function at this index
+                    }
+                });
+            }
+            else {
+                // no resource with this id
+            }
+        });
+    }
+
+    
+    IIPRequestInvokeFunctionNamedArguments(callback, resourceId, index, content) {
+
+        var self = this;
+
+        Warehouse.get(resourceId).then(function (r) {
+            if (r != null) {
+                Codec.parseStructure(content, 0, content.Length, self).then(function (namedArgs) {
+                    var ft = r.instance.template.getFunctionTemplateByIndex(index);
+                    if (ft != null) {
+                        if (r instanceof DistributedResource) {
+                            var rt = r._invokeByNamedArguments(index, namedArgs);
+                            if (rt != null) {
+                                rt.then(function (res) {
+                                    self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
+                                                    .addUint8Array(Codec.compose(res, self))
+                                                    .done();
+                                });
+                            }
+                            else {
+                                // function not found on a distributed object
+                            }
+                        }
+                        else {
+
+                            var fi = r[ft.name];
+
+                            if (r.instance.applicable(self.session, ActionType.Execute, ft) == Ruling.Denied)
+                            {
+                                self.sendError(ErrorType.Management, callback, ExceptionCode.InvokeDenied);
+                                return;
+                            }
+
+                            if (fi instanceof Function) {
+
+                                var pi = ResourceTemplate.getFunctionParameters(fi);
+                                var args = new Array(pi.length);
+
+                                for (var i = 0; i < pi.Length; i++)
+                                {
+                                    if (namedArgs[pi[i]] !== undefined)
+                                        args[i] = namedArgs[pi[i]];
+                                }
+
+                                // pass this to the last argument if it is undefined
+                                if (args[args.length-1] === undefined)
+                                    args[args.length-1] = self;
+
+                                var rt = fi.apply(r, args);
+
+
+                                if (rt instanceof AsyncReply) {
+                                    rt.then(function (res) {
+                                        self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
+                                                      .addUint8Array(Codec.compose(res, self))
+                                                      .done();
+                                    });
+                                }
+                                else {
+                                    self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
                                                     .addUint8Array(Codec.compose(rt, self))
                                                     .done();
                                 }
@@ -5319,7 +5432,18 @@ class DistributedResource extends IResource
             var makeFunc = function(index)
             {
               return function () {
-                  return self._invoke(index, arguments);
+
+                  if (   arguments.length = 1 
+                      && arguments[0] instanceof Object 
+                      && arguments[0].constructor.name == "Object")
+                  {
+                      var namedArgs = new Structure(arguments[0]);
+                      return self._invokeByNamedArguments(index, namedArgs);
+                  }
+                  else
+                  {
+                      return self._invokeByArrayArguments(index, arguments);
+                  }
               };
             };
 
@@ -5366,35 +5490,25 @@ class DistributedResource extends IResource
         this.instance._emitResourceEvent(null, null, et.name, args);
     }
 
-    _invoke(index, args) {
+    _invokeByArrayArguments(index, args) {
         if (this.destroyed)
             throw new Exception("Trying to access destroyed object");
 
         if (index >= this.instance.template.functions.length)
             throw new Exception("Function index is incorrect");
 
-        return this._p.connection.sendInvoke(this._p.instanceId, index, args);
-
-        /*
-        var reply = new AsyncReply();
-
-        var parameters = Codec.composeVarArray(args, this._p.connection, true);
-
-        var self = this;
-
-        this._p.connection.sendRequest(IIPPacketAction.InvokeFunction,
-                BL().addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters))
-            .then(function (res) {
-                Codec.parse(res[0], 0, self._p.connection).then(function (rt) {
-                reply.trigger(rt);
-            });
-        });
-
-
-        return reply;
-        */
+        return this._p.connection.sendInvokeByArrayArguments(this._p.instanceId, index, args);
     }
 
+    _invokeByNamedArguments(index, namedArgs) {
+        if (this.destroyed)
+            throw new Exception("Trying to access destroyed object");
+
+        if (index >= this.instance.template.functions.length)
+            throw new Exception("Function index is incorrect");
+
+        return this._p.connection.sendInvokeByNamedArguments(this._p.instanceId, index, namedArgs);
+    }
 
     _get(index)
     {
@@ -5973,10 +6087,11 @@ const IIPPacketAction =
     ResourceParents: 14,
 
     // Request Invoke
-    InvokeFunction: 16,
+    InvokeFunctionArrayArguments: 16,
     GetProperty: 17,
     GetPropertyIfModified: 18,
     SetProperty: 19,
+    InvokeFunctionNamedArguments: 20,
 
     // Request Attribute
     GetAllAttributes: 24,
@@ -6320,7 +6435,8 @@ class IIPPacket
                 offset += 8;
 
             }
-            else if (this.action == IIPPacketAction.InvokeFunction)
+            else if (  this.action == IIPPacket.InvokeFunctionArrayArguments 
+                    || this.action == IIPPacketAction.InvokeFunctionNamedArguments)
             {
                 if (this.notEnough(offset, ends, 9))
                     return -this.dataLengthNeeded;
@@ -6500,7 +6616,8 @@ class IIPPacket
                 this.content = data.clip(offset, cl);
                 offset += cl;
             }
-            else if (this.action == IIPPacketAction.InvokeFunction
+            else if (this.action == IIPPacketAction.InvokeFunctionArrayArguments
+                || this.action == IIPPacketAction.InvokeFunctionNamedArguments
                 || this.action == IIPPacketAction.GetProperty
                 || this.action == IIPPacketAction.GetPropertyIfModified)
             {
@@ -7238,6 +7355,18 @@ class ResourceTemplate {
             b.addUint8Array(this.events[i].compose());
 
         this.content = b.toArray();
+    }
+
+    static getFunctionParameters(func)
+    {
+        var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
+        var ARGUMENT_NAMES = /([^\s,]+)/g;
+        
+        var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+        var result = fnStr.slice(fnStr.indexOf('(')+1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+        if(result === null)
+            result = [];
+        return result;
     }
 
     static parse(data, offset = 0, contentLength = -1) {
