@@ -81,7 +81,7 @@ class DistributedResource extends IResource
 
             var makeFunc = function(index)
             {
-              return function () {
+              var func = function () {
 
                   if (   arguments.length = 1 
                       && arguments[0] instanceof Object 
@@ -95,6 +95,10 @@ class DistributedResource extends IResource
                       return self._invokeByArrayArguments(index, arguments);
                   }
               };
+
+              // get expansion
+              func.help = self.instance.template.functions[index].expansion;
+              return func;
             };
 
             var makeGetter = function(index)

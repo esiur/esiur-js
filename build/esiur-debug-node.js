@@ -5431,7 +5431,7 @@ class DistributedResource extends IResource
 
             var makeFunc = function(index)
             {
-              return function () {
+              var func = function () {
 
                   if (   arguments.length = 1 
                       && arguments[0] instanceof Object 
@@ -5445,6 +5445,10 @@ class DistributedResource extends IResource
                       return self._invokeByArrayArguments(index, arguments);
                   }
               };
+
+              // get expansion
+              func.help = self.instance.template.functions[index].expansion;
+              return func;
             };
 
             var makeGetter = function(index)
@@ -7407,8 +7411,9 @@ class ResourceTemplate {
                 ft.index = functionIndex++;
                 var expansion = ((data.getUint8(offset) & 0x10) == 0x10);
                 ft.isVoid = ((data.getUint8(offset++) & 0x08) == 0x08);
-                ft.name = data.getString(offset + 1, data.getUint8(offset));// Encoding.ASCII.getString(data, (int)offset + 1, data.getUint8(offset));
-                offset += data.getUint8(offset) + 1;
+                var len = data.getUint8(offset++);
+                ft.name = data.getString(offset, len);
+                offset += len;
 
                 if (expansion) // expansion ?
                 {
@@ -7429,8 +7434,9 @@ class ResourceTemplate {
                 var writeExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
                 pt.recordable = ((data.getUint8(offset) & 1) == 1);
                 pt.permission = ((data.getUint8(offset++) >> 1) & 0x3);
-                pt.name = data.getString(offset + 1, data.getUint8(offset));// Encoding.ASCII.getString(data, (int)offset + 1, data.getUint8(offset));
-                offset += data.getUint8(offset) + 1;
+                var len = data.getUint8(offset++);
+                pt.name = data.getString(offset, len);
+                offset += len;
 
                 if (readExpansion) // expansion ?
                 {
@@ -7455,9 +7461,9 @@ class ResourceTemplate {
                 var et = new EventTemplate();
                 et.index = eventIndex++;
                 var expansion = ((data.getUint8(offset++) & 0x10) == 0x10);
-
-                et.name = data.getString(offset + 1, data.getUint8(offset));// Encoding.ASCII.getString(data, (int)offset + 1, (int)data.getUint8(offset));
-                offset += data.getUint8(offset) + 1;
+                var len = data.getUint8(offset++);
+                et.name = data.getString(offset, len);
+                offset += len;
 
                 if (expansion) // expansion ?
                 {
