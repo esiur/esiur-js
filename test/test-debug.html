@@ -1,42 +1,10 @@
 <html>
 <head>
-    <script src="../build/esiur-debug.js"></script>
-    <script>
-        var demo;
-
-        class MyStore extends IStore
-        {
-
-        }
-
-        function init() {
-
-            var con = new DistributedConnection("ws://localhost:5001/iip/system/iip", "localhost", "demo", "1234");
-            Warehouse.put(con, "remote");
-
-            con.on("ready", function (d) {
-              con.get("db/my").then(function(rt){
-                console.log("Object received.");
-                demo = rt;
-                  rt.on("LevelUp", function(a, b, c){
-                     console.log("LevelUp", a, b, c);
-                  });
-
-                  rt.Add(3);
-
-                  rt.Divide({nominator: 10, denominator: 50}).then(x=>{
-                      console.log(x);
-                  });
-                  
-              });
-            }).on("error", function(sender, code, msg){
-                console.log(sender, code, msg);
-            });
-        }
-    </script>
+    <!--<script src="../build/esiur-debug.js"></script>-->
+    <script src='test.js' type="module"></script>
 </head>
 
-<body onload="init()">
+<body onload="">
 
 </body>
 </html>

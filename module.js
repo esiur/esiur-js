@@ -5,4 +5,4 @@ exports.printMsg = function() {
 module.exports = { Warehouse, DistributedConnection};
 
 
-var WebSocket = require('ws')
+let WebSocket = require('ws')
