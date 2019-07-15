@@ -26,77 +26,11 @@
 
 "use strict";  
 
-export const IIPPacketCommand =
-{
-    Event: 0,
-    Request: 1,
-    Reply: 2,
-    Report: 3
-};
-
-export const IIPPacketReport = 
-{
-    ManagementError: 0,
-    ExecutionError: 1,
-    ProgressReport: 0x8,
-    ChunkStream: 0x9
-};
-
-export const IIPPacketEvent =
-{
-    // Event Manage
-    ResourceReassigned : 0,
-    ResourceDestroyed: 1,
-    ChildAdded: 2,
-    ChildRemoved: 3,
-    Renamed: 4,
-
-    // Event Invoke
-    PropertyUpdated : 0x10,
-    EventOccurred: 0x11,
-
-    // Attribute
-    AttributesUpdated: 0x18
-                
-};
-
-export const IIPPacketAction =
-{
-    // Request Manage
-    AttachResource: 0,
-    ReattachResource: 1,
-    DetachResource: 2,
-    CreateResource: 3,
-    DeleteResource: 4,
-    AddChild: 5,
-    RemoveChild: 6,
-    RenameResource: 7,
-
-    // Request Inquire
-    TemplateFromClassName: 8,
-    TemplateFromClassId: 9,
-    TemplateFromResourceId: 10,
-    QueryLink: 11,
-    ResourceHistory: 12,
-    ResourceChildren: 13,
-    ResourceParents: 14,
-
-    // Request Invoke
-    InvokeFunctionArrayArguments: 16,
-    GetProperty: 17,
-    GetPropertyIfModified: 18,
-    SetProperty: 19,
-    InvokeFunctionNamedArguments: 20,
-
-    // Request Attribute
-    GetAllAttributes: 24,
-    UpdateAllAttributes: 25,
-    ClearAllAttributes: 26,
-    GetAttributes: 27,
-    UpdateAttributes: 28,
-    ClearAttributes: 29
-};
-
+import IIPPacketAction from "./IIPPacketAction.js";
+import IIPPacketCommand from "./IIPPacketCommand.js";
+import IIPPacketEvent from "./IIPPacketEvent.js";
+import IIPPacketReport from "./IIPPacketReport.js";
+import DataType from '../../Data/DataType.js';
 
 export default class IIPPacket
 {

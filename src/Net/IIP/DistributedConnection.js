@@ -28,9 +28,9 @@
 
 import IStore from '../../Resource/IStore.js';
 import Session from '../../Security/Authority/Session.js';
-import {Authentication, AuthenticationType} from '../../Security/Authority/Authentication.js';
-import IIPPacket from '../../Net/Packets/IIPPacket.js';
-import IIPAuthPacket from '../../Net/Packets/IIPAuthPacket.js';
+import Authentication  from '../../Security/Authority/Authentication.js';
+import AuthenticationType from "../../Security/Authority/AuthenticationType.js";
+
 import SHA256 from '../../Security/Integrity/SHA256.js';
 import {BL, DC} from '../../Data/DataConverter.js';
 import SendList from '../SendList.js';
@@ -41,6 +41,29 @@ import NetworkBuffer from '../Sockets/NetworkBuffer.js';
 import KeyList from '../../Data/KeyList.js';
 import AsyncQueue from '../../Engine/AsyncQueue.js';
 import Warehouse from '../../Resource/Warehouse.js';
+
+import IIPAuthPacket from "../Packets/IIPAuthPacket.js";
+import IIPPacket from "../Packets/IIPPacket.js";
+import IIPAuthPacketAction from "../Packets/IIPAuthPacketAction.js";
+import IIPAuthPacketCommand from "../Packets/IIPAuthPacketCommand.js";
+import IIPAuthPacketMethod from "../Packets/IIPAuthPacketMethod.js";
+
+import IIPPacketAction from "../Packets/IIPPacketAction.js";
+import IIPPacketCommand from "../Packets/IIPPacketCommand.js";
+import IIPPacketEvent from "../Packets/IIPPacketEvent.js";
+import IIPPacketReport from "../Packets//IIPPacketReport.js";
+
+import ErrorType from "../../Engine/ErrorType.js";
+import ProgressType from "../../Engine/ProgressType.js";
+import ExceptionCode from "../../Engine/ExceptionCode.js";
+
+import DistributedResource from './DistributedResource.js';
+import ResourceTemplate from '../../Resource/Template/ResourceTemplate.js';
+
+import DistributedResourceQueueItem from './DistributedResourceQueueItem.js';
+import DistributedResourceQueueItemType from './DistributedResourceQueueItemType.js';
+
+import DistributedPropertyContext from './DistributedPropertyContext.js';
 
 export default class DistributedConnection extends IStore {
 
@@ -157,7 +180,7 @@ export default class DistributedConnection extends IStore {
         var self = this;
 
         this.socket.onopen = function () {
-            var bl = new BinaryList();
+            var bl = BL();
             bl.addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(self.localNonce).addUint8(un.length).addUint8Array(un);
             self.send(bl.toArray());
         };

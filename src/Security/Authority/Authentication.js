@@ -26,14 +26,8 @@
 
 "use strict";  
 
- export const AuthenticationType = {
-    Host: 0,
-    CoHost: 1,
-    Client: 2,
-    Alien: 3
- };
 
- export default class Authentication
+export default class Authentication
 {
     constructor(type)
     {
@@ -48,5 +42,3 @@
         return this.domain + "@" + this.username;
     }
 }
-
-export {Authentication};

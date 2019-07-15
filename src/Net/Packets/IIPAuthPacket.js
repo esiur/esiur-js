@@ -27,31 +27,9 @@
 "use strict";  
 
 
-export const IIPAuthPacketCommand =
-{
-    Action: 0,
-    Declare: 1,
-    Acknowledge: 2,
-    Error: 3
-};
-
-export const IIPAuthPacketAction =
-{
-    // Authenticate
-    AuthenticateHash: 0,
-    NewConnection: 0x20,
-    ResumeConnection: 0x21,
-    ConnectionEstablished: 0x28
-};
-
-
-export const IIPAuthPacketMethod =
-{
-    None: 0,
-    Certificate: 1,
-    Credentials: 2,
-    Token: 3
-};
+import IIPAuthPacketCommand from "./IIPAuthPacketCommand.js";
+import IIPAuthPacketAction from "./IIPAuthPacketAction.js";
+import IIPAuthPacketMethod from "./IIPAuthPacketMethod.js";
 
 export default class IIPAuthPacket
 {

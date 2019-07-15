@@ -28,13 +28,6 @@
 
 import DC from '../../Data/DataConverter.js';
 
-
-export const MemberType = {
-    Function: 0,
-    Property: 1,
-    Event: 2
-};
-
 export default class MemberTemplate {
     compose() {
         return DC.stringToBytes(this.name);

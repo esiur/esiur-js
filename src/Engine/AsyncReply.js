@@ -28,16 +28,6 @@
 
 import AsyncException from './AsyncException.js';
 
-export const ErrorType = {
-    Management: 0,
-    Exception: 1
-};
-
-export const ProgressType =  {
-    Execution: 0,
-    Network: 1
-};
-
 export default class AsyncReply
 {
     then(callback)
@@ -58,11 +48,18 @@ export default class AsyncReply
         return this;
     }
 
+    // Alias for then()
+    done(callback)
+    {
+        this.then(callback);
+    }
+
+    // Alias for error()
     catch(callback)
     {
-        return error(callback);
+        return this.error(callback);
     }
-    
+        
     error(callback)
     {
         this.errorCallbacks.push(callback);
@@ -93,6 +90,12 @@ export default class AsyncReply
         return this;
     }
 
+    // Alias for chunk()
+    next(callback)
+    {
+        this.chunk(callback);
+    }
+
     trigger(result)
     {
         this.result = result;
@@ -110,29 +113,23 @@ export default class AsyncReply
     }
 
 
-    triggerError(type, code, message)//exception)
+    triggerError(type, code, message)
     {
         if (this.ready)
             return;
 
-        if (type instanceof Exception)
-        {
-            code = type.code;
-            message = type.message;
-            type = type.type;
-        }
+        this.taskExpired = true;
 
-        this.exception.raise(type, code, message);// = exception;
+        if (type instanceof AsyncException)
+            this.exception.raise(type.type, type.code, type.message);
+        else
+            this.exception.raise(type, code, message);
 
-        for(var i = 0; i < this.errorCallbacks.length; i++)
-            this.errorCallbacks[i](this.exception, this);
-
-            
-        if (!this.taskExpired)
-        {   
-            this.taskExpired = true; 
+        if (this.errorCallbacks.length == 0)
             this.rejectTask(this.exception);
-        }
+        else
+            for(var i = 0; i < this.errorCallbacks.length; i++)
+                this.errorCallbacks[i](this.exception, this);
     }
 
     triggerProgress(type, value, max)

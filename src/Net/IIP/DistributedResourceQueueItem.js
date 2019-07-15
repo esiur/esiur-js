@@ -26,11 +26,6 @@
 
 "use strict";  
 
-export const DistributedResourceQueueItemType =
-    {
-        Propery: 0,
-        Event: 1
-    };
 
 export default class DistributedResourceQueueItem {
     constructor(resource, type, value, index) {

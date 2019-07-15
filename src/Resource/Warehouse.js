@@ -116,19 +116,13 @@ export class WH extends IEventHandler
                 {
                     var store = this.new(handler, url[0] + "://" + hostname);
                     store.open(settings).then(x=>{
-                        if (success)
-                        {
-                            if (pathname.length > 0 && pathname[1] != "")
-                                store.get(pathname[1]).then(r=>{
-                                    rt.trigger(r);
-                                }).error(e => rt.triggerError(e));
-                            else
-                                rt.trigger(store);
-                        }
+                        if (pathname.length > 0 && pathname[1] != "")
+                            store.get(pathname).then(r=>{
+                                rt.trigger(r);
+                            }).error(e => rt.triggerError(e));
                         else
-                        {
-                            self.remove(store);
-                        }
+                            rt.trigger(store);
+                            
                     }).error(e => {
                         rt.triggerError(e); 
                         self.remove(store);

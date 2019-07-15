@@ -40,12 +40,14 @@ export default class AsyncException extends Error
          this.code = code;
 
          if (type == 0)
+         {
             for(var i in ExceptionCode)
                 if (ExceptionCode[i] == code)
                 {
                     this.message = i;
                     break;
                 }
+        }
         else
             this.message = message;
 
@@ -54,6 +56,6 @@ export default class AsyncException extends Error
 
      toString()
      {
-         return this.type + " " + this.code + " " + this.message;
+         return this.type + " (" + this.code + ") : " + this.message;
      }
  }

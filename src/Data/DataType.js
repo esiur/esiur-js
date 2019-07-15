@@ -26,7 +26,7 @@
 
 "use strict";  
 
-export default //const DataType =
+export default
 { 
     Void: 0x0,
     //Variant,
@@ -76,35 +76,35 @@ export default //const DataType =
 
     isArray: function(type)
     {
-        return ((type & 0x80) == 0x80) && (type != DataType.NotModified);
+        return ((type & 0x80) == 0x80) && (type != this.NotModified);
     },
 
     sizeOf: function(type)
     {
         switch (type)
         {
-            case DataType.Void:
-            case DataType.NotModified:
+            case this.Void:
+            case this.NotModified:
                 return 0;
-            case DataType.Bool:
-            case DataType.Int8:
-            case DataType.UInt8:
+            case this.Bool:
+            case this.Int8:
+            case this.UInt8:
                 return 1;
-            case DataType.Char:
-            case DataType.Int16:
-            case DataType.UInt16:
+            case this.Char:
+            case this.Int16:
+            case this.UInt16:
                 return 2;
-            case DataType.Int32:
-            case DataType.UInt32:
-            case DataType.Float32:
-            case DataType.Resource:
+            case this.Int32:
+            case this.UInt32:
+            case this.Float32:
+            case this.Resource:
                 return 4;
-            case DataType.Int64:
-            case DataType.UInt64:
-            case DataType.Float64:
-            case DataType.DateTime:
+            case this.Int64:
+            case this.UInt64:
+            case this.Float64:
+            case this.DateTime:
                 return 8;
-            case DataType.DistributedResource:
+            case this.DistributedResource:
                 return 4;
 
             default:

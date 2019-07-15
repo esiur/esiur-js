@@ -29,6 +29,8 @@
 import IResource from '../../Resource/IResource.js';
 import AsyncReply from '../../Engine/AsyncReply.js';
 import Codec from '../../Data/Codec.js';
+import Structure from '../../Data/Structure.js';
+import IIPPacketAction from '../Packets//IIPPacketAction.js';
 
 export default class DistributedResource extends IResource
 {
@@ -87,7 +89,7 @@ export default class DistributedResource extends IResource
             {
               var func = function () {
 
-                  if (   arguments.length = 1 
+                  if (   arguments.length == 1 
                       && arguments[0] instanceof Object 
                       && arguments[0].constructor.name == "Object")
                   {

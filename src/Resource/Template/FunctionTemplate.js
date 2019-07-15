@@ -28,6 +28,7 @@
 
 import {DC, BL} from '../../Data/DataConverter.js';
 import MemberTemplate from './MemberTemplate.js';
+import MemberType from './MemberType.js';
 
 export default class FunctionTemplate extends MemberTemplate {
     compose() {

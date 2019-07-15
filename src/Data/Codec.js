@@ -30,6 +30,13 @@ import DataType from './DataType.js';
 import ResourceComparisonResult from './ResourceComparisionResult.js';
 import StructureComparisonResult from './StructureComparisonResult.js';
 
+import AsyncBag from '../Engine/AsyncBag.js';
+import AsyncReply from '../Engine/AsyncReply.js';
+import Structure from './Structure.js';
+import PropertyValue from './PropertyValue.js';
+import {DC, BL} from './DataConverter.js';
+import BinaryList from './BinaryList.js';
+import DistributedPropertyContext from '../Net/IIP/DistributedPropertyContext.JS';
 
 export default class Codec {
 
