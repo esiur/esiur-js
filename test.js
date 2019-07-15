@@ -6,7 +6,7 @@ var IIP_LINK = "ws://media.delta.iq:5001/iip/system/iip";
 
 var connection = new esiur.DistributedConnection(IIP_LINK, "sawadland", "guest", "guest");
 esiur.Warehouse.put(connection, "remote");
-
+ 
 connection.on("ready", function (d) {
 	console.log(d);
 	connection.get("vod/home").then(function(rt){
