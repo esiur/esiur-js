@@ -183,10 +183,18 @@ export default class DistributedResource extends IResource
         var pt = this.instance.template.getPropertyTemplateByIndex(index);
         this._p.properties[index] = value;
         this.instance.emitModification(pt, value);
+
+        // this to invoke other property setters
+        this._p.neglect = true;
+        this[pt.name] = null;
+        this._p.neglect = false;
     }
 
     _set(index, value)
     {
+        if (this._p.neglect)
+            return;
+
         if (index >= this._p.properties.length)
             return null;
 

@@ -1,2 +1,7 @@
+
 import wh from './Resource/Warehouse.js';
-export default wh; 
+
+if (window)
+	window.wh = wh;
+
+export default wh;

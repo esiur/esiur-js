@@ -2,7 +2,6 @@ exports.printMsg = function() {
   console.log("Esiur 1.1");
 }
 
-module.exports = { Warehouse, DistributedConnection};
-
+module.exports = { wh };
 
 let WebSocket = require('ws')

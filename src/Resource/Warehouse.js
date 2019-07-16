@@ -116,7 +116,7 @@ export class WH extends IEventHandler
                 {
                     var store = this.new(handler, url[0] + "://" + hostname);
                     store.open(settings).then(x=>{
-                        if (pathname.length > 0 && pathname[1] != "")
+                        if (pathname.length > 0 && pathname != "")
                             store.get(pathname).then(r=>{
                                 rt.trigger(r);
                             }).error(e => rt.triggerError(e));

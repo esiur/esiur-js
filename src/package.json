@@ -1,8 +1,8 @@
 {
   "name": "esiur",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Distributed Object Framework",
-  "main": "build/esiur-debug-node.js",
+  "main": "esiur.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
