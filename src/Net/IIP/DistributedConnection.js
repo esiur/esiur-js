@@ -201,8 +201,8 @@ export default class DistributedConnection extends IStore {
 
         this.socket.onclose = function(event)
         {
-            if (this.openReply)
-                this.openReply.triggerError();
+            if (this.connection.openReply)
+                this.connection.openReply.triggerError(0, 0, "Host not reachable");
 
             self.close(event);
         };

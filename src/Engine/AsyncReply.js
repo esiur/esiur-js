@@ -28,22 +28,14 @@
 
 import AsyncException from './AsyncException.js';
 
-export default class AsyncReply
+export default class AsyncReply extends Promise
 {
     then(callback)
     {
         this.callbacks.push(callback);
         
         if (this.ready)
-        {
             callback(this.result, this);
-
-            if (!this.taskExpired)
-            {
-                this.taskExpired = true;
-                this.resolveTask(this.result);
-            }
-        }
 
         return this;
     }
@@ -66,13 +58,7 @@ export default class AsyncReply
 
         if (this.exception.raised)
         {
-            callback(this.exception);
-            
-            if (!this.taskExpired)
-            {   
-                this.taskExpired = true; 
-                this.rejectTask(this.exception);
-            }
+            callback(this.exception);            
         }
 
         return this;
@@ -102,14 +88,7 @@ export default class AsyncReply
         this.ready = true;
 
         for(var i = 0; i < this.callbacks.length; i++)
-            this.callbacks[i](result, this);
-
-        
-        if (!this.taskExpired)
-        {
-            this.taskExpired = true;
-            this.resolveTask(this.result);
-        }
+            this.callbacks[i](result, this);        
     }
 
 
@@ -118,15 +97,13 @@ export default class AsyncReply
         if (this.ready)
             return;
 
-        this.taskExpired = true;
-
         if (type instanceof AsyncException)
             this.exception.raise(type.type, type.code, type.message);
         else
             this.exception.raise(type, code, message);
 
         if (this.errorCallbacks.length == 0)
-            this.rejectTask(this.exception);
+            throw this.exception;
         else
             for(var i = 0; i < this.errorCallbacks.length; i++)
                 this.errorCallbacks[i](this.exception, this);
@@ -152,6 +129,16 @@ export default class AsyncReply
 
     constructor(result)
     {
+
+        if (result instanceof Function)
+        {
+            super(result);
+            this.awaiter = result;
+        }
+        else
+            super(()=>{});
+
+
         this.callbacks = [];
         this.errorCallbacks = [];
         this.progressCallbacks = [];
@@ -159,22 +146,13 @@ export default class AsyncReply
         this.exception = new AsyncException();// null;
 
         var self = this;
-
-        this.task = new Promise(function(resolve, reject){
-            self.resolveTask = resolve;
-            self.rejectTask = reject;    
-        });
-
-
-        if (result !== undefined) {
+ 
+        if (result !== undefined && !(result instanceof Function)) {
             this.result = result;
             this.ready = true;
-            this.taskExpired = true;            
-            this.resolveTask(result);
         }
         else
         {
-            this.taskExpired = false;            
             this.ready = false;
             this.result = null;
         }

@@ -8,6 +8,15 @@ class MyStore extends IStore
 
 }
 
+async function load()
+{
+  window.x = await wh.get("iip://localhost:5001/db/my", {username: "demo", password: "1234"});
+  console.log(window.x);
+}
+
+load();
+
+/*
 wh.get("iip://localhost:5001/db/my", {username: "demo", password: "1234"})
     .then(x=>{
       console.log("connected", x);
@@ -16,3 +25,4 @@ wh.get("iip://localhost:5001/db/my", {username: "demo", password: "1234"})
     }).catch(x=>{
       console.log("error", x);
     });
+    */
