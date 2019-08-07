@@ -25,7 +25,7 @@
  */
 
 "use strict";  
-import IDestructible from '../Engine/IDestructible.js';
+import IDestructible from '../Core/IDestructible.js';
 
 export default class KeyList
  {
@@ -33,6 +33,14 @@ export default class KeyList
      {
          this.keys = [];
          this.values = [];
+     }
+
+     toObject()
+     {
+        var rt = {};
+        for(var i = 0; i < this.keys.length; i++)
+            rt[this.keys[i]]=this.values[i];
+        return rt;
      }
 
      at(index)

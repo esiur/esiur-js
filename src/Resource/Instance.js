@@ -26,7 +26,7 @@
 
 "use strict";  
 
-import IEventHandler from '../Engine/IEventHandler.js';
+import IEventHandler from '../Core/IEventHandler.js';
 import IPermissionsManager from '../Security/Permissions/IPermissionsManager.js';
 import StructureArray from '../Data/StructureArray.js';
 import AutoList from '../Data/AutoList.js';

@@ -27,7 +27,7 @@
 "use strict";  
 
 import IResource from '../../Resource/IResource.js';
-import AsyncReply from '../../Engine/AsyncReply.js';
+import AsyncReply from '../../Core/AsyncReply.js';
 import Codec from '../../Data/Codec.js';
 import Structure from '../../Data/Structure.js';
 import IIPPacketAction from '../Packets//IIPPacketAction.js';

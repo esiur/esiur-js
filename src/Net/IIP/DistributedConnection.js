@@ -35,11 +35,11 @@ import SHA256 from '../../Security/Integrity/SHA256.js';
 import {BL, DC} from '../../Data/DataConverter.js';
 import SendList from '../SendList.js';
 
-import AsyncReply from '../../Engine/AsyncReply.js';
+import AsyncReply from '../../Core/AsyncReply.js';
 import Codec from '../../Data/Codec.js';
 import NetworkBuffer from '../Sockets/NetworkBuffer.js';
 import KeyList from '../../Data/KeyList.js';
-import AsyncQueue from '../../Engine/AsyncQueue.js';
+import AsyncQueue from '../../Core/AsyncQueue.js';
 import Warehouse from '../../Resource/Warehouse.js';
 
 import IIPAuthPacket from "../Packets/IIPAuthPacket.js";
@@ -53,9 +53,9 @@ import IIPPacketCommand from "../Packets/IIPPacketCommand.js";
 import IIPPacketEvent from "../Packets/IIPPacketEvent.js";
 import IIPPacketReport from "../Packets//IIPPacketReport.js";
 
-import ErrorType from "../../Engine/ErrorType.js";
-import ProgressType from "../../Engine/ProgressType.js";
-import ExceptionCode from "../../Engine/ExceptionCode.js";
+import ErrorType from "../../Core/ErrorType.js";
+import ProgressType from "../../Core/ProgressType.js";
+import ExceptionCode from "../../Core/ExceptionCode.js";
 
 import DistributedResource from './DistributedResource.js';
 import ResourceTemplate from '../../Resource/Template/ResourceTemplate.js';
@@ -64,6 +64,7 @@ import DistributedResourceQueueItem from './DistributedResourceQueueItem.js';
 import DistributedResourceQueueItemType from './DistributedResourceQueueItemType.js';
 
 import DistributedPropertyContext from './DistributedPropertyContext.js';
+import { ResourceTrigger } from '../../Resource/IResource.js';
 
 export default class DistributedConnection extends IStore {
 
@@ -134,81 +135,6 @@ export default class DistributedConnection extends IStore {
     }
 
 
-    open(settings = {})
-    {
-
-        var { domain = null, 
-            secure = false,
-             username = "guest", 
-             password = "", 
-             checkInterval = 30, 
-             connectionTimeout = 600, 
-             revivingTime = 120, 
-             debug = false} = settings;
-
-        this.openReply = new AsyncReply();
-
-        var hostname = this.instance.name.split("://", 2)[1].split("/", 2)[0];
-
-        // assign domain from hostname if not provided
-        domain = domain ? domain : hostname.split(":")[0];
-
-        this.session.localAuthentication.domain = domain;
-        this.session.localAuthentication.username = username;
-
-        this.localPassword = DC.stringToBytes(password);
-
-        var url = `ws${secure ? 's' : ''}://${hostname}`;
-
-
-        this.debug = debug;
-        this.totalReceived = 0;
-        this.totalSent = 0;
-
-        this.checkInterval = checkInterval * 1000; // check every 30 seconds
-        this.connectionTimeout = connectionTimeout * 1000; // 10 minutes (4 pings failed)
-        this.revivingTime = revivingTime * 1000; // 2 minutes
-        this.lastAction = Date.now();
-
-        this.socket = new WebSocket(url, "iip");
-        this.socket.binaryType = "arraybuffer";
-        this.socket.connection = this;
-        this.socket.networkBuffer = new NetworkBuffer();
-
-        var un = DC.stringToBytes(username);
-        var dmn = DC.stringToBytes(domain);
-        var self = this;
-
-        this.socket.onopen = function () {
-            var bl = BL();
-            bl.addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(self.localNonce).addUint8(un.length).addUint8Array(un);
-            self.send(bl.toArray());
-        };
-
-        this.socket.onmessage = function (msg) {
-
-            //console.log("Rec", msg.data.byteLength);
-
-            this.networkBuffer.writeAll(msg.data);
-
-            self.lastAction = new Date();
-
-            while (this.networkBuffer.available > 0 && !this.networkBuffer.protected)
-                self.receive(this.networkBuffer);
-
-
-        };
-
-        this.socket.onclose = function(event)
-        {
-            if (this.connection.openReply)
-                this.connection.openReply.triggerError(0, 0, "Host not reachable");
-
-            self.close(event);
-        };
-
-        return this.openReply;
-    }
 
     processPacket(msg, offset, ends, data)
     {
@@ -590,8 +516,85 @@ export default class DistributedConnection extends IStore {
         }
     }
 
-    trigger(trigger) {
-        return true;
+    trigger(trigger) 
+    {    
+        if (trigger == ResourceTrigger.Open)
+        {
+            var { domain = null, 
+                secure = false,
+                 username = "guest", 
+                 password = "", 
+                 checkInterval = 30, 
+                 connectionTimeout = 600, 
+                 revivingTime = 120, 
+                 debug = false} = this.instance.attributes.toObject();
+    
+            this.openReply = new AsyncReply();
+    
+            var hostname = this.instance.name.split("://", 2)[1].split("/", 2)[0];
+    
+            // assign domain from hostname if not provided
+            domain = domain ? domain : hostname.split(":")[0];
+    
+            this.session.localAuthentication.domain = domain;
+            this.session.localAuthentication.username = username;
+    
+            this.localPassword = DC.stringToBytes(password);
+    
+            var url = `ws${secure ? 's' : ''}://${hostname}`;
+    
+    
+            this.debug = debug;
+            this.totalReceived = 0;
+            this.totalSent = 0;
+    
+            this.checkInterval = checkInterval * 1000; // check every 30 seconds
+            this.connectionTimeout = connectionTimeout * 1000; // 10 minutes (4 pings failed)
+            this.revivingTime = revivingTime * 1000; // 2 minutes
+            this.lastAction = Date.now();
+    
+            this.socket = new WebSocket(url, "iip");
+            this.socket.binaryType = "arraybuffer";
+            this.socket.connection = this;
+            this.socket.networkBuffer = new NetworkBuffer();
+    
+            var un = DC.stringToBytes(username);
+            var dmn = DC.stringToBytes(domain);
+            var self = this;
+    
+            this.socket.onopen = function () {
+                var bl = BL();
+                bl.addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(self.localNonce).addUint8(un.length).addUint8Array(un);
+                self.send(bl.toArray());
+            };
+    
+            this.socket.onmessage = function (msg) {
+    
+                //console.log("Rec", msg.data.byteLength);
+    
+                this.networkBuffer.writeAll(msg.data);
+    
+                self.lastAction = new Date();
+    
+                while (this.networkBuffer.available > 0 && !this.networkBuffer.protected)
+                    self.receive(this.networkBuffer);
+    
+    
+            };
+    
+            this.socket.onclose = function(event)
+            {
+                if (this.connection.openReply)
+                    this.connection.openReply.triggerError(0, 0, "Host not reachable");
+    
+                self.close(event);
+            };
+    
+            return this.openReply;
+    
+        }
+
+        return new AsyncReply(true);
     }
 
     put(resource) {
@@ -1948,7 +1951,7 @@ export default class DistributedConnection extends IStore {
                             .then(function(ar)
             {
                 rt.trigger(true);
-            }).error(function(ex) { rt.triggerChunk(ex); });
+            }).error(function(ex) { rt.triggerError(ex); });
         }
 
         return rt;

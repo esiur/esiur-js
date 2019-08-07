@@ -26,15 +26,16 @@
 
 "use strict";  
 
-import AsyncReply from '../Engine/AsyncReply.js';
+import AsyncReply from '../Core/AsyncReply.js';
 import ResourceTemplate from '../Resource/Template/ResourceTemplate.js';
-import IEventHandler from '../Engine/IEventHandler.js';
+import IEventHandler from '../Core/IEventHandler.js';
 import AutoList from '../Data/AutoList.js';
 import KeyList from '../Data/KeyList.js';
 import DistributedConnection from '../Net/IIP/DistributedConnection.js';
 import MemoryStore from '../Stores/MemoryStore.js';
 import Instance from '../Resource/Instance.js';
 import IStore from './IStore.js';
+import { ResourceTrigger } from './IResource.js';
 
 
 export class WH extends IEventHandler
@@ -52,14 +53,14 @@ export class WH extends IEventHandler
         this._register("disconnected");
     }
 
-    new(type, name, store = null, parent = null, manager = null)
+    new(type, name, store = null, parent = null, manager = null, attributes = null)
     {
         var res = new type();
-        this.put(res, name, store, parent, null, 0, manager);
+        this.put(res, name, store, parent, null, 0, manager, attributes);
         return res;
     }
 
-    get(id, settings)
+    get(id, attributes = null, parent = null, manager = null)
     {
         if (Number.isInteger(id))
         {
@@ -114,8 +115,9 @@ export class WH extends IEventHandler
 
                 if (handler = this.protocols.item(url[0]))
                 {
-                    var store = this.new(handler, url[0] + "://" + hostname);
-                    store.open(settings).then(x=>{
+                    var store = handler();
+                    this.put(store, url[0] + "://" + hostname, null, parent, null, 0, manager, attributes);
+                    store.trigger(ResourceTrigger.Open).then(x=>{
                         if (pathname.length > 0 && pathname != "")
                             store.get(pathname).then(r=>{
                                 rt.trigger(r);
@@ -177,10 +179,14 @@ export class WH extends IEventHandler
         return true;
     }
 
-    put(resource, name, store, parent, customTemplate = null, age = 0, manager = null){
+    put(resource, name, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
+
         resource.instance = new Instance(this.resourceCounter++, name, resource, store, customTemplate, age);
         //resource.instance.children.on("add", Warehouse._onChildrenAdd).on("remove", Warehouse._onChildrenRemove);
         //resource.instance.parents.on("add", Warehouse._onParentsAdd).on("remove", Warehouse._onParentsRemove);
+        
+        if (attributes != null)
+            resource.instance.setAttributes(attributes);
 
         if (manager != null)
             resource.instance.managers.add(manager);
@@ -294,8 +300,8 @@ export class WH extends IEventHandler
 
 let Warehouse  = new WH();
 
-Warehouse.protocols.add("iip", DistributedConnection);
-Warehouse.protocols.add("mem", MemoryStore);
+Warehouse.protocols.add("iip", () => new DistributedConnection());
+Warehouse.protocols.add("mem", () => new MemoryStore());
 
 export default Warehouse;
 

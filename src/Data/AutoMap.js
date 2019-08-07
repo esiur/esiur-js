@@ -25,8 +25,8 @@
  */
 
 "use strict";  
-import IEventHandler from '../Engine/IEventHandler.js';
-import IDestructible from '../Engine/IDestructible.js';
+import IEventHandler from '../Core/IEventHandler.js';
+import IDestructible from '../Core/IDestructible.js';
 
 export default class AutoMap extends IEventHandler
 {

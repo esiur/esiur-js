@@ -26,11 +26,11 @@
 
 "use strict";  
 
-import IDestructible from '../Engine/IDestructible.js';
+import IDestructible from '../Core/IDestructible.js';
 
 export const ResourceTrigger =
 {
-    Loaded : 0,
+        Open : 0,
         Initialize: 1,
         Terminate: 2,
         Configure: 3,
