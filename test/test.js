@@ -10,7 +10,8 @@ class MyStore extends IStore
 
 async function load()
 {
-  window.x = await wh.get("iip://localhost:5001/db/my", {username: "demo", password: "1234"});
+//  window.x = await wh.get("iip://localhost:5001/db/my", {username: "demo", password: "1234"});
+  window.x = await wh.get("iip://chat.go.iq:5001/sys/hd", {username: "admin", password: "delta"});
 
   console.log(window.x);
 }

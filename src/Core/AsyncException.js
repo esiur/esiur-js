@@ -36,7 +36,7 @@ export default class AsyncException extends Error
 
      raise(type, code, message)
      {
-         this.type = (type == 0 ? "Management" : "Execusion");
+         this.type = type;
          this.code = code;
 
          if (type == 0)
@@ -56,6 +56,6 @@ export default class AsyncException extends Error
 
      toString()
      {
-         return this.type + " (" + this.code + ") : " + this.message;
+         return (this.type == 0 ? "Management" : "Exception") + " (" + this.code + ") : " + this.message;
      }
  }

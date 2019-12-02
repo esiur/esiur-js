@@ -1,4 +1,4 @@
-class Esiur_Stores_MemoryStore extends IUIWidget
+class Esyur_Stores_MemoryStore extends IUIWidget
 {
     constuctor()
     {
@@ -6,4 +6,4 @@ class Esiur_Stores_MemoryStore extends IUIWidget
     }
 }
 
-IUI.module("Esiur.Stores.MemoryStore", Esiur_Stores_MemoryStore);
+IUI.module("Esyur.Stores.MemoryStore", Esyur_Stores_MemoryStore);

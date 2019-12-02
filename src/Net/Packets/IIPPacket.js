@@ -59,7 +59,8 @@ export default class IIPPacket
     {
         if (offset + needed > ends)
         {
-            this.dataLengthNeeded = needed - (ends - this.originalOffset);
+            this.dataLengthNeeded = needed - (ends - offset);
+//            this.dataLengthNeeded = needed - (ends - this.originalOffset);
             return true;
         }
         else

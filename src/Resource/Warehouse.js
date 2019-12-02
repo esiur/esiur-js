@@ -60,82 +60,78 @@ export class WH extends IEventHandler
         return res;
     }
 
+    getById(id)
+    {
+        return new AsyncReply(this.resources.item(id));
+    }
+    
     get(id, attributes = null, parent = null, manager = null)
     {
-        if (Number.isInteger(id))
+    
+        var p = id.split('/');
+        var res = null;
+
+        for(var s = 0; s < this.stores.length; s++)
         {
-            //if (Warehouse.resources.contains(id))
-                return new AsyncReply(this.resources.item(id));
-            //else
-            //    return null;
-        }
-        else
-        {
-            var p = id.split('/');
-            var res = null;
-
-            for(var s = 0; s < this.stores.length; s++)
+            var d = this.stores.at(s);
+            if (p[0] == d.instance.name)
             {
-                var d = this.stores.at(s);
-                if (p[0] == d.instance.name)
+                var i = 1;
+                res = d;
+                while(p.length > i)
                 {
-                    var i = 1;
-                    res = d;
-                    while(p.length > i)
-                    {
-                        var si = i;
+                    var si = i;
 
-                        for (var r = 0; r < res.instance.children.length; r++)
-                            if (res.instance.children.item(r).instance.name == p[i])
-                            {
-                                i++;
-                                res = res.instance.children.item(r);
-                                break;
-                            }
+                    for (var r = 0; r < res.instance.children.length; r++)
+                        if (res.instance.children.item(r).instance.name == p[i])
+                        {
+                            i++;
+                            res = res.instance.children.item(r);
+                            break;
+                        }
 
-                        if (si == i)
-                            // not found, ask the store
-                            return d.get(id.substring(p[0].length + 1));
-                    }
-
-                    return new AsyncReply(res);
-                }
-            }
-
-            // Should we create a new store ?
-            if (id.includes("://"))
-            {
-                var url = id.split("://", 2);
-                var hostname = url[1].split("/", 2)[0];
-                var pathname = url[1].split("/").splice(1).join("/");
-                var handler;
-
-                var rt = new AsyncReply();
-                var self = this;
-
-                if (handler = this.protocols.item(url[0]))
-                {
-                    var store = handler();
-                    this.put(store, url[0] + "://" + hostname, null, parent, null, 0, manager, attributes);
-                    store.trigger(ResourceTrigger.Open).then(x=>{
-                        if (pathname.length > 0 && pathname != "")
-                            store.get(pathname).then(r=>{
-                                rt.trigger(r);
-                            }).error(e => rt.triggerError(e));
-                        else
-                            rt.trigger(store);
-                            
-                    }).error(e => {
-                        rt.triggerError(e); 
-                        self.remove(store);
-                    });
+                    if (si == i)
+                        // not found, ask the store
+                        return d.get(id.substring(p[0].length + 1));
                 }
 
-                return rt;
+                return new AsyncReply(res);
+            }
+        }
+
+        // Should we create a new store ?
+        if (id.includes("://"))
+        {
+            var url = id.split("://", 2);
+            var hostname = url[1].split("/", 2)[0];
+            var pathname = url[1].split("/").splice(1).join("/");
+            var handler;
+
+            var rt = new AsyncReply();
+            var self = this;
+
+            if (handler = this.protocols.item(url[0]))
+            {
+                var store = handler();
+                this.put(store, url[0] + "://" + hostname, null, parent, null, 0, manager, attributes);
+                store.trigger(ResourceTrigger.Open).then(x=>{
+                    if (pathname.length > 0 && pathname != "")
+                        store.get(pathname).then(r=>{
+                            rt.trigger(r);
+                        }).error(e => rt.triggerError(e));
+                    else
+                        rt.trigger(store);
+                        
+                }).error(e => {
+                    rt.triggerError(e); 
+                    self.remove(store);
+                });
             }
 
-            return new AsyncReply(null);
+            return rt;
         }
+
+        return new AsyncReply(null);
     }
 
 

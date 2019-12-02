@@ -1,4 +1,4 @@
-# Esiur.JS
-Esiur Library for Javascript
+# Esyur.JS
+Esyur Library for Javascript
 
 # Usage

@@ -1,5 +1,5 @@
 exports.printMsg = function() {
-  console.log("Esiur 1.1");
+  console.log("Esyur 1.1");
 }
 
 module.exports = { wh };

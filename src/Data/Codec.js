@@ -200,7 +200,7 @@ export default class Codec {
     }
 
     static parseResource(data, offset) {
-        return Warehouse.get(data.getUint32(offset));
+        return Warehouse.getById(data.getUint32(offset));
     }
 
     static parseDistributedResource(data, offset, connection) {
@@ -210,7 +210,7 @@ export default class Codec {
         // find the object
         var iid = data.getUint32(offset);
 
-        return connection.fetch(iid);// Warehouse.Get(iid);
+        return connection.fetch(iid);// Warehouse.getById(iid);
     }
 
             /// <summary>
@@ -241,7 +241,7 @@ export default class Codec {
                 previous = new AsyncReply(null);
             else if (result == ResourceComparisonResult.Local)
             {
-                previous = Warehouse.get(data.getUint32(offset));
+                previous = Warehouse.getById(data.getUint32(offset));
                 offset += 4;
             }
             else if (result == ResourceComparisonResult.Distributed)
@@ -269,7 +269,7 @@ export default class Codec {
                 }
                 else if (result == ResourceComparisonResult.Local)
                 {
-                    current = Warehouse.get(data.getUint32(offset));
+                    current = Warehouse.getById(data.getUint32(offset));
                     offset += 4;
                 }
                 else if (result == ResourceComparisonResult.Distributed)
@@ -766,7 +766,7 @@ static isLocalResource(resource, connection) {
 
 
 
-static getDataType(value) {
+static getDataType(value, connection) {
         switch (typeof value) {
             case "number":
                 // float or ?

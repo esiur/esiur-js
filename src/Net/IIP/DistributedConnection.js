@@ -68,9 +68,17 @@ import { ResourceTrigger } from '../../Resource/IResource.js';
 
 export default class DistributedConnection extends IStore {
 
+ 
     send(data) {
-        //console.log("Send", data.length);
-        this.socket.send(data.buffer);
+
+        if (this.holdSending)
+        {
+           //console.log("hold ", data.length);
+           this.sendBuffer.writeAll(data);
+        }
+        else
+            //console.log("Send", data.length);
+            this.socket.send(data.buffer);
     }
 
     sendParams(doneReply) {
@@ -516,6 +524,25 @@ export default class DistributedConnection extends IStore {
         }
     }
 
+    hold()
+    {
+        this.holdSending = true;
+    }
+
+    unhold()
+    {
+        if (this.holdSending)
+        {   
+            var msg = this.sendBuffer.read();
+
+            if (msg == null || msg.length == 0)
+                return;
+
+            this.socket.send(msg);
+            this.holdSending = false;
+        }
+    }
+
     trigger(trigger) 
     {    
         if (trigger == ResourceTrigger.Open)
@@ -576,9 +603,10 @@ export default class DistributedConnection extends IStore {
     
                 self.lastAction = new Date();
     
+                self.hold();
                 while (this.networkBuffer.available > 0 && !this.networkBuffer.protected)
                     self.receive(this.networkBuffer);
-    
+                self.unhold();
     
             };
     
@@ -873,7 +901,7 @@ export default class DistributedConnection extends IStore {
         var self = this;
 
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
 
                 if (r.instance.applicable(self.session, ActionType.Attach, null) == Ruling.Denied)
@@ -916,7 +944,7 @@ export default class DistributedConnection extends IStore {
     IIPRequestReattachResource(callback, resourceId, resourceAge) {
         var self = this;
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (res != null) {
                 r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
                 r.instance.on("ResourceModified", self.instance_propertyModified, self);
@@ -937,7 +965,7 @@ export default class DistributedConnection extends IStore {
     IIPRequestDetachResource(callback, resourceId) {
         var self = this;
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
                 r.instance.off("ResourceEventOccurred", self.instance_eventOccurred);
                 r.instance.off("ResourceModified", self.instance_propertyModified);
@@ -955,7 +983,7 @@ export default class DistributedConnection extends IStore {
 
     IIPRequestCreateResource(callback, storeId, parentId, content) {
         var self = this;
-        Warehouse.get(storeId).then(function(store)
+        Warehouse.getById(storeId).then(function(store)
             {
                 if (store == null)
                 {
@@ -976,7 +1004,7 @@ export default class DistributedConnection extends IStore {
                     return;
                 }
 
-                Warehouse.get(parentId).then(function(parent)
+                Warehouse.getById(parentId).then(function(parent)
                 {
 
                     // check security
@@ -1039,7 +1067,7 @@ export default class DistributedConnection extends IStore {
 
     IIPRequestDeleteResource(callback, resourceId) {
         var self = this;
-        Warehouse.get(resourceId).then(function(r)
+        Warehouse.getById(resourceId).then(function(r)
             {
                 if (r == null)
                 {
@@ -1096,7 +1124,7 @@ export default class DistributedConnection extends IStore {
 
         var self = this;
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (r != null)
                 self.sendReply(IIPPacketAction.TemplateFromResourceId, callback)
                             .addUint32(r.instance.template.content.length)
@@ -1113,7 +1141,7 @@ export default class DistributedConnection extends IStore {
 
         var self = this;
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
                 Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
                     var ft = r.instance.template.getFunctionTemplateByIndex(index);
@@ -1194,7 +1222,7 @@ export default class DistributedConnection extends IStore {
 
         var self = this;
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
                 Codec.parseStructure(content, 0, content.Length, self).then(function (namedArgs) {
                     var ft = r.instance.template.getFunctionTemplateByIndex(index);
@@ -1282,7 +1310,7 @@ export default class DistributedConnection extends IStore {
         
         var self = this;
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
                 var pt = r.instance.template.getFunctionTemplateByIndex(index);
                 if (pt != null) {
@@ -1312,7 +1340,7 @@ export default class DistributedConnection extends IStore {
         
         var self = this;
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
                 var pt = r.instance.template.getFunctionTemplateByIndex(index);
                 if (pt != null) {
@@ -1343,7 +1371,7 @@ export default class DistributedConnection extends IStore {
         
         var self = this;
 
-        Warehouse.get(resourceId).then(function (r) {
+        Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
 
 
@@ -1399,7 +1427,7 @@ export default class DistributedConnection extends IStore {
     IIPRequestInquireResourceHistory(callback, resourceId, fromDate, toDate)
     {
         var self = this;
-        Warehouse.get(resourceId).then(function(r)
+        Warehouse.getById(resourceId).then(function(r)
         {
             if (r != null)
             {
@@ -1678,7 +1706,7 @@ export default class DistributedConnection extends IStore {
     IIPRequestAddChild(callback, parentId, childId)
     {
         var self = this;
-        Warehouse.get(parentId).then(function(parent)
+        Warehouse.getById(parentId).then(function(parent)
         {
             if (parent == null)
             {
@@ -1686,7 +1714,7 @@ export default class DistributedConnection extends IStore {
                 return;
             }
 
-            Warehouse.get(childId).then(function(child)
+            Warehouse.getById(childId).then(function(child)
             {
                 if (child == null)
                 {
@@ -1720,7 +1748,7 @@ export default class DistributedConnection extends IStore {
     {
         var self = this;
 
-        Warehouse.get(parentId).then(function(parent)
+        Warehouse.getById(parentId).then(function(parent)
         {
             if (parent == null)
             {
@@ -1728,7 +1756,7 @@ export default class DistributedConnection extends IStore {
                 return;
             }
 
-            Warehouse.get(childId).then(function(child)
+            Warehouse.getById(childId).then(function(child)
             {
                 if (child == null)
                 {
@@ -1761,7 +1789,7 @@ export default class DistributedConnection extends IStore {
     IIPRequestRenameResource(callback, resourceId, name)
     {
         var self = this;
-        Warehouse.get(resourceId).then(function(resource)
+        Warehouse.getById(resourceId).then(function(resource)
         {
             if (resource == null)
             {
@@ -1784,7 +1812,7 @@ export default class DistributedConnection extends IStore {
     IIPRequestResourceChildren(callback, resourceId)
     {
         var self = this;
-        Warehouse.get(resourceId).then(function(resource)
+        Warehouse.getById(resourceId).then(function(resource)
         {
             if (resource == null)
             {
@@ -1803,7 +1831,7 @@ export default class DistributedConnection extends IStore {
     {
         var self = this;
 
-        Warehouse.get(resourceId).then(function(resource)
+        Warehouse.getById(resourceId).then(function(resource)
         {
             if (resource == null)
             {
@@ -1819,7 +1847,7 @@ export default class DistributedConnection extends IStore {
 
     IIPRequestClearAttributes(callback, resourceId, attributes, all = false)
     {
-        Warehouse.get(resourceId).then(function(r)
+        Warehouse.getById(resourceId).then(function(r)
         {
             if (r == null)
             {
@@ -1851,7 +1879,7 @@ export default class DistributedConnection extends IStore {
     {
         var self = this;
 
-        Warehouse.get(resourceId).then(function(r)
+        Warehouse.getById(resourceId).then(function(r)
         {
             if (r == null)
             {

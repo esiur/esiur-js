@@ -1,21 +1,21 @@
 {
-  "name": "esiur",
+  "name": "Esyur",
   "version": "1.3.0",
   "description": "Distributed Object Framework",
-  "main": "esiur.js",
+  "main": "Esyur.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/esiur/esiur-js.git"
+    "url": "git+https://github.com/esyur/esyur-js.git"
   },
   "author": "Ahmed Zamil",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/esiur/esiur-js/issues"
+    "url": "https://github.com/esyur/esyur-js/issues"
   },
-  "homepage": "https://github.com/esiur/esiur-js#readme",
+  "homepage": "https://github.com/esyur/esyur-js#readme",
   "dependencies": {
     "ws": "^6.2.0"
   }

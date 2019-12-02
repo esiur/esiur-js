@@ -54,7 +54,7 @@ export default class IResource extends IDestructible
     static getTemplate()
     {
         return {
-                namespace: "Esiur",
+                namespace: "Esyur",
                 properties: [],
                 functions: [],
                 events: []

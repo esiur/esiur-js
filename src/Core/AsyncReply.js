@@ -30,13 +30,21 @@ import AsyncException from './AsyncException.js';
 
 export default class AsyncReply extends Promise
 {
-    then(callback)
+    then(callback, onError)
     {
-        this.callbacks.push(callback);
-        
-        if (this.ready)
-            callback(this.result, this);
-
+		if (callback != undefined)
+		{
+			this.callbacks.push(callback);
+			
+			if (this.ready)
+				callback(this.result, this);
+		}
+		
+		if (onError != undefined)
+		{
+			this.error(onError);
+		}
+		
         return this;
     }
 
@@ -46,11 +54,6 @@ export default class AsyncReply extends Promise
         this.then(callback);
     }
 
-    // Alias for error()
-    catch(callback)
-    {
-        return this.error(callback);
-    }
         
     error(callback)
     {
@@ -103,7 +106,7 @@ export default class AsyncReply extends Promise
             this.exception.raise(type, code, message);
 
         if (this.errorCallbacks.length == 0)
-            throw this.exception;
+			throw this.exception;
         else
             for(var i = 0; i < this.errorCallbacks.length; i++)
                 this.errorCallbacks[i](this.exception, this);
