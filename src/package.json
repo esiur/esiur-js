@@ -1,8 +1,8 @@
 {
-  "name": "Esyur",
-  "version": "1.3.0",
+  "name": "esyur",
+  "version": "1.3.1",
   "description": "Distributed Object Framework",
-  "main": "Esyur.js",
+  "main": "esyur.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
