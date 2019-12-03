@@ -584,7 +584,8 @@ export default class DistributedConnection extends IStore {
             this.socket.binaryType = "arraybuffer";
             this.socket.connection = this;
             this.socket.networkBuffer = new NetworkBuffer();
-    
+            this.sendBuffer = new NetworkBuffer();
+            
             var un = DC.stringToBytes(username);
             var dmn = DC.stringToBytes(domain);
             var self = this;
