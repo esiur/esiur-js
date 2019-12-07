@@ -298,7 +298,7 @@ export default class Codec {
         static composePropertyValueArray(array, connection, prependLength = false)
         {
             var rt = BL();
-            for (var i = 0; i < array.Length; i++)
+            for (var i = 0; i < array.length; i++)
                 rt.addUint8Array(Codec.composePropertyValue(array[i], connection));
             if (prependLength)
                 rt.addUint32(rt.length, 0);
@@ -647,7 +647,7 @@ export default class Codec {
         rt.addUint8(comparision);
         rt.addUint8Array(Codec.composeStructure(structures[0], connection));
 
-        for (var i = 1; i < structures.Length; i++) {
+        for (var i = 1; i < structures.length; i++) {
             comparision = Codec.compareStructure(structures[i - 1], structures[i], connection);
             rt.addUint8(comparision);
 
@@ -747,7 +747,7 @@ static isLocalResource(resource, connection) {
     else if (comparsion == ResourceComparisonResult.Distributed)
         rt.addUint32(resources[0].instance.id);
 
-    for (var i = 1; i < resources.Length; i++)
+    for (var i = 1; i < resources.length; i++)
     {
         comparsion = Codec.compareResource(resources[i - 1], resources[i], connection);
         rt.addUint8(comparsion);

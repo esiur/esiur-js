@@ -65,9 +65,62 @@ export class WH extends IEventHandler
         return new AsyncReply(this.resources.item(id));
     }
     
-    get(id, attributes = null, parent = null, manager = null)
+    get(path, attributes = null, parent = null, manager = null)
     {
-    
+        var rt = new AsyncReply();
+        var self = this;
+
+        // Should we create a new store ?
+
+        if (path.includes("://"))
+        {
+
+            var url = path.split("://", 2);
+            var hostname = url[1].split("/", 2)[0];
+            var pathname = url[1].split("/").splice(1).join("/");
+
+            var handler;
+
+            if (handler = this.protocols.item(url[0]))
+            {
+
+                
+                var store = handler();
+                this.put(store, hostname, null, parent, null, 0, manager, attributes);
+
+
+                store.trigger(ResourceTrigger.Open).then(x => {
+
+                    this.warehouseIsOpen = true;
+
+                    if (pathname.length > 0 && pathname != "")
+                        store.get(pathname).then(r => {
+                            rt.trigger(r);
+                        }).error(e => rt.triggerError(e));
+                    else
+                        rt.trigger(store);
+                }).error(e => {
+                    rt.triggerError(e);
+                    self.remove(store);
+                });
+
+                return rt;
+            }
+        }
+        
+        
+        this.query(path).then(rs =>
+        {
+            if (rs != null && rs.length > 0)
+                rt.trigger(rs[0]);
+            else
+                rt.trigger(null);
+        });
+        
+        return rt;
+  
+
+        /*
         var p = id.split('/');
         var res = null;
 
@@ -132,6 +185,7 @@ export class WH extends IEventHandler
         }
 
         return new AsyncReply(null);
+        */
     }
 
 
@@ -287,10 +341,56 @@ export class WH extends IEventHandler
         return rt;
     }
 
-    query(path)
+    async query(path)
     {
-        var p = path.split('/');
-        return new AsyncReply(this._qureyIn(p, 0, this.stores));
+        //var p = path.split('/');
+        //return new AsyncReply(this._qureyIn(p, 0, this.stores));
+
+        
+        
+        var rt = new AsyncReply();
+
+        var p = path.trim().split('/');
+        var resource;
+
+        for(var i = 0; i < this.stores.length; i++)
+        {
+            let store = this.stores.at(i);
+
+            if (p[0] == store.instance.name)
+            {
+
+                if (p.length == 1)
+                    return [store];
+
+                  
+                var res = await store.get(p.splice(1).join("/"));
+                if (res != null)
+                    return [res];
+                
+                
+                resource = store;
+                for (var i = 1; i < p.length; i++)
+                {
+                    var children = await resource.instance.children.list.filter(x=>x.instance.name == p[i]);// <IResource>(p[i]);
+                    if (children.length > 0)
+                    {
+                        if (i == p.length - 1)
+                            return children;
+                        else
+                            resource = children[0];
+                    }
+                    else
+                        break;
+                }
+
+                return null;
+            }
+
+        }
+
+        return null;
+        
     }
 }
 

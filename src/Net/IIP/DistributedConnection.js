@@ -532,14 +532,15 @@ export default class DistributedConnection extends IStore {
     unhold()
     {
         if (this.holdSending)
-        {   
+        {
+            this.holdSending = false;
+
             var msg = this.sendBuffer.read();
 
             if (msg == null || msg.length == 0)
                 return;
 
             this.socket.send(msg);
-            this.holdSending = false;
         }
     }
 
@@ -558,17 +559,24 @@ export default class DistributedConnection extends IStore {
     
             this.openReply = new AsyncReply();
     
-            var hostname = this.instance.name.split("://", 2)[1].split("/", 2)[0];
+            //var hostname = this.instance.name.split("://", 2)[1].split("/", 2)[0];
     
             // assign domain from hostname if not provided
-            domain = domain ? domain : hostname.split(":")[0];
-    
+     
+
+            var host = this.instance.name.split(':');
+
+            var address = host[0];
+            var port = parseInt(host[1]);
+
+            domain = domain ? domain : address;
+
             this.session.localAuthentication.domain = domain;
             this.session.localAuthentication.username = username;
     
             this.localPassword = DC.stringToBytes(password);
     
-            var url = `ws${secure ? 's' : ''}://${hostname}`;
+            var url = `ws${secure ? 's' : ''}://${this.instance.name}`;
     
     
             this.debug = debug;
@@ -1225,7 +1233,7 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
-                Codec.parseStructure(content, 0, content.Length, self).then(function (namedArgs) {
+                Codec.parseStructure(content, 0, content.length, self).then(function (namedArgs) {
                     var ft = r.instance.template.getFunctionTemplateByIndex(index);
                     if (ft != null) {
                         if (r instanceof DistributedResource) {
@@ -1256,7 +1264,7 @@ export default class DistributedConnection extends IStore {
                                 var pi = ResourceTemplate.getFunctionParameters(fi);
                                 var args = new Array(pi.length);
 
-                                for (var i = 0; i < pi.Length; i++)
+                                for (var i = 0; i < pi.length; i++)
                                 {
                                     if (namedArgs[pi[i]] !== undefined)
                                         args[i] = namedArgs[pi[i]];
@@ -1894,7 +1902,7 @@ export default class DistributedConnection extends IStore {
                 return;
             }
 
-            Codec.parseStructure(attributes, 0, attributes.Length, this).then(function(attrs) {
+            Codec.parseStructure(attributes, 0, attributes.length, this).then(function(attrs) {
                 if (r.instance.setAttributes(attrs, clearAttributes))
                     self.sendReply(clearAttributes ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes,
                               callback)
