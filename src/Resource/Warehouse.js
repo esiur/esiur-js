@@ -51,6 +51,8 @@ export class WH extends IEventHandler
         this.protocols = new KeyList();
         this._register("connected");
         this._register("disconnected");
+        ///this._urlRegex = /^(?:([\S]*):\/\/([^\/]*)\/?)/;
+        this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
     }
 
     new(type, name, store = null, parent = null, manager = null, attributes = null)
@@ -72,29 +74,35 @@ export class WH extends IEventHandler
 
         // Should we create a new store ?
 
-        if (path.includes("://"))
+    
+        if (path.match(this._urlRegex))
+        //if (path.includes("://"))
         {
+            // with port
+            //var url = path.split(/(?:):\/\/([^:\/]*):?(\d*)/);
+            // without port
+            let url = path.split(this._urlRegex);
 
-            var url = path.split("://", 2);
-            var hostname = url[1].split("/", 2)[0];
-            var pathname = url[1].split("/").splice(1).join("/");
-
+            //var url = path.split("://", 2);
+            //var hostname = url[1];// url[1].split("/", 2)[0];
+            //var pathname = url[2];// url[1].split("/").splice(1).join("/");
+            
             var handler;
 
-            if (handler = this.protocols.item(url[0]))
+            if (handler = this.protocols.item(url[1]))
             {
 
                 
                 var store = handler();
-                this.put(store, hostname, null, parent, null, 0, manager, attributes);
+                this.put(store, url[2], null, parent, null, 0, manager, attributes);
 
 
                 store.trigger(ResourceTrigger.Open).then(x => {
 
                     this.warehouseIsOpen = true;
 
-                    if (pathname.length > 0 && pathname != "")
-                        store.get(pathname).then(r => {
+                    if (url[3].length > 0 && url[3] != "")
+                        store.get(url[3]).then(r => {
                             rt.trigger(r);
                         }).error(e => rt.triggerError(e));
                     else
