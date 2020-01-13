@@ -54,7 +54,7 @@ export default class NetworkBuffer {
 
     holdFor(src, offset, size, needed) {
         if (size >= needed)
-            throw new Exception("Size >= Needed !");
+            throw new Error("Size >= Needed !");
 
         this.data = DC.combine(src, offset, size, this.data, 0, this.data.length);
         this.neededDataLength = needed;

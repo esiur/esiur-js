@@ -442,7 +442,7 @@ export default class Codec {
                     length -= cs.size;
                 }
                 else
-                    throw new Exception("Error while parsing ValueInfo structured data");
+                    throw new Error("Error while parsing ValueInfo structured data");
             }
 
             rt.seal();
@@ -536,7 +536,7 @@ export default class Codec {
                 contentLength -= cs.size;
             }
             else
-                throw new Exception("Error while parsing structured data");
+                throw new Error("Error while parsing structured data");
 
         }
 

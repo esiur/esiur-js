@@ -152,20 +152,20 @@ export default class DistributedResource extends IResource
 
     _invokeByArrayArguments(index, args) {
         if (this.destroyed)
-            throw new Exception("Trying to access destroyed object");
+            throw new Error("Trying to access destroyed object");
 
         if (index >= this.instance.template.functions.length)
-            throw new Exception("Function index is incorrect");
+            throw new Error("Function index is incorrect");
 
         return this._p.connection.sendInvokeByArrayArguments(this._p.instanceId, index, args);
     }
 
     _invokeByNamedArguments(index, namedArgs) {
         if (this.destroyed)
-            throw new Exception("Trying to access destroyed object");
+            throw new Error("Trying to access destroyed object");
 
         if (index >= this.instance.template.functions.length)
-            throw new Exception("Function index is incorrect");
+            throw new Error("Function index is incorrect");
 
         return this._p.connection.sendInvokeByNamedArguments(this._p.instanceId, index, namedArgs);
     }

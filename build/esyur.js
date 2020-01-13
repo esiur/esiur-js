@@ -2553,7 +2553,7 @@ function () {
         if (cs.size > 0) {
           offset += cs.size;
           length -= cs.size;
-        } else throw new Exception("Error while parsing ValueInfo structured data");
+        } else throw new Error("Error while parsing ValueInfo structured data");
       }
 
       rt.seal();
@@ -2641,7 +2641,7 @@ function () {
         if (cs.size > 0) {
           offset += cs.size;
           contentLength -= cs.size;
-        } else throw new Exception("Error while parsing structured data");
+        } else throw new Error("Error while parsing structured data");
       }
 
       rt.seal();
@@ -3572,8 +3572,8 @@ var _default = {
   //Array = 0x80,
   VarArray: 0x80,
   BoolArray: 0x81,
-  UInt8Array: 0x82,
-  Int8Array: 0x83,
+  Int8Array: 0x82,
+  UInt8Array: 0x83,
   CharArray: 0x84,
   Int16Array: 0x85,
   UInt16Array: 0x86,
@@ -6024,15 +6024,15 @@ function (_IResource) {
   }, {
     key: "_invokeByArrayArguments",
     value: function _invokeByArrayArguments(index, args) {
-      if (this.destroyed) throw new Exception("Trying to access destroyed object");
-      if (index >= this.instance.template.functions.length) throw new Exception("Function index is incorrect");
+      if (this.destroyed) throw new Error("Trying to access destroyed object");
+      if (index >= this.instance.template.functions.length) throw new Error("Function index is incorrect");
       return this._p.connection.sendInvokeByArrayArguments(this._p.instanceId, index, args);
     }
   }, {
     key: "_invokeByNamedArguments",
     value: function _invokeByNamedArguments(index, namedArgs) {
-      if (this.destroyed) throw new Exception("Trying to access destroyed object");
-      if (index >= this.instance.template.functions.length) throw new Exception("Function index is incorrect");
+      if (this.destroyed) throw new Error("Trying to access destroyed object");
+      if (index >= this.instance.template.functions.length) throw new Error("Function index is incorrect");
       return this._p.connection.sendInvokeByNamedArguments(this._p.instanceId, index, namedArgs);
     }
   }, {
@@ -6988,7 +6988,7 @@ function () {
   }, {
     key: "holdFor",
     value: function holdFor(src, offset, size, needed) {
-      if (size >= needed) throw new Exception("Size >= Needed !");
+      if (size >= needed) throw new Error("Size >= Needed !");
       this.data = _DataConverter["default"].combine(src, offset, size, this.data, 0, this.data.length);
       this.neededDataLength = needed;
     }
