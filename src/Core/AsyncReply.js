@@ -87,6 +87,9 @@ export default class AsyncReply extends Promise
 
     trigger(result)
     {
+        if (this.ready)
+            return;
+
         this.result = result;
         this.ready = true;
 
@@ -114,18 +117,12 @@ export default class AsyncReply extends Promise
 
     triggerProgress(type, value, max)
     {
-        if (this.ready)
-            return;
-
         for(var i = 0; i < this.progressCallbacks.length; i++)
             this.progressCallbacks[i](type, value, max, this);
     }
 
     triggerChunk(value)
     {
-        if (this.ready)
-            return;
-
         for(var i = 0; i < this.chunkCallbacks.length; i++)
             this.chunkCallbacks[i](value, this);
     }
