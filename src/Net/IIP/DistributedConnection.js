@@ -417,7 +417,11 @@ export default class DistributedConnection extends IStore {
                                     }
                                     else {
                                         // incorrect password
-                                        this.sendParams().addUint8(0xc0).addInt32(1).addUint16(5).addString("Error").done();
+                                        this.sendParams().addUint8(0xc0)
+                                                         .addInt32(ExceptionCode.AccessDenied)
+                                                         .addUint16(13)
+                                                         .addString("Access Denied")
+                                                         .done();
                                     }
                                 }
                             });
@@ -471,7 +475,11 @@ export default class DistributedConnection extends IStore {
                                 this.sendParams().addUint8(0x20).addUint16(0).done();
                             }
                             else {
-                                this.sendParams().addUint8(0xc0).addUint32(1).addUint16(5).addString("Error").done();
+                                this.sendParams().addUint8(0xc0)
+                                                 .addUint32(ExceptionCode.ChallengeFailed)
+                                                 .addUint16(16)
+                                                 .addString("Challenge Failed")
+                                                 .done();
                             }
                         }
                         else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished) {

@@ -297,43 +297,43 @@ export default class DC extends Uint8Array
 
     getInt16Array(offset, length)
     {
-        return new Int16Array(this.buffer, offset, length);
+        return new Int16Array(this.clip(offset, length).buffer);
     }
 
     getUint16Array(offset, length)
     {
-        return new Uint16Array(this.buffer, offset, length);
+        return new Uint16Array(this.clip(offset, length).buffer);
     }
 
     getInt32Array(offset, length)
     {
-        return new Int32Array(this.buffer, offset, length);
+        return new Int32Array(this.clip(offset, length).buffer);
     }
 
     getUint32Array(offset, length)
     {
-        return new Uint32Array(this.buffer, offset, length);
+        return new Uint32Array(this.clip(offset, length).buffer);
     }
 
     getFloat32Array(offset, length)
     {
-        return new Float32Array(this.buffer, offset, length);
+        return new Float32Array(this.clip(offset, length).buffer);
     }
 
     getFloat64Array(offset, length)
-    {
-        return new Float64Array(this.buffer, offset, length);
+    {       
+        return new Float64Array(this.clip(offset, length).buffer);
     }
 
     getInt64Array(offset, length)
     {
-        return new Int64Array(this.buffer, offset, length);
+        return new Int64Array(this.clip(offset, length).buffer);
     }
 
 
     getUint64Array(offset, length)
     {
-        return new Uint64Array(this.buffer, offset, length);
+        return new Uint64Array(this.clip(offset, length).buffer);
     }
 
     getBoolean(offset)
