@@ -1401,6 +1401,7 @@ function (_Promise) {
   }, {
     key: "trigger",
     value: function trigger(result) {
+      if (this.ready) return;
       this.result = result;
       this.ready = true;
 
@@ -1420,8 +1421,6 @@ function (_Promise) {
   }, {
     key: "triggerProgress",
     value: function triggerProgress(type, value, max) {
-      if (this.ready) return;
-
       for (var i = 0; i < this.progressCallbacks.length; i++) {
         this.progressCallbacks[i](type, value, max, this);
       }
@@ -1429,8 +1428,6 @@ function (_Promise) {
   }, {
     key: "triggerChunk",
     value: function triggerChunk(value) {
-      if (this.ready) return;
-
       for (var i = 0; i < this.chunkCallbacks.length; i++) {
         this.chunkCallbacks[i](value, this);
       }
@@ -1495,31 +1492,33 @@ var _default = //const ExceptionCode =
 {
   HostNotReachable: 0,
   AccessDenied: 1,
-  ResourceNotFound: 2,
-  AttachDenied: 3,
-  InvalidMethod: 4,
-  InvokeDenied: 5,
-  CreateDenied: 6,
-  AddParentDenied: 7,
-  AddChildDenied: 8,
-  ViewAttributeDenied: 9,
-  UpdateAttributeDenied: 10,
-  StoreNotFound: 11,
-  ParentNotFound: 12,
-  ChildNotFound: 13,
-  ResourceIsNotStore: 14,
-  DeleteDenied: 15,
-  DeleteFailed: 16,
-  UpdateAttributeFailed: 17,
-  GetAttributesFailed: 18,
-  ClearAttributesFailed: 19,
-  TemplateNotFound: 20,
-  RenameDenied: 21,
-  ClassNotFound: 22,
-  MethodNotFound: 23,
-  PropertyNotFound: 24,
-  SetPropertyDenied: 25,
-  ReadOnlyProperty: 26
+  UserNotFound: 2,
+  ChallengeFailed: 3,
+  ResourceNotFound: 4,
+  AttachDenied: 5,
+  InvalidMethod: 6,
+  InvokeDenied: 7,
+  CreateDenied: 8,
+  AddParentDenied: 9,
+  AddChildDenied: 10,
+  ViewAttributeDenied: 11,
+  UpdateAttributeDenied: 12,
+  StoreNotFound: 13,
+  ParentNotFound: 14,
+  ChildNotFound: 15,
+  ResourceIsNotStore: 16,
+  DeleteDenied: 17,
+  DeleteFailed: 18,
+  UpdateAttributeFailed: 19,
+  GetAttributesFailed: 20,
+  ClearAttributesFailed: 21,
+  TemplateNotFound: 22,
+  RenameDenied: 23,
+  ClassNotFound: 24,
+  MethodNotFound: 25,
+  PropertyNotFound: 26,
+  SetPropertyDenied: 27,
+  ReadOnlyProperty: 28
 };
 exports["default"] = _default;
 
@@ -3159,42 +3158,42 @@ function (_Uint8Array) {
   }, {
     key: "getInt16Array",
     value: function getInt16Array(offset, length) {
-      return new Int16Array(this.buffer, offset, length);
+      return new Int16Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getUint16Array",
     value: function getUint16Array(offset, length) {
-      return new Uint16Array(this.buffer, offset, length);
+      return new Uint16Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getInt32Array",
     value: function getInt32Array(offset, length) {
-      return new Int32Array(this.buffer, offset, length);
+      return new Int32Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getUint32Array",
     value: function getUint32Array(offset, length) {
-      return new Uint32Array(this.buffer, offset, length);
+      return new Uint32Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getFloat32Array",
     value: function getFloat32Array(offset, length) {
-      return new Float32Array(this.buffer, offset, length);
+      return new Float32Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getFloat64Array",
     value: function getFloat64Array(offset, length) {
-      return new Float64Array(this.buffer, offset, length);
+      return new Float64Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getInt64Array",
     value: function getInt64Array(offset, length) {
-      return new Int64Array(this.buffer, offset, length);
+      return new Int64Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getUint64Array",
     value: function getUint64Array(offset, length) {
-      return new Uint64Array(this.buffer, offset, length);
+      return new Uint64Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getBoolean",
@@ -4521,7 +4520,7 @@ function (_IStore) {
                       this.readyToEstablish = true;
                     } else {
                       // incorrect password
-                      this.sendParams().addUint8(0xc0).addInt32(1).addUint16(5).addString("Error").done();
+                      this.sendParams().addUint8(0xc0).addInt32(_ExceptionCode["default"].AccessDenied).addUint16(13).addString("Access Denied").done();
                     }
                   }
                 });
@@ -4559,7 +4558,7 @@ function (_IStore) {
                   // send establish request
                   this.sendParams().addUint8(0x20).addUint16(0).done();
                 } else {
-                  this.sendParams().addUint8(0xc0).addUint32(1).addUint16(5).addString("Error").done();
+                  this.sendParams().addUint8(0xc0).addUint32(_ExceptionCode["default"].ChallengeFailed).addUint16(16).addString("Challenge Failed").done();
                 }
               } else if (authPacket.action == _IIPAuthPacketAction["default"].ConnectionEstablished) {
                 this.session.id = authPacket.sessionId;
@@ -9250,8 +9249,17 @@ exports["default"] = void 0;
 
 var _Warehouse = _interopRequireDefault(require("./Resource/Warehouse.js"));
 
-if (window) window.wh = _Warehouse["default"];
+var _Structure = _interopRequireDefault(require("./Data/Structure.js"));
+
+var _DistributedResource = _interopRequireDefault(require("./Net/IIP/DistributedResource.js"));
+
+if (window) {
+  window.wh = _Warehouse["default"];
+  window.Structure = _Structure["default"];
+  window.DistributedResource = _DistributedResource["default"];
+}
+
 var _default = _Warehouse["default"];
 exports["default"] = _default;
 
-},{"./Resource/Warehouse.js":65,"@babel/runtime/helpers/interopRequireDefault":9}]},{},[72]);
+},{"./Data/Structure.js":36,"./Net/IIP/DistributedResource.js":41,"./Resource/Warehouse.js":65,"@babel/runtime/helpers/interopRequireDefault":9}]},{},[72]);
