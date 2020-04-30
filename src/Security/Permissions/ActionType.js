@@ -21,33 +21,25 @@
 */
 
 /** 
- * Created by Ahmed Zamil on 16/11/2017.
+ * Created by Ahmed Zamil on 9/2/2017.
  */
 
 "use strict";
 
-export default class IPermissionsManager
+export default // ActionType =
 {
-    /// <summary>
-    /// Check for permission.
-    /// </summary>
-    /// <param name="resource">IResource.</param>
-    /// <param name="session">Caller sessions.</param>
-    /// <param name="action">Action type</param>
-    /// <param name="member">Function or property to check for permission.</param>
-    /// <returns>Allowed or denined.</returns>
-    applicable(resource, session, action, member, inquirer)
-    {
-
-    }
-
-    initialize(settings, resource)
-    {
-
-    }
-
-    get settings()
-    {
-
-    }
-}
+    Attach: 0,
+    Delete: 1,
+    Execute: 2,
+    GetProperty: 3,
+    SetProperty: 4,
+    CreateResource: 5,
+    UpdateAttributes: 6,
+    InquireAttributes: 7,
+    AddParent: 8,
+    RemoveParent: 9,
+    AddChild: 10,
+    RemoveChild: 11,
+    Rename: 12,
+    ReceiveEvent: 13
+};

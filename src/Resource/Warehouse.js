@@ -82,7 +82,7 @@ export class WH extends IEventHandler
             //var url = path.split(/(?:):\/\/([^:\/]*):?(\d*)/);
             // without port
             let url = path.split(this._urlRegex);
-
+            
             //var url = path.split("://", 2);
             //var hostname = url[1];// url[1].split("/", 2)[0];
             //var pathname = url[2];// url[1].split("/").splice(1).join("/");

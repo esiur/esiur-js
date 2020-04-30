@@ -189,6 +189,9 @@ export default class IIPPacket
                 var cl = data.getUint32(offset);
                 offset += 4;
 
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+
                 this.content = data.clip(offset, cl);
                 offset += cl;
             }

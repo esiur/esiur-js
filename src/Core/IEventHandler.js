@@ -72,6 +72,7 @@ export default class IEventHandler
         return this;
     }
 
+    
     off(event, fn)
     {
         event = event.toLocaleString();

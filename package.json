@@ -1,6 +1,6 @@
 {
   "name": "esyur",
-  "version": "1.4.0",
+  "version": "1.4.6",
   "description": "Distributed Object Framework",
   "main": "esyur.js",
   "scripts": {
@@ -19,14 +19,15 @@
   },
   "homepage": "https://github.com/esyur/esyur-js#readme",
   "dependencies": {
-    "@babel/runtime": "^7.7.7",
-    "ws": "^6.2.0"
+    "@babel/polyfill": "^7.8.3",
+    "@babel/runtime": "^7.8.4",
+    "ws": "^6.2.1"
   },
   "devDependencies": {
-    "@babel/cli": "^7.7.7",
-    "@babel/core": "^7.7.7",
-    "@babel/plugin-transform-runtime": "^7.7.6",
-    "@babel/preset-env": "^7.7.7",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.6",
+    "@babel/plugin-transform-runtime": "^7.8.3",
+    "@babel/preset-env": "^7.8.6",
     "babel-cli": "^6.0.0",
     "babelify": "^10.0.0",
     "browserify": "^16.5.0"

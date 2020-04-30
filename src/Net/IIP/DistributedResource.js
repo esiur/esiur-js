@@ -37,7 +37,15 @@ export default class DistributedResource extends IResource
     destroy()
     {
         this.destroyed = true;
+        this._p.attached = false;
+        this._p.connection.sendDetachRequest(this._p.instanceId);
         this._emit("destroy", this);
+    }
+
+    _suspend()
+    {
+      this._p.suspended = true;
+      this._p.attached = false;
     }
 
     constructor(connection, instanceId, age, link)
@@ -45,7 +53,8 @@ export default class DistributedResource extends IResource
         super();
 
         this._p = {
-            isAttached: false,
+            suspended: false,
+            attached: false,
             connection: connection,
             instanceId: instanceId,
             age: age,
@@ -66,13 +75,16 @@ export default class DistributedResource extends IResource
         return props;
     }
 
-    _attached(properties)
+    _attach(properties)
     {
 
-        if (this._isAttached)
+        if (this._p.attached)
             return false;
         else
         { 
+
+            this._p.suspended = false;
+
             for(var i = 0; i  < properties.length; i++)
             {
                 this.instance.setAge(i, properties[i].age);
@@ -81,7 +93,7 @@ export default class DistributedResource extends IResource
             }
 
 
-            this._p.isAttached = true;
+            this._p.attached = true;
 
             var self = this;
 
@@ -154,6 +166,9 @@ export default class DistributedResource extends IResource
         if (this.destroyed)
             throw new Error("Trying to access destroyed object");
 
+        if (this._p.suspended)
+            throw new Error("Trying to access suspended object");
+
         if (index >= this.instance.template.functions.length)
             throw new Error("Function index is incorrect");
 
@@ -163,6 +178,9 @@ export default class DistributedResource extends IResource
     _invokeByNamedArguments(index, namedArgs) {
         if (this.destroyed)
             throw new Error("Trying to access destroyed object");
+
+        if (this._p.suspended)
+            throw new Error("Trying to access suspended object");
 
         if (index >= this.instance.template.functions.length)
             throw new Error("Function index is incorrect");

@@ -137,7 +137,8 @@ export default class Instance extends IEventHandler
             this.store.record(this.resource, pt.name, value, this.ages[pt.index], now);
 
         super._emit("ResourceModified", this.resource, pt.name, value);  
-        this.resource._emit("modified", pt.name, value);
+        //this.resource._emit("modified", pt.name, value);
+        this.resource._emit(":" + pt.name, value);
     }
 
     modified(propertyName = null)

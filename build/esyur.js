@@ -212,6 +212,8 @@ function _superPropBase(object, property) {
 module.exports = _superPropBase;
 },{"./getPrototypeOf":7}],14:[function(require,module,exports){
 function _typeof(obj) {
+  "@babel/helpers - typeof";
+
   if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
     module.exports = _typeof = function _typeof(obj) {
       return typeof obj;
@@ -1048,9 +1050,7 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 
 var _AsyncReply2 = _interopRequireDefault(require("./AsyncReply.js"));
 
-var AsyncBag =
-/*#__PURE__*/
-function (_AsyncReply) {
+var AsyncBag = /*#__PURE__*/function (_AsyncReply) {
   (0, _inherits2["default"])(AsyncBag, _AsyncReply);
 
   function AsyncBag() {
@@ -1156,9 +1156,7 @@ var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/w
 
 var _ExceptionCode = _interopRequireDefault(require("./ExceptionCode.js"));
 
-var AsyncException =
-/*#__PURE__*/
-function (_Error) {
+var AsyncException = /*#__PURE__*/function (_Error) {
   (0, _inherits2["default"])(AsyncException, _Error);
 
   function AsyncException() {
@@ -1194,7 +1192,7 @@ function (_Error) {
     }
   }]);
   return AsyncException;
-}((0, _wrapNativeSuper2["default"])(Error));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Error));
 
 exports["default"] = AsyncException;
 
@@ -1247,9 +1245,7 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 
 var _AsyncReply2 = _interopRequireDefault(require("./AsyncReply.js"));
 
-var AsyncQueue =
-/*#__PURE__*/
-function (_AsyncReply) {
+var AsyncQueue = /*#__PURE__*/function (_AsyncReply) {
   (0, _inherits2["default"])(AsyncQueue, _AsyncReply);
 
   function AsyncQueue() {
@@ -1264,8 +1260,15 @@ function (_AsyncReply) {
       for (var i = 0; i < self.list.length; i++) {
         if (self.list[i].ready) {
           self.trigger(self.list[i].result);
-          self.list.splice(i, 1);
+          self.ready = false; //self.list.splice(i, 1);
+
+          self.list.shift();
           i--;
+        } else if (self.list[i].failed) {
+          self.ready = false;
+          self.list.shift();
+          i--;
+          console.log("AsyncQueue (Reply Failed)");
         } else break;
       }
 
@@ -1280,11 +1283,12 @@ function (_AsyncReply) {
     value: function add(reply) {
       this.list.push(reply);
       this.ready = false;
-      reply.then(this.processQueue);
+      reply.then(this.processQueue).error(this.processQueue);
     }
   }, {
     key: "remove",
     value: function remove(reply) {
+      console.log("REMOVE QUEUE");
       this.list.splice(this.list.indexOf(reply), 1);
       this.processQueue();
     }
@@ -1345,9 +1349,7 @@ var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/w
 
 var _AsyncException = _interopRequireDefault(require("./AsyncException.js"));
 
-var AsyncReply =
-/*#__PURE__*/
-function (_Promise) {
+var AsyncReply = /*#__PURE__*/function (_Promise) {
   (0, _inherits2["default"])(AsyncReply, _Promise);
   (0, _createClass2["default"])(AsyncReply, [{
     key: "then",
@@ -1464,7 +1466,7 @@ function (_Promise) {
   }
 
   return AsyncReply;
-}((0, _wrapNativeSuper2["default"])(Promise));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Promise));
 
 exports["default"] = AsyncReply;
 
@@ -1569,9 +1571,7 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 
 var _IEventHandler2 = _interopRequireDefault(require("./IEventHandler.js"));
 
-var IDestructible =
-/*#__PURE__*/
-function (_IEventHandler) {
+var IDestructible = /*#__PURE__*/function (_IEventHandler) {
   (0, _inherits2["default"])(IDestructible, _IEventHandler);
   (0, _createClass2["default"])(IDestructible, [{
     key: "destroy",
@@ -1629,9 +1629,7 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-var IEventHandler =
-/*#__PURE__*/
-function () {
+var IEventHandler = /*#__PURE__*/function () {
   (0, _createClass2["default"])(IEventHandler, [{
     key: "_register",
     value: function _register(event) {
@@ -1764,9 +1762,7 @@ var _IEventHandler2 = _interopRequireDefault(require("../Core/IEventHandler.js")
 
 var _IDestructible = _interopRequireDefault(require("../Core/IDestructible.js"));
 
-var AutoList =
-/*#__PURE__*/
-function (_IEventHandler) {
+var AutoList = /*#__PURE__*/function (_IEventHandler) {
   (0, _inherits2["default"])(AutoList, _IEventHandler);
 
   function AutoList() {
@@ -1888,9 +1884,7 @@ var _DataType = _interopRequireDefault(require("./DataType.js"));
 
 var _DataConverter = _interopRequireDefault(require("./DataConverter.js"));
 
-var BinaryList =
-/*#__PURE__*/
-function () {
+var BinaryList = /*#__PURE__*/function () {
   function BinaryList() {
     (0, _classCallCheck2["default"])(this, BinaryList);
     this.list = [];
@@ -2197,9 +2191,7 @@ var _DistributedResource = _interopRequireDefault(require("../Net/IIP/Distribute
 
 var _IResource = _interopRequireDefault(require("../Resource/IResource.js"));
 
-var Codec =
-/*#__PURE__*/
-function () {
+var Codec = /*#__PURE__*/function () {
   function Codec() {
     (0, _classCallCheck2["default"])(this, Codec);
   }
@@ -3029,9 +3021,7 @@ exports.UNIX_EPOCH = UNIX_EPOCH;
 var TWO_PWR_32 = (1 << 16) * (1 << 16);
 exports.TWO_PWR_32 = TWO_PWR_32;
 
-var DC =
-/*#__PURE__*/
-function (_Uint8Array) {
+var DC = /*#__PURE__*/function (_Uint8Array) {
   (0, _inherits2["default"])(DC, _Uint8Array);
 
   function DC(bufferOrSize) {
@@ -3156,44 +3146,57 @@ function (_Uint8Array) {
       return new Uint8Array(this.buffer, offset, length);
     }
   }, {
+    key: "copy",
+    value: function copy(offset, length, elementSize, func, dstType) {
+      var rt = new dstType(length / elementSize);
+      var d = 0,
+          end = offset + length;
+
+      for (var i = offset; i < end; i += elementSize) {
+        rt[d++] = func.call(this, i);
+      }
+
+      return rt;
+    }
+  }, {
     key: "getInt16Array",
     value: function getInt16Array(offset, length) {
-      return new Int16Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 2, this.getInt16, Int16Array); //return new Int16Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getUint16Array",
     value: function getUint16Array(offset, length) {
-      return new Uint16Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 2, this.getUint16, Uint16Array); //return new Uint16Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getInt32Array",
     value: function getInt32Array(offset, length) {
-      return new Int32Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 4, this.getInt32, Int32Array); //return new Int32Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getUint32Array",
     value: function getUint32Array(offset, length) {
-      return new Uint32Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 4, this.getUint32, Uint32Array); //return new Uint32Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getFloat32Array",
     value: function getFloat32Array(offset, length) {
-      return new Float32Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 4, this.getFloat32, Float32Array); //return new Float32Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getFloat64Array",
     value: function getFloat64Array(offset, length) {
-      return new Float64Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 8, this.getFloat64, Float64Array); //        return new Float64Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getInt64Array",
     value: function getInt64Array(offset, length) {
-      return new Int64Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 8, this.getInt64, Int64Array); //return new Int64Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getUint64Array",
     value: function getUint64Array(offset, length) {
-      return new Uint64Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 8, this.getUint64, Uint64Array); //return new Uint64Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getBoolean",
@@ -3503,7 +3506,7 @@ function (_Uint8Array) {
     }
   }]);
   return DC;
-}((0, _wrapNativeSuper2["default"])(Uint8Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Uint8Array));
 
 exports.DC = exports["default"] = DC;
 
@@ -3671,9 +3674,7 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-var Guid =
-/*#__PURE__*/
-function () {
+var Guid = /*#__PURE__*/function () {
   function Guid(dc) {
     (0, _classCallCheck2["default"])(this, Guid);
     this.value = dc;
@@ -3731,9 +3732,7 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _IDestructible = _interopRequireDefault(require("../Core/IDestructible.js"));
 
-var KeyList =
-/*#__PURE__*/
-function () {
+var KeyList = /*#__PURE__*/function () {
   function KeyList() {
     (0, _classCallCheck2["default"])(this, KeyList);
     this.keys = [];
@@ -3932,9 +3931,7 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-var Structure =
-/*#__PURE__*/
-function () {
+var Structure = /*#__PURE__*/function () {
   (0, _createClass2["default"])(Structure, [{
     key: "getKeys",
     value: function getKeys() {
@@ -4009,9 +4006,7 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 
 var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
-var StructureArray =
-/*#__PURE__*/
-function (_Array) {
+var StructureArray = /*#__PURE__*/function (_Array) {
   (0, _inherits2["default"])(StructureArray, _Array);
 
   function StructureArray() {
@@ -4026,7 +4021,7 @@ function (_Array) {
     }
   }]);
   return StructureArray;
-}((0, _wrapNativeSuper2["default"])(Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Array));
 
 exports["default"] = StructureArray;
 
@@ -4156,9 +4151,11 @@ var _DistributedPropertyContext = _interopRequireDefault(require("./DistributedP
 
 var _IResource = require("../../Resource/IResource.js");
 
-var DistributedConnection =
-/*#__PURE__*/
-function (_IStore) {
+var _Ruling = _interopRequireDefault(require("../../Security/Permissions/Ruling.js"));
+
+var _ActionType = _interopRequireDefault(require("../../Security/Permissions/ActionType.js"));
+
+var DistributedConnection = /*#__PURE__*/function (_IStore) {
   (0, _inherits2["default"])(DistributedConnection, _IStore);
   (0, _createClass2["default"])(DistributedConnection, [{
     key: "send",
@@ -4246,244 +4243,248 @@ function (_IStore) {
         } else {
           offset += rt;
 
-          if (packet.command == _IIPPacketCommand["default"].Event) {
-            switch (packet.event) {
-              case _IIPPacketEvent["default"].ResourceReassigned:
-                this.IIPEventResourceReassigned(packet.resourceId, packet.newResourceId);
-                break;
+          try {
+            if (packet.command == _IIPPacketCommand["default"].Event) {
+              switch (packet.event) {
+                case _IIPPacketEvent["default"].ResourceReassigned:
+                  this.IIPEventResourceReassigned(packet.resourceId, packet.newResourceId);
+                  break;
 
-              case _IIPPacketEvent["default"].ResourceDestroyed:
-                this.IIPEventResourceDestroyed(packet.resourceId);
-                break;
+                case _IIPPacketEvent["default"].ResourceDestroyed:
+                  this.IIPEventResourceDestroyed(packet.resourceId);
+                  break;
 
-              case _IIPPacketEvent["default"].PropertyUpdated:
-                this.IIPEventPropertyUpdated(packet.resourceId, packet.methodIndex, packet.content);
-                break;
+                case _IIPPacketEvent["default"].PropertyUpdated:
+                  this.IIPEventPropertyUpdated(packet.resourceId, packet.methodIndex, packet.content);
+                  break;
 
-              case _IIPPacketEvent["default"].EventOccurred:
-                this.IIPEventEventOccurred(packet.resourceId, packet.methodIndex, packet.content);
-                break;
+                case _IIPPacketEvent["default"].EventOccurred:
+                  this.IIPEventEventOccurred(packet.resourceId, packet.methodIndex, packet.content);
+                  break;
 
-              case _IIPPacketEvent["default"].ChildAdded:
-                this.IIPEventChildAdded(packet.resourceId, packet.childId);
-                break;
+                case _IIPPacketEvent["default"].ChildAdded:
+                  this.IIPEventChildAdded(packet.resourceId, packet.childId);
+                  break;
 
-              case _IIPPacketEvent["default"].ChildRemoved:
-                this.IIPEventChildRemoved(packet.resourceId, packet.childId);
-                break;
+                case _IIPPacketEvent["default"].ChildRemoved:
+                  this.IIPEventChildRemoved(packet.resourceId, packet.childId);
+                  break;
 
-              case _IIPPacketEvent["default"].Renamed:
-                this.IIPEventRenamed(packet.resourceId, packet.content);
-                break;
+                case _IIPPacketEvent["default"].Renamed:
+                  this.IIPEventRenamed(packet.resourceId, packet.content);
+                  break;
 
-              case _IIPPacketEvent["default"].AttributesUpdated:
-                this.IIPEventAttributesUpdated(packet.resourceId, packet.content);
-                break;
+                case _IIPPacketEvent["default"].AttributesUpdated:
+                  this.IIPEventAttributesUpdated(packet.resourceId, packet.content);
+                  break;
+              }
+            } else if (packet.command == _IIPPacketCommand["default"].Request) {
+              switch (packet.action) {
+                // Manage
+                case _IIPPacketAction["default"].AttachResource:
+                  this.IIPRequestAttachResource(packet.callbackId, packet.resourceId);
+                  break;
+
+                case _IIPPacketAction["default"].ReattachResource:
+                  this.IIPRequestReattachResource(packet.callbackId, packet.resourceId, packet.resourceAge);
+                  break;
+
+                case _IIPPacketAction["default"].DetachResource:
+                  this.IIPRequestDetachResource(packet.callbackId, packet.resourceId);
+                  break;
+
+                case _IIPPacketAction["default"].CreateResource:
+                  this.IIPRequestCreateResource(packet.callbackId, packet.storeId, packet.resourceId, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].DeleteResource:
+                  this.IIPRequestDeleteResource(packet.callbackId, packet.resourceId);
+                  break;
+
+                case _IIPPacketAction["default"].AddChild:
+                  this.IIPRequestAddChild(packet.callbackId, packet.resourceId, packet.childId);
+                  break;
+
+                case _IIPPacketAction["default"].RemoveChild:
+                  this.IIPRequestRemoveChild(packet.callbackId, packet.resourceId, packet.childId);
+                  break;
+
+                case _IIPPacketAction["default"].RenameResource:
+                  this.IIPRequestRenameResource(packet.callbackId, packet.resourceId, packet.content);
+                  break;
+                // Inquire
+
+                case _IIPPacketAction["default"].TemplateFromClassName:
+                  this.IIPRequestTemplateFromClassName(packet.callbackId, packet.className);
+                  break;
+
+                case _IIPPacketAction["default"].TemplateFromClassId:
+                  this.IIPRequestTemplateFromClassId(packet.callbackId, packet.classId);
+                  break;
+
+                case _IIPPacketAction["default"].TemplateFromResourceId:
+                  this.IIPRequestTemplateFromResourceId(packet.callbackId, packet.resourceId);
+                  break;
+
+                case _IIPPacketAction["default"].QueryLink:
+                  this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
+                  break;
+
+                case _IIPPacketAction["default"].ResourceChildren:
+                  this.IIPRequestResourceChildren(packet.callbackId, packet.resourceId);
+                  break;
+
+                case _IIPPacketAction["default"].ResourceParents:
+                  this.IIPRequestResourceParents(packet.callbackId, packet.resourceId);
+                  break;
+
+                case _IIPPacketAction["default"].ResourceHistory:
+                  this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
+                  break;
+                // Invoke
+
+                case _IIPPacketAction["default"].InvokeFunctionArrayArguments:
+                  this.IIPRequestInvokeFunctionArrayArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].InvokeFunctionNamedArguments:
+                  this.IIPRequestInvokeFunctionNamedArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].GetProperty:
+                  this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
+                  break;
+
+                case _IIPPacketAction["default"].GetPropertyIfModified:
+                  this.IIPRequestGetPropertyIfModifiedSince(packet.callbackId, packet.resourceId, packet.methodIndex, packet.resourceAge);
+                  break;
+
+                case _IIPPacketAction["default"].SetProperty:
+                  this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].ResourceHistory:
+                  this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
+                  break;
+
+                case _IIPPacketAction["default"].QueryLink:
+                  this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
+                  break;
+                // Attribute
+
+                case _IIPPacketAction["default"].GetAllAttributes:
+                  this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                  break;
+
+                case _IIPPacketAction["default"].UpdateAllAttributes:
+                  this.IIPRequestUpdateAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                  break;
+
+                case _IIPPacketAction["default"].ClearAllAttributes:
+                  this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, true);
+                  break;
+
+                case _IIPPacketAction["default"].GetAttributes:
+                  this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                  break;
+
+                case _IIPPacketAction["default"].UpdateAttributes:
+                  this.IIPRequestUpdateAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                  break;
+
+                case _IIPPacketAction["default"].ClearAttributes:
+                  this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, false);
+                  break;
+              }
+            } else if (packet.command == _IIPPacketCommand["default"].Reply) {
+              switch (packet.action) {
+                case _IIPPacketAction["default"].AttachResource:
+                  this.IIPReply(packet.callbackId, packet.classId, packet.resourceAge, packet.resourceLink, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].ReattachResource:
+                  this.IIPReply(packet.callbackId, packet.resourceAge, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].DetachResource:
+                  this.IIPReply(packet.callbackId);
+                  break;
+
+                case _IIPPacketAction["default"].CreateResource:
+                  this.IIPReply(packet.callbackId, packet.resourceId);
+                  break;
+
+                case _IIPPacketAction["default"].DeleteResource:
+                case _IIPPacketAction["default"].AddChild:
+                case _IIPPacketAction["default"].RemoveChild:
+                case _IIPPacketAction["default"].RenameResource:
+                  this.IIPReply(packet.callbackId);
+                  break;
+
+                case _IIPPacketAction["default"].TemplateFromClassName:
+                case _IIPPacketAction["default"].TemplateFromClassId:
+                case _IIPPacketAction["default"].TemplateFromResourceId:
+                  this.IIPReply(packet.callbackId, _ResourceTemplate["default"].parse(packet.content));
+                  break;
+
+                case _IIPPacketAction["default"].QueryLink:
+                case _IIPPacketAction["default"].ResourceChildren:
+                case _IIPPacketAction["default"].ResourceParents:
+                case _IIPPacketAction["default"].ResourceHistory:
+                  this.IIPReply(packet.callbackId, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].InvokeFunctionArrayArguments:
+                case _IIPPacketAction["default"].InvokeFunctionNamedArguments:
+                  this.IIPReplyInvoke(packet.callbackId, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].GetProperty:
+                  this.IIPReply(packet.callbackId, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].GetPropertyIfModified:
+                  this.IIPReply(packet.callbackId, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].SetProperty:
+                  this.IIPReply(packet.callbackId);
+                  break;
+                // Attribute
+
+                case _IIPPacketAction["default"].GetAllAttributes:
+                case _IIPPacketAction["default"].GetAttributes:
+                  this.IIPReply(packet.callbackId, packet.content);
+                  break;
+
+                case _IIPPacketAction["default"].UpdateAllAttributes:
+                case _IIPPacketAction["default"].UpdateAttributes:
+                case _IIPPacketAction["default"].ClearAllAttributes:
+                case _IIPPacketAction["default"].ClearAttributes:
+                  this.IIPReply(packet.callbackId);
+                  break;
+              }
+            } else if (packet.command == _IIPPacketCommand["default"].Report) {
+              switch (packet.report) {
+                case _IIPPacketReport["default"].ManagementError:
+                  this.IIPReportError(packet.callbackId, _ErrorType["default"].Management, packet.errorCode, null);
+                  break;
+
+                case _IIPPacketReport["default"].ExecutionError:
+                  this.IIPReportError(packet.callbackId, _ErrorType["default"].Exception, packet.errorCode, packet.errorMessage);
+                  break;
+
+                case _IIPPacketReport["default"].ProgressReport:
+                  this.IIPReportProgress(packet.callbackId, _ProgressType["default"].Execution, packet.progressValue, packet.progressMax);
+                  break;
+
+                case _IIPPacketReport["default"].ChunkStream:
+                  this.IIPReportChunk(packet.callbackId, packet.content);
+                  break;
+              }
             }
-          } else if (packet.command == _IIPPacketCommand["default"].Request) {
-            switch (packet.action) {
-              // Manage
-              case _IIPPacketAction["default"].AttachResource:
-                this.IIPRequestAttachResource(packet.callbackId, packet.resourceId);
-                break;
-
-              case _IIPPacketAction["default"].ReattachResource:
-                this.IIPRequestReattachResource(packet.callbackId, packet.resourceId, packet.resourceAge);
-                break;
-
-              case _IIPPacketAction["default"].DetachResource:
-                this.IIPRequestDetachResource(packet.callbackId, packet.resourceId);
-                break;
-
-              case _IIPPacketAction["default"].CreateResource:
-                this.IIPRequestCreateResource(packet.callbackId, packet.storeId, packet.resourceId, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].DeleteResource:
-                this.IIPRequestDeleteResource(packet.callbackId, packet.resourceId);
-                break;
-
-              case _IIPPacketAction["default"].AddChild:
-                this.IIPRequestAddChild(packet.callbackId, packet.resourceId, packet.childId);
-                break;
-
-              case _IIPPacketAction["default"].RemoveChild:
-                this.IIPRequestRemoveChild(packet.callbackId, packet.resourceId, packet.childId);
-                break;
-
-              case _IIPPacketAction["default"].RenameResource:
-                this.IIPRequestRenameResource(packet.callbackId, packet.resourceId, packet.content);
-                break;
-              // Inquire
-
-              case _IIPPacketAction["default"].TemplateFromClassName:
-                this.IIPRequestTemplateFromClassName(packet.callbackId, packet.className);
-                break;
-
-              case _IIPPacketAction["default"].TemplateFromClassId:
-                this.IIPRequestTemplateFromClassId(packet.callbackId, packet.classId);
-                break;
-
-              case _IIPPacketAction["default"].TemplateFromResourceId:
-                this.IIPRequestTemplateFromResourceId(packet.callbackId, packet.resourceId);
-                break;
-
-              case _IIPPacketAction["default"].QueryLink:
-                this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
-                break;
-
-              case _IIPPacketAction["default"].ResourceChildren:
-                this.IIPRequestResourceChildren(packet.callbackId, packet.resourceId);
-                break;
-
-              case _IIPPacketAction["default"].ResourceParents:
-                this.IIPRequestResourceParents(packet.callbackId, packet.resourceId);
-                break;
-
-              case _IIPPacketAction["default"].ResourceHistory:
-                this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
-                break;
-              // Invoke
-
-              case _IIPPacketAction["default"].InvokeFunctionArrayArguments:
-                this.IIPRequestInvokeFunctionArrayArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].InvokeFunctionNamedArguments:
-                this.IIPRequestInvokeFunctionNamedArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].GetProperty:
-                this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
-                break;
-
-              case _IIPPacketAction["default"].GetPropertyIfModified:
-                this.IIPRequestGetPropertyIfModifiedSince(packet.callbackId, packet.resourceId, packet.methodIndex, packet.resourceAge);
-                break;
-
-              case _IIPPacketAction["default"].SetProperty:
-                this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].ResourceHistory:
-                this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
-                break;
-
-              case _IIPPacketAction["default"].QueryLink:
-                this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
-                break;
-              // Attribute
-
-              case _IIPPacketAction["default"].GetAllAttributes:
-                this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, true);
-                break;
-
-              case _IIPPacketAction["default"].UpdateAllAttributes:
-                this.IIPRequestUpdateAttributes(packet.callbackId, packet.resourceId, packet.content, true);
-                break;
-
-              case _IIPPacketAction["default"].ClearAllAttributes:
-                this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, true);
-                break;
-
-              case _IIPPacketAction["default"].GetAttributes:
-                this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, false);
-                break;
-
-              case _IIPPacketAction["default"].UpdateAttributes:
-                this.IIPRequestUpdateAttributes(packet.callbackId, packet.resourceId, packet.content, false);
-                break;
-
-              case _IIPPacketAction["default"].ClearAttributes:
-                this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, false);
-                break;
-            }
-          } else if (packet.command == _IIPPacketCommand["default"].Reply) {
-            switch (packet.action) {
-              case _IIPPacketAction["default"].AttachResource:
-                this.IIPReply(packet.callbackId, packet.classId, packet.resourceAge, packet.resourceLink, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].ReattachResource:
-                this.IIPReply(packet.callbackId, packet.resourceAge, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].DetachResource:
-                this.IIPReply(packet.callbackId);
-                break;
-
-              case _IIPPacketAction["default"].CreateResource:
-                this.IIPReply(packet.callbackId, packet.resourceId);
-                break;
-
-              case _IIPPacketAction["default"].DeleteResource:
-              case _IIPPacketAction["default"].AddChild:
-              case _IIPPacketAction["default"].RemoveChild:
-              case _IIPPacketAction["default"].RenameResource:
-                this.IIPReply(packet.callbackId);
-                break;
-
-              case _IIPPacketAction["default"].TemplateFromClassName:
-              case _IIPPacketAction["default"].TemplateFromClassId:
-              case _IIPPacketAction["default"].TemplateFromResourceId:
-                this.IIPReply(packet.callbackId, _ResourceTemplate["default"].parse(packet.content));
-                break;
-
-              case _IIPPacketAction["default"].QueryLink:
-              case _IIPPacketAction["default"].ResourceChildren:
-              case _IIPPacketAction["default"].ResourceParents:
-              case _IIPPacketAction["default"].ResourceHistory:
-                this.IIPReply(packet.callbackId, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].InvokeFunctionArrayArguments:
-              case _IIPPacketAction["default"].InvokeFunctionNamedArguments:
-                this.IIPReplyInvoke(packet.callbackId, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].GetProperty:
-                this.IIPReply(packet.callbackId, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].GetPropertyIfModified:
-                this.IIPReply(packet.callbackId, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].SetProperty:
-                this.IIPReply(packet.callbackId);
-                break;
-              // Attribute
-
-              case _IIPPacketAction["default"].GetAllAttributes:
-              case _IIPPacketAction["default"].GetAttributes:
-                this.IIPReply(packet.callbackId, packet.content);
-                break;
-
-              case _IIPPacketAction["default"].UpdateAllAttributes:
-              case _IIPPacketAction["default"].UpdateAttributes:
-              case _IIPPacketAction["default"].ClearAllAttributes:
-              case _IIPPacketAction["default"].ClearAttributes:
-                this.IIPReply(packet.callbackId);
-                break;
-            }
-          } else if (packet.command == _IIPPacketCommand["default"].Report) {
-            switch (packet.report) {
-              case _IIPPacketReport["default"].ManagementError:
-                this.IIPReportError(packet.callbackId, _ErrorType["default"].Management, packet.errorCode, null);
-                break;
-
-              case _IIPPacketReport["default"].ExecutionError:
-                this.IIPReportError(packet.callbackId, _ErrorType["default"].Exception, packet.errorCode, packet.errorMessage);
-                break;
-
-              case _IIPPacketReport["default"].ProgressReport:
-                this.IIPReportProgress(packet.callbackId, _ProgressType["default"].Execution, packet.progressValue, packet.progressMax);
-                break;
-
-              case _IIPPacketReport["default"].ChunkStream:
-                this.IIPReportChunk(packet.callbackId, packet.content);
-                break;
-            }
+          } catch (ex) {
+            console.log("Esyur Error ", ex);
           }
         }
       } else {
@@ -4683,7 +4684,13 @@ function (_IStore) {
           self.hold();
 
           while (this.networkBuffer.available > 0 && !this.networkBuffer["protected"]) {
-            self.receive(this.networkBuffer);
+            // try
+            // {
+            self.receive(this.networkBuffer); // }
+            // catch(e) 
+            //{
+            //  console.log(e);
+            //}
           }
 
           self.unhold();
@@ -4832,19 +4839,18 @@ function (_IStore) {
     value: function IIPEventPropertyUpdated(resourceId, index, content) {
       var self = this;
       this.fetch(resourceId).then(function (r) {
+        var pt = r.instance.template.getPropertyTemplateByIndex(index);
+        if (pt == null) return; // ft found, fi not found, this should never happen
         // push to the queue to gaurantee serialization
+
         var item = new _AsyncReply["default"]();
         self.queue.add(item);
 
         _Codec["default"].parse(content, 0, {}, self).then(function (args) {
-          var pt = r.instance.template.getPropertyTemplateByIndex(index);
-
-          if (pt != null) {
-            item.trigger(new _DistributedResourceQueueItem["default"](r, _DistributedResourceQueueItemType["default"].Propery, args, index));
-          } else {
-            // ft found, fi not found, this should never happen
-            self.queue.remove(item);
-          }
+          item.trigger(new _DistributedResourceQueueItem["default"](r, _DistributedResourceQueueItemType["default"].Propery, args, index));
+        }).error(function (ex) {
+          self.queue.remove(item);
+          console.log("Esyur Property Error", ex);
         });
       });
     }
@@ -4853,20 +4859,18 @@ function (_IStore) {
     value: function IIPEventEventOccurred(resourceId, index, content) {
       var self = this;
       this.fetch(resourceId).then(function (r) {
+        var et = r.instance.template.getEventTemplateByIndex(index);
+        if (et == null) return; // ft found, fi not found, this should never happen
         // push to the queue to guarantee serialization
+
         var item = new _AsyncReply["default"]();
-        var r = self.resources[resourceId];
         self.queue.add(item);
 
         _Codec["default"].parseVarArray(content, 0, content.length, self).then(function (args) {
-          var et = r.instance.template.getEventTemplateByIndex(index);
-
-          if (et != null) {
-            item.trigger(new _DistributedResourceQueueItem["default"](r, _DistributedResourceQueueItemType["default"].Event, args, index));
-          } else {
-            // ft found, fi not found, this should never happen
-            self.queue.remove(item);
-          }
+          item.trigger(new _DistributedResourceQueueItem["default"](r, _DistributedResourceQueueItemType["default"].Event, args, index));
+        }).error(function (ex) {
+          self.queue.remove(item);
+          console.log("Esyur Event Error", ex);
         });
       });
     }
@@ -4926,7 +4930,7 @@ function (_IStore) {
 
       _Warehouse["default"].getById(resourceId).then(function (r) {
         if (r != null) {
-          if (r.instance.applicable(self.session, ActionType.Attach, null) == Ruling.Denied) {
+          if (r.instance.applicable(self.session, _ActionType["default"].Attach, null) == _Ruling["default"].Denied) {
             self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AttachDenied);
             return;
           }
@@ -4997,14 +5001,14 @@ function (_IStore) {
         } // check security
 
 
-        if (store.instance.applicable(self.session, ActionType.CreateResource, null) != Ruling.Allowed) {
+        if (store.instance.applicable(self.session, _ActionType["default"].CreateResource, null) != _Ruling["default"].Allowed) {
           self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].CreateDenied);
           return;
         }
 
         _Warehouse["default"].getById(parentId).then(function (parent) {
           // check security
-          if (parent != null) if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed) {
+          if (parent != null) if (parent.instance.applicable(self.session, _ActionType["default"].AddChild, null) != _Ruling["default"].Allowed) {
             self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
             return;
           }
@@ -5054,7 +5058,7 @@ function (_IStore) {
           return;
         }
 
-        if (r.instance.store.instance.applicable(session, ActionType.Delete, null) != Ruling.Allowed) {
+        if (r.instance.store.instance.applicable(session, _ActionType["default"].Delete, null) != _Ruling["default"].Allowed) {
           self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].DeleteDenied);
           return;
         }
@@ -5121,15 +5125,13 @@ function (_IStore) {
               } else {
                 var fi = r[ft.name];
 
-                if (r.instance.applicable(self.session, ActionType.Execute, ft) == Ruling.Denied) {
+                if (r.instance.applicable(self.session, _ActionType["default"].Execute, ft) == _Ruling["default"].Denied) {
                   self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].InvokeDenied);
                   return;
                 }
 
                 if (fi instanceof Function) {
-                  var itt =
-                  /*#__PURE__*/
-                  _regenerator["default"].mark(function itt() {
+                  var itt = /*#__PURE__*/_regenerator["default"].mark(function itt() {
                     return _regenerator["default"].wrap(function itt$(_context) {
                       while (1) {
                         switch (_context.prev = _context.next) {
@@ -5211,7 +5213,7 @@ function (_IStore) {
               } else {
                 var fi = r[ft.name];
 
-                if (r.instance.applicable(self.session, ActionType.Execute, ft) == Ruling.Denied) {
+                if (r.instance.applicable(self.session, _ActionType["default"].Execute, ft) == _Ruling["default"].Denied) {
                   self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].InvokeDenied);
                   return;
                 }
@@ -5335,7 +5337,7 @@ function (_IStore) {
                   self.sendError(x.type, callback, x.code, x.message).done();
                 });
               } else {
-                if (r.instance.applicable(self.session, ActionType.SetProperty, pt) == Ruling.Denied) {
+                if (r.instance.applicable(self.session, _ActionType["default"].SetProperty, pt) == _Ruling["default"].Denied) {
                   self.sendError(_AsyncReply["default"].ErrorType.Exception, callback, _ExceptionCode["default"].SetPropertyDenied);
                   return;
                 }
@@ -5381,7 +5383,7 @@ function (_IStore) {
 
       _Warehouse["default"].query(resourceLink).then(function (resources) {
         var list = resources.filter(function (r) {
-          return r.instance.applicable(self.session, ActionType.Attach, null) != Ruling.Denied;
+          return r.instance.applicable(self.session, _ActionType["default"].Attach, null) != _Ruling["default"].Denied;
         });
         if (list.length == 0) self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else self.sendReply(_IIPPacketAction["default"].QueryLink, callback).addUint8Array(_Codec["default"].composeResourceArray(list, self, true)).done();
       });
@@ -5541,7 +5543,7 @@ function (_IStore) {
       var et = resource.instance.template.getEventTemplateByName(name);
       if (et == null) return;
       if (receivers != null) if (receivers.indexOf(this.session) < 0) return;
-      if (resource.instance.applicable(this.session, ActionType.ReceiveEvent, et, issuer) == Ruling.Denied) return; // compose the packet
+      if (resource.instance.applicable(this.session, _ActionType["default"].ReceiveEvent, et, issuer) == _Ruling["default"].Denied) return; // compose the packet
 
       this.sendEvent(_IIPPacketEvent["default"].EventOccurred).addUint32(resource.instance.id).addUint8(et.index).addUint8Array(_Codec["default"].composeVarArray(args, this, true)).done();
     }
@@ -5562,12 +5564,12 @@ function (_IStore) {
             return;
           }
 
-          if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed) {
+          if (parent.instance.applicable(self.session, _ActionType["default"].AddChild, null) != _Ruling["default"].Allowed) {
             self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
             return;
           }
 
-          if (child.instance.applicable(self.session, ActionType.AddParent, null) != Ruling.Allowed) {
+          if (child.instance.applicable(self.session, _ActionType["default"].AddParent, null) != _Ruling["default"].Allowed) {
             self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddParentDenied);
             return;
           }
@@ -5594,12 +5596,12 @@ function (_IStore) {
             return;
           }
 
-          if (parent.instance.applicable(self.session, ActionType.RemoveChild, null) != Ruling.Allowed) {
+          if (parent.instance.applicable(self.session, _ActionType["default"].RemoveChild, null) != _Ruling["default"].Allowed) {
             self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
             return;
           }
 
-          if (child.instance.applicable(self.session, ActionType.RemoveParent, null) != Ruling.Allowed) {
+          if (child.instance.applicable(self.session, _ActionType["default"].RemoveParent, null) != _Ruling["default"].Allowed) {
             self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddParentDenied);
             return;
           }
@@ -5620,7 +5622,7 @@ function (_IStore) {
           return;
         }
 
-        if (resource.instance.applicable(self.session, ActionType.Rename, null) != Ruling.Allowed) {
+        if (resource.instance.applicable(self.session, _ActionType["default"].Rename, null) != _Ruling["default"].Allowed) {
           self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].RenameDenied);
           return;
         }
@@ -5668,7 +5670,7 @@ function (_IStore) {
           return;
         }
 
-        if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed) {
+        if (r.instance.store.instance.applicable(self.session, _ActionType["default"].UpdateAttributes, null) != _Ruling["default"].Allowed) {
           self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeDenied);
           return;
         }
@@ -5690,7 +5692,7 @@ function (_IStore) {
           return;
         }
 
-        if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed) {
+        if (r.instance.store.instance.applicable(self.session, _ActionType["default"].UpdateAttributes, null) != _Ruling["default"].Allowed) {
           self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeDenied);
           return;
         }
@@ -5808,7 +5810,7 @@ function (_IStore) {
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncQueue.js":20,"../../Core/AsyncReply.js":21,"../../Core/ErrorType.js":22,"../../Core/ExceptionCode.js":23,"../../Core/ProgressType.js":26,"../../Data/Codec.js":29,"../../Data/DataConverter.js":30,"../../Data/KeyList.js":33,"../../Resource/IResource.js":56,"../../Resource/IStore.js":57,"../../Resource/Template/ResourceTemplate.js":64,"../../Resource/Warehouse.js":65,"../../Security/Authority/Authentication.js":66,"../../Security/Authority/AuthenticationType.js":67,"../../Security/Authority/Session.js":68,"../../Security/Integrity/SHA256.js":69,"../Packets//IIPPacketReport.js":52,"../Packets/IIPAuthPacket.js":44,"../Packets/IIPAuthPacketAction.js":45,"../Packets/IIPAuthPacketCommand.js":46,"../Packets/IIPAuthPacketMethod.js":47,"../Packets/IIPPacket.js":48,"../Packets/IIPPacketAction.js":49,"../Packets/IIPPacketCommand.js":50,"../Packets/IIPPacketEvent.js":51,"../SendList.js":53,"../Sockets/NetworkBuffer.js":54,"./DistributedPropertyContext.js":40,"./DistributedResource.js":41,"./DistributedResourceQueueItem.js":42,"./DistributedResourceQueueItemType.js":43,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11,"@babel/runtime/regenerator":17}],40:[function(require,module,exports){
+},{"../../Core/AsyncQueue.js":20,"../../Core/AsyncReply.js":21,"../../Core/ErrorType.js":22,"../../Core/ExceptionCode.js":23,"../../Core/ProgressType.js":26,"../../Data/Codec.js":29,"../../Data/DataConverter.js":30,"../../Data/KeyList.js":33,"../../Resource/IResource.js":56,"../../Resource/IStore.js":57,"../../Resource/Template/ResourceTemplate.js":64,"../../Resource/Warehouse.js":65,"../../Security/Authority/Authentication.js":66,"../../Security/Authority/AuthenticationType.js":67,"../../Security/Authority/Session.js":68,"../../Security/Integrity/SHA256.js":69,"../../Security/Permissions/ActionType.js":70,"../../Security/Permissions/Ruling.js":72,"../Packets//IIPPacketReport.js":52,"../Packets/IIPAuthPacket.js":44,"../Packets/IIPAuthPacketAction.js":45,"../Packets/IIPAuthPacketCommand.js":46,"../Packets/IIPAuthPacketMethod.js":47,"../Packets/IIPPacket.js":48,"../Packets/IIPPacketAction.js":49,"../Packets/IIPPacketCommand.js":50,"../Packets/IIPPacketEvent.js":51,"../SendList.js":53,"../Sockets/NetworkBuffer.js":54,"./DistributedPropertyContext.js":40,"./DistributedResource.js":41,"./DistributedResourceQueueItem.js":42,"./DistributedResourceQueueItemType.js":43,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11,"@babel/runtime/regenerator":17}],40:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -5913,9 +5915,7 @@ var _Structure = _interopRequireDefault(require("../../Data/Structure.js"));
 
 var _IIPPacketAction = _interopRequireDefault(require("../Packets//IIPPacketAction.js"));
 
-var DistributedResource =
-/*#__PURE__*/
-function (_IResource) {
+var DistributedResource = /*#__PURE__*/function (_IResource) {
   (0, _inherits2["default"])(DistributedResource, _IResource);
   (0, _createClass2["default"])(DistributedResource, [{
     key: "destroy",
@@ -6181,9 +6181,7 @@ var _IIPAuthPacketAction = _interopRequireDefault(require("./IIPAuthPacketAction
 
 var _IIPAuthPacketMethod = _interopRequireDefault(require("./IIPAuthPacketMethod.js"));
 
-var IIPAuthPacket =
-/*#__PURE__*/
-function () {
+var IIPAuthPacket = /*#__PURE__*/function () {
   function IIPAuthPacket() {
     (0, _classCallCheck2["default"])(this, IIPAuthPacket);
     this.command = 0;
@@ -6412,9 +6410,7 @@ var _IIPPacketReport = _interopRequireDefault(require("./IIPPacketReport.js"));
 
 var _DataType = _interopRequireDefault(require("../../Data/DataType.js"));
 
-var IIPPacket =
-/*#__PURE__*/
-function () {
+var IIPPacket = /*#__PURE__*/function () {
   function IIPPacket() {
     (0, _classCallCheck2["default"])(this, IIPPacket);
     this.command = 0;
@@ -6897,9 +6893,7 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 
 var _BinaryList2 = _interopRequireDefault(require("../Data/BinaryList.js"));
 
-var SendList =
-/*#__PURE__*/
-function (_BinaryList) {
+var SendList = /*#__PURE__*/function (_BinaryList) {
   (0, _inherits2["default"])(SendList, _BinaryList);
 
   function SendList(connection, doneReply) {
@@ -6965,9 +6959,7 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _DataConverter = _interopRequireDefault(require("../../Data/DataConverter.js"));
 
-var NetworkBuffer =
-/*#__PURE__*/
-function () {
+var NetworkBuffer = /*#__PURE__*/function () {
   function NetworkBuffer() {
     (0, _classCallCheck2["default"])(this, NetworkBuffer);
     this.neededDataLength = 0;
@@ -7164,9 +7156,7 @@ var ResourceTrigger = {
 };
 exports.ResourceTrigger = ResourceTrigger;
 
-var IResource =
-/*#__PURE__*/
-function (_IDestructible) {
+var IResource = /*#__PURE__*/function (_IDestructible) {
   (0, _inherits2["default"])(IResource, _IDestructible);
   (0, _createClass2["default"])(IResource, [{
     key: "trigger",
@@ -7241,9 +7231,7 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 
 var _IResource2 = _interopRequireDefault(require("./IResource.js"));
 
-var IStore =
-/*#__PURE__*/
-function (_IResource) {
+var IStore = /*#__PURE__*/function (_IResource) {
   (0, _inherits2["default"])(IStore, _IResource);
   (0, _createClass2["default"])(IStore, [{
     key: "get",
@@ -7342,9 +7330,7 @@ var _CustomResourceEvent = _interopRequireDefault(require("./CustomResourceEvent
 
 var _Warehouse = _interopRequireDefault(require("./Warehouse.js"));
 
-var Instance =
-/*#__PURE__*/
-function (_IEventHandler) {
+var Instance = /*#__PURE__*/function (_IEventHandler) {
   (0, _inherits2["default"])(Instance, _IEventHandler);
   (0, _createClass2["default"])(Instance, [{
     key: "getAge",
@@ -7616,7 +7602,7 @@ function (_IEventHandler) {
 
 exports["default"] = Instance;
 
-},{"../Core/IEventHandler.js":25,"../Data/AutoList.js":27,"../Data/KeyList.js":33,"../Data/PropertyValue.js":34,"../Data/Structure.js":36,"../Data/StructureArray.js":37,"../Security/Permissions/IPermissionsManager.js":70,"./CustomResourceEvent.js":55,"./Warehouse.js":65,"@babel/runtime/helpers/assertThisInitialized":1,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/get":6,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11}],59:[function(require,module,exports){
+},{"../Core/IEventHandler.js":25,"../Data/AutoList.js":27,"../Data/KeyList.js":33,"../Data/PropertyValue.js":34,"../Data/Structure.js":36,"../Data/StructureArray.js":37,"../Security/Permissions/IPermissionsManager.js":71,"./CustomResourceEvent.js":55,"./Warehouse.js":65,"@babel/runtime/helpers/assertThisInitialized":1,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/get":6,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11}],59:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -7669,9 +7655,7 @@ var _MemberTemplate2 = _interopRequireDefault(require("./MemberTemplate.js"));
 
 var _MemberType = _interopRequireDefault(require("./MemberType.js"));
 
-var EventTemplate =
-/*#__PURE__*/
-function (_MemberTemplate) {
+var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
   (0, _inherits2["default"])(EventTemplate, _MemberTemplate);
 
   function EventTemplate() {
@@ -7754,9 +7738,7 @@ var _MemberTemplate2 = _interopRequireDefault(require("./MemberTemplate.js"));
 
 var _MemberType = _interopRequireDefault(require("./MemberType.js"));
 
-var FunctionTemplate =
-/*#__PURE__*/
-function (_MemberTemplate) {
+var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
   (0, _inherits2["default"])(FunctionTemplate, _MemberTemplate);
   (0, _createClass2["default"])(FunctionTemplate, [{
     key: "compose",
@@ -7827,9 +7809,7 @@ var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/creat
 
 var _DataConverter = _interopRequireDefault(require("../../Data/DataConverter.js"));
 
-var MemberTemplate =
-/*#__PURE__*/
-function () {
+var MemberTemplate = /*#__PURE__*/function () {
   function MemberTemplate() {
     (0, _classCallCheck2["default"])(this, MemberTemplate);
   }
@@ -7919,9 +7899,7 @@ var PropertyPermission = {
 };
 exports.PropertyPermission = PropertyPermission;
 
-var PropertyTemplate =
-/*#__PURE__*/
-function (_MemberTemplate) {
+var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
   (0, _inherits2["default"])(PropertyTemplate, _MemberTemplate);
 
   function PropertyTemplate() {
@@ -8007,9 +7985,7 @@ var _SHA = _interopRequireDefault(require("../../Security/Integrity/SHA256.js"))
 
 var _DataConverter = require("../../Data/DataConverter.js");
 
-var ResourceTemplate =
-/*#__PURE__*/
-function () {
+var ResourceTemplate = /*#__PURE__*/function () {
   (0, _createClass2["default"])(ResourceTemplate, [{
     key: "getEventTemplateByName",
     value: function getEventTemplateByName(eventName) {
@@ -8353,9 +8329,7 @@ var _IStore = _interopRequireDefault(require("./IStore.js"));
 
 var _IResource = require("./IResource.js");
 
-var WH =
-/*#__PURE__*/
-function (_IEventHandler) {
+var WH = /*#__PURE__*/function (_IEventHandler) {
   (0, _inherits2["default"])(WH, _IEventHandler);
 
   function WH() {
@@ -8625,9 +8599,7 @@ function (_IEventHandler) {
   }, {
     key: "query",
     value: function () {
-      var _query = (0, _asyncToGenerator2["default"])(
-      /*#__PURE__*/
-      _regenerator["default"].mark(function _callee(path) {
+      var _query = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(path) {
         var rt, p, resource, i, store, res, children;
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
@@ -8758,7 +8730,7 @@ Warehouse.protocols.add("mem", function () {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncReply.js":21,"../Core/IEventHandler.js":25,"../Data/AutoList.js":27,"../Data/KeyList.js":33,"../Net/IIP/DistributedConnection.js":39,"../Resource/Instance.js":58,"../Resource/Template/ResourceTemplate.js":64,"../Stores/MemoryStore.js":71,"./IResource.js":56,"./IStore.js":57,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11,"@babel/runtime/helpers/typeof":14,"@babel/runtime/regenerator":17}],66:[function(require,module,exports){
+},{"../Core/AsyncReply.js":21,"../Core/IEventHandler.js":25,"../Data/AutoList.js":27,"../Data/KeyList.js":33,"../Net/IIP/DistributedConnection.js":39,"../Resource/Instance.js":58,"../Resource/Template/ResourceTemplate.js":64,"../Stores/MemoryStore.js":73,"./IResource.js":56,"./IStore.js":57,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11,"@babel/runtime/helpers/typeof":14,"@babel/runtime/regenerator":17}],66:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8797,9 +8769,7 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-var Authentication =
-/*#__PURE__*/
-function () {
+var Authentication = /*#__PURE__*/function () {
   function Authentication(type) {
     (0, _classCallCheck2["default"])(this, Authentication);
     this.type = type;
@@ -8925,9 +8895,7 @@ var _DataConverter = require("../../Data/DataConverter.js");
  * Created by Ahmed Zamil on 25/12/2017.
  * Ref: https://en.wikipedia.org/wiki/SHA-2
  */
-var SHA256 =
-/*#__PURE__*/
-function () {
+var SHA256 = /*#__PURE__*/function () {
   function SHA256() {
     (0, _classCallCheck2["default"])(this, SHA256);
   }
@@ -9070,22 +9038,16 @@ exports["default"] = SHA256;
 */
 
 /** 
- * Created by Ahmed Zamil on 16/11/2017.
+ * Created by Ahmed Zamil on 9/2/2017.
  */
 "use strict";
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = exports.Ruling = exports.ActionType = void 0;
-
-var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
-
-var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
-
-var ActionType = {
+exports["default"] = void 0;
+var _default = // ActionType =
+{
   Attach: 0,
   Delete: 1,
   Execute: 2,
@@ -9101,17 +9063,48 @@ var ActionType = {
   Rename: 12,
   ReceiveEvent: 13
 };
-exports.ActionType = ActionType;
-var Ruling = {
-  Denied: 0,
-  Allowed: 1,
-  DontCare: 2
-};
-exports.Ruling = Ruling;
+exports["default"] = _default;
 
-var IPermissionsManager =
-/*#__PURE__*/
-function () {
+},{}],71:[function(require,module,exports){
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** 
+ * Created by Ahmed Zamil on 16/11/2017.
+ */
+"use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var IPermissionsManager = /*#__PURE__*/function () {
   function IPermissionsManager() {
     (0, _classCallCheck2["default"])(this, IPermissionsManager);
   }
@@ -9139,7 +9132,47 @@ function () {
 
 exports["default"] = IPermissionsManager;
 
-},{"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/interopRequireDefault":9}],71:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/interopRequireDefault":9}],72:[function(require,module,exports){
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/** 
+ * Created by Ahmed Zamil on 9/2/2020.
+ */
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var _default = //Ruling = 
+{
+  Denied: 0,
+  Allowed: 1,
+  DontCare: 2
+};
+exports["default"] = _default;
+
+},{}],73:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9186,9 +9219,7 @@ var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits
 
 var _IStore2 = _interopRequireDefault(require("../Resource/IStore.js"));
 
-var MemoryStore =
-/*#__PURE__*/
-function (_IStore) {
+var MemoryStore = /*#__PURE__*/function (_IStore) {
   (0, _inherits2["default"])(MemoryStore, _IStore);
 
   function MemoryStore() {
@@ -9237,7 +9268,8 @@ function (_IStore) {
 
 exports["default"] = MemoryStore;
 
-},{"../Resource/IStore.js":57,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11}],72:[function(require,module,exports){
+},{"../Resource/IStore.js":57,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11}],74:[function(require,module,exports){
+(function (global){
 "use strict";
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
@@ -9253,13 +9285,26 @@ var _Structure = _interopRequireDefault(require("./Data/Structure.js"));
 
 var _DistributedResource = _interopRequireDefault(require("./Net/IIP/DistributedResource.js"));
 
+var _MemoryStore = _interopRequireDefault(require("./Stores/MemoryStore.js"));
+
+var _IResource = _interopRequireDefault(require("./Resource/IResource.js"));
+
 if (window) {
   window.wh = _Warehouse["default"];
   window.Structure = _Structure["default"];
   window.DistributedResource = _DistributedResource["default"];
+  window.MemoryStore = _MemoryStore["default"];
+  window.IResource = _IResource["default"];
+} else if (global) {
+  global.wh = _Warehouse["default"];
+  global.Structure = _Structure["default"];
+  global.DistributedResource = _DistributedResource["default"];
+  global.MemoryStore = _MemoryStore["default"];
+  global.IResource = _IResource["default"];
 }
 
 var _default = _Warehouse["default"];
 exports["default"] = _default;
 
-},{"./Data/Structure.js":36,"./Net/IIP/DistributedResource.js":41,"./Resource/Warehouse.js":65,"@babel/runtime/helpers/interopRequireDefault":9}]},{},[72]);
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./Data/Structure.js":36,"./Net/IIP/DistributedResource.js":41,"./Resource/IResource.js":56,"./Resource/Warehouse.js":65,"./Stores/MemoryStore.js":73,"@babel/runtime/helpers/interopRequireDefault":9}]},{},[74]);

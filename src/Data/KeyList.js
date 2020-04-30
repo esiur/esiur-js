@@ -92,6 +92,11 @@ export default class KeyList
         return false;
      }
 
+     containsKey(key)
+     {
+         return this.contains(key);
+     }
+     
      set(key, value)
      {
         this.remove(key);

@@ -21,33 +21,15 @@
 */
 
 /** 
- * Created by Ahmed Zamil on 16/11/2017.
+ * Created by Ahmed Zamil on 9/2/2020.
  */
 
 "use strict";
 
-export default class IPermissionsManager
+export default //Ruling = 
 {
-    /// <summary>
-    /// Check for permission.
-    /// </summary>
-    /// <param name="resource">IResource.</param>
-    /// <param name="session">Caller sessions.</param>
-    /// <param name="action">Action type</param>
-    /// <param name="member">Function or property to check for permission.</param>
-    /// <returns>Allowed or denined.</returns>
-    applicable(resource, session, action, member, inquirer)
-    {
+    Denied: 0,
+    Allowed: 1,
+    DontCare: 2,
+};
 
-    }
-
-    initialize(settings, resource)
-    {
-
-    }
-
-    get settings()
-    {
-
-    }
-}

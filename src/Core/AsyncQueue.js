@@ -40,11 +40,19 @@ export default class AsyncQueue extends AsyncReply
         this.processQueue = function ()
         {
             for (var i = 0; i < self.list.length; i++)
-                if (self.list[i].ready)
-                {
+                if (self.list[i].ready) {
                     self.trigger(self.list[i].result);
-                    self.list.splice(i, 1);
+                    self.ready = false;
+                    //self.list.splice(i, 1);
+                    self.list.shift();
+
                     i--;
+                }
+                else if (self.list[i].failed) {
+                    self.ready = false;
+                    self.list.shift();
+                    i--;
+                    console.log("AsyncQueue (Reply Failed)");
                 }
                 else
                     break;
@@ -57,11 +65,13 @@ export default class AsyncQueue extends AsyncReply
     {
         this.list.push(reply);
         this.ready = false;
-        reply.then(this.processQueue);
+        reply.then(this.processQueue).error(this.processQueue);
+
     }
 
     remove(reply)
     {
+        console.log("REMOVE QUEUE");
         this.list.splice(this.list.indexOf(reply), 1);
         this.processQueue();
     }
