@@ -344,14 +344,14 @@ export default class DC extends Uint8Array
 
     getInt64Array(offset, length)
     {
-        return this.copy(offset, length, 8, this.getInt64, BigInt64Array);
+        return this.copy(offset, length, 8, this.getInt64, Float64Array);//BigInt64Array);
         //return new Int64Array(this.clip(offset, length).buffer);
     }
 
 
     getUint64Array(offset, length)
     {
-        return this.copy(offset, length, 8, this.getUint64, BigUint64Array);
+        return this.copy(offset, length, 8, this.getUint64, Float64Array);//BigUint64Array);
         //return new Uint64Array(this.clip(offset, length).buffer);
     }
 

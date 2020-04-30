@@ -114,7 +114,7 @@ export default class DistributedConnection extends IStore {
         this.packet = new IIPPacket();
         this.authPacket = new IIPAuthPacket();
 
-        this.resources = {};
+        this.resources = new KeyList();//{};
         this.templates = new KeyList();
         this.requests = new KeyList();// {};
         //this.pathRequests = new KeyList();// {};
@@ -694,7 +694,7 @@ export default class DistributedConnection extends IStore {
     }
 
     put(resource) {
-        this.resources[parseInt(resource.instance.name)] = resource;
+        this.resources.add(parseInt(resource.instance.name), resource);
         return true;
     }
 
@@ -846,9 +846,9 @@ export default class DistributedConnection extends IStore {
     }
 
     IIPEventResourceDestroyed(resourceId) {
-        if (this.resources[resourceId]) {
-            var r = this.resources[resourceId];
-            delete this.resources[resourceId];
+        if (this.resources.item(resourceId)) {
+            var r = this.resources.item(resourceId);
+            this.resources.remove(resourceId);
             r.destroy();
         }
     }
@@ -1599,17 +1599,22 @@ export default class DistributedConnection extends IStore {
     }
 
     retrieve(iid) {
-        for (var r in this.resources)
-            if (this.resources[r].instance.id == iid)
-                return new AsyncReply(r);
-        return new AsyncReply(null);
+
+        let r = this.resources.item(iid);
+        
+        return new AsyncReply(r);
+
+        //for (var r in this.resources)
+        //    if (this.resources[r].instance.id == iid)
+        //        return new AsyncReply(r);
+        //return new AsyncReply(null);
     }
 
     // Get a resource from the other end
     fetch(id) {
 
         let resource = this.resources.item(id);
-        let request = htis.resourceRequests.item(id);
+        let request = this.resourceRequests.item(id);
 
         if (request != null) {
 

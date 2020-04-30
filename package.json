@@ -1,6 +1,6 @@
 {
   "name": "esyur",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "Distributed Object Framework",
   "main": "esyur.js",
   "scripts": {

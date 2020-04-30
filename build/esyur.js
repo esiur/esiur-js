@@ -3191,12 +3191,12 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
   }, {
     key: "getInt64Array",
     value: function getInt64Array(offset, length) {
-      return this.copy(offset, length, 8, this.getInt64, Int64Array); //return new Int64Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 8, this.getInt64, BigInt64Array); //return new Int64Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getUint64Array",
     value: function getUint64Array(offset, length) {
-      return this.copy(offset, length, 8, this.getUint64, Uint64Array); //return new Uint64Array(this.clip(offset, length).buffer);
+      return this.copy(offset, length, 8, this.getUint64, BigUint64Array); //return new Uint64Array(this.clip(offset, length).buffer);
     }
   }, {
     key: "getBoolean",
@@ -3797,6 +3797,11 @@ var KeyList = /*#__PURE__*/function () {
       return false;
     }
   }, {
+    key: "containsKey",
+    value: function containsKey(key) {
+      return this.contains(key);
+    }
+  }, {
     key: "set",
     value: function set(key, value) {
       this.remove(key);
@@ -4079,6 +4084,8 @@ exports["default"] = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
 var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
@@ -4202,10 +4209,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     _this.authPacket = new _IIPAuthPacket["default"]();
     _this.resources = {};
     _this.templates = new _KeyList["default"]();
-    _this.requests = {};
-    _this.pathRequests = {};
+    _this.requests = new _KeyList["default"](); // {};
+    //this.pathRequests = new KeyList();// {};
+
     _this.templateRequests = new _KeyList["default"]();
-    _this.resourceRequests = {};
+    _this.resourceRequests = new _KeyList["default"](); // {};
+
     _this.callbackCounter = 0;
     _this.queue = new _AsyncQueue["default"]();
 
@@ -4532,7 +4541,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                   this.sendParams().addUint8(0x28).addUint8Array(this.session.id).done();
                   this.ready = true;
-                  this.openReply.trigger(this); //this._emit("ready", this);
+                  this.openReply.trigger(this);
+                  this.openReply = null; //this._emit("ready", this);
                 }
               }
             }
@@ -4564,10 +4574,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
               } else if (authPacket.action == _IIPAuthPacketAction["default"].ConnectionEstablished) {
                 this.session.id = authPacket.sessionId;
                 this.ready = true;
-                this.openReply.trigger(this); //this._emit("ready", this);
+                this.openReply.trigger(this);
+                this.openReply = null; //this._emit("ready", this);
               }
             } else if (authPacket.command == _IIPAuthPacketCommand["default"].Error) {
-              this.openReply.triggerError(1, authPacket.errorCode, authPacket.errorMessage); //this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
+              this.openReply.triggerError(1, authPacket.errorCode, authPacket.errorMessage);
+              this.openReply = null; //this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
 
               this.close();
             }
@@ -4593,14 +4605,96 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "close",
     value: function close(event) {
-      this._emit("close", event);
-
-      _Warehouse["default"].remove(this);
+      this.ready = false;
+      this.readyToEstablish = false;
+      this.requests.values.forEach(function (x) {
+        return x.triggerError(AsyncException(_ErrorType["default"].Management, 0, "Connection closed"));
+      });
+      this.resourceRequests.values.forEach(function (x) {
+        return x.triggerError(new AsyncException(_ErrorType["default"].Management, 0, "Connection closed"));
+      });
+      this.templateRequests.values.forEach(function (x) {
+        return x.triggerError(new AsyncException(_ErrorType["default"].Management, 0, "Connection closed"));
+      });
+      this.resources.values.forEach(function (x) {
+        return x.suspend();
+      });
+      this.requests.clear();
+      this.resourceRequests.clear();
+      this.templateRequests.clear(); //        Warehouse.remove(this);
 
       if (this.socket.readyState != this.socket.CLOSED) {
         this.socket.close();
       }
+
+      this._emit("close", event);
     }
+  }, {
+    key: "reconnect",
+    value: function () {
+      var _reconnect = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
+        var bag, i, index;
+        return _regenerator["default"].wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.prev = 0;
+                _context.next = 3;
+                return this.connect();
+
+              case 3:
+                if (!_context.sent) {
+                  _context.next = 15;
+                  break;
+                }
+
+                _context.prev = 4;
+                bag = new AsyncBag();
+
+                for (i = 0; i < this.resources.keys.length; i++) {
+                  index = this.resources.keys[i];
+                  bag.add(this.fetch(index));
+                }
+
+                bag.seal();
+                _context.next = 10;
+                return bag;
+
+              case 10:
+                _context.next = 15;
+                break;
+
+              case 12:
+                _context.prev = 12;
+                _context.t0 = _context["catch"](4);
+                console.log(_context.t0);
+
+              case 15:
+                _context.next = 20;
+                break;
+
+              case 17:
+                _context.prev = 17;
+                _context.t1 = _context["catch"](0);
+                return _context.abrupt("return", false);
+
+              case 20:
+                return _context.abrupt("return", true);
+
+              case 21:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this, [[0, 17], [4, 12]]);
+      }));
+
+      function reconnect() {
+        return _reconnect.apply(this, arguments);
+      }
+
+      return reconnect;
+    }()
   }, {
     key: "hold",
     value: function hold() {
@@ -4638,74 +4732,91 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
             _this$instance$attrib9 = _this$instance$attrib.debug,
             debug = _this$instance$attrib9 === void 0 ? false : _this$instance$attrib9;
 
-        this.openReply = new _AsyncReply["default"](); //var hostname = this.instance.name.split("://", 2)[1].split("/", 2)[0];
-        // assign domain from hostname if not provided
-
-        var host = this.instance.name.split(':');
-        var address = host[0];
-        var port = parseInt(host[1]);
-        domain = domain ? domain : address;
-        this.session.localAuthentication.domain = domain;
-        this.session.localAuthentication.username = username;
-        this.localPassword = _DataConverter.DC.stringToBytes(password);
-        var url = "ws".concat(secure ? 's' : '', "://").concat(this.instance.name);
         this.debug = debug;
-        this.totalReceived = 0;
-        this.totalSent = 0;
         this.checkInterval = checkInterval * 1000; // check every 30 seconds
 
         this.connectionTimeout = connectionTimeout * 1000; // 10 minutes (4 pings failed)
 
         this.revivingTime = revivingTime * 1000; // 2 minutes
 
-        this.lastAction = Date.now();
-        this.socket = new WebSocket(url, "iip");
-        this.socket.binaryType = "arraybuffer";
-        this.socket.connection = this;
-        this.socket.networkBuffer = new _NetworkBuffer["default"]();
-        this.sendBuffer = new _NetworkBuffer["default"]();
+        var pw = _DataConverter.DC.stringToBytes(password);
 
-        var un = _DataConverter.DC.stringToBytes(username);
-
-        var dmn = _DataConverter.DC.stringToBytes(domain);
-
-        var self = this;
-
-        this.socket.onopen = function () {
-          var bl = (0, _DataConverter.BL)();
-          bl.addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(self.localNonce).addUint8(un.length).addUint8Array(un);
-          self.send(bl.toArray());
-        };
-
-        this.socket.onmessage = function (msg) {
-          //console.log("Rec", msg.data.byteLength);
-          this.networkBuffer.writeAll(msg.data);
-          self.lastAction = new Date();
-          self.hold();
-
-          while (this.networkBuffer.available > 0 && !this.networkBuffer["protected"]) {
-            // try
-            // {
-            self.receive(this.networkBuffer); // }
-            // catch(e) 
-            //{
-            //  console.log(e);
-            //}
-          }
-
-          self.unhold();
-        };
-
-        this.socket.onclose = function (event) {
-          if (this.connection.openReply) this.connection.openReply.triggerError(0, 0, "Host not reachable");
-          self.close(event);
-        };
-
-        return this.openReply;
+        var host = this.instance.name.split(':');
+        var address = host[0];
+        var port = parseInt(host[1]);
+        return this.connect(secure, address, port, username, pw, domain);
       }
 
       return new _AsyncReply["default"](true);
     }
+  }, {
+    key: "connect",
+    value: function connect(secure, hostname, port, username, password, domain) {
+      this.openReply = new _AsyncReply["default"]();
+
+      if (secure !== undefined) {
+        this.session.localAuthentication.domain = domain;
+        this.session.localAuthentication.username = username;
+        this.localPassword = password; //this.url = `ws${secure ? 's' : ''}://${this.instance.name}`;
+
+        this.url = "ws".concat(secure ? 's' : '', "://").concat(hostname, ":").concat(port);
+      } //this.debug = debug;
+
+
+      this.totalReceived = 0;
+      this.totalSent = 0;
+      this.lastAction = Date.now();
+      this.socket = new WebSocket(this.url, "iip");
+      this.socket.binaryType = "arraybuffer";
+      this.socket.connection = this;
+      this.socket.networkBuffer = new _NetworkBuffer["default"]();
+      this.sendBuffer = new _NetworkBuffer["default"]();
+
+      var un = _DataConverter.DC.stringToBytes(this.session.localAuthentication.username);
+
+      var dmn = _DataConverter.DC.stringToBytes(this.session.localAuthentication.domain);
+
+      var self = this;
+
+      this.socket.onopen = function () {
+        var bl = (0, _DataConverter.BL)();
+        bl.addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(self.localNonce).addUint8(un.length).addUint8Array(un);
+        self.send(bl.toArray());
+      };
+
+      this.socket.onmessage = function (msg) {
+        //console.log("Rec", msg.data.byteLength);
+        this.networkBuffer.writeAll(msg.data);
+        self.lastAction = new Date();
+        self.hold();
+
+        while (this.networkBuffer.available > 0 && !this.networkBuffer["protected"]) {
+          // try
+          // {
+          self.receive(this.networkBuffer); // }
+          // catch(e) 
+          //{
+          //  console.log(e);
+          //}
+        }
+
+        self.unhold();
+      };
+
+      this.socket.onclose = function (event) {
+        if (this.connection.openReply) {
+          this.connection.openReply.triggerError(0, 0, "Host not reachable");
+          this.connection.openReply = null;
+        }
+
+        self.close(event);
+      };
+
+      return this.openReply;
+    }
+  }, {
+    key: "reconnect",
+    value: function reconnect() {}
   }, {
     key: "put",
     value: function put(resource) {
@@ -4718,21 +4829,21 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     // Protocol Implementation
 
   }, {
-    key: "sendRequest2",
-    value: function sendRequest2(action, binaryList) {
-      var reply = new _AsyncReply["default"]();
-      this.callbackCounter++;
-      this.sendParams().addUint8(0x40 | action).addUint32(this.callbackCounter).addRange(binaryList).done();
-      this.requests[this.callbackCounter] = reply;
-      return reply;
-    }
-  }, {
     key: "sendRequest",
     value: function sendRequest(action) {
       var reply = new _AsyncReply["default"]();
       this.callbackCounter++;
-      this.requests[this.callbackCounter] = reply;
+      this.requests.set(this.callbackCounter, reply);
       return this.sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);
+    }
+  }, {
+    key: "sendDetachRequest",
+    value: function sendDetachRequest(instanceId) {
+      try {
+        return this.sendRequest(_IIPPacketAction["default"].DetachResource).addUint32(instanceId).done();
+      } catch (ex) {
+        return null;
+      }
     }
   }, {
     key: "sendInvokeByArrayArguments",
@@ -4743,7 +4854,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       this.callbackCounter++;
       this.sendParams().addUint8(0x40 | _IIPPacketAction["default"].InvokeFunctionArrayArguments).addUint32(this.callbackCounter).addUint32(instanceId).addUint8(index).addUint8Array(pb).done();
-      this.requests[this.callbackCounter] = reply;
+      this.requests.set(this.callbackCounter, reply);
       return reply;
     }
   }, {
@@ -4755,7 +4866,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       this.callbackCounter++;
       this.sendParams().addUint8(0x40 | _IIPPacketAction["default"].InvokeFunctionNamedArguments).addUint32(this.callbackCounter).addUint32(instanceId).addUint8(index).addUint8Array(pb).done();
-      this.requests[this.callbackCounter] = reply;
+      this.requests.set(this.callbackCounter, reply);
       return reply;
     }
   }, {
@@ -4783,40 +4894,45 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     key: "IIPReply",
     value: function IIPReply(callbackId) {
       var results = Array.prototype.slice.call(arguments, 1);
-      var req = this.requests[callbackId]; //console.log("Reply " + callbackId, req);
-
-      delete this.requests[callbackId];
+      var req = this.requests.item(callbackId);
+      this.requests.remove(callbackId);
       req.trigger(results);
     }
   }, {
     key: "IIPReplyInvoke",
     value: function IIPReplyInvoke(callbackId, result) {
-      var req = this.requests[callbackId];
-      delete this.requests[callbackId];
+      var req = this.requests.item(callbackId);
 
-      _Codec["default"].parse(result, 0, {}, this).then(function (rt) {
-        req.trigger(rt);
-      });
+      if (req != null) {
+        this.requests.remove(callbackId);
+
+        _Codec["default"].parse(result, 0, {}, this).then(function (rt) {
+          req.trigger(rt);
+        });
+      }
     }
   }, {
     key: "IIPReportError",
     value: function IIPReportError(callbackId, errorType, errorCode, errorMessage) {
-      var req = this.requests[callbackId];
-      delete this.requests[callbackId];
-      req.triggerError(errorType, errorCode, errorMessage);
+      var req = this.requests.item(callbackId);
+
+      if (request != null) {
+        this.requests.remove(callbackId);
+        req.triggerError(errorType, errorCode, errorMessage);
+      }
     }
   }, {
     key: "IIPReportProgress",
     value: function IIPReportProgress(callbackId, type, value, max) {
-      var req = this.requests[callbackId];
-      req.triggerProgress(type, value, max);
+      var req = this.requests.item(callbackId);
+      req === null || req === void 0 ? void 0 : req.triggerProgress(type, value, max);
     }
   }, {
     key: "IIPReportChunk",
     value: function IIPReportChunk(callbackId, data) {
-      if (this.requests[callbackId]) {
-        var req = this.requests[callbackId];
+      var req = this.requests.item(callbackId);
 
+      if (req != null) {
         _Codec["default"].parse(data, 0, {}, this).then(function (x) {
           req.triggerChunk(x);
         });
@@ -4933,15 +5049,15 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           if (r.instance.applicable(self.session, _ActionType["default"].Attach, null) == _Ruling["default"].Denied) {
             self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AttachDenied);
             return;
-          }
+          } // reply ok
 
-          r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
-          r.instance.on("ResourceModified", self.instance_propertyModified, self);
-          r.instance.on("ResourceDestroyed", self.instance_resourceDestroyed, self); // reply ok
 
           var link = _DataConverter.DC.stringToBytes(r.instance.link);
 
           if (r instanceof _DistributedResource["default"]) self.sendReply(_IIPPacketAction["default"].AttachResource, callback).addUint8Array(r.instance.template.classId.value).addUint64(r.instance.age).addUint16(link.length).addUint8Array(link).addUint8Array(_Codec["default"].composePropertyValueArray(r._serialize(), self, true)).done();else self.sendReply(_IIPPacketAction["default"].AttachResource, callback).addUint8Array(r.instance.template.classId.value).addUint64(r.instance.age).addUint16(link.length).addUint8Array(link).addUint8Array(_Codec["default"].composePropertyValueArray(r.instance.serialize(), self, true)).done();
+          r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
+          r.instance.on("ResourceModified", self.instance_propertyModified, self);
+          r.instance.on("ResourceDestroyed", self.instance_resourceDestroyed, self);
         } else {
           // reply failed
           self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
@@ -5132,12 +5248,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                 if (fi instanceof Function) {
                   var itt = /*#__PURE__*/_regenerator["default"].mark(function itt() {
-                    return _regenerator["default"].wrap(function itt$(_context) {
+                    return _regenerator["default"].wrap(function itt$(_context2) {
                       while (1) {
-                        switch (_context.prev = _context.next) {
+                        switch (_context2.prev = _context2.next) {
                           case 0:
                           case "end":
-                            return _context.stop();
+                            return _context2.stop();
                         }
                       }
                     }, itt);
@@ -5483,26 +5599,29 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "fetch",
     value: function fetch(id) {
-      if (this.resourceRequests[id] && this.resources[id]) {
-        // dig for dead locks
-        // or not
-        return new _AsyncReply["default"](this.resources[id]); //return this.resourceRequests[id];
-      } else if (this.resourceRequests[id]) return this.resourceRequests[id];else if (this.resources[id]) return new _AsyncReply["default"](this.resources[id]);
+      var resource = this.resources.item(id);
+      var request = htis.resourceRequests.item(id);
+
+      if (request != null) {
+        if (resource != null) // dig for dead locks            // or not
+          return new _AsyncReply["default"](resource);else return request;
+      } else if (resource != null && !resource._p.suspended) {
+        return new _AsyncReply["default"](resource);
+      }
 
       var reply = new _AsyncReply["default"]();
-      this.resourceRequests[id] = reply;
+      this.resourceRequests.set(id, reply);
       var self = this;
       this.sendRequest(_IIPPacketAction["default"].AttachResource).addUint32(id).done().then(function (rt) {
-        var dr = new _DistributedResource["default"](self, id, rt[1], rt[2]); //var dr = new DistributedResource(self, tmp, id, rt[1], rt[2]);
-
+        var dr = resource !== null && resource !== void 0 ? resource : new _DistributedResource["default"](self, id, rt[1], rt[2]);
         self.getTemplate(rt[0]).then(function (tmp) {
           // ClassId, ResourceAge, ResourceLink, Content
-          _Warehouse["default"].put(dr, id.toString(), self, null, tmp);
+          if (resource == null) _Warehouse["default"].put(dr, id.toString(), self, null, tmp);
 
           _Codec["default"].parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
-            dr._attached(ar);
+            dr._attach(ar);
 
-            delete self.resourceRequests[id];
+            self.resourceRequests.remove(id);
             reply.trigger(dr);
           });
         });
@@ -5810,7 +5929,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncQueue.js":20,"../../Core/AsyncReply.js":21,"../../Core/ErrorType.js":22,"../../Core/ExceptionCode.js":23,"../../Core/ProgressType.js":26,"../../Data/Codec.js":29,"../../Data/DataConverter.js":30,"../../Data/KeyList.js":33,"../../Resource/IResource.js":56,"../../Resource/IStore.js":57,"../../Resource/Template/ResourceTemplate.js":64,"../../Resource/Warehouse.js":65,"../../Security/Authority/Authentication.js":66,"../../Security/Authority/AuthenticationType.js":67,"../../Security/Authority/Session.js":68,"../../Security/Integrity/SHA256.js":69,"../../Security/Permissions/ActionType.js":70,"../../Security/Permissions/Ruling.js":72,"../Packets//IIPPacketReport.js":52,"../Packets/IIPAuthPacket.js":44,"../Packets/IIPAuthPacketAction.js":45,"../Packets/IIPAuthPacketCommand.js":46,"../Packets/IIPAuthPacketMethod.js":47,"../Packets/IIPPacket.js":48,"../Packets/IIPPacketAction.js":49,"../Packets/IIPPacketCommand.js":50,"../Packets/IIPPacketEvent.js":51,"../SendList.js":53,"../Sockets/NetworkBuffer.js":54,"./DistributedPropertyContext.js":40,"./DistributedResource.js":41,"./DistributedResourceQueueItem.js":42,"./DistributedResourceQueueItemType.js":43,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11,"@babel/runtime/regenerator":17}],40:[function(require,module,exports){
+},{"../../Core/AsyncQueue.js":20,"../../Core/AsyncReply.js":21,"../../Core/ErrorType.js":22,"../../Core/ExceptionCode.js":23,"../../Core/ProgressType.js":26,"../../Data/Codec.js":29,"../../Data/DataConverter.js":30,"../../Data/KeyList.js":33,"../../Resource/IResource.js":56,"../../Resource/IStore.js":57,"../../Resource/Template/ResourceTemplate.js":64,"../../Resource/Warehouse.js":65,"../../Security/Authority/Authentication.js":66,"../../Security/Authority/AuthenticationType.js":67,"../../Security/Authority/Session.js":68,"../../Security/Integrity/SHA256.js":69,"../../Security/Permissions/ActionType.js":70,"../../Security/Permissions/Ruling.js":72,"../Packets//IIPPacketReport.js":52,"../Packets/IIPAuthPacket.js":44,"../Packets/IIPAuthPacketAction.js":45,"../Packets/IIPAuthPacketCommand.js":46,"../Packets/IIPAuthPacketMethod.js":47,"../Packets/IIPPacket.js":48,"../Packets/IIPPacketAction.js":49,"../Packets/IIPPacketCommand.js":50,"../Packets/IIPPacketEvent.js":51,"../SendList.js":53,"../Sockets/NetworkBuffer.js":54,"./DistributedPropertyContext.js":40,"./DistributedResource.js":41,"./DistributedResourceQueueItem.js":42,"./DistributedResourceQueueItemType.js":43,"@babel/runtime/helpers/asyncToGenerator":2,"@babel/runtime/helpers/classCallCheck":3,"@babel/runtime/helpers/createClass":5,"@babel/runtime/helpers/getPrototypeOf":7,"@babel/runtime/helpers/inherits":8,"@babel/runtime/helpers/interopRequireDefault":9,"@babel/runtime/helpers/possibleConstructorReturn":11,"@babel/runtime/regenerator":17}],40:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -5921,8 +6040,17 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
     key: "destroy",
     value: function destroy() {
       this.destroyed = true;
+      this._p.attached = false;
+
+      this._p.connection.sendDetachRequest(this._p.instanceId);
 
       this._emit("destroy", this);
+    }
+  }, {
+    key: "_suspend",
+    value: function _suspend() {
+      this._p.suspended = true;
+      this._p.attached = false;
     }
   }]);
 
@@ -5932,7 +6060,8 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
     (0, _classCallCheck2["default"])(this, DistributedResource);
     _this = (0, _possibleConstructorReturn2["default"])(this, (0, _getPrototypeOf2["default"])(DistributedResource).call(this));
     _this._p = {
-      isAttached: false,
+      suspended: false,
+      attached: false,
       connection: connection,
       instanceId: instanceId,
       age: age,
@@ -5954,9 +6083,11 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
       return props;
     }
   }, {
-    key: "_attached",
-    value: function _attached(properties) {
-      if (this._isAttached) return false;else {
+    key: "_attach",
+    value: function _attach(properties) {
+      if (this._p.attached) return false;else {
+        this._p.suspended = false;
+
         for (var i = 0; i < properties.length; i++) {
           this.instance.setAge(i, properties[i].age);
           this.instance.setModificationDate(i, properties[i].date);
@@ -5964,7 +6095,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
           this._p.properties.push(properties[i].value);
         }
 
-        this._p.isAttached = true;
+        this._p.attached = true;
         var self = this;
 
         var makeFunc = function makeFunc(index) {
@@ -6024,6 +6155,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
     key: "_invokeByArrayArguments",
     value: function _invokeByArrayArguments(index, args) {
       if (this.destroyed) throw new Error("Trying to access destroyed object");
+      if (this._p.suspended) throw new Error("Trying to access suspended object");
       if (index >= this.instance.template.functions.length) throw new Error("Function index is incorrect");
       return this._p.connection.sendInvokeByArrayArguments(this._p.instanceId, index, args);
     }
@@ -6031,6 +6163,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
     key: "_invokeByNamedArguments",
     value: function _invokeByNamedArguments(index, namedArgs) {
       if (this.destroyed) throw new Error("Trying to access destroyed object");
+      if (this._p.suspended) throw new Error("Trying to access suspended object");
       if (index >= this.instance.template.functions.length) throw new Error("Function index is incorrect");
       return this._p.connection.sendInvokeByNamedArguments(this._p.instanceId, index, namedArgs);
     }
@@ -6506,6 +6639,7 @@ var IIPPacket = /*#__PURE__*/function () {
           this.methodIndex = data.getUint8(offset++);
           var cl = data.getUint32(offset);
           offset += 4;
+          if (this.notEnough(offset, ends, cl)) return -this.dataLengthNeeded;
           this.content = data.clip(offset, cl);
           offset += cl;
         } // Attribute
@@ -7406,9 +7540,9 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
       this.ages[pt.index] = this.instanceAge;
       this.modificationDates[pt.index] = now;
       if (pt.recordable) this.store.record(this.resource, pt.name, value, this.ages[pt.index], now);
-      (0, _get2["default"])((0, _getPrototypeOf2["default"])(Instance.prototype), "_emit", this).call(this, "ResourceModified", this.resource, pt.name, value);
+      (0, _get2["default"])((0, _getPrototypeOf2["default"])(Instance.prototype), "_emit", this).call(this, "ResourceModified", this.resource, pt.name, value); //this.resource._emit("modified", pt.name, value);
 
-      this.resource._emit("modified", pt.name, value);
+      this.resource._emit(":" + pt.name, value);
     }
   }, {
     key: "modified",
