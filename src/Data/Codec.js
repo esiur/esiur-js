@@ -835,6 +835,18 @@ static getDataType(value, connection) {
                     || value instanceof ArrayBuffer) {
                     return DataType.UInt8Array;
                 }
+                else if (value instanceof Uint16Array)
+                    return DataType.UInt16Array;
+                else if (value instanceof Uint32Array)
+                    return DataType.UInt32Array;
+                else if (value instanceof Int16Array)
+                    return DataType.Int16Array;
+                else if (value instanceof Int32Array)
+                    return DataType.Int32Array;
+                else if (value instanceof Float32Array)
+                    return DataType.Float32Array;
+                else if (value instanceof Float64Array)
+                    return DataType.Float64Array;
                 else if (value instanceof Number) {
                     // JS numbers are always 64-bit float
                     return DataType.Float64;

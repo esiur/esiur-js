@@ -1,23 +1,23 @@
 {
-  "name": "esyur",
-  "version": "1.4.8",
+  "name": "esiur",
+  "version": "1.5.0",
   "description": "Distributed Object Framework",
-  "main": "esyur.js",
+  "main": "esiur.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "babel": "./node_modules/.bin/babel src -d build",
-    "build": "browserify src/esyur.js -t babelify --outfile build/esyur.js"
+    "build": "browserify src/esiur.js -t babelify --outfile build/esiur.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/esyur/esyur-js.git"
+    "url": "git+https://github.com/esiur/esiur-js.git"
   },
   "author": "Ahmed Zamil",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/esyur/esyur-js/issues"
+    "url": "https://github.com/esiur/esiur-js/issues"
   },
-  "homepage": "https://github.com/esyur/esyur-js#readme",
+  "homepage": "https://github.com/esiur/esiur-js#readme",
   "dependencies": {
     "@babel/polyfill": "^7.8.3",
     "@babel/runtime": "^7.8.4",

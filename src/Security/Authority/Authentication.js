@@ -31,6 +31,8 @@ export default class Authentication
 {
     constructor(type)
     {
+        this.method = 0;
+        this.tokenIndex = 0;
         this.type = type;
         this.state = 0;
         this.domain = null;

@@ -29,7 +29,7 @@
 
 import IIPAuthPacketCommand from "./IIPAuthPacketCommand.js";
 import IIPAuthPacketAction from "./IIPAuthPacketAction.js";
-import IIPAuthPacketMethod from "./IIPAuthPacketMethod.js";
+import AuthenticationMethod from "../../Security/Authority/AuthenticationMethod.js";
 
 export default class IIPAuthPacket
 {
@@ -138,9 +138,9 @@ export default class IIPAuthPacket
             offset += domainLength;
 
 
-            if (this.remoteMethod == IIPAuthPacketMethod.Credentials)
+            if (this.remoteMethod == AuthenticationMethod.Credentials)
             {
-                if (this.localMethod == IIPAuthPacketMethod.None)
+                if (this.localMethod == AuthenticationMethod.None)
                 {
                     if (this.notEnough(offset, ends, 33))
                         return -this.dataLengthNeeded;
@@ -159,6 +159,21 @@ export default class IIPAuthPacket
 
                     offset += length;
                 }
+            }
+            else if (this.remoteMethod == AuthenticationMethod.Token)
+            {
+                if (this.localMethod == AuthenticationMethod.None)
+                {
+                    if (this.notEnough(offset, ends, 40))
+                            return -this.dataLengthNeeded;
+                    
+                    this.remoteNonce = data.clip(offset, 32);
+
+                    offset += 32;
+
+                    this.remoteTokenIndex = data.getUint64(offset);
+                    offset += 8;
+                 }
             }
 
             if (encrypt)
@@ -188,9 +203,10 @@ export default class IIPAuthPacket
                 return -this.dataLengthNeeded;
 
 
-            if (this.remoteMethod == IIPAuthPacketMethod.Credentials)
+            if (this.remoteMethod == AuthenticationMethod.Credentials
+                || this.remoteMethod == AuthenticationMethod.Token)
             {
-                if (this.localMethod == IIPAuthPacketMethod.None)
+                if (this.localMethod == AuthenticationMethod.None)
                 {
                     if (this.notEnough(offset, ends, 32))
                         return -this.dataLengthNeeded;

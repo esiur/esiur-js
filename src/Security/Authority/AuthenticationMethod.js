@@ -1,4 +1,4 @@
-export default //const IIPAuthPacketMethod =
+export default
 {
     None: 0,
     Certificate: 1,

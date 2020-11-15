@@ -2,7 +2,7 @@ export default //const ExceptionCode =
 {
     HostNotReachable: 0,
     AccessDenied: 1,
-    UserNotFound: 2,
+    UserOrTokenNotFound: 2,
     ChallengeFailed: 3,
     ResourceNotFound: 4,
     AttachDenied: 5,
@@ -28,5 +28,6 @@ export default //const ExceptionCode =
     MethodNotFound: 25,
     PropertyNotFound: 26,
     SetPropertyDenied: 27,
-    ReadOnlyProperty: 28
+    ReadOnlyProperty: 28,
+    GeneralFailure: 29,
 };

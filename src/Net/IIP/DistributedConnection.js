@@ -46,7 +46,7 @@ import IIPAuthPacket from "../Packets/IIPAuthPacket.js";
 import IIPPacket from "../Packets/IIPPacket.js";
 import IIPAuthPacketAction from "../Packets/IIPAuthPacketAction.js";
 import IIPAuthPacketCommand from "../Packets/IIPAuthPacketCommand.js";
-import IIPAuthPacketMethod from "../Packets/IIPAuthPacketMethod.js";
+import AuthenticationMethod from "../../Security/Authority/AuthenticationMethod.js";
 
 import IIPPacketAction from "../Packets/IIPPacketAction.js";
 import IIPPacketCommand from "../Packets/IIPPacketCommand.js";
@@ -68,6 +68,7 @@ import { ResourceTrigger } from '../../Resource/IResource.js';
 
 import Ruling from '../../Security/Permissions/Ruling.js';
 import ActionType from '../../Security/Permissions/ActionType.js';
+import AsyncException from '../../Core/AsyncException.js';
 
 export default class DistributedConnection extends IStore {
 
@@ -372,7 +373,7 @@ export default class DistributedConnection extends IStore {
 
                     }
                 } catch (ex) {
-                    console.log("Esyur Error ", ex);
+                    console.log("Esiur Error ", ex);
                 }
             }
         }
@@ -390,8 +391,8 @@ export default class DistributedConnection extends IStore {
 
                 if (this.session.localAuthentication.type == AuthenticationType.Host) {
                     if (authPacket.command == IIPAuthPacketCommand.Declare) {
-                        if (authPacket.remoteMethod == IIPAuthPacketMethod.credentials
-                            && authPacket.localMethod == IIPAuthPacketMethod.None) {
+                        if (authPacket.remoteMethod == AuthenticationMethod.credentials
+                            && authPacket.localMethod == AuthenticationMethod.None) {
                             this.session.remoteAuthentication.username = authPacket.remoteUsername;
                             this.remoteNonce = authPacket.remoteNonce;
                             this.domain = authPacket.domain;
@@ -449,11 +450,7 @@ export default class DistributedConnection extends IStore {
 
                         // send our hash
 
-                        //var localHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.localPassword)
-                        //    .addUint8Array(this.localNonce)
-                        //    .addUint8Array(this.remoteNonce).toArray()));
-
-                        var localHash = SHA256.compute(BL().addUint8Array(this.localPassword)
+                        var localHash = SHA256.compute(BL().addUint8Array(this.localPasswordOrToken)
                             .addUint8Array(this.localNonce)
                             .addUint8Array(this.remoteNonce).toDC());
 
@@ -461,15 +458,10 @@ export default class DistributedConnection extends IStore {
                     }
                     else if (authPacket.command == IIPAuthPacketCommand.Action) {
                         if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-                            // check if the server knows my password
-                            //var remoteHash = new DC(sha256.arrayBuffer(BL().addUint8Array(this.remoteNonce)
-                            //    .addUint8Array(this.localNonce)
-                            //    .addUint8Array(this.localPassword).toArray()
-                            //));
 
                             var remoteHash = SHA256.compute(BL().addUint8Array(this.remoteNonce)
                                 .addUint8Array(this.localNonce)
-                                .addUint8Array(this.localPassword).toDC());
+                                .addUint8Array(this.localPasswordOrToken).toDC());
 
 
                             if (remoteHash.sequenceEqual(authPacket.hash)) {
@@ -527,10 +519,18 @@ export default class DistributedConnection extends IStore {
         this.ready = false;
         this.readyToEstablish = false;
 
-        this.requests.values.forEach((x) => x.triggerError(AsyncException(ErrorType.Management, 0, "Connection closed")));
-        this.resourceRequests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
-        this.templateRequests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
-        this.resources.values.forEach((x) => x.suspend());
+        try
+        {
+            this.requests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
+            this.resourceRequests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
+            this.templateRequests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
+        }
+        catch(ex)
+        {
+            // unhandled error
+        }
+
+        this.resources.values.forEach((x) => x._suspend());
 
         this.requests.clear();
         this.resourceRequests.clear();
@@ -597,6 +597,8 @@ export default class DistributedConnection extends IStore {
                 checkInterval = 30,
                 connectionTimeout = 600,
                 revivingTime = 120,
+                tokenIndex = 0,
+                token = null,
                 debug = false } = this.instance.attributes.toObject();
 
 
@@ -605,27 +607,40 @@ export default class DistributedConnection extends IStore {
             this.connectionTimeout = connectionTimeout * 1000; // 10 minutes (4 pings failed)
             this.revivingTime = revivingTime * 1000; // 2 minutes
 
-            var pw = DC.stringToBytes(password);
+            
             var host = this.instance.name.split(':');
 
             var address = host[0];
             var port = parseInt(host[1]);
 
-            return this.connect(secure, address, port, username, pw, domain);
+            if (token != null)
+            {
+                var tk = DC.stringToBytes(token);
+                return this.connect(secure, AuthenticationMethod.token, address, port, null, tokenIndex, tk, domain);
+            }
+            else
+            {
+                var pw = DC.stringToBytes(password);
+                return this.connect(secure, AuthenticationMethod.credentials, address, port, username, null, pw, domain);
+            }
         }
 
         return new AsyncReply(true);
     }
 
 
-    connect(secure, hostname, port, username, password, domain) {
+    connect(secure, method, hostname, port, username, tokenIndex, passwordOrToken, domain) {
         this.openReply = new AsyncReply();
 
 
         if (secure !== undefined) {
+
+            this.session.localAuthentication.method = method;
+            this.session.localAuthentication.tokenIndex = tokenIndex;
+        
             this.session.localAuthentication.domain = domain;
             this.session.localAuthentication.username = username;
-            this.localPassword = password;
+            this.localPasswordOrToken = passwordOrToken;
 
             //this.url = `ws${secure ? 's' : ''}://${this.instance.name}`;
             this.url = `ws${secure ? 's' : ''}://${hostname}:${port}`;
@@ -806,6 +821,7 @@ export default class DistributedConnection extends IStore {
     }
 
     IIPReplyInvoke(callbackId, result) {
+        
         var req = this.requests.item(callbackId);
 
         if (req != null) {
@@ -820,7 +836,7 @@ export default class DistributedConnection extends IStore {
 
     IIPReportError(callbackId, errorType, errorCode, errorMessage) {
         var req = this.requests.item(callbackId);
-        if (request != null)
+        if (req != null)
         {
             this.requests.remove(callbackId);
             req.triggerError(errorType, errorCode, errorMessage);
@@ -872,7 +888,7 @@ export default class DistributedConnection extends IStore {
                 item.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Propery, args, index));
             }).error(function (ex) {
                 self.queue.remove(item);
-                console.log("Esyur Property Error", ex);
+                console.log("Esiur Property Error", ex);
             });
         });
     }
@@ -896,7 +912,7 @@ export default class DistributedConnection extends IStore {
 
             }).error(function (ex) {
                 self.queue.remove(item);
-                console.log("Esyur Event Error", ex);
+                console.log("Esiur Event Error", ex);
             });
         });
     }

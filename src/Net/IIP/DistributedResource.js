@@ -79,13 +79,20 @@ export default class DistributedResource extends IResource
     {
 
         if (this._p.attached)
+        {
+            console.log("Already attached.");
             return false;
+        }
         else
         { 
 
+            this._p.attached = true;
+
             this._p.suspended = false;
 
-            for(var i = 0; i  < properties.length; i++)
+            this._p.properties = [];
+            
+            for(let i = 0; i  < properties.length; i++)
             {
                 this.instance.setAge(i, properties[i].age);
                 this.instance.setModificationDate(i, properties[i].date);
@@ -93,7 +100,6 @@ export default class DistributedResource extends IResource
             }
 
 
-            this._p.attached = true;
 
             var self = this;
 
@@ -210,6 +216,12 @@ export default class DistributedResource extends IResource
 
     _set(index, value)
     {
+        if (!this._p.attached)
+        {
+            console.log("What ?");
+            return;
+        }
+
         if (this._p.neglect)
             return;
 

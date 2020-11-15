@@ -28,6 +28,14 @@
 
 export default class Structure
 {
+    toPairs() {
+        var rt = [];
+        for (var i in this)
+            if (!(this[i] instanceof Function))
+                rt.push({ key: i, value: this[i]});
+        return rt;
+    }
+    
     getKeys() {
         var rt = [];
         for (var i in this)

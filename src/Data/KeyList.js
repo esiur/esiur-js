@@ -122,6 +122,47 @@ export default class KeyList
         this.values.splice(index, 1);
      }
 
+     clear()
+     {
+        while(this.length > 0)
+            this.removeAt(0);
+     }
+
+    filter(selector)
+    {	
+        if (selector instanceof Function){
+            return this.values.filter(selector);
+        }
+        else
+        {
+            let match = function(small, big)
+            {
+                if (small == big)
+                {
+                    return true;
+                }
+                else if (typeof small == "object" && typeof big == "object" && small != null && big != null)
+                {
+                    if (small.constructor.name == "Object")
+                    {
+                        for(var i in small)
+                            if (!match(small[i], big[i]))
+                                return false;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                    return false;
+            };
+
+            return this.values.filter((x) => match(selector, x));
+        }
+     }
+ 
      get length()
      {
          return this.keys.length;

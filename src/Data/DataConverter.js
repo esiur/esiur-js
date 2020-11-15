@@ -172,6 +172,71 @@ export default class DC extends Uint8Array
         return list.toArray();
     }
 
+    static uint16ArrayToBytes(values)
+    {
+        var rt = new DC(values.length * 2);
+        for(var i = 0; i < values.length; i++)
+            rt.setUint16(i * 2, values[i]);
+        return rt;
+    }
+
+    static int16ArrayToBytes(values)
+    {
+        var rt = new DC(values.length * 2);
+        for(var i = 0; i < values.length; i++)
+            rt.setInt16(i * 2, values[i]);
+        return rt;
+    }
+
+    static uint32ArrayToBytes(values)
+    {
+        var rt = new DC(values.length * 4);
+        for(var i = 0; i < values.length; i++)
+            rt.setUint32(i * 4, values[i]);
+        return rt;
+    }
+
+
+    static int32ArrayToBytes(values)
+    {
+        var rt = new DC(values.length * 4);
+        for(var i = 0; i < values.length; i++)
+            rt.setInt32(i * 4, values[i]);
+        return rt;
+    }
+
+    static int64ArrayToBytes(values)
+    {
+        var rt = new DC(values.length * 8);
+        for(var i = 0; i < values.length; i++)
+            rt.setInt64(i * 8, values[i]);
+        return rt;
+    }
+
+    static uint64ArrayToBytes(values)
+    {
+        var rt = new DC(values.length * 8);
+        for(var i = 0; i < values.length; i++)
+            rt.setUint64(i * 8, values[i]);
+        return rt;
+    }
+
+    static float32ArrayToBytes(values)
+    {
+        var rt = new DC(values.length * 4);
+        for(var i = 0; i < values.length; i++)
+            rt.setFloat32(i * 4, values[i]);
+        return rt;
+    }
+
+    static float64ArrayToBytes(values)
+    {
+        var rt = new DC(values.length * 8);
+        for(var i = 0; i < values.length; i++)
+            rt.setFloat64(i * 8, values[i]);
+        return rt;
+    }
+
     append(src, offset, length)
     {
         if (!(src instanceof DC))
@@ -303,6 +368,16 @@ export default class DC extends Uint8Array
             rt[d++] = func.call(this, i);
         return rt;
     }
+
+    paste(offset, length, elementSize, func) 
+    {
+        let rt = new dstType(length / elementSize);
+        let d = 0, end = offset + length;
+        for (let i = offset; i < end; i += elementSize)
+            rt[d++] = func.call(this, i);
+        return rt;
+    }
+
 
     getInt16Array(offset, length)
     {

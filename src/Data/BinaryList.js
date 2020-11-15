@@ -112,6 +112,31 @@ export default class BinaryList
                     break;
                 case DataType.UInt8Array:
                     ars.push(this.list[i].value);
+                    break;
+
+                case DataType.UInt16Array:
+                    ars.push(DC.uint16ArrayToBytes(this.list[i].value));
+                    break;
+    
+                case DataType.UInt32Array:
+                    ars.push(DC.uint32ArrayToBytes(this.list[i].value));
+                    break;
+
+                case DataType.Int16Array:
+                    ars.push(DC.int16ArrayToBytes(this.list[i].value));
+                    break;
+
+                case DataType.Int32Array:
+                    ars.push(DC.int32ArrayToBytes(this.list[i].value));
+                    break;
+
+                case DataType.Float32Array:
+                    ars.push(DC.float32ArrayToBytes(this.list[i].value));
+                    break;
+
+                case DataType.Float64Array:
+                    ars.push(DC.float64ArrayToBytes(this.list[i].value));
+                    break;
 
                 //case DataType.Resource:
                 //    ars.push(DC.uint32ToBytes(this.list[i].value.instance.id));
@@ -127,7 +152,7 @@ export default class BinaryList
 
         var length = 0;
         ars.forEach(function(a){
-            length += a.length;
+            length += a.length ;//?? a.byteLength;
         });
 
         var rt = new Uint8Array(length);
@@ -135,7 +160,7 @@ export default class BinaryList
         var offset = 0;
         for(var i = 0; i < ars.length; i++) {
             rt.set(ars[i], offset);
-            offset+=ars[i].length;
+            offset+=ars[i].length;// ?? ars[i].byteLength;
         }
 
         return rt;
