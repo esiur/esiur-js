@@ -4,7 +4,7 @@ var demo = null;
 
 class JSResource extends IResource
 {
-    static getTemplate()
+    static get template()
     {
         return {
                 namespace: "JS",

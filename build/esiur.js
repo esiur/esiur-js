@@ -5117,7 +5117,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     key: "IIPReportProgress",
     value: function IIPReportProgress(callbackId, type, value, max) {
       var req = this.requests.item(callbackId);
-      req === null || req === void 0 ? void 0 : req.triggerProgress(type, value, max);
+      if (req != null) req.triggerProgress(type, value, max);
     }
   }, {
     key: "IIPReportChunk",
@@ -5805,7 +5805,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       this.resourceRequests.set(id, reply);
       var self = this;
       this.sendRequest(_IIPPacketAction["default"].AttachResource).addUint32(id).done().then(function (rt) {
-        var dr = resource !== null && resource !== void 0 ? resource : new _DistributedResource["default"](self, id, rt[1], rt[2]);
+        var dr = resource || new _DistributedResource["default"](self, id, rt[1], rt[2]);
         self.getTemplate(rt[0]).then(function (tmp) {
           // ClassId, ResourceAge, ResourceLink, Content
           if (resource == null) _Warehouse["default"].put(dr, id.toString(), self, null, tmp);

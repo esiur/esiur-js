@@ -27,6 +27,7 @@
 "use strict";  
 
 import IStore from '../Resource/IStore.js'
+import AsyncReply from '../Core/AsyncReply.js';
 
 export default class MemoryStore extends IStore
  {

@@ -48,6 +48,11 @@ export default class DistributedResource extends IResource
       this._p.attached = false;
     }
 
+    trigger(type)
+    {
+        return new AsyncReply(true);
+    }
+
     constructor(connection, instanceId, age, link)
     {
         super();

@@ -51,7 +51,7 @@ export default class IResource extends IDestructible
         super();
     }
 
-    static getTemplate()
+    static get template()
     {
         return {
                 namespace: "Esiur",

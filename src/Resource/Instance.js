@@ -149,7 +149,7 @@ export default class Instance extends IEventHandler
         var val = {};
         if (this.getPropertyValue(propertyName, val))
         {
-            var pt = this.template.getPropertyTemplateByName(propertyName);            
+            var pt = this.template.getPropertyTemplateByName(propertyName);
             this.emitModification(pt, val.value)
         }
     }

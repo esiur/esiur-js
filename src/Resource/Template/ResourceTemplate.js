@@ -99,7 +99,7 @@ export default class ResourceTemplate {
         if (type === undefined)
             return;
 
-        var template = type.getTemplate();
+        var template = type.template;
 
         // set guid
         this.className = template.namespace + "." + type.prototype.constructor.name;
@@ -122,7 +122,7 @@ export default class ResourceTemplate {
             var et = new EventTemplate();
             et.name = template.events[i].name;
             et.index = i;
-            et.expansion = template.events[i].expansion;
+            et.expansion = template.events[i].help;
             this.events.push(et);
         }
 
@@ -131,7 +131,7 @@ export default class ResourceTemplate {
             ft.name = template.functions[i].name;
             ft.index = i;
             ft.isVoid = template.functions[i].void;
-            ft.expansion = template.functions[i].expansion;
+            ft.expansion = template.functions[i].help;
             this.functions.push(ft);
         }
 

@@ -845,7 +845,8 @@ export default class DistributedConnection extends IStore {
 
     IIPReportProgress(callbackId, type, value, max) {
         var req = this.requests.item(callbackId);
-        req?.triggerProgress(type, value, max);
+        if (req != null)
+            req.triggerProgress(type, value, max);
     }
 
     IIPReportChunk(callbackId, data) {
@@ -1655,7 +1656,7 @@ export default class DistributedConnection extends IStore {
             .done()
             .then(function (rt) {
 
-                let dr = resource ?? new DistributedResource(self, id, rt[1], rt[2]);
+                let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
 
                 self.getTemplate(rt[0]).then(function (tmp) {
 
