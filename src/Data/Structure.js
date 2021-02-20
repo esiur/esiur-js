@@ -45,6 +45,15 @@ export default class Structure
         return rt;
     }
 
+    toObject()
+    {
+        var rt = {};
+        for (var i in this)
+            if (!(this[i] instanceof Function))
+                rt[i] = this[i];
+        return rt;
+    }
+
     constructor(data)
     {
         if (data instanceof Object)

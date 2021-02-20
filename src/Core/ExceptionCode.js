@@ -30,4 +30,5 @@ export default //const ExceptionCode =
     SetPropertyDenied: 27,
     ReadOnlyProperty: 28,
     GeneralFailure: 29,
+    AddToStoreFailed: 30
 };

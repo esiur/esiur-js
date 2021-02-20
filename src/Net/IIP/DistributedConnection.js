@@ -1112,13 +1112,14 @@ export default class DistributedConnection extends IStore {
 
                             var resource = new (Function.prototype.bind.apply(type, values));
 
-                            Warehouse.put(resource, name, store, parent);
-
-
-                            self.sendReply(IIPPacketAction.CreateResource, callback)
+                            Warehouse.put(resource, name, store, parent).then(function(ok){
+                                self.sendReply(IIPPacketAction.CreateResource, callback)
                                 .addUint32(resource.Instance.Id)
                                 .done();
-
+                            }).error(function(ex){
+                                // send some error
+                                self.sendError(ErrorType.Management, callback, ExceptionCode.AddToStoreFailed);
+                            });
                         });
                     });
                 });
@@ -1662,14 +1663,32 @@ export default class DistributedConnection extends IStore {
 
                     // ClassId, ResourceAge, ResourceLink, Content
                     if (resource == null)
-                        Warehouse.put(dr, id.toString(), self, null, tmp);
-
-                    Codec.parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
-                        dr._attach(ar);
-                        self.resourceRequests.remove(id);
-                        reply.trigger(dr);
-                    });
+                    {
+                        Warehouse.put(dr, id.toString(), self, null, tmp).then(function(ok){
+                            Codec.parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
+                                dr._attach(ar);
+                                self.resourceRequests.remove(id);
+                                reply.trigger(dr);
+                            });
+                        }).error(function(ex){
+                            reply.triggerError(ex);
+                        });
+                    }
+                    else
+                    {
+                        Codec.parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
+                            dr._attach(ar);
+                            self.resourceRequests.remove(id);
+                            reply.trigger(dr);
+                        }).error(function(ex){
+                            reply.triggerError(ex);
+                        });
+                    }
+                }).error(function(ex){
+                    reply.triggerError(ex);
                 });
+            }).error(function(ex){
+                reply.triggerError(ex);
             });
 
         return reply;

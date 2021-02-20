@@ -217,10 +217,7 @@ export class WH extends IEventHandler
         }
 
         if (resource instanceof IStore)
-        {
             this.stores.add(resource);
-            this._emit("connected", resource);
-        }
         else
             await store.put(resource);
 
@@ -233,6 +230,9 @@ export class WH extends IEventHandler
             if (resource instanceof IStore)
                 await resource.trigger(ResourceTrigger.Open);
         }
+
+        if (resource instanceof IStore)
+            this._emit("connected", resource);
 
         return new AsyncReply(true);
     }
@@ -388,11 +388,8 @@ export class WH extends IEventHandler
         for (var i = 0; i < this.resources.length; i++)
         {
             var r = this.resources.at(i);
-            console.log("init ", r);
 
             var rt = await r.trigger(ResourceTrigger.Initialize);
-
-            console.log("init done", r);
 
             if (!rt)
                 console.log(`Resource failed at Initialize ${r.Instance.Name} [${r.Instance.Template.ClassName}]`);
