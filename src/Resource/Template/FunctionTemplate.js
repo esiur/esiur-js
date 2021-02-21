@@ -39,11 +39,17 @@ export default class FunctionTemplate extends MemberTemplate {
             var exp = DC.stringToBytes(this.expansion);
 
             return rt.addUint8(0x10 | (this.isVoid ? 0x8 : 0x0))
-                    .addUint8(name.length).addUint8Array(name)
-                    .addUint32(exp.length).addUint8Array(exp).toArray();
+                    .addUint8(name.length)
+                    .addUint8Array(name)
+                    .addUint32(exp.length)
+                    .addUint8Array(exp)
+                    .toArray();
         }
         else
-            return rt.addUint8(this.isVoid ? 0x8 : 0x0).addUint8(name.length).addUint8Array(name).toArray();
+            return rt.addUint8(this.isVoid ? 0x8 : 0x0)
+                     .addUint8(name.length)
+                     .addUint8Array(name)
+                     .toArray();
     }
 
     constructor() {

@@ -49,7 +49,7 @@ export default class PropertyTemplate extends MemberTemplate
     {
         var name = super.compose();
         var rt = BL();
-        var pv = (this.permission >> 1) | (this.recordable ? 1 : 0);
+        var pv = (this.permission << 1) | (this.recordable ? 1 : 0);
 
         if (this.writeExpansion != null && this.readExpansion != null)
         {
@@ -86,7 +86,7 @@ export default class PropertyTemplate extends MemberTemplate
         }
         else
             return rt.addUint8(0x20 | pv)
-                .addUint32(name.length)
+                .addUint8(name.length)
                 .addUint8Array(name)
                 .toArray();
     }

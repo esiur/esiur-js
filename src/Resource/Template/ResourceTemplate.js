@@ -150,7 +150,10 @@ export default class ResourceTemplate {
         var b = BL();
         var cls = DC.stringToBytes(this.className);
         b.addUint8Array(this.classId.value)
-            .addUint8(cls.length).addUint8Array(cls).addUint32(template.version).addUint16(this.members.length);
+            .addUint8(cls.length)
+            .addUint8Array(cls)
+            .addUint32(template.version)
+            .addUint16(this.members.length);
 
         for (var i = 0; i < this.functions.length; i++)
             b.addUint8Array(this.functions[i].compose());

@@ -36,8 +36,9 @@ import MemoryStore from '../Stores/MemoryStore.js';
 import Instance from '../Resource/Instance.js';
 import IStore from './IStore.js';
 import { ResourceTrigger } from './IResource.js';
-import IndexDBStore from '../Stores/IndexDBStore.js';
+import IndexedDBStore from '../Stores/IndexedDBStore.js';
 import ResourceProxy from '../Proxy/ResourceProxy.js';
+import AsyncBag from '../Core/AsyncBag.js';
 
 
 export class WH extends IEventHandler
@@ -57,17 +58,22 @@ export class WH extends IEventHandler
         this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
     }
 
-    async new(type, name, store = null, parent = null, manager = null, attributes = null, properties = null)
+    new(type, name, store = null, parent = null, manager = null, attributes = null, properties = null)
     {
         var proxyType = ResourceProxy.getProxy(type);
+
+        var rt = new AsyncReply();
 
         var res = new proxyType();
 
         if (properties != null)
             Object.assign(res, properties);
 
-        await this.put(res, name, store, parent, null, 0, manager, attributes);
-        return res;
+        this.put(res, name, store, parent, null, 0, manager, attributes)
+                .then((ok)=>rt.trigger(res))
+                .error((ex)=>rt.triggerError(ex));
+
+        return rt;
     }
 
     getById(id)
@@ -75,82 +81,57 @@ export class WH extends IEventHandler
         return new AsyncReply(this.resources.item(id));
     }
     
-    async get(path, attributes = null, parent = null, manager = null)
+    get(path, attributes = null, parent = null, manager = null)
     {
-        //var rt = new AsyncReply();
-        //var self = this;
+        var rt = new AsyncReply();
+        var self = this;
 
         // Should we create a new store ?
         if (path.match(this._urlRegex))
-        //if (path.includes("://"))
         {
             // with port
             //var url = path.split(/(?:):\/\/([^:\/]*):?(\d*)/);
             // without port
             let url = path.split(this._urlRegex);
-                        
+            
             var handler;
+
+            const initResource = ()=>{
+                handler(url[2], attributes).then(store => {
+                    if (url[3].length > 0 && url[3] != "")
+                        store.get(url[3]).then(r=>rt.trigger(r)).error(ex=>rt.triggerError(ex));
+                    else
+                        rt.triggerError(store);
+                }).error(ex=>{
+                    Warehouse.remove(resource);
+                    rt.triggerError(ex);
+                });
+            }
 
             if (handler = this.protocols.item(url[1]))
             {
                 if (!this.warehouseIsOpen)
-                    await this.open();
-
-                var store = await handler(url[2], attributes);
-                //await this.put(store, url[2], null, parent, null, 0, manager, attributes);
-                //await store.trigger(ResourceTrigger.Open);
-                //this.warehouseIsOpen = true;
-
-                try
                 {
-                    if (url[3].length > 0 && url[3] != "")
-                        return await store.get(url[3]);
-                    else
-                        return store;
-                } catch(ex)
-                {
-                    this.remove(resource);
-                    throw ex;
+                    this.open().then((ok)=>{
+                        initResource();
+                    }).error(ex=>rt.triggerError(ex));
                 }
-
-                // store.trigger(ResourceTrigger.Open).then(x => {
-
-                //     this.warehouseIsOpen = true;
-
-                //     if (url[3].length > 0 && url[3] != "")
-                //         store.get(url[3]).then(r => {
-                //             rt.trigger(r);
-                //         }).error(e => rt.triggerError(e));
-                //     else
-                //         rt.trigger(store);
-                // }).error(e => {
-                //     rt.triggerError(e);
-                //     self.remove(store);
-                // });
-
-                // return rt;
+                else
+                    initResource();
+     
+                 return rt;
             }
         }
         
         
-        var rs = await this.query(path);
-        
-        if (rs != null && rs.length > 0)
-            return rs[0];
-        else
-            return null;
+        this.query(path).then(rs => {
+            if (rs != null && rs.length > 0)
+                rt.trigger(rs[0]);
+            else
+                rt.trigger( null);
+        }).error(ex => rt.triggerError(ex));
 
-        // .then(rs =>
-        // {
-        //     if (rs != null && rs.length > 0)
-        //         rt.trigger(rs[0]);
-        //     else
-        //         rt.trigger(null);
-        // });
-        
-        //return rt;
-  
-
+        return rt;
     }
 
 
@@ -194,7 +175,9 @@ export class WH extends IEventHandler
         return true;
     }
 
-    async put(resource, name, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
+    put(resource, name, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
+
+        var rt = new AsyncReply();
 
         resource.instance = new Instance(this.resourceCounter++, name, resource, store, customTemplate, age);
         //resource.instance.children.on("add", Warehouse._onChildrenAdd).on("remove", Warehouse._onChildrenRemove);
@@ -216,25 +199,42 @@ export class WH extends IEventHandler
                 store.instance.children.add(resource);
         }
 
-        if (resource instanceof IStore)
-            this.stores.add(resource);
-        else
-            await store.put(resource);
+        let self = this;
 
-        this.resources.add(resource.instance.id, resource);
+        const initResource = ()=>{
+            self.resources.add(resource.instance.id, resource);
 
-        if (this.warehouseIsOpen)
-        {
-            await resource.trigger(ResourceTrigger.Initialize);
-
-            if (resource instanceof IStore)
-                await resource.trigger(ResourceTrigger.Open);
+            if (self.warehouseIsOpen)
+            {
+                resource.trigger(ResourceTrigger.Initialize).then(x=>{
+                    if (resource instanceof IStore)
+                        resource.trigger(ResourceTrigger.Open).then(y=>{ rt.trigger(true); 
+                                                                        self._emit("connected", resource) 
+                                                                    }).error(ex => rt.triggerError(ex));
+                    else
+                        rt.trigger(true);
+                    
+                }).error(ex=>rt.triggerError(ex));
+            }
+            else
+            {
+                 if (resource instanceof IStore)
+                 self._emit("connected", resource);
+                rt.trigger(true);
+            }
         }
 
         if (resource instanceof IStore)
-            this._emit("connected", resource);
+        {
+            this.stores.add(resource);
+            initResource();
+        }
+        else
+            store.put(resource).then(ok=>{
+                initResource();
+            }).error(ex=>rt.triggerError(ex));
 
-        return new AsyncReply(true);
+        return rt;
     }
 
     _onParentsRemove(value)
@@ -325,14 +325,10 @@ export class WH extends IEventHandler
         return rt;
     }
 
-    async query(path)
+    query(path)
     {
-        //var p = path.split('/');
-        //return new AsyncReply(this._qureyIn(p, 0, this.stores));
 
         
-        
-        var rt = new AsyncReply();
 
         var p = path.trim().split('/');
         var resource;
@@ -345,65 +341,102 @@ export class WH extends IEventHandler
             {
 
                 if (p.length == 1)
-                    return [store];
-
+                    return new AsyncReply([store]);
                   
-                var res = await store.get(p.splice(1).join("/"));
-                if (res != null)
-                    return [res];
-                
-                
-                resource = store;
-                for (var i = 1; i < p.length; i++)
-                {
-                    var children = await resource.instance.children.list.filter(x=>x.instance.name == p[i]);// <IResource>(p[i]);
-                    if (children.length > 0)
-                    {
-                        if (i == p.length - 1)
-                            return children;
-                        else
-                            resource = children[0];
-                    }
+                var rt = new AsyncReply();
+
+                store.get(p.splice(1).join("/")).then(res=>{
+                    if (res != null)
+                        rt.trigger([res]);
                     else
-                        break;
-                }
+                    {
+                        resource = store;
 
-                return null;
+                        for (var i = 1; i < p.length; i++)
+                        {
+                            var children = resource.instance.children.list.filter(x=>x.instance.name == p[i]);// <IResource>(p[i]);
+                            if (children.length > 0)
+                            {
+                                if (i == p.length - 1)
+                                {
+                                    rt.trigger(children);
+                                    return;
+                                }
+                                else
+                                    resource = children[0];
+                            }
+                            else
+                                break;
+                        }
+        
+                        rt.trigger(null);
+                    }
+                }).error(ex => rt.triggerError(ex));
+
+                return rt;
             }
-
         }
 
-        return null;
-        
+        return new AsyncReply(null);    
     }
 
 
-    async open()
+    open()
     {
         if (this.warehouseIsOpen)
             return new AsyncReply(false);
 
-        this.warehouseIsOpen = true;
+        var initBag = new AsyncBag();
+
+        let rt = new AsyncReply();
+        let self = this;
 
         for (var i = 0; i < this.resources.length; i++)
         {
             var r = this.resources.at(i);
-
-            var rt = await r.trigger(ResourceTrigger.Initialize);
-
-            if (!rt)
-                console.log(`Resource failed at Initialize ${r.Instance.Name} [${r.Instance.Template.ClassName}]`);
+            initBag.add(r.trigger(ResourceTrigger.Initialize));
+            //if (!rt)
+              //  console.log(`Resource failed at Initialize ${r.Instance.Name} [${r.Instance.Template.ClassName}]`);
         }
 
-        for (var i = 0; i < this.resources.length; i++)
-        {
-            var r = this.resources.at(i);
-            var rt = await r.trigger(ResourceTrigger.SystemInitialized);
-            if (!rt)
-            console.log(`Resource failed at SystemInitialized ${r.Instance.Name} [${r.Instance.Template.ClassName}]`);
-        }
+        initBag.seal();
 
-        return new AsyncReply(true);
+        initBag.then(ar => {
+
+            for(var i = 0; i < ar.length; i++)
+                if (!ar[i])
+                    console.log(`Resource failed at Initialize ${self.resources.at(i).Instance.Name} [${self.resources.at(i).Instance.Template.ClassName}]`);
+
+            var sysBag = new AsyncBag();
+
+            for (var i = 0; i < this.resources.length; i++)
+            {
+                var r = this.resources.at(i);
+                sysBag.add(r.trigger(ResourceTrigger.SystemInitialized));
+            }
+    
+            sysBag.seal();
+            sysBag.then(ar2 => {
+                for(var i = 0; i < ar2.length; i++)
+                if (!ar2[i])
+                    console.log(`Resource failed at Initialize ${self.resources.at(i).Instance.Name} [${self.resources.at(i).Instance.Template.ClassName}]`);
+                
+                self.warehouseIsOpen = true;
+                rt.trigger(true);
+
+            }).error(ex => rt.triggerError(ex));
+
+        }).error(ex => rt.triggerError(ex));
+
+        // for (var i = 0; i < this.resources.length; i++)
+        // {
+        //     var r = this.resources.at(i);
+        //     var rt = await r.trigger(ResourceTrigger.SystemInitialized);
+        //     if (!rt)
+        //     console.log(`Resource failed at SystemInitialized ${r.Instance.Name} [${r.Instance.Template.ClassName}]`);
+        // }
+
+        return rt;
     }
 
 }
@@ -412,7 +445,7 @@ let Warehouse  = new WH();
 
 Warehouse.protocols.add("iip", (name, attributes) => Warehouse.new(DistributedConnection, name, null, null, null, attributes));
 Warehouse.protocols.add("mem", (name, attributes) => Warehouse.new(MemoryStore, name, null, null, null, attributes));
-Warehouse.protocols.add("db", (name, attributes) => Warehouse.new(IndexDBStore, name, null, null, null, attributes));
+Warehouse.protocols.add("db", (name, attributes) => Warehouse.new(IndexedDBStore, name, null, null, null, attributes));
 
 
 export default Warehouse;

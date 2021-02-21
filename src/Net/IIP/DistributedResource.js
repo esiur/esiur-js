@@ -169,7 +169,9 @@ export default class DistributedResource extends IResource
     _emitEventByIndex(index, args)
     {
         var et = this.instance.template.getEventTemplateByIndex(index);
-        this._emitArgs(et.name, args);
+        //@TODO if  array _emitArgs
+        //this._emitArgs(et.name, [args]);
+        this._emit(et.name, args);
         this.instance._emitResourceEvent(null, null, et.name, args);
     }
 

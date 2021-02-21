@@ -32,6 +32,9 @@ import AsyncReply from '../Core/AsyncReply.js';
 import Codec from '../Data/Codec.js';
 import Warehouse from '../Resource/Warehouse.js';
 import DataType from '../Data/DataType.js';
+import AsyncBag from '../Core/AsyncBag.js';
+import ErrorType from '../Core/ErrorType.js';
+import ExceptionCode from '../Core/ExceptionCode.js';
 
 export default class IndexedDBStore extends IStore
  {
@@ -133,8 +136,10 @@ export default class IndexedDBStore extends IStore
          this.classes.set(className, type);
      }
      
-     async fetch(id)
+     fetch(id)
      {
+        let self = this;
+
          if (this.resources.has(id))
              return new AsyncReply(this.resources.get(id));
          
@@ -145,44 +150,68 @@ export default class IndexedDBStore extends IStore
         var request = objectStore.get(id);
 
         request.onerror = function(event) {
-            rt.trigger(null);
+            rt.triggerError(event);
         };
-
-        request.onsuccess = async function(event) {
+        
+        request.onsuccess = function(event) {
             var doc = request.result;
             
-            if (!this.classes.has(doc.className))
+            if (doc == null)
             {
-                rt.triggerError(0, 0, "Class not found");
+                //rt.triggerError(ErrorType.Management, ExceptionCode.ResourceNotFound);
+                rt.trigger(null);
+                return;
+            }
+
+            if (!self.classes.has(doc.className))
+            {
+                rt.triggerError(ErrorType.Management, ExceptionCode.ClassNotFound);
                 return;
             }
 
             //let r = await Warehouse.new(, doc.name, this, null, null, this);
-            let type = this.classes.get(doc.className);
+            let type = self.classes.get(doc.className);
             var proxyType = ResourceProxy.getProxy(type);
             var resource = new proxyType();
-            this.resources.set(doc._id, resource);
+            self.resources.set(doc.id, resource);
 
-            await Warehouse.put(resource, doc.name, this, null, null, null, null);
+            resource._id = doc.id;
 
-            var attributes = await parse(doc.attributes);
-            resource.instance.setAttributes(attributes);
+            Warehouse.put(resource, doc.name, self, null, null, null, null).then(ok=>{
+                self.parse(doc.attributes).then(attributes=>{
 
-            
-            // Apply store managers
-            for (var i = 0; i < this.instance.managers.length; i++)
-                resource.instance.managers.add(this.instance.managers[i]);
+                    resource.instance.setAttributes(attributes);
+        
+                    // Apply store managers
+                    for (var i = 0; i < self.instance.managers.length; i++)
+                        resource.instance.managers.add(self.instance.managers[i]);
+        
+                    // Load values
+        
+                    var bag = new AsyncBag();
 
-            // Load values
+                    for(var i = 0; i < doc.values.length; i++)
+                    {
+                        let v = doc.values[i];
 
-            for(var i = 0; i < doc.values.length; i++)
-            {
-                let v = doc.values[i];
-                var x = await this.parse(v.value);
-                resource.instance.loadProperty(v.name, v.age, v.modification, x);
-            }
+                        bag.add(self.parse(v.value));
+                        //var x = await this.parse(v.value);
+                        resource.instance.loadProperty(v.name, v.age, v.modification, x);
+                    }
 
-            rt.trigger(resource);
+                    bag.seal();
+
+                    bag.then(ar=>{
+                        for(var i = 0; i < ar.length; i++)
+                        {
+                            let v = doc.values[i];
+                            resource.instance.loadProperty(v.name, v.age, v.modification, ar[i]);
+                        }
+
+                        rt.trigger(resource);
+                    }).error(ex => rt.triggerError(ex));
+                }).error(ex => rt.triggerError(ex));
+            }).error(ex => rt.triggerError(ex));
         };
 
         return rt;
@@ -190,6 +219,7 @@ export default class IndexedDBStore extends IStore
 
      put(resource)
      {
+
         let rt = new AsyncReply();
 
         var transaction = this.db.transaction(["resources"], "readwrite");
@@ -202,8 +232,10 @@ export default class IndexedDBStore extends IStore
             className: resource.instance.template.className,
             name: resource.instance.name,
             attributes: this.composeStructure(attrs),
-            _id: resource._id // if it has an Id will be replaced
         };
+
+        if (resource._id != null)
+            record.id = resource._id;
 
         // copy resource data
         let props = resource.instance.template.properties;
@@ -219,12 +251,8 @@ export default class IndexedDBStore extends IStore
         }
 
         record.values = snap;
-
-        //snap[props[i].name] = resource[props[i].name];
-
-        // debugger;
-
-        var request = objectStore.put(snap);
+  
+        var request = objectStore.put(record);
 
         request.onerror = function(event) {
             rt.trigger(false);
@@ -264,7 +292,7 @@ export default class IndexedDBStore extends IStore
             if (p[0] == "id")
             {
                 // load from Id
-                return this.fetch(p[1]);
+                return this.fetch(parseInt(p[1]));
             }
 
         return new AsyncReply(null);
@@ -287,7 +315,7 @@ export default class IndexedDBStore extends IStore
             let rt = new AsyncReply();
             
             request.onupgradeneeded = function(event) {
-                self._store = request.result.createObjectStore("resources", {keyPath: "_id", autoIncrement: true});
+                self._store = request.result.createObjectStore("resources", {keyPath: "id", autoIncrement: true});
                 console.log(self._store);
               };
             

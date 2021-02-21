@@ -35,6 +35,7 @@ import Structure from '../Data/Structure.js';
 import PropertyValue from '../Data/PropertyValue.js';
 import CustomResourceEvent from './CustomResourceEvent.js';
 import Warehouse from './Warehouse.js';
+import Ruling from '../Security/Permissions/Ruling.js';
 
 export default class Instance extends IEventHandler
 {

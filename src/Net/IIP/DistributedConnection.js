@@ -710,7 +710,7 @@ export default class DistributedConnection extends IStore {
 
     put(resource) {
         this.resources.add(parseInt(resource.instance.name), resource);
-        return true;
+        return new AsyncReply(true);
     }
 
     remove(resource) {
@@ -908,7 +908,8 @@ export default class DistributedConnection extends IStore {
             var item = new AsyncReply();
             self.queue.add(item);
 
-            Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
+           // Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
+            Codec.parse(content, 0, {}, self).then(function (args) {
                 item.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Event, args, index));
 
             }).error(function (ex) {
@@ -1199,7 +1200,7 @@ export default class DistributedConnection extends IStore {
     IIPRequestInvokeFunctionArrayArguments(callback, resourceId, index, content) {
 
         var self = this;
-
+        
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
                 Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
@@ -1230,14 +1231,20 @@ export default class DistributedConnection extends IStore {
                             if (fi instanceof Function) {
                                 args.push(self);
 
-                                var rt = fi.apply(r, args);
-
-                                function* itt() {
-
-                                };
+                                var rt;
+                                
+                                try
+                                {
+                                    rt = fi.apply(r, args);
+                                }
+                                catch(ex)
+                                {
+                                    self.sendError(ErrorType.Exception, callback, 0, ex.toString());
+                                    return;
+                                }
 
                                 // Is iterator ?
-                                if (rt[Symbol.iterator] instanceof Function) {
+                                if (rt != null && rt[Symbol.iterator] instanceof Function) {
                                     for (let v of rt)
                                         self.sendChunk(callback, v);
 
@@ -1250,6 +1257,24 @@ export default class DistributedConnection extends IStore {
                                         self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
                                             .addUint8Array(Codec.compose(res, self))
                                             .done();
+                                    }).error(ex => {
+                                        self.sendError(ErrorType.Exception, callback, ex.code, ex.message);
+                                    }).progress((pt, pv, pm) =>
+                                    {
+                                        self.sendProgress(callback, pv, pm);
+                                    }).chunk(v =>
+                                    {
+                                        self.sendChunk(callback, v);
+                                    });
+                                }
+                                else if (rt instanceof Promise)
+                                {
+                                    rt.then(function (res) {
+                                        self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
+                                            .addUint8Array(Codec.compose(res, self))
+                                            .done();
+                                    }).catch(ex => {
+                                        self.sendError(ErrorType.Exception, callback, 0, ex.toString());
                                     });
                                 }
                                 else {
@@ -1260,16 +1285,19 @@ export default class DistributedConnection extends IStore {
                             }
                             else {
                                 // ft found, fi not found, this should never happen
+                                this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                             }
                         }
                     }
                     else {
                         // no function at this index
+                        this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                     }
                 });
             }
             else {
                 // no resource with this id
+                this.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -1320,10 +1348,21 @@ export default class DistributedConnection extends IStore {
                                 if (args[args.length - 1] === undefined)
                                     args[args.length - 1] = self;
 
-                                var rt = fi.apply(r, args);
+
+                                var rt;
+                            
+                                try
+                                {
+                                    rt = fi.apply(r, args);
+                                }
+                                catch(ex)
+                                {
+                                    self.sendError(ErrorType.Exception, callback, 0, ex.toString());
+                                    return;
+                                }
 
                                 // Is iterator ?
-                                if (rt[Symbol.iterator] instanceof Function) {
+                                if (rt != null && rt[Symbol.iterator] instanceof Function) {
                                     for (let v of rt)
                                         self.sendChunk(callback, v);
 
@@ -1336,6 +1375,24 @@ export default class DistributedConnection extends IStore {
                                         self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
                                             .addUint8Array(Codec.compose(res, self))
                                             .done();
+                                    }).error(ex => {
+                                        self.sendError(ErrorType.Exception, callback, ex.code, ex.message);
+                                    }).progress((pt, pv, pm) =>
+                                    {
+                                        self.sendProgress(callback, pv, pm);
+                                    }).chunk(v =>
+                                    {
+                                        self.sendChunk(callback, v);
+                                    });
+                                }
+                                else if (rt instanceof Promise)
+                                {
+                                    rt.then(function (res) {
+                                        self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
+                                            .addUint8Array(Codec.compose(res, self))
+                                            .done();
+                                    }).catch(ex => {
+                                        self.sendError(ErrorType.Exception, callback, 0, ex.toString());
                                     });
                                 }
                                 else {
@@ -1346,16 +1403,19 @@ export default class DistributedConnection extends IStore {
                             }
                             else {
                                 // ft found, fi not found, this should never happen
+                                this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                             }
                         }
                     }
                     else {
                         // no function at this index
+                        this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                     }
                 });
             }
             else {
                 // no resource with this id
+                this.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -1492,14 +1552,19 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.query(resourceLink).then(function (resources) {
 
-            var list = resources.filter(function (r) { return r.instance.applicable(self.session, ActionType.Attach, null) != Ruling.Denied });
-
-            if (list.length == 0)
+            if (resources == null)
                 self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             else
-                self.sendReply(IIPPacketAction.QueryLink, callback)
-                    .addUint8Array(Codec.composeResourceArray(list, self, true))
-                    .done();
+            {
+                var list = resources.filter(function (r) { return r.instance.applicable(self.session, ActionType.Attach, null) != Ruling.Denied });
+
+                if (list.length == 0)
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                else
+                    self.sendReply(IIPPacketAction.QueryLink, callback)
+                        .addUint8Array(Codec.composeResourceArray(list, self, true))
+                        .done();
+            }
         });
     }
 
@@ -1664,13 +1729,15 @@ export default class DistributedConnection extends IStore {
                     // ClassId, ResourceAge, ResourceLink, Content
                     if (resource == null)
                     {
-                        Warehouse.put(dr, id.toString(), self, null, tmp).then(function(ok){
+                        let wp =  Warehouse.put(dr, id.toString(), self, null, tmp).then(function(ok){
                             Codec.parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
                                 dr._attach(ar);
                                 self.resourceRequests.remove(id);
                                 reply.trigger(dr);
                             });
-                        }).error(function(ex){
+                        });
+                        
+                        wp.error(function(ex){
                             reply.triggerError(ex);
                         });
                     }
@@ -1753,11 +1820,12 @@ export default class DistributedConnection extends IStore {
         if (resource.instance.applicable(this.session, ActionType.ReceiveEvent, et, issuer) == Ruling.Denied)
             return;
 
+
         // compose the packet
         this.sendEvent(IIPPacketEvent.EventOccurred)
             .addUint32(resource.instance.id)
             .addUint8(et.index)
-            .addUint8Array(Codec.composeVarArray(args, this, true))
+            .addUint8Array(Codec.compose(args, this, true))
             .done();
 
     }

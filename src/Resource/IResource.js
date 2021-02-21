@@ -26,6 +26,8 @@
 
 "use strict";  
 
+import AsyncBag from '../Core/AsyncBag.js';
+import AsyncReply from '../Core/AsyncReply.js';
 import IDestructible from '../Core/IDestructible.js';
 
 export const ResourceTrigger =
@@ -43,7 +45,7 @@ export default class IResource extends IDestructible
 {
     trigger(trigger)
     {
-
+        return new AsyncReply(true);
     }
 
     constructor()

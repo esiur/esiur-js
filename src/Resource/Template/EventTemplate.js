@@ -46,10 +46,18 @@ export default class EventTemplate extends MemberTemplate
         var name = super.compose();
         if (this.expansion != null) {
             var exp = DC.stringToBytes(this.expansion);
-            return rt.addUint8(0x50).addUint8(name.length).addUint8Array(name).addUint32(exp.length).addUint8Array(exp).toArray();
+            return rt.addUint8(0x50)
+                     .addUint8(name.length)
+                     .addUint8Array(name)
+                     .addUint32(exp.length)
+                     .addUint8Array(exp)
+                     .toArray();
         }
         else
-            return rt.addUint8(0x40).addUint32(name.length).addUint8Array(name).toArray();
+            return rt.addUint8(0x40)
+                     .addUint8(name.length)
+                     .addUint8Array(name)
+                     .toArray();
     }
 
 }

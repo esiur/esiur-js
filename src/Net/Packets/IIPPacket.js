@@ -146,7 +146,8 @@ export default class IIPPacket
 
                 offset += cl;
             }
-            else if (this.event == IIPPacketEvent.PropertyUpdated)
+            else if (this.event == IIPPacketEvent.PropertyUpdated 
+                    || this.event == IIPPacketEvent.EventOccurred)
             {
                 if (this.notEnough(offset, ends, 2))
                     return -this.dataLengthNeeded;
@@ -179,22 +180,22 @@ export default class IIPPacket
                     offset += size;
                 }
             }
-            else if (this.event == IIPPacketEvent.EventOccurred)
-            {
-                if (this.notEnough(offset, ends, 5))
-                    return -this.dataLengthNeeded;
+            // else if (this.event == IIPPacketEvent.EventOccurred)
+            // {
+            //     if (this.notEnough(offset, ends, 5))
+            //         return -this.dataLengthNeeded;
 
-                this.methodIndex = data.getUint8(offset++);
+            //     this.methodIndex = data.getUint8(offset++);
 
-                var cl = data.getUint32(offset);
-                offset += 4;
+            //     var cl = data.getUint32(offset);
+            //     offset += 4;
 
-                if (this.notEnough(offset, ends, cl))
-                    return -this.dataLengthNeeded;
+            //     if (this.notEnough(offset, ends, cl))
+            //         return -this.dataLengthNeeded;
 
-                this.content = data.clip(offset, cl);
-                offset += cl;
-            }
+            //     this.content = data.clip(offset, cl);
+            //     offset += cl;
+            // }
             // Attribute
             else if (this.event == IIPPacketEvent.AttributesUpdated)
             {
@@ -368,9 +369,10 @@ export default class IIPPacket
                 offset += 8;
 
             }
-            else if (  this.action == IIPPacket.InvokeFunctionArrayArguments 
+            else if (  this.action == IIPPacketAction.InvokeFunctionArrayArguments 
                     || this.action == IIPPacketAction.InvokeFunctionNamedArguments)
             {
+                
                 if (this.notEnough(offset, ends, 9))
                     return -this.dataLengthNeeded;
 
@@ -554,6 +556,7 @@ export default class IIPPacket
                 || this.action == IIPPacketAction.GetProperty
                 || this.action == IIPPacketAction.GetPropertyIfModified)
             {
+
                 if (this.notEnough(offset, ends, 1))
                     return -this.dataLengthNeeded;
 
