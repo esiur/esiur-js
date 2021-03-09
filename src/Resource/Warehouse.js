@@ -58,22 +58,38 @@ export class WH extends IEventHandler
         this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
     }
 
+    newInstance(type, properties)
+    {
+        var proxyType = ResourceProxy.getProxy(type);
+        var res = new proxyType();
+        if (properties != null)
+            Object.assign(res, properties);
+        return type;
+    }
+
     new(type, name, store = null, parent = null, manager = null, attributes = null, properties = null)
     {
         var proxyType = ResourceProxy.getProxy(type);
-
-        var rt = new AsyncReply();
 
         var res = new proxyType();
 
         if (properties != null)
             Object.assign(res, properties);
 
-        this.put(res, name, store, parent, null, 0, manager, attributes)
-                .then((ok)=>rt.trigger(res))
-                .error((ex)=>rt.triggerError(ex));
+        if (store != null || parent != null || res instanceof IStore)
+        {
+            var rt = new AsyncReply();
 
-        return rt;
+            this.put(res, name, store, parent, null, 0, manager, attributes)
+                        .then((ok)=>rt.trigger(res))
+                        .error((ex)=>rt.triggerError(ex));
+
+            return rt;
+        }
+        else
+        {
+            return new AsyncReply(res);
+        }
     }
 
     getById(id)
@@ -103,7 +119,6 @@ export class WH extends IEventHandler
                     else
                         rt.triggerError(store);
                 }).error(ex=>{
-                    Warehouse.remove(resource);
                     rt.triggerError(ex);
                 });
             }
@@ -176,7 +191,7 @@ export class WH extends IEventHandler
     }
 
     put(resource, name, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
-
+        
         var rt = new AsyncReply();
 
         resource.instance = new Instance(this.resourceCounter++, name, resource, store, customTemplate, age);
@@ -202,6 +217,7 @@ export class WH extends IEventHandler
         let self = this;
 
         const initResource = ()=>{
+
             self.resources.add(resource.instance.id, resource);
 
             if (self.warehouseIsOpen)
@@ -210,16 +226,22 @@ export class WH extends IEventHandler
                     if (resource instanceof IStore)
                         resource.trigger(ResourceTrigger.Open).then(y=>{ rt.trigger(true); 
                                                                         self._emit("connected", resource) 
-                                                                    }).error(ex => rt.triggerError(ex));
+                                                                    }).error(ex => {
+                                                                        Warehouse.remove(resource);
+                                                                        rt.triggerError(ex)
+                                                                    });
                     else
                         rt.trigger(true);
                     
-                }).error(ex=>rt.triggerError(ex));
+                }).error(ex => {
+                    Warehouse.remove(resource);
+                    rt.triggerError(ex)
+                });
             }
             else
             {
-                 if (resource instanceof IStore)
-                 self._emit("connected", resource);
+                if (resource instanceof IStore)
+                    self._emit("connected", resource);
                 rt.trigger(true);
             }
         }
@@ -232,7 +254,11 @@ export class WH extends IEventHandler
         else
             store.put(resource).then(ok=>{
                 initResource();
-            }).error(ex=>rt.triggerError(ex));
+            }).error(ex=> { 
+                // failed to put
+                Warehouse.remove(resource);
+                rt.triggerError(ex);
+            });
 
         return rt;
     }
@@ -268,8 +294,7 @@ export class WH extends IEventHandler
 
     getTemplateByType(type)
     {
-        //debugger;
-
+    
         let className = type.prototype.constructor.name;
 
         if (className.startsWith("E_"))

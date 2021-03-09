@@ -26,7 +26,7 @@
 
 "use strict";  
 
-import DC from '../../Data/DataConverter.js';
+import DC from '../Data/DataConverter.js';
 
 export default class NetworkBuffer {
     constructor() {

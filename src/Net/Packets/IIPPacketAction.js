@@ -21,10 +21,10 @@ export default  // const IIPPacketAction =
 
     // Request Invoke
     InvokeFunctionArrayArguments: 16,
-    GetProperty: 17,
-    GetPropertyIfModified: 18,
-    SetProperty: 19,
-    InvokeFunctionNamedArguments: 20,
+    InvokeFunctionNamedArguments: 17,
+    Listen: 18,
+    Unlisten: 19,
+    SetProperty: 20,
 
     // Request Attribute
     GetAllAttributes: 24,

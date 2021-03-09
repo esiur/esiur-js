@@ -391,7 +391,9 @@ export default class IIPPacket
                 offset += cl;
 
             }
-            else if (this.action == IIPPacketAction.GetProperty)
+            else if (this.action == IIPPacketAction.Listen 
+                  || this.action == IIPPacketAction.Unlisten)
+                //this.action == IIPPacketAction.GetProperty)
             {
                 if (this.notEnough(offset, ends, 5))
                     return -this.dataLengthNeeded;
@@ -402,20 +404,20 @@ export default class IIPPacket
                 this.methodIndex = data.getUint8(offset++);
 
             }
-            else if (this.action == IIPPacketAction.GetPropertyIfModified)
-            {
-                if (this.notEnough(offset, ends, 9))
-                    return -this.dataLengthNeeded;
+            // else if (this.action == IIPPacketAction.GetPropertyIfModified)
+            // {
+            //     if (this.notEnough(offset, ends, 9))
+            //         return -this.dataLengthNeeded;
 
-                this.resourceId = data.getUint32(offset);
-                offset += 4;
+            //     this.resourceId = data.getUint32(offset);
+            //     offset += 4;
 
-                this.methodIndex = data[offset++];
+            //     this.methodIndex = data[offset++];
 
-                this.resourceAge = data.getUint64(offset);
-                offset += 8;
+            //     this.resourceAge = data.getUint64(offset);
+            //     offset += 8;
 
-            }
+            // }
             else if (this.action == IIPPacketAction.SetProperty)
             {
                 if (this.notEnough(offset, ends, 6))
@@ -552,9 +554,9 @@ export default class IIPPacket
                 offset += cl;
             }
             else if (this.action == IIPPacketAction.InvokeFunctionArrayArguments
-                || this.action == IIPPacketAction.InvokeFunctionNamedArguments
-                || this.action == IIPPacketAction.GetProperty
-                || this.action == IIPPacketAction.GetPropertyIfModified)
+                || this.action == IIPPacketAction.InvokeFunctionNamedArguments)
+                //|| this.action == IIPPacketAction.GetProperty
+                //|| this.action == IIPPacketAction.GetPropertyIfModified)
             {
 
                 if (this.notEnough(offset, ends, 1))
@@ -586,7 +588,9 @@ export default class IIPPacket
                     offset += size;
                 }
             }
-            else if (this.action == IIPPacketAction.SetProperty)
+            else if (this.action == IIPPacketAction.SetProperty 
+                || this.action == IIPPacketAction.Listen 
+                || this.action == IIPPacketAction.Unlisten)
             {
                 // nothing to do
             }

@@ -1,0 +1,91 @@
+<html>
+    <head>
+        <script type="module" src="../../src/esiur.js"></script>
+        <link href="style.css" rel="stylesheet">
+        <script>
+            var service;
+            let $ = document.querySelector;
+
+            async function connect(){
+
+                let status = document.getElementById("status");
+                let username = document.getElementById("username").value;
+                let login = document.getElementById("login");
+                let chat = document.getElementById("chat");
+
+                try {
+                    status.innerHTML = "Connecting...";
+                    service = await wh.get("iip://localhost:8081/chat", {username, password: "1234"});
+                    login.style.display = "none";
+                    service.on("message", appendMessage)
+                           .on(":title", updateTitle)
+                           .on("login", appendUser)
+                           .on("logout", removeUser)
+                    updateTitle();
+                    service.messages.forEach(appendMessage);
+                    service.users.forEach((x)=>appendUser(x, true));
+                    status.innerHTML = "Online";
+                } catch (ex) {
+                    status.innerHTML = "Error " + ex.toString;   
+                }
+            }
+
+            function appendMessage(message)
+            {
+                let el = document.createElement("div");
+                let list = document.getElementById("list");
+                el.innerHTML = `<span>${message.usr}</span><span>${message.msg}</span><span>${message.date.toLocaleTimeString()}</span>`;
+                list.append(el);
+                list.scrollTop = list.scrollHeight;
+            }
+
+            function appendUser(usr, silent){
+                let el = document.createElement("div");
+                let users = document.getElementById("users");
+                el.innerHTML = usr;
+                users.append(el);
+
+                if (!silent)
+                    appendMessage({usr, msg: "joined the room", date: new Date()});
+            }
+
+            function removeUser(usr){
+                for(var i = 0; i < users.children.length; i++)
+                    if (users.children[i].innerHTML == usr)
+                        {
+                            users.removeChild(users.children[i]);
+                            break;
+                        }
+
+                appendMessage({usr, msg: "left the room", date: new Date()});
+            }
+
+            function updateTitle()
+            {
+                document.getElementById("title").value = service.title;
+            }
+            
+            function send(){
+                service.send(document.getElementById("message").value);
+            }
+        </script>
+
+    </head>
+    <body>
+        <div id="login">
+            Username: <input id="username"> <button onclick="connect()">Connect</button>
+        </div>
+        <div id="chat">
+            <div class="bar">
+                <input id="title" onkeyup="service.title = this.value"><div id="status"></div>
+            </div>
+            <div class="bar">
+                <div>Online users: </div> <div id="users"></div>
+            </div>
+            <div id="list"></div>
+            <div class="bar">
+                <input id="message"><button onclick="send()">Send</button>
+            </div>
+        </div>
+    </body>
+</html>

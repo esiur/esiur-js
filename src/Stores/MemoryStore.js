@@ -34,12 +34,13 @@ export default class MemoryStore extends IStore
      constructor()
      {
          super();
-         this.resources = [];
+         this.resources = new Map();
      }
 
      put(resource)
      {
-         this.resources[resource.instance.id] = resource;
+        this.resources.set(resource.instance.id, resource);
+        return new AsyncReply(true);
      }
 
      retrive(id)

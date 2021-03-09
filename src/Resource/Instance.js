@@ -234,7 +234,7 @@ export default class Instance extends IEventHandler
         return function(args)
         {
             if (args instanceof CustomResourceEvent)
-                self._emitResourceEvent(args.issuer, args.receivers, name, args.params);
+                self._emitResourceEvent(args.issuer, args.receivers, name, args.args);
             else
                 self._emitResourceEvent(null, null, name, args);
         };

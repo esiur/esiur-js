@@ -31,6 +31,10 @@ import AsyncReply from '../../Core/AsyncReply.js';
 import Codec from '../../Data/Codec.js';
 import Structure from '../../Data/Structure.js';
 import IIPPacketAction from '../Packets//IIPPacketAction.js';
+import EventTemplate from '../../Resource/Template/EventTemplate.js';
+import AsyncException from '../../Core/AsyncException.js';
+import ExceptionCode from '../../Core//ExceptionCode.js';
+import ErrorType from '../../Core/ErrorType.js';
 
 export default class DistributedResource extends IResource
 {
@@ -166,6 +170,32 @@ export default class DistributedResource extends IResource
         return true;
     }
 
+    listen(event)
+    {
+      let et = event instanceof EventTemplate ? event : this.instance.template.getEventTemplateByName(event);
+  
+      if (et == null)
+          return new AsyncReply().triggerError(new AsyncException(ErrorType.Management, ExceptionCode.MethodNotFound, ""));
+  
+      if (!et.listenable)
+          return new AsyncReply().triggerError(new AsyncException(ErrorType.Management, ExceptionCode.NotListenable, ""));
+  
+      return this._p.connection.sendListenRequest(this._p.instanceId, et.index);  
+    }
+  
+    unlisten(event)
+    {  
+      let et = event instanceof EventTemplate ? event : this.instance.template.getEventTemplateByName(event);
+  
+      if (et == null)
+          return new AsyncReply().triggerError(new AsyncException(ErrorType.Management, ExceptionCode.MethodNotFound, ""));
+  
+      if (!et.listenable)
+          return  new AsyncReply().triggerError(new AsyncException(ErrorType.Management, ExceptionCode.NotListenable, ""));
+  
+      return this._p.connection.sendUnlistenRequest(this._p.instanceId, et.index);
+    }
+
     _emitEventByIndex(index, args)
     {
         var et = this.instance.template.getEventTemplateByIndex(index);
@@ -225,7 +255,7 @@ export default class DistributedResource extends IResource
     {
         if (!this._p.attached)
         {
-            console.log("What ?");
+            console.log("Resource not attached.");
             return;
         }
 

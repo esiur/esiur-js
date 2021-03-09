@@ -28,10 +28,10 @@
 
 export default class CustomResourceEvent
 {
-    constructor(issuer, receivers, params)
+    constructor(issuer, receivers, args)
     {
         this.issuer = issuer;
         this.receivers = receivers;
-        this.params = params;
+        this.args = args;
     }
 }

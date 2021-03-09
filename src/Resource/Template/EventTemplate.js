@@ -46,7 +46,7 @@ export default class EventTemplate extends MemberTemplate
         var name = super.compose();
         if (this.expansion != null) {
             var exp = DC.stringToBytes(this.expansion);
-            return rt.addUint8(0x50)
+            return rt.addUint8(this.listenable ? 0x58 : 0x50)
                      .addUint8(name.length)
                      .addUint8Array(name)
                      .addUint32(exp.length)
@@ -54,7 +54,7 @@ export default class EventTemplate extends MemberTemplate
                      .toArray();
         }
         else
-            return rt.addUint8(0x40)
+            return rt.addUint8(this.listenable ? 0x48 : 0x40)
                      .addUint8(name.length)
                      .addUint8Array(name)
                      .toArray();

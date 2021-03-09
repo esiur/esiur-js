@@ -28,11 +28,22 @@ import ExceptionCode from './ExceptionCode.js';
 
 export default class AsyncException extends Error
 {
-     constructor()
-     {
-         super();
-         this.raised = false;
-     }
+
+    constructor(type, code, message)
+    {
+        super();
+
+        if (type instanceof AsyncException) {
+            this.raise(type.type, type.code, type.message);
+        } else if (type instanceof Error) {
+            this.raise(1, 0, type.message);   
+        } else if (type != undefined){
+            this.raise(type, code, message);
+        } else {
+            this.raised = false;
+        }
+    }
+
 
      raise(type, code, message)
      {

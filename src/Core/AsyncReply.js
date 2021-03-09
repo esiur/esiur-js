@@ -94,14 +94,16 @@ export default class AsyncReply extends Promise
         this.ready = true;
 
         for(var i = 0; i < this.callbacks.length; i++)
-            this.callbacks[i](result, this);        
+            this.callbacks[i](result, this);
+        
+        return this;
     }
 
 
     triggerError(type, code, message)
     {
         if (this.ready)
-            return;
+            return this;
 
         if (type instanceof AsyncException)
             this.exception.raise(type.type, type.code, type.message);
@@ -113,18 +115,24 @@ export default class AsyncReply extends Promise
         else
             for(var i = 0; i < this.errorCallbacks.length; i++)
                 this.errorCallbacks[i](this.exception, this);
+
+        return this;
     }
 
     triggerProgress(type, value, max)
     {
         for(var i = 0; i < this.progressCallbacks.length; i++)
             this.progressCallbacks[i](type, value, max, this);
+
+        return this;
     }
 
     triggerChunk(value)
     {
         for(var i = 0; i < this.chunkCallbacks.length; i++)
             this.chunkCallbacks[i](value, this);
+
+        return this;
     }
 
     constructor(result)

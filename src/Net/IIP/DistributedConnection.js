@@ -37,7 +37,7 @@ import SendList from '../SendList.js';
 
 import AsyncReply from '../../Core/AsyncReply.js';
 import Codec from '../../Data/Codec.js';
-import NetworkBuffer from '../Sockets/NetworkBuffer.js';
+import NetworkBuffer from '../NetworkBuffer.js';
 import KeyList from '../../Data/KeyList.js';
 import AsyncQueue from '../../Core/AsyncQueue.js';
 import Warehouse from '../../Resource/Warehouse.js';
@@ -69,19 +69,17 @@ import { ResourceTrigger } from '../../Resource/IResource.js';
 import Ruling from '../../Security/Permissions/Ruling.js';
 import ActionType from '../../Security/Permissions/ActionType.js';
 import AsyncException from '../../Core/AsyncException.js';
+import WSSocket from '../Sockets/WSSocket.js';
+
+import ClientAuthentication from "../../Security/Authority/ClientAuthentication.js";
+import HostAuthentication from "../../Security/Authority/HostAuthentication.js";
+import SocketState from "../Sockets/SocketState.js";
 
 export default class DistributedConnection extends IStore {
 
 
-    send(data) {
-
-        if (this.holdSending) {
-            //console.log("hold ", data.length);
-            this.sendBuffer.writeAll(data);
-        }
-        else
-            //console.log("Send", data.length);
-            this.socket.send(data.buffer);
+    sendAll(data) {
+        this.socket.sendAll(data.buffer);
     }
 
     sendParams(doneReply) {
@@ -96,21 +94,21 @@ export default class DistributedConnection extends IStore {
         return rt;
     }
 
-    constructor() {
+    constructor(server) {
 
         super();
 
-        //Instance.Name = Global.GenerateCode(12);
-
-        //this.hostType = AuthenticationType.Client;
-        //this.domain = domain;
-        //this.localUsername = username;
-
-        //this._register("ready");
-        //this._register("error");
+        this._register("ready");
+        this._register("error");
         this._register("close");
 
-        this.session = new Session(new Authentication(AuthenticationType.Client), new Authentication(AuthenticationType.Host));
+        if (server != null)
+        {
+            this.session = new Session(new Authentication(AuthenticationType.Host), new Authentication(AuthenticationType.Client));
+            this.server = server;
+        }
+        else
+            this.session = new Session(new Authentication(AuthenticationType.Client), new Authentication(AuthenticationType.Host));
 
         this.packet = new IIPPacket();
         this.authPacket = new IIPAuthPacket();
@@ -125,6 +123,8 @@ export default class DistributedConnection extends IStore {
 
         this.queue = new AsyncQueue();
 
+        this.subscriptions = new Map();
+
         this.queue.then(function (x) {
             if (x.type == DistributedResourceQueueItemType.Event) {
                 x.resource._emitEventByIndex(x.index, x.value);
@@ -134,19 +134,12 @@ export default class DistributedConnection extends IStore {
             }
         });
 
-        this.localNonce = this.generateNonce(32);// new Uint8Array(32);
-        //window.crypto.getRandomValues(this.localNonce);
-
-        // declare (Credentials -> No Auth, No Enctypt)
-        //this.socket.onerror = function(event)
-        //{
-        //    self.close(event);
-        //};
+        this.localNonce = this.generateNonce(32);
     }
 
 
 
-    processPacket(msg, offset, ends, data) {
+    _processPacket(msg, offset, ends, data) {
 
 
         var authPacket = this.authPacket;
@@ -252,12 +245,20 @@ export default class DistributedConnection extends IStore {
                             case IIPPacketAction.InvokeFunctionNamedArguments:
                                 this.IIPRequestInvokeFunctionNamedArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
                                 break;
-                            case IIPPacketAction.GetProperty:
-                                this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
+                            // case IIPPacketAction.GetProperty:
+                            //     this.IIPRequestGetProperty(packet.callbackId, packet.resourceId, packet.methodIndex);
+                            //     break;
+                            // case IIPPacketAction.GetPropertyIfModified:
+                            //     this.IIPRequestGetPropertyIfModifiedSince(packet.callbackId, packet.resourceId, packet.methodIndex, packet.resourceAge);
+                            //     break;
+
+                            case IIPPacketAction.Listen:
+                                this.IIPRequestListen(packet.callbackId, packet.resourceId, packet.methodIndex);
                                 break;
-                            case IIPPacketAction.GetPropertyIfModified:
-                                this.IIPRequestGetPropertyIfModifiedSince(packet.callbackId, packet.resourceId, packet.methodIndex, packet.resourceAge);
+                            case IIPPacketAction.Unlisten:
+                                this.IIPRequestUnlisten(packet.callbackId, packet.resourceId, packet.methodIndex);
                                 break;
+
                             case IIPPacketAction.SetProperty:
                                 this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
                                 break;
@@ -328,12 +329,15 @@ export default class DistributedConnection extends IStore {
                                 this.IIPReplyInvoke(packet.callbackId, packet.content);
                                 break;
 
-                            case IIPPacketAction.GetProperty:
-                                this.IIPReply(packet.callbackId, packet.content);
-                                break;
-                            case IIPPacketAction.GetPropertyIfModified:
-                                this.IIPReply(packet.callbackId, packet.content);
-                                break;
+                            // case IIPPacketAction.GetProperty:
+                            //     this.IIPReply(packet.callbackId, packet.content);
+                            //     break;
+                            // case IIPPacketAction.GetPropertyIfModified:
+                            //     this.IIPReply(packet.callbackId, packet.content);
+                            //     break;
+
+                            case IIPPacketAction.Listen:
+                            case IIPPacketAction.Unlisten:
                             case IIPPacketAction.SetProperty:
                                 this.IIPReply(packet.callbackId);
                                 break;
@@ -381,6 +385,7 @@ export default class DistributedConnection extends IStore {
         else {
             var rt = authPacket.parse(msg, offset, ends);
 
+            //console.log("Auth", rt, authPacket.command);
 
             if (rt <= 0) {
                 data.holdAllFor(msg, ends - rt);
@@ -389,109 +394,413 @@ export default class DistributedConnection extends IStore {
             else {
                 offset += rt;
 
-                if (this.session.localAuthentication.type == AuthenticationType.Host) {
-                    if (authPacket.command == IIPAuthPacketCommand.Declare) {
-                        if (authPacket.remoteMethod == AuthenticationMethod.credentials
-                            && authPacket.localMethod == AuthenticationMethod.None) {
-                            this.session.remoteAuthentication.username = authPacket.remoteUsername;
-                            this.remoteNonce = authPacket.remoteNonce;
-                            this.domain = authPacket.domain;
-                            this.sendParams().addUint8(0xa0).addUint8Array(this.localNonce).done();
-                        }
-                    }
-                    else if (authPacket.command == IIPAuthPacketCommand.Action) {
-                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-                            var remoteHash = authPacket.hash;
+                if (this.session.localAuthentication.type == AuthenticationType.Host)
+                {
+                    if (authPacket.command == IIPAuthPacketCommand.Declare)
+                    {
+                        this.session.remoteAuthentication.method = authPacket.remoteMethod;
 
-                            this.server.membership.getPassword(this.session.remoteAuthentication.username, this.domain).then(function (pw) {
-                                if (pw != null) {
-
-                                    //var hash = new DC(sha256.arrayBuffer(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toArray()));
-                                    var hash = SHA256.compute(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toDC());
-
-
-                                    if (hash.sequenceEqual(remoteHash)) {
-                                        // send our hash
-                                        //var localHash = new DC(sha256.arrayBuffer((new BinaryList()).addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toArray()));
-                                        var localHash = SHA256.compute(BL().addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toDC());
-                                        this.sendParams().addUint8(0).addUint8Array(localHash).done();
-
-                                        this.readyToEstablish = true;
+                        if (authPacket.remoteMethod == AuthenticationMethod.Credentials 
+                            && authPacket.localMethod == AuthenticationMethod.None)
+                        {
+                            try
+                            {
+                                this.server.membership.userExists(authPacket.remoteUsername, authPacket.domain).then(x =>
+                                {
+                                    if (x)
+                                    {
+                                        this.session.remoteAuthentication.username = authPacket.remoteUsername;
+                                        this.remoteNonce = authPacket.remoteNonce;
+                                        this.session.remoteAuthentication.domain = authPacket.domain;
+                                        this.sendParams()
+                                                    .addUint8(0xa0)
+                                                    .addUint8Array(this.localNonce)
+                                                    .done();
                                     }
-                                    else {
-                                        // incorrect password
+                                    else
+                                    {
                                         this.sendParams().addUint8(0xc0)
-                                            .addInt32(ExceptionCode.AccessDenied)
-                                            .addUint16(13)
-                                            .addString("Access Denied")
-                                            .done();
+                                                        .addUint8(ExceptionCode.UserOrTokenNotFound)
+                                                        .addUint16(14)
+                                                        .addString("User not found")
+                                                        .done();
                                     }
-                                }
-                            });
-                        }
-                        else if (authPacket.action == IIPAuthPacketAction.NewConnection) {
-                            if (readyToEstablish) {
-                                this.session.id = this.generateNonce(32);// new DC(32);
-                                //window.crypto.getRandomValues(this.session.id);
-
-                                this.sendParams().addUint8(0x28).addUint8Array(this.session.id).done();
-                                this.ready = true;
-
-                                this.openReply.trigger(this);
-                                this.openReply = null;
-                                //this._emit("ready", this);
+                                });
                             }
-                        }
-                    }
-                }
-                else if (this.session.localAuthentication.type == AuthenticationType.Client) {
-                    if (authPacket.command == IIPAuthPacketCommand.Acknowledge) {
-                        this.remoteNonce = authPacket.remoteNonce;
+                            catch (ex)
+                            {
+                                console.log(ex);
 
-                        // send our hash
+                                var errMsg = DC.stringToBytes(ex.message);
 
-                        var localHash = SHA256.compute(BL().addUint8Array(this.localPasswordOrToken)
-                            .addUint8Array(this.localNonce)
-                            .addUint8Array(this.remoteNonce).toDC());
-
-                        this.sendParams().addUint8(0).addUint8Array(localHash).done();
-                    }
-                    else if (authPacket.command == IIPAuthPacketCommand.Action) {
-                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-
-                            var remoteHash = SHA256.compute(BL().addUint8Array(this.remoteNonce)
-                                .addUint8Array(this.localNonce)
-                                .addUint8Array(this.localPasswordOrToken).toDC());
-
-
-                            if (remoteHash.sequenceEqual(authPacket.hash)) {
-                                // send establish request
-                                this.sendParams().addUint8(0x20).addUint16(0).done();
-                            }
-                            else {
-                                this.sendParams().addUint8(0xc0)
-                                    .addUint32(ExceptionCode.ChallengeFailed)
-                                    .addUint16(16)
-                                    .addString("Challenge Failed")
+                                this.sendParams()
+                                    .addUint8(0xc0)
+                                    .addUint8(ExceptionCode.GeneralFailure)
+                                    .addUint16(errMsg.length)
+                                    .addUint8Array(errMsg)
                                     .done();
                             }
                         }
-                        else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished) {
-                            this.session.id = authPacket.sessionId;
-                            this.ready = true;
-                            this.openReply.trigger(this);
-                            this.openReply = null;
+                        else if (authPacket.remoteMethod == AuthenticationMethod.Token 
+                                && authPacket.localMethod == AuthenticationMethod.None)
+                        {
+                            try
+                            {
+                                // Check if user and token exists
+                                this.server.membership.tokenExists(authPacket.remoteTokenIndex, authPacket.domain).then(x =>
+                                {
+                                    if (x != null)
+                                    {
+                                        this.session.remoteAuthentication.username = x;
+                                        this.session.remoteAuthentication.tokenIndex = authPacket.remoteTokenIndex;
+                                        this.remoteNonce = authPacket.remoteNonce;
+                                        this.session.remoteAuthentication.domain = authPacket.domain;
+                                        this.sendParams()
+                                                    .addUint8(0xa0)
+                                                    .addUint8Array(this.localNonce)
+                                                    .done();
+                                    }
+                                    else
+                                    {
+                                        //Console.WriteLine("User not found");
+                                        this.sendParams().addUint8(0xc0)
+                                                        .addUint8(ExceptionCode.UserOrTokenNotFound)
+                                                        .addUint16(15)
+                                                        .addString("Token not found")
+                                                        .done();
+                                    }
+                                });
+                            }
+                            catch (ex)
+                            {
+                                console.log(ex);
 
-                            //this._emit("ready", this);
+                                var errMsg = DC.stringToBytes(ex.message);
+
+                                this.sendParams().addUint8(0xc0)
+                                    .addUint8(ExceptionCode.GeneralFailure)
+                                    .addUint16(errMsg.length)
+                                    .addUint8Array(errMsg)
+                                    .done();
+                            }
                         }
                     }
-                    else if (authPacket.command == IIPAuthPacketCommand.Error) {
-                        this.openReply.triggerError(1, authPacket.errorCode, authPacket.errorMessage);
-                        this.openReply = null;
-                        //this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
+                    else if (authPacket.command == IIPAuthPacketCommand.Action)
+                    {
+                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash)
+                        {
+                            var remoteHash = authPacket.hash;
+                            var reply = null;
+
+                            try
+                            {
+                                if (this.session.remoteAuthentication.method == AuthenticationMethod.Credentials)
+                                {
+                                    reply = this.server.membership.getPassword(this.session.remoteAuthentication.username,
+                                                                  this.session.remoteAuthentication.domain);
+                                }
+                                else if (this.session.remoteAuthentication.method == AuthenticationMethod.Token)
+                                {
+                                    reply = this.server.membership.getToken(this.session.remoteAuthentication.tokenIndex,
+                                                                    this.session.remoteAuthentication.domain);
+                                }
+                                else
+                                {
+                                    // Error
+                                }
+
+                                reply.then((pw) =>
+                                {
+                                    if (pw != null)
+                                    {
+                                        var hash = SHA256.compute(BL()
+                                                                                .addUint8Array(pw)
+                                                                                .addUint8Array(this.remoteNonce)
+                                                                                .addUint8Array(this.localNonce)
+                                                                                .toArray());
+                                        if (hash.sequenceEqual(remoteHash))
+                                        {
+                                            // send our hash
+                                            var localHash = SHA256.compute(BL()
+                                                                    .addUint8Array(this.localNonce)
+                                                                    .addUint8Array(this.remoteNonce)
+                                                                    .addUint8Array(pw)
+                                                                    .toArray());
+                                            
+                                            this.sendParams()
+                                                .addUint8(0)
+                                                .addUint8Array(localHash)
+                                                .done();
+
+                                            this.readyToEstablish = true;
+                                        }
+                                        else
+                                        {
+                                            
+                                            this.sendParams()
+                                                            .addUint8(0xc0)
+                                                            .addUint8(ExceptionCode.AccessDenied)
+                                                            .addUint16(13)
+                                                            .addString("Access Denied")
+                                                            .done();
+                                        }
+                                    }
+                                });
+                            }
+                            catch (ex)
+                            {
+                                console.log(ex);
+
+                                var errMsg = DC.stringToBytes(ex.message);
+
+                                this.sendParams().addUint8(0xc0)
+                                    .addUint8(ExceptionCode.GeneralFailure)
+                                    .addUint16(errMsg.Length)
+                                    .addUint8Array(errMsg)
+                                    .done();
+                            }
+                        }
+                        else if (authPacket.action == IIPAuthPacketAction.NewConnection)
+                        {
+                            if (this.readyToEstablish)
+                            {
+                                this.session.Id = this.generateNonce(32);
+                                
+                                this.sendParams()
+                                                .addUint8(0x28)
+                                                .addUint8Array(this.session.Id)
+                                                .done();
+
+                                if (this.instance == null)
+                                {
+                                    Warehouse.put(this, this.localUsername, null, this.server).then(x =>
+                                    {
+    
+                                        this.ready = true;
+                                        this.openReply?.trigger(true);
+                                        this._emit("ready", this);
+                                        this.server?.membership.login(this.session);
+
+                                    }).error( x=>
+                                    {
+                                        this.openReply?.triggerError(x);
+                                    });
+                                }
+                                else
+                                {
+                                    this.ready = true;
+                                    this.openReply?.trigger(true);
+                                    this._emit("ready", this);
+                                    this.server?.membership.login(this.session);
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (this.session.localAuthentication.type == AuthenticationType.Client)
+                {
+                    if (authPacket.command == IIPAuthPacketCommand.Acknowledge)
+                    {
+                        this.remoteNonce = authPacket.remoteNonce;
+
+                        // send our hash
+                        var localHash = SHA256.compute(BL()
+                                                            .addUint8Array(this.localPasswordOrToken)
+                                                            .addUint8Array(this.localNonce)
+                                                            .addUint8Array(this.remoteNonce)
+                                                            .toArray());
+
+                        this.sendParams()
+                            .addUint8(0)
+                            .addUint8Array(localHash)
+                            .done();
+
+                    }
+                    else if (authPacket.command == IIPAuthPacketCommand.Action)
+                    {
+                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash)
+                        {
+                            // check if the server knows my password
+                            var remoteHash = SHA256.compute(BL()
+                                                                    .addUint8Array(this.remoteNonce)
+                                                                    .addUint8Array(this.localNonce)
+                                                                    .addUint8Array(this.localPasswordOrToken)
+                                                                    .toArray());
+
+
+                            if (remoteHash.sequenceEqual(authPacket.hash))
+                            {
+                                // send establish request
+                                //SendParams((byte)0x20, (ushort)0);
+                                this.sendParams()
+                                            .addUint8(0x20)
+                                            .addUint16(0)
+                                            .done();
+                            }
+                            else
+                            {
+                                this.sendParams()
+                                            .addUint8(0xc0)
+                                            .addUint8(ExceptionCode.ChallengeFailed)
+                                            .addUint16(16)
+                                            .addString("Challenge Failed")
+                                            .done();
+                            }
+                        }
+                        else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished)
+                        {
+                            this.session.id = authPacket.sessionId;
+                            this.ready = true;
+                            this.openReply?.trigger(true);
+                            this._emit("ready", this);
+
+                            // put it in the warehouse
+                            if (this.instance == null)
+                            {
+                                Warehouse.put(this, this.localUsername, null, this.server).then(x =>
+                                {
+                                    this.openReply?.trigger(true);
+                                    this._emit("ready", this);
+                                }).error(x=> this.openReply?.triggerError(x));
+                            }
+                            else
+                            {
+                                this.openReply?.trigger(true);
+                                this._emit("ready", this);
+                            }
+                        }
+                    }
+                    else if (authPacket.command == IIPAuthPacketCommand.Error)
+                    {
+                        this.openReply?.triggerError(new AsyncException(ErrorType.Management, authPacket.errorCode, authPacket.errorMessage));
+                        this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
                         this.close();
                     }
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                // if (this.session.localAuthentication.type == AuthenticationType.Host) {
+                //     if (authPacket.command == IIPAuthPacketCommand.Declare) {
+                //         if (authPacket.remoteMethod == AuthenticationMethod.Credentials
+                //             && authPacket.localMethod == AuthenticationMethod.None) {
+
+                //             console.log("Declare");
+                //             this.session.remoteAuthentication.username = authPacket.remoteUsername;
+                //             this.remoteNonce = authPacket.remoteNonce;
+                //             this.domain = authPacket.domain;
+                //             this.sendParams().addUint8(0xa0).addUint8Array(this.localNonce).done();
+                //         }
+                //     }
+                //     else if (authPacket.command == IIPAuthPacketCommand.Action) {
+                //         if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
+                //             var remoteHash = authPacket.hash;
+
+                //             this.server.membership.getPassword(this.session.remoteAuthentication.username, this.domain).then(function (pw) {
+                //                 if (pw != null) {
+
+                //                     //var hash = new DC(sha256.arrayBuffer(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toArray()));
+                //                     var hash = SHA256.compute(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toDC());
+
+
+                //                     if (hash.sequenceEqual(remoteHash)) {
+                //                         // send our hash
+                //                         //var localHash = new DC(sha256.arrayBuffer((new BinaryList()).addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toArray()));
+                //                         var localHash = SHA256.compute(BL().addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toDC());
+                //                         this.sendParams().addUint8(0).addUint8Array(localHash).done();
+
+                //                         this.readyToEstablish = true;
+                //                     }
+                //                     else {
+                //                         // incorrect password
+                //                         this.sendParams().addUint8(0xc0)
+                //                             .addInt32(ExceptionCode.AccessDenied)
+                //                             .addUint16(13)
+                //                             .addString("Access Denied")
+                //                             .done();
+                //                     }
+                //                 }
+                //             });
+                //         }
+                //         else if (authPacket.action == IIPAuthPacketAction.NewConnection) {
+                //             if (readyToEstablish) {
+                //                 this.session.id = this.generateNonce(32);// new DC(32);
+                //                 //window.crypto.getRandomValues(this.session.id);
+
+                //                 this.sendParams().addUint8(0x28).addUint8Array(this.session.id).done();
+                //                 this.ready = true;
+
+                //                 this.openReply.trigger(this);
+                //                 this.openReply = null;
+                //                 //this._emit("ready", this);
+                //             }
+                //         }
+                //     }
+                // }
+                // else if (this.session.localAuthentication.type == AuthenticationType.Client) {
+                //     if (authPacket.command == IIPAuthPacketCommand.Acknowledge) {
+                //         this.remoteNonce = authPacket.remoteNonce;
+
+                //         // send our hash
+
+                //         var localHash = SHA256.compute(BL().addUint8Array(this.localPasswordOrToken)
+                //             .addUint8Array(this.localNonce)
+                //             .addUint8Array(this.remoteNonce).toDC());
+
+                //         this.sendParams().addUint8(0).addUint8Array(localHash).done();
+                //     }
+                //     else if (authPacket.command == IIPAuthPacketCommand.Action) {
+                //         if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
+
+                //             var remoteHash = SHA256.compute(BL().addUint8Array(this.remoteNonce)
+                //                 .addUint8Array(this.localNonce)
+                //                 .addUint8Array(this.localPasswordOrToken).toDC());
+
+
+                //             if (remoteHash.sequenceEqual(authPacket.hash)) {
+                //                 // send establish request
+                //                 this.sendParams().addUint8(0x20).addUint16(0).done();
+                //             }
+                //             else {
+                //                 this.sendParams().addUint8(0xc0)
+                //                     .addUint32(ExceptionCode.ChallengeFailed)
+                //                     .addUint16(16)
+                //                     .addString("Challenge Failed")
+                //                     .done();
+                //             }
+                //         }
+                //         else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished) {
+                //             this.session.id = authPacket.sessionId;
+                //             this.ready = true;
+                //             this.openReply.trigger(this);
+                //             this.openReply = null;
+
+                //             //this._emit("ready", this);
+                //         }
+                //     }
+                //     else if (authPacket.command == IIPAuthPacketCommand.Error) {
+                //         this.openReply.triggerError(1, authPacket.errorCode, authPacket.errorMessage);
+                //         this.openReply = null;
+                //         //this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
+                //         this.close();
+                //     }
+                // }
             }
         }
 
@@ -501,48 +810,50 @@ export default class DistributedConnection extends IStore {
         //    this.processPacket(msg, offset, ends, data);
     }
 
-    receive(data) {
+    // dataReceived(data) {
+    //     var msg = data.read();
+    //     var offset = 0;
+    //     var ends = msg.length;
+    //     var packet = this.packet;
+
+    //     //console.log("Data");
+
+    //     while (offset < ends) {
+    //         offset = this.processPacket(msg, offset, ends, data);
+    //     }
+    // }
+
+    
+    _dataReceived(data)
+    {
         var msg = data.read();
-        var offset = 0;
-        var ends = msg.length;
-        var packet = this.packet;
+        let offset = 0;
+        let ends = msg.length;
 
-        //console.log("Data");
-
-        while (offset < ends) {
-            offset = this.processPacket(msg, offset, ends, data);
-        }
-    }
-
-    close(event) {
-
-        this.ready = false;
-        this.readyToEstablish = false;
+        this.socket.hold();
 
         try
         {
-            this.requests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
-            this.resourceRequests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
-            this.templateRequests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
+            while (offset < ends)
+            {
+                offset = this._processPacket(msg, offset, ends, data);
+            }
         }
-        catch(ex)
+        catch (ex)
         {
-            // unhandled error
+            console.log(ex);
         }
 
-        this.resources.values.forEach((x) => x._suspend());
+        this.socket?.unhold();
+    }
 
-        this.requests.clear();
-        this.resourceRequests.clear();
-        this.templateRequests.clear();
-
-        //        Warehouse.remove(this);
-
-        if (this.socket.readyState != this.socket.CLOSED) {
+    close(event) {
+        try {
             this.socket.close();
         }
+        catch {
 
-        this._emit("close", event);
+        }
     }
 
     async reconnect() {
@@ -584,7 +895,7 @@ export default class DistributedConnection extends IStore {
             if (msg == null || msg.length == 0)
                 return;
 
-            this.socket.send(msg);
+            this.socket.sendAll(msg);
         }
     }
 
@@ -629,22 +940,117 @@ export default class DistributedConnection extends IStore {
     }
 
 
-    connect(secure, method, hostname, port, username, tokenIndex, passwordOrToken, domain) {
+    connect(method = AuthenticationMethod.Certificate, socket = null, hostname = null, port = 0, 
+        username = null, tokenIndex = 0, passwordOrToken = null, domain = null, secure = false)
+    {
+        
+        if (this.openReply != null)
+            throw new AsyncException(ErrorType.Exception, 0, "Connection in progress");
+
         this.openReply = new AsyncReply();
 
-
-        if (secure !== undefined) {
+        if (hostname != null)
+        {
+            this.session = new Session(new ClientAuthentication()
+                                        , new HostAuthentication());
 
             this.session.localAuthentication.method = method;
             this.session.localAuthentication.tokenIndex = tokenIndex;
-        
             this.session.localAuthentication.domain = domain;
             this.session.localAuthentication.username = username;
             this.localPasswordOrToken = passwordOrToken;
-
-            //this.url = `ws${secure ? 's' : ''}://${this.instance.name}`;
-            this.url = `ws${secure ? 's' : ''}://${hostname}:${port}`;
         }
+
+        if (this.session == null)
+            throw new AsyncException(ErrorType.Exception, 0, "Session not initialized");
+
+        if (socket == null)
+            socket = new WSSocket();// TCPSocket();
+
+        if (port > 0)
+            this._port = port;
+
+        if (hostname != null)
+            this._hostname = hostname;
+
+        if (secure != null)
+            this._secure = secure;
+
+        let self = this;
+
+        socket.connect(this._hostname, this._port, this._secure).then(x =>
+        {
+            self.assign(socket);
+        }).error((x) =>
+        {
+            self.openReply?.triggerError(x);
+            self.openReply = null;
+        });
+
+        return this.openReply;
+
+    // //connect(secure, method, hostname, port, username, tokenIndex, passwordOrToken, domain) {
+    //     this.openReply = new AsyncReply();
+
+
+    //     if (secure !== undefined) {
+
+    //         this.session.localAuthentication.method = method;
+    //         this.session.localAuthentication.tokenIndex = tokenIndex;
+        
+    //         this.session.localAuthentication.domain = domain;
+    //         this.session.localAuthentication.username = username;
+    //         this.localPasswordOrToken = passwordOrToken;
+
+    //         //this.url = `ws${secure ? 's' : ''}://${this.instance.name}`;
+    //         this.url = `ws${secure ? 's' : ''}://${hostname}:${port}`;
+
+    //         let socket = new WebSocket(this.url, "iip");
+    //         socket.binaryType = "arraybuffer";
+    //         socket.connection = this;
+
+    //         this.assign(socket);
+
+    //         return this.openReply;
+    //     }
+    }
+
+
+    assign(socket)
+    {
+        this.socket = socket;
+        socket.receiver = this;
+
+        // this.session.remoteAuthentication.source.attributes[SourceAttributeType.IPv4] = socket.RemoteEndPoint.Address;
+        // this.session.remoteAuthentication.source.attributes[SourceAttributeType.Port] = socket.RemoteEndPoint.Port;
+        // this.session.localAuthentication.source.attributes[SourceAttributeType.IPv4] = socket.LocalEndPoint.Address;
+        // this.session.localAuthentication.source.attributes[SourceAttributeType.Port] = socket.LocalEndPoint.Port;
+
+        if (socket.state == SocketState.Established &&
+            this.session.localAuthentication.type == AuthenticationType.Client)
+        {
+            // declare (Credentials -> No Auth, No Enctypt)
+
+            var un = DC.stringToBytes(this.session.localAuthentication.username);
+            var dmn = DC.stringToBytes(this.session.localAuthentication.domain);// domain);
+
+            this.sendParams()
+                .addUint8(0x60)
+                .addUint8(dmn.length)
+                .addUint8Array(dmn)
+                .addUint8Array(this.localNonce)
+                .addUint8(un.length)
+                .addUint8Array(un)
+                .done();
+        }
+    }
+
+
+    assign_old(socket)
+    {
+        socket.networkBuffer = new NetworkBuffer();
+
+        this.socket = socket;
 
         //this.debug = debug;
         this.totalReceived = 0;
@@ -652,23 +1058,22 @@ export default class DistributedConnection extends IStore {
 
         this.lastAction = Date.now();
 
-        this.socket = new WebSocket(this.url, "iip");
-        this.socket.binaryType = "arraybuffer";
-        this.socket.connection = this;
-        this.socket.networkBuffer = new NetworkBuffer();
         this.sendBuffer = new NetworkBuffer();
 
-        var un = DC.stringToBytes(this.session.localAuthentication.username);
-        var dmn = DC.stringToBytes(this.session.localAuthentication.domain);
         var self = this;
 
-        this.socket.onopen = function () {
-            var bl = BL();
-            bl.addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(self.localNonce).addUint8(un.length).addUint8Array(un);
-            self.send(bl.toArray());
+        socket.onopen = function () {
+            if (self.session.localAuthentication.type == AuthenticationType.Client)
+            {
+                var un = DC.stringToBytes(self.session.localAuthentication.username);
+                var dmn = DC.stringToBytes(self.session.localAuthentication.domain);
+                var bl = BL();
+                bl.addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(self.localNonce).addUint8(un.length).addUint8Array(un);
+                self.sendAll(bl.toArray());
+            }
         };
 
-        this.socket.onmessage = function (msg) {
+        socket.onmessage = function (msg) {
 
             //console.log("Rec", msg.data.byteLength);
 
@@ -678,21 +1083,13 @@ export default class DistributedConnection extends IStore {
 
             self.hold();
             while (this.networkBuffer.available > 0 && !this.networkBuffer.protected) {
-                // try
-                // {
                 self.receive(this.networkBuffer);
-                // }
-                // catch(e) 
-                //{
-                //  console.log(e);
-                //}
             }
 
             self.unhold();
-
         };
 
-        this.socket.onclose = function (event) {
+        socket.onclose = function (event) {
             if (this.connection.openReply) {
                 this.connection.openReply.triggerError(0, 0, "Host not reachable");
                 this.connection.openReply = null;
@@ -700,8 +1097,120 @@ export default class DistributedConnection extends IStore {
 
             self.close(event);
         };
+    }
 
-        return this.openReply;
+
+    _unsubscribeAll()
+    {
+        for (let resource of this.subscriptions.keys()) {
+
+            resource.instance.off("ResourceEventOccurred", this._instance_eventOccurred, this);
+            resource.instance.off("ResourceModified", this._instance_propertyModified, this);
+            resource.instance.off("ResourceDestroyed", this._instance_resourceDestroyed, this);    
+        }
+        
+        this.subscriptions.clear();
+    }
+
+    destroy(){
+        this._unsubscribeAll();
+        super.destroy();
+    }
+
+    networkClose(socket)
+    {
+        this.readyToEstablish = false;
+
+        try
+        {
+            this.requests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
+            this.resourceRequests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
+            this.templateRequests.values.forEach((x) => x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed")));
+        }
+        catch(ex)
+        {
+            // unhandled error
+        }
+
+        this.requests.clear();
+        this.resourceRequests.clear();
+        this.templateRequests.clear();
+
+        this.resources.values.forEach((x) => x._suspend());
+
+        this._unsubscribeAll();
+
+        Warehouse.remove(this);
+
+        if (this.ready)
+            this.server?.membership.logout(this.session);
+
+        this.ready = false;
+
+        this._emit("close", this);
+    }
+
+    networkConnect(socket)
+    {
+        if (this.session.localAuthentication.Type == AuthenticationType.Client)
+        {
+            // declare (Credentials -> No Auth, No Enctypt)
+
+            var un = DC.stringToBytes(this.session.localAuthentication.username);
+            var dmn = DC.stringToBytes(this.session.localAuthentication.domain);// domain);
+
+            this.sendParams()
+                .addUint8(0x60)
+                .addUint8(dmn.Length)
+                .addUint8Array(dmn)
+                .addUint8Array(this.localNonce)
+                .addUint8(un.Length)
+                .addUint8Array(un)
+                .done();
+        }
+        
+        this._emit("connect", this);
+    }
+
+    networkReceive(sender, buffer)
+    {
+        try
+        {
+            // Unassigned ?
+            if (this.socket == null)
+                return;
+
+            // Closed ?
+            if (this.socket.state == SocketState.Closed)
+                return;
+
+            //this.lastAction = DateTime.Now;
+
+            if (!this.processing)
+            {
+                this.processing = true;
+
+                try
+                {
+                    while (buffer.available > 0 && !buffer.protected)
+                    {
+                        this._dataReceived(buffer);
+                    }
+                }
+                catch
+                {
+
+                }
+
+                this.processing = false;
+            }
+
+        }
+        catch (ex)
+        {
+            console.log(ex);
+            //Global.Log("NetworkConnection", LogType.Warning, ex.ToString());
+        }
     }
 
     reconnect() {
@@ -742,16 +1251,16 @@ export default class DistributedConnection extends IStore {
 
         var pb = Codec.composeVarArray(parameters, this, true);
 
-        this.callbackCounter++;
+        let callbackId = ++this.callbackCounter;
         this.sendParams()
             .addUint8(0x40 | IIPPacketAction.InvokeFunctionArrayArguments)
-            .addUint32(this.callbackCounter)
+            .addUint32(callbackId)
             .addUint32(instanceId)
             .addUint8(index)
             .addUint8Array(pb)
             .done();
 
-        this.requests.set(this.callbackCounter, reply);
+        this.requests.set(callbackId, reply);
 
         return reply;
     }
@@ -761,16 +1270,16 @@ export default class DistributedConnection extends IStore {
 
         var pb = Codec.composeStructure(parameters, this, true, true, true);
 
-        this.callbackCounter++;
+        let callbackId = ++this.callbackCounter;
         this.sendParams()
             .addUint8(0x40 | IIPPacketAction.InvokeFunctionNamedArguments)
-            .addUint32(this.callbackCounter)
+            .addUint32(callbackId)
             .addUint32(instanceId)
             .addUint8(index)
             .addUint8Array(pb)
             .done();
 
-        this.requests.set(this.callbackCounter, reply);
+        this.requests.set(callbackId, reply);
 
         return reply;
     }
@@ -966,6 +1475,40 @@ export default class DistributedConnection extends IStore {
         return this.sendParams().addUint8(evt);
     }
 
+    sendListenRequest(instanceId, index)
+    {
+        var reply = new AsyncReply();
+        let callbackId = ++this.callbackCounter;
+
+        this.sendParams()
+            .addUint8(0x40 | IIPPacketAction.Listen)
+            .addUint32(callbackId)
+            .addUint32(instanceId)
+            .addUint8(index)
+            .done();
+
+        this.requests.set(callbackId, reply);
+
+        return reply;
+    }
+
+    sendUnlistenRequest(instanceId, index)
+    {
+        var reply = new AsyncReply();
+        let callbackId = ++this.callbackCounter;
+        
+        this.sendParams()
+            .addUint8(0x40 | IIPPacketAction.Unlisten)
+            .addUint32(callbackId)
+            .addUint32(instanceId)
+            .addUint8(index)
+            .done();
+
+        this.requests.set(callbackId, reply);
+
+        return reply;
+    }
+
     IIPRequestAttachResource(callback, resourceId) {
 
         //var sl = this.sendParams();
@@ -975,13 +1518,15 @@ export default class DistributedConnection extends IStore {
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
 
+
                 if (r.instance.applicable(self.session, ActionType.Attach, null) == Ruling.Denied) {
                     self.sendError(ErrorType.Management, callback, ExceptionCode.AttachDenied);
                     return;
                 }
 
-                // reply ok
+                self._unsubscribe(r);
 
+                // reply ok
                 var link = DC.stringToBytes(r.instance.link);
 
                 if (r instanceof DistributedResource)
@@ -1001,10 +1546,8 @@ export default class DistributedConnection extends IStore {
                         .addUint8Array(Codec.composePropertyValueArray(r.instance.serialize(), self, true))
                         .done();
 
-                r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
-                r.instance.on("ResourceModified", self.instance_propertyModified, self);
-                r.instance.on("ResourceDestroyed", self.instance_resourceDestroyed, self);
         
+                self._subscribe(r);
             }
             else {
                 // reply failed
@@ -1013,14 +1556,34 @@ export default class DistributedConnection extends IStore {
         });
     }
 
+    _subscribe(resource)
+    {
+        resource.instance.on("ResourceEventOccurred", this._instance_eventOccurred, this);
+        resource.instance.on("ResourceModified", this._instance_propertyModified, this);
+        resource.instance.on("ResourceDestroyed", this._instance_resourceDestroyed, this);
+
+        this.subscriptions.set(resource, []);
+    }
+
+    _unsubscribe(resource)
+    {
+        resource.instance.off("ResourceEventOccurred", this._instance_eventOccurred, this);
+        resource.instance.off("ResourceModified", this._instance_propertyModified, this);
+        resource.instance.off("ResourceDestroyed", this._instance_resourceDestroyed, this);
+
+        this.subscriptions.delete(resource);
+    }
+
+
     IIPRequestReattachResource(callback, resourceId, resourceAge) {
         var self = this;
 
         Warehouse.getById(resourceId).then(function (r) {
-            if (res != null) {
-                r.instance.on("ResourceEventOccurred", self.instance_eventOccurred, self);
-                r.instance.on("ResourceModified", self.instance_propertyModified, self);
-                r.instance.on("ResourceDestroyed", self.instance_resourceDestroyed, self);
+            if (r != null) {
+
+                self._unsubscribe(r);
+                self._subscribe(r);
+                
                 // reply ok
                 self.sendReply(IIPPacketAction.ReattachResource, callback)
                     .addUint64(r.instance.age)
@@ -1039,10 +1602,7 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
-                r.instance.off("ResourceEventOccurred", self.instance_eventOccurred);
-                r.instance.off("ResourceModified", self.instance_propertyModified);
-                r.instance.off("ResourceDestroyed", self.instance_resourceDestroyed);
-
+                self._unsubscribe(r);
                 // reply ok
                 self.sendReply(IIPPacketAction.DetachResource, callback).done();
             }
@@ -1248,7 +1808,7 @@ export default class DistributedConnection extends IStore {
                                     for (let v of rt)
                                         self.sendChunk(callback, v);
 
-                                    self.sendReply(IIPPacket.IIPPacketAction.InvokeFunctionArrayArguments, callback)
+                                    self.sendReply(IIPPacketAction.InvokeFunctionArrayArguments, callback)
                                         .addUint8(DataType.Void)
                                         .done();
                                 }
@@ -1366,7 +1926,7 @@ export default class DistributedConnection extends IStore {
                                     for (let v of rt)
                                         self.sendChunk(callback, v);
 
-                                    self.sendReply(IIPPacket.IIPPacketAction.InvokeFunctionNamedArguments, callback)
+                                    self.sendReply(IIPPacketAction.InvokeFunctionNamedArguments, callback)
                                         .addUint8(DataType.Void)
                                         .done();
                                 }
@@ -1420,62 +1980,168 @@ export default class DistributedConnection extends IStore {
         });
     }
 
-    IIPRequestGetProperty(callback, resourceId, index) {
+    // IIPRequestGetProperty(callback, resourceId, index) {
 
-        var self = this;
+    //     var self = this;
 
-        Warehouse.getById(resourceId).then(function (r) {
-            if (r != null) {
-                var pt = r.instance.template.getFunctionTemplateByIndex(index);
-                if (pt != null) {
-                    if (r instanceof DistributedResource) {
-                        self.sendReply(IIPPacketAction.GetProperty, callback)
-                            .addUint8Array(Codec.compose(r._get(pt.index), self))
-                            .done();
+    //     Warehouse.getById(resourceId).then(function (r) {
+    //         if (r != null) {
+    //             var pt = r.instance.template.getFunctionTemplateByIndex(index);
+    //             if (pt != null) {
+    //                 if (r instanceof DistributedResource) {
+    //                     self.sendReply(IIPPacketAction.GetProperty, callback)
+    //                         .addUint8Array(Codec.compose(r._get(pt.index), self))
+    //                         .done();
+    //                 }
+    //                 else {
+    //                     var pv = r[pt.name];
+    //                     self.sendReply(IIPPacketAction.GetProperty)
+    //                         .addUint8Array(Codec.compose(pv, self))
+    //                         .done();
+    //                 }
+    //             }
+    //             else {
+    //                 // pt not found
+    //             }
+    //         }
+    //         else {
+    //             // resource not found
+    //         }
+    //     });
+    // }
+
+    // IIPRequestGetPropertyIfModifiedSince(callback, resourceId, index, age) {
+
+    //     var self = this;
+
+    //     Warehouse.getById(resourceId).then(function (r) {
+    //         if (r != null) {
+    //             var pt = r.instance.template.getFunctionTemplateByIndex(index);
+    //             if (pt != null) {
+    //                 if (r.instance.getAge(index) > age) {
+    //                     var pv = r[pt.name];
+    //                     self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+    //                         .addUint8Array(Codec.compose(pv, self))
+    //                         .done();
+    //                 }
+    //                 else {
+    //                     self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+    //                         .addUint8(DataType.NotModified)
+    //                         .done();
+    //                 }
+    //             }
+    //             else {
+    //                 // pt not found
+    //             }
+    //         }
+    //         else {
+    //             // resource not found
+    //         }
+    //     });
+    // }
+
+    IIPRequestListen(callback, resourceId, index)
+    {
+        let self = this;
+
+        Warehouse.getById(resourceId).then((r) =>
+        {
+            if (r != null)
+            {
+                var et = r.instance.template.getEventTemplateByIndex(index);
+
+                if (et != null)
+                {
+                    if (r instanceof DistributedResource)
+                    {
+                        r.listen(et).then(x =>
+                       {
+                           self.sendReply(IIPPacketAction.Listen, callback).done();
+                       }).error(x => self.sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
                     }
-                    else {
-                        var pv = r[pt.name];
-                        self.sendReply(IIPPacketAction.GetProperty)
-                            .addUint8Array(Codec.compose(pv, self))
-                            .done();
+                    else
+                    {
+                        if (!self.subscriptions.has(r))
+                        {
+                            self.sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
+                            return;
+                        }
+
+                        if (self.subscriptions.get(r).includes(index))
+                        {
+                            self.sendError(ErrorType.Management, callback, ExceptionCode.AlreadyListened);
+                            return;
+                        }
+
+                        self.subscriptions.get(r).push(index);
+
+                        self.sendReply(IIPPacketAction.Listen, callback).done();
                     }
                 }
-                else {
+                else
+                {
                     // pt not found
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 }
             }
-            else {
+            else
+            {
                 // resource not found
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
 
-    IIPRequestGetPropertyIfModifiedSince(callback, resourceId, index, age) {
+    IIPRequestUnlisten(callback, resourceId, index)
+    {
+        let self = this;
 
-        var self = this;
+        Warehouse.getById(resourceId).then((r) =>
+        {
+            if (r != null)
+            {
+                var et = r.instance.template.getEventTemplateByIndex(index);
 
-        Warehouse.getById(resourceId).then(function (r) {
-            if (r != null) {
-                var pt = r.instance.template.getFunctionTemplateByIndex(index);
-                if (pt != null) {
-                    if (r.instance.getAge(index) > age) {
-                        var pv = r[pt.name];
-                        self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
-                            .addUint8Array(Codec.compose(pv, self))
-                            .done();
+                if (et != null)
+                {
+                    if (r instanceof DistributedResource)
+                    {
+                        r.unlisten(et).then(x =>
+                        {
+                            self.sendReply(IIPPacketAction.Unlisten, callback).done();
+                        }).error(x => self.sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
                     }
-                    else {
-                        self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
-                            .addUint8(DataType.NotModified)
-                            .done();
+                    else
+                    {
+                        if (!self.subscriptions.has(r))
+                        {
+                            self.sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
+                            return;
+                        }
+
+                        if (!self.subscriptions.get(r).includes(index))
+                        {
+                            self.sendError(ErrorType.Management, callback, ExceptionCode.AlreadyUnlistened);
+                            return;
+                        }
+
+                        let ar = self.subscriptions.get(r);
+                        let i = ar.indexOf(index);
+                        ar.splice(i, 1);
+                        
+                        self.sendReply(IIPPacketAction.Unlisten, callback).done();             
                     }
                 }
-                else {
+                else
+                {
                     // pt not found
+                    self.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 }
             }
-            else {
+            else
+            {
                 // resource not found
+                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -1550,7 +2216,7 @@ export default class DistributedConnection extends IStore {
     IIPRequestQueryResources(callback, resourceLink) {
         var self = this;
 
-        Warehouse.query(resourceLink).then(function (resources) {
+        let queryCallback = function (resources) {
 
             if (resources == null)
                 self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
@@ -1565,7 +2231,16 @@ export default class DistributedConnection extends IStore {
                         .addUint8Array(Codec.composeResourceArray(list, self, true))
                         .done();
             }
-        });
+        };
+
+        if (this.server?.entryPoint != null)
+        {
+            this.server?.entryPoint.query(resourceLink, this).then(queryCallback);
+        }
+        else
+        {
+            Warehouse.query(resourceLink).then(queryCallback);
+        }
     }
 
     create(store, parent, className, parameters, attributes, values) {
@@ -1582,13 +2257,12 @@ export default class DistributedConnection extends IStore {
 
         pkt.addUint32(pkt.length, 8);
 
-        this.sendRequest(IIPPacket.IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
+        this.sendRequest(IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
             var rid = args[0];
 
             self.fetch(rid).then(function (r) {
                 reply.trigger(r);
             });
-
         });
 
         return reply;
@@ -1787,14 +2461,16 @@ export default class DistributedConnection extends IStore {
             return new AsyncReply(null);
     }
 
-    instance_resourceDestroyed(resource) {
+    _instance_resourceDestroyed(resource) {
+
+        this._unsubscribe(resource);
         // compose the packet
         this.sendEvent(IIPPacketEvent.ResourceDestroyed)
             .addUint32(resource.instance.id)
             .done();
     }
 
-    instance_propertyModified(resource, name, newValue) {
+    _instance_propertyModified(resource, name, newValue) {
         var pt = resource.instance.template.getPropertyTemplateByName(name);
 
         if (pt == null)
@@ -1807,16 +2483,26 @@ export default class DistributedConnection extends IStore {
             .done();
     }
 
-    instance_eventOccurred(resource, issuer, receivers, name, args) {
+    _instance_eventOccurred(resource, issuer, receivers, name, args) {
         var et = resource.instance.template.getEventTemplateByName(name);
 
         if (et == null)
             return;
 
-        if (receivers != null)
-            if (receivers.indexOf(this.session) < 0)
+        if (et.listenable)
+        {
+            // check the client requested listen
+            if (!this.subscriptions.has(resource))
                 return;
 
+            if (!this.subscriptions.get(resource).includes(et.index))
+                return;
+        }
+
+        if (receivers instanceof Function)
+            if (!receivers(this.sessions))
+                return;
+                
         if (resource.instance.applicable(this.session, ActionType.ReceiveEvent, et, issuer) == Ruling.Denied)
             return;
 

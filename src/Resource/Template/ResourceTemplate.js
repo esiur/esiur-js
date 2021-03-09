@@ -123,6 +123,7 @@ export default class ResourceTemplate {
             et.name = template.events[i].name;
             et.index = i;
             et.expansion = template.events[i].help;
+            et.listenable = template.events[i].listenable;
             this.events.push(et);
         }
 
@@ -266,9 +267,11 @@ export default class ResourceTemplate {
             {
                 var et = new EventTemplate();
                 et.index = eventIndex++;
-                var expansion = ((data.getUint8(offset++) & 0x10) == 0x10);
+                var expansion = ((data.getUint8(offset) & 0x10) == 0x10);
+                et.listenable = ((data.getUint8(offset++) & 0x8) == 0x8);
                 var len = data.getUint8(offset++);
                 et.name = data.getString(offset, len);
+
                 offset += len;
 
                 if (expansion) // expansion ?
