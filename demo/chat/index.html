@@ -15,7 +15,7 @@
 
                 try {
                     status.innerHTML = "Connecting...";
-                    service = await wh.get("iip://localhost:8081/chat", {username, password: "1234"});
+                    service = await wh.get("iip://localhost:8001/chat", {username, password: "1234"});
                     login.style.display = "none";
                     service.on("message", appendMessage)
                            .on(":title", updateTitle)
@@ -26,7 +26,7 @@
                     service.users.forEach((x)=>appendUser(x, true));
                     status.innerHTML = "Online";
                 } catch (ex) {
-                    status.innerHTML = "Error " + ex.toString;   
+                    status.innerHTML = "Error " + ex.toString();   
                 }
             }
 

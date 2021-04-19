@@ -152,7 +152,9 @@ export class WH extends IEventHandler
 
     remove(resource)
     {
-        
+        if (resource.instance == null)
+            return;
+
         if (this.resources.contains(resource.instance.id))
             this.resources.remove(resource.instance.id); 
         else
@@ -430,7 +432,7 @@ export class WH extends IEventHandler
 
             for(var i = 0; i < ar.length; i++)
                 if (!ar[i])
-                    console.log(`Resource failed at Initialize ${self.resources.at(i).Instance.Name} [${self.resources.at(i).Instance.Template.ClassName}]`);
+                    console.log(`Resource failed at Initialize ${self.resources.at(i).instance.name} [${self.resources.at(i).instance.template.className}]`);
 
             var sysBag = new AsyncBag();
 
@@ -444,7 +446,7 @@ export class WH extends IEventHandler
             sysBag.then(ar2 => {
                 for(var i = 0; i < ar2.length; i++)
                 if (!ar2[i])
-                    console.log(`Resource failed at Initialize ${self.resources.at(i).Instance.Name} [${self.resources.at(i).Instance.Template.ClassName}]`);
+                    console.log(`Resource failed at Initialize ${self.resources.at(i).instance.name} [${self.resources.at(i).instance.template.className}]`);
                 
                 self.warehouseIsOpen = true;
                 rt.trigger(true);

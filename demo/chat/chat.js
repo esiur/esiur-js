@@ -17,7 +17,7 @@ const WebSocket = require('ws');
 const http = require("http");
 const fs = require("fs");
 
-const wss = new WebSocket.Server({port: 8081});
+const wss = new WebSocket.Server({port: 8001});
 
 class MyMembership extends IMembership {
   userExists(username, domain) {
@@ -90,7 +90,7 @@ http.createServer(function (req, res) {
       res.end(data);
     }
   });
-}).listen(8080);
+}).listen(8000);
 
-console.log(`HTTP Server running http://localhost:8080/demo/chat/index.html`);
-console.log(`IIP Server running iip://localhost:8081`);
+console.log(`HTTP Server running http://localhost:8000/demo/chat/index.html`);
+console.log(`IIP Server running iip://localhost:8001`);

@@ -108,7 +108,7 @@ export default class ResourceTemplate {
 
         //byte currentIndex = 0;
 
-        for (var i = 0; i < template.properties.length; i++) {
+        for (var i = 0; i < template.properties?.length; i++) {
             var pt = new PropertyTemplate();
             pt.name = template.properties[i].name;
             pt.index = i;
@@ -118,7 +118,7 @@ export default class ResourceTemplate {
             this.properties.push(pt);
         }
 
-        for (var i = 0; i < template.events.length; i++) {
+        for (var i = 0; i < template.events?.length; i++) {
             var et = new EventTemplate();
             et.name = template.events[i].name;
             et.index = i;
@@ -127,7 +127,7 @@ export default class ResourceTemplate {
             this.events.push(et);
         }
 
-        for (var i = 0; i < template.functions.length; i++) {
+        for (var i = 0; i < template.functions?.length; i++) {
             var ft = new FunctionTemplate();
             ft.name = template.functions[i].name;
             ft.index = i;
