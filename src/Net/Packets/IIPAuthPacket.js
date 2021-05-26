@@ -199,11 +199,15 @@ export default class IIPAuthPacket
             this.localMethod = (data.getUint8(offset) >> 2) & 0x3;
             var encrypt = ((data.getUint8(offset++) & 0x2) == 0x2);
 
-            if (this.notEnough(offset, ends, 1))
-                return -this.dataLengthNeeded;
-
-
-            if (this.remoteMethod == AuthenticationMethod.Credentials
+            
+            if (this.remoteMethod == AuthenticationMethod.None)
+            {
+                if (this.localMethod == AuthenticationMethod.None)
+                {
+                    // do nothing
+                }
+            }
+            else if (this.remoteMethod == AuthenticationMethod.Credentials
                 || this.remoteMethod == AuthenticationMethod.Token)
             {
                 if (this.localMethod == AuthenticationMethod.None)

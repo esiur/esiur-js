@@ -1,4 +1,3 @@
-import DistributedConnection from "../../src/Net/IIP/DistributedConnection.js";
 import Warehouse from "../../src/Resource/Warehouse.js";
 
 import { createRequire } from 'module'
@@ -10,6 +9,7 @@ import MemoryStore from "../../src/Stores/MemoryStore.js";
 import DC from "../../src/Data/DataConverter.js";
 import IResource from "../../src/Resource/IResource.js";
 import Structure from "../../src/Data/Structure.js";
+import DataType from "../../src/Data/DataType.js";
 
 const require = createRequire(import.meta.url);
 
@@ -32,12 +32,13 @@ var server;
 
 class MyChat extends IResource {
     
+   // void (string, string)->void
     static get template() {
         return {
             namespace: "Chat",
-            properties: [{name: "title"}, { name: "messages" }, {name: "users"}],
-            events: [{ name: "message" }, { name: "voice", listenable: true }, {name: "login"}, {name: "logout"}],
-            functions: [{ name: "send" }]
+            properties: [["title", DataType.String], ["messages", DataType.StructureArray], ["users", DataType.StringArray]],
+            events: [["message", DataType.Structure], ["voice", 0, {listenable: true }], ["login"], ["logout"]],
+            functions: [[ "send", {msg: DataType.String} ]]
         };
     }
 

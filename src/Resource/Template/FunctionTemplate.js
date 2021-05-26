@@ -33,23 +33,27 @@ import MemberType from './MemberType.js';
 export default class FunctionTemplate extends MemberTemplate {
     compose() {
         var name = super.compose();
-        var rt = BL();
 
-        if (this.expansion != null) {
+        var bl = BL()
+                .addUint8(name.length)
+                .addUint8Array(name)
+                .addUint8Array(this.returnType.compose())
+                .addUint8(this.arguments.length);
+
+        for (var i = 0; i < this.arguments.length; i++)
+            bl.addUint8Array(this.arguments[i].compose());
+
+        if (this.expansion != null)
+        {
             var exp = DC.stringToBytes(this.expansion);
-
-            return rt.addUint8(0x10 | (this.isVoid ? 0x8 : 0x0))
-                    .addUint8(name.length)
-                    .addUint8Array(name)
-                    .addUint32(exp.length)
-                    .addUint8Array(exp)
-                    .toArray();
+            bl.addInt32(exp.length)
+              .addUint8Array(exp);
+            bl.insertUint8(0, 0x10);
         }
         else
-            return rt.addUint8(this.isVoid ? 0x8 : 0x0)
-                     .addUint8(name.length)
-                     .addUint8Array(name)
-                     .toArray();
+            bl.addUint8(0x0, 0);
+        
+        return bl.toArray();
     }
 
     constructor() {

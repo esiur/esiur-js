@@ -148,6 +148,8 @@ export default class DistributedConnection extends IStore {
             var packet = new IIPPacket();
 
             var rt = packet.parse(msg, offset, ends);
+
+
             if (rt <= 0) {
                 data.holdFor(msg, offset, ends - offset, -rt);
                 return ends;
@@ -238,6 +240,10 @@ export default class DistributedConnection extends IStore {
                                 this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
                                 break;
 
+                            case IIPPacketAction.LinkTemplates:
+                                this.IIPRequestLinkTemplates(packet.callbackId, packet.resourceLink);
+                                break;
+    
                             // Invoke
                             case IIPPacketAction.InvokeFunctionArrayArguments:
                                 this.IIPRequestInvokeFunctionArrayArguments(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
@@ -262,13 +268,8 @@ export default class DistributedConnection extends IStore {
                             case IIPPacketAction.SetProperty:
                                 this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
                                 break;
-                            case IIPPacketAction.ResourceHistory:
-                                this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
-                                break;
-                            case IIPPacketAction.QueryLink:
-                                this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
-                                break;
 
+                                
                             // Attribute
                             case IIPPacketAction.GetAllAttributes:
                                 this.IIPRequestGetAttributes(packet.callbackId, packet.resourceId, packet.content, true);
@@ -321,6 +322,7 @@ export default class DistributedConnection extends IStore {
                             case IIPPacketAction.ResourceChildren:
                             case IIPPacketAction.ResourceParents:
                             case IIPPacketAction.ResourceHistory:
+                            case IIPPacketAction.LinkTemplates:
                                 this.IIPReply(packet.callbackId, packet.content);
                                 break;
 
@@ -463,7 +465,8 @@ export default class DistributedConnection extends IStore {
                                     else
                                     {
                                         //Console.WriteLine("User not found");
-                                        this.sendParams().addUint8(0xc0)
+                                        this.sendParams()
+                                                        .addUint8(0xc0)
                                                         .addUint8(ExceptionCode.UserOrTokenNotFound)
                                                         .addUint16(15)
                                                         .addString("Token not found")
@@ -477,13 +480,53 @@ export default class DistributedConnection extends IStore {
 
                                 var errMsg = DC.stringToBytes(ex.message);
 
-                                this.sendParams().addUint8(0xc0)
-                                    .addUint8(ExceptionCode.GeneralFailure)
-                                    .addUint16(errMsg.length)
-                                    .addUint8Array(errMsg)
-                                    .done();
+                                this.sendParams()
+                                        .addUint8(0xc0)
+                                        .addUint8(ExceptionCode.GeneralFailure)
+                                        .addUint16(errMsg.length)
+                                        .addUint8Array(errMsg)
+                                        .done();
                             }
                         }
+
+                        else if (authPacket.remoteMethod == AuthenticationMethod.None 
+                            && authPacket.localMethod == AuthenticationMethod.None)
+                        {
+                            try
+                            {
+                                // Check if guests are allowed
+                                if (this.server?.membership.guestsAllowed)
+                                {
+                                    this.session.remoteAuthentication.username = "g-" + Math.random().toString(36).substring(10);
+                                    this.session.remoteAuthentication.domain = authPacket.domain;
+                                    this.readyToEstablish = true;
+                                    this.sendParams()
+                                                .addUint8(0x80)
+                                                .done();
+                                }
+                                else
+                                {
+                                    this.sendParams()
+                                                .addUInt8(0xc0)
+                                                .addUint8(ExceptionCode.AccessDenied)
+                                                .addUint16(18)
+                                                .addString("Guests not allowed")
+                                                .done();
+                                }
+                            }
+                            catch (ex)
+                            {
+                                var errMsg = DC.stringToBytes(ex.message);
+
+                                this.sendParams()
+                                        .addUInt8(0xc0)
+                                        .addUint8(ExceptionCode.GeneralFailure)
+                                        .addUint16(errMsg.length)
+                                        .addUint8Array(errMsg)
+                                        .done();
+                            }
+                        }
+
                     }
                     else if (authPacket.command == IIPAuthPacketCommand.Action)
                     {
@@ -553,7 +596,8 @@ export default class DistributedConnection extends IStore {
 
                                 var errMsg = DC.stringToBytes(ex.message);
 
-                                this.sendParams().addUint8(0xc0)
+                                this.sendParams()
+                                    .addUint8(0xc0)
                                     .addUint8(ExceptionCode.GeneralFailure)
                                     .addUint16(errMsg.Length)
                                     .addUint8Array(errMsg)
@@ -573,7 +617,7 @@ export default class DistributedConnection extends IStore {
 
                                 if (this.instance == null)
                                 {
-                                    Warehouse.put(this, this.localUsername, null, this.server).then(x =>
+                                    Warehouse.put(this.localUsername, this, null, this.server).then(x =>
                                     {
     
                                         this.ready = true;
@@ -594,6 +638,17 @@ export default class DistributedConnection extends IStore {
                                     this.server?.membership.login(this.session);
                                 }
                             }
+                            else
+                            {
+                                this.sendParams()
+                                    .addUint8(0xc0)
+                                    .addUint8(ExceptionCode.GeneralFailure)
+                                    .addUint16(9)
+                                    .addString("Not ready")
+                                    .done();
+    
+                               //     this.close();
+                            }    
                         }
                     }
                 }
@@ -601,19 +656,32 @@ export default class DistributedConnection extends IStore {
                 {
                     if (authPacket.command == IIPAuthPacketCommand.Acknowledge)
                     {
-                        this.remoteNonce = authPacket.remoteNonce;
+                        if (authPacket.remoteMethod == AuthenticationMethod.None)
+                        {
+                            // send establish
+                            this.sendParams()
+                                        .addUint8(0x20)
+                                        .addUint16(0)
+                                        .done();
+                        }
+                        else if (authPacket.remoteMethod == AuthenticationMethod.Credentials
+                                || authPacket.remoteMethod == AuthenticationMethod.Token)
+                        {
 
-                        // send our hash
-                        var localHash = SHA256.compute(BL()
-                                                            .addUint8Array(this.localPasswordOrToken)
-                                                            .addUint8Array(this.localNonce)
-                                                            .addUint8Array(this.remoteNonce)
-                                                            .toArray());
+                            this.remoteNonce = authPacket.remoteNonce;
 
-                        this.sendParams()
-                            .addUint8(0)
-                            .addUint8Array(localHash)
-                            .done();
+                            // send our hash
+                            var localHash = SHA256.compute(BL()
+                                                                .addUint8Array(this.localPasswordOrToken)
+                                                                .addUint8Array(this.localNonce)
+                                                                .addUint8Array(this.remoteNonce)
+                                                                .toArray());
+
+                            this.sendParams()
+                                .addUint8(0)
+                                .addUint8Array(localHash)
+                                .done();
+                        }
 
                     }
                     else if (authPacket.command == IIPAuthPacketCommand.Action)
@@ -657,7 +725,7 @@ export default class DistributedConnection extends IStore {
                             // put it in the warehouse
                             if (this.instance == null)
                             {
-                                Warehouse.put(this, this.localUsername, null, this.server).then(x =>
+                                Warehouse.put(this.localUsername, this, null, this.server).then(x =>
                                 {
                                     this.openReply?.trigger(true);
                                     this._emit("ready", this);
@@ -900,11 +968,17 @@ export default class DistributedConnection extends IStore {
     }
 
     trigger(trigger) {
+
+        console.log(this, trigger);
+
         if (trigger == ResourceTrigger.Open) {
+            if (this.server != null)
+                return new AsyncReply(true);
+
             var { domain = null,
                 secure = false,
-                username = "guest",
-                password = "",
+                username = null,
+                password = null,
                 checkInterval = 30,
                 connectionTimeout = 600,
                 revivingTime = 120,
@@ -924,15 +998,20 @@ export default class DistributedConnection extends IStore {
             var address = host[0];
             var port = parseInt(host[1]);
 
-            if (token != null)
+            if (username != null 
+                && password != null)
             {
-                var tk = DC.stringToBytes(token);
-                return this.connect(secure, AuthenticationMethod.token, address, port, null, tokenIndex, tk, domain);
+                var pw = DC.stringToBytes(password);
+                return this.connect(AuthenticationMethod.Credentials, null, address, port, username, null, pw, domain, secure);
+            }
+            else if (token != null)
+            {
+                var tk = token instanceof Uint8Array ? token : DC.stringToBytes(token);
+                return this.connect(AuthenticationMethod.Token, null, address, port, null, tokenIndex, tk, domain, secure);
             }
             else
             {
-                var pw = DC.stringToBytes(password);
-                return this.connect(secure, AuthenticationMethod.credentials, address, port, username, null, pw, domain);
+                return this.connect(AuthenticationMethod.None, null, address, port, null, 0, null, domain);
             }
         }
 
@@ -1016,6 +1095,41 @@ export default class DistributedConnection extends IStore {
     }
 
 
+    _declare() {
+        // declare (Credentials -> No Auth, No Enctypt)
+        var dmn = DC.stringToBytes(this.session.localAuthentication.domain);
+
+        if (this.session.localAuthentication.method == AuthenticationMethod.Credentials) {
+            var un = DC.stringToBytes(this.session.localAuthentication.username);
+
+            this.sendParams()
+                .addUint8(0x60)
+                .addUint8(dmn.length)
+                .addUint8Array(dmn)
+                .addUint8Array(this.localNonce)
+                .addUint8(un.length)
+                .addUint8Array(un)
+                .done();
+        } 
+        else if (this.session.localAuthentication.method == AuthenticationMethod.Token) {                
+            this.sendParams()
+                .addUint8(0x70)
+                .addUint8(dmn.length)
+                .addUint8Array(dmn)
+                .addUint8Array(this.localNonce)
+                .addUint64(this.session.localAuthentication.tokenIndex)
+                .done();
+        } 
+        else if (this.session.localAuthentication.method == AuthenticationMethod.None) {
+            
+            this.sendParams()
+                .addUint8(0x40)
+                .addUint8(dmn.length)
+                .addUint8Array(dmn)
+                .done();
+        }        
+    }
+
     assign(socket)
     {
         this.socket = socket;
@@ -1028,76 +1142,9 @@ export default class DistributedConnection extends IStore {
 
         if (socket.state == SocketState.Established &&
             this.session.localAuthentication.type == AuthenticationType.Client)
-        {
-            // declare (Credentials -> No Auth, No Enctypt)
-
-            var un = DC.stringToBytes(this.session.localAuthentication.username);
-            var dmn = DC.stringToBytes(this.session.localAuthentication.domain);// domain);
-
-            this.sendParams()
-                .addUint8(0x60)
-                .addUint8(dmn.length)
-                .addUint8Array(dmn)
-                .addUint8Array(this.localNonce)
-                .addUint8(un.length)
-                .addUint8Array(un)
-                .done();
-        }
+            this._declare();
     }
 
-
-    assign_old(socket)
-    {
-        socket.networkBuffer = new NetworkBuffer();
-
-        this.socket = socket;
-
-        //this.debug = debug;
-        this.totalReceived = 0;
-        this.totalSent = 0;
-
-        this.lastAction = Date.now();
-
-        this.sendBuffer = new NetworkBuffer();
-
-        var self = this;
-
-        socket.onopen = function () {
-            if (self.session.localAuthentication.type == AuthenticationType.Client)
-            {
-                var un = DC.stringToBytes(self.session.localAuthentication.username);
-                var dmn = DC.stringToBytes(self.session.localAuthentication.domain);
-                var bl = BL();
-                bl.addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(self.localNonce).addUint8(un.length).addUint8Array(un);
-                self.sendAll(bl.toArray());
-            }
-        };
-
-        socket.onmessage = function (msg) {
-
-            //console.log("Rec", msg.data.byteLength);
-
-            this.networkBuffer.writeAll(msg.data);
-
-            self.lastAction = new Date();
-
-            self.hold();
-            while (this.networkBuffer.available > 0 && !this.networkBuffer.protected) {
-                self.receive(this.networkBuffer);
-            }
-
-            self.unhold();
-        };
-
-        socket.onclose = function (event) {
-            if (this.connection.openReply) {
-                this.connection.openReply.triggerError(0, 0, "Host not reachable");
-                this.connection.openReply = null;
-            }
-
-            self.close(event);
-        };
-    }
 
 
     _unsubscribeAll()
@@ -1153,21 +1200,7 @@ export default class DistributedConnection extends IStore {
     networkConnect(socket)
     {
         if (this.session.localAuthentication.Type == AuthenticationType.Client)
-        {
-            // declare (Credentials -> No Auth, No Enctypt)
-
-            var un = DC.stringToBytes(this.session.localAuthentication.username);
-            var dmn = DC.stringToBytes(this.session.localAuthentication.domain);// domain);
-
-            this.sendParams()
-                .addUint8(0x60)
-                .addUint8(dmn.Length)
-                .addUint8Array(dmn)
-                .addUint8Array(this.localNonce)
-                .addUint8(un.Length)
-                .addUint8Array(un)
-                .done();
-        }
+            this._declare();
         
         this._emit("connect", this);
     }
@@ -1194,6 +1227,7 @@ export default class DistributedConnection extends IStore {
                 {
                     while (buffer.available > 0 && !buffer.protected)
                     {
+                        //console.log("RX", buffer.length );
                         this._dataReceived(buffer);
                     }
                 }
@@ -1673,7 +1707,7 @@ export default class DistributedConnection extends IStore {
 
                             var resource = new (Function.prototype.bind.apply(type, values));
 
-                            Warehouse.put(resource, name, store, parent).then(function(ok){
+                            Warehouse.put(name, resource, store, parent).then(function(ok){
                                 self.sendReply(IIPPacketAction.CreateResource, callback)
                                 .addUint32(resource.Instance.Id)
                                 .done();
@@ -1708,6 +1742,50 @@ export default class DistributedConnection extends IStore {
         });
     }
 
+    IIPRequestLinkTemplates(callback, resourceLink)
+    {
+        var queryCallback = (r) =>
+        {
+            if (r == null)
+                this.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+            else
+            {
+                var list = r.filter(x => x.instance.applicable(this.session, ActionType.ViewTemplate, null) != Ruling.Denied);
+
+                if (list.length == 0)
+                    this.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                else
+                {
+                    // get all templates related to this resource
+
+                    var msg = new BinaryList();
+
+                    var templates = [];
+                    for (var i = 0; i < list.length; i++)
+                        templates = templates
+                                    .concat(ResourceTemplate.getDependencies(list[i].instance.template)
+                                    .filter(x => !templates.includes(x)));
+
+                    for(var i = 0; i < templates.length; i++) {
+                        msg.addInt32(templates[i].content.length)
+                            .addUint8Array(templates[i].content);
+                    }
+
+                    // send
+                    this.sendReply(IIPPacketAction.LinkTemplates, callback)
+                                .addInt32(msg.length)
+                                .addUint8Array(msg.toArray())
+                                .done();
+                }
+            }
+        };
+
+        if (this.server?.entryPoint != null)
+            this.server.entryPoint.query(resourceLink, this).then(queryCallback);
+        else
+            Warehouse.query(resourceLink).then(queryCallback);
+    }
+
     IIPRequestTemplateFromClassName(callback, className) {
 
         var self = this;
@@ -1727,17 +1805,17 @@ export default class DistributedConnection extends IStore {
 
     IIPRequestTemplateFromClassId(callback, classId) {
         var self = this;
-        Warehouse.getTemplateByClassId(classId).then(function (t) {
-            if (t != null)
-                self.sendReply(IIPPacketAction.TemplateFromClassId, callback)
-                    .addUint32(t.content.length)
-                    .addUint8Array(t.content)
-                    .done();
-            else {
-                // reply failed
-                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
-            }
-        });
+        var t = Warehouse.getTemplateByClassId(classId);
+
+        if (t != null)
+            self.sendReply(IIPPacketAction.TemplateFromClassId, callback)
+                .addUint32(t.content.length)
+                .addUint8Array(t.content)
+                .done();
+        else {
+            // reply failed
+            self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+        }
     }
 
     IIPRequestTemplateFromResourceId(callback, resourceId) {
@@ -2367,6 +2445,42 @@ export default class DistributedConnection extends IStore {
         //return new AsyncReply(null);
     }
 
+    getLinkTemplates(link)
+    {
+        var reply = new AsyncReply();
+
+        var l = DC.stringToBytes(link);
+
+        this.sendRequest(IIPPacketAction.LinkTemplates)
+        .addUint16(l.length)
+        .addUint8Array(l)
+        .done()
+        .then((rt) =>
+        {
+
+            var templates = [];
+            // parse templates
+
+            var data = rt[0];
+            //var offset = 0;
+            for (var offset = 0; offset < data.length;)
+            {
+                var cs = data.getUint32(offset);
+                offset += 4;
+                templates.push(ResourceTemplate.parse(data, offset, cs));
+                offset += cs;
+            }
+
+            reply.trigger(templates);
+
+        }).error((ex) =>
+        {
+            reply.triggerError(ex);
+        });
+
+        return reply;
+    }
+
     // Get a resource from the other end
     fetch(id) {
 
@@ -2396,14 +2510,27 @@ export default class DistributedConnection extends IStore {
             .done()
             .then(function (rt) {
 
-                let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
+                var dr;
+
+                if (resource == null)
+                {
+                    var template = Warehouse.getTemplateByClassId(rt[0]);
+                    if (template?.resourceType != null)
+                        dr = new template.getDependencies(self, id, rt[1], rt[2]);
+                    else
+                        dr = new DistributedResource(self, id, rt[1], rt[2]);
+                }
+                else
+                    dr = resource;
+
+                //let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
 
                 self.getTemplate(rt[0]).then(function (tmp) {
 
                     // ClassId, ResourceAge, ResourceLink, Content
                     if (resource == null)
                     {
-                        let wp =  Warehouse.put(dr, id.toString(), self, null, tmp).then(function(ok){
+                        let wp =  Warehouse.put(id.toString(), dr, self, null, tmp).then(function(ok){
                             Codec.parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
                                 dr._attach(ar);
                                 self.resourceRequests.remove(id);

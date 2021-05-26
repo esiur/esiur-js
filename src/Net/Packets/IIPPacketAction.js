@@ -18,6 +18,7 @@ export default  // const IIPPacketAction =
     ResourceHistory: 12,
     ResourceChildren: 13,
     ResourceParents: 14,
+    LinkTemplates: 15,
 
     // Request Invoke
     InvokeFunctionArrayArguments: 16,

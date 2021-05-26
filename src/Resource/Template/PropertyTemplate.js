@@ -58,6 +58,7 @@ export default class PropertyTemplate extends MemberTemplate
             return rt.addUint8(0x38 | pv)
                 .addUint8(name.length)
                 .addUint8Array(name)
+                .addUint8Array(this.valueType.compose())
                 .addUint32(wexp.length)
                 .addUint8Array(wexp)
                 .addUint32(rexp.length)
@@ -70,6 +71,7 @@ export default class PropertyTemplate extends MemberTemplate
             return rt.addUint8(0x30 | pv)
                 .addUint8(name.length)
                 .addUint8Array(name)
+                .addUint8Array(this.valueType.compose())
                 .addUint32(wexp.length)
                 .addUint8Array(wexp)
                 .toArray();
@@ -80,6 +82,7 @@ export default class PropertyTemplate extends MemberTemplate
             return rt.addUint8(0x28 | pv)
                 .addUint8(name.length)                
                 .addUint8Array(name)
+                .addUint8Array(this.valueType.compose())
                 .addUint32(rexp.length)
                 .addUint8Array(rexp)
                 .toArray();
@@ -88,6 +91,7 @@ export default class PropertyTemplate extends MemberTemplate
             return rt.addUint8(0x20 | pv)
                 .addUint8(name.length)
                 .addUint8Array(name)
+                .addUint8Array(this.valueType.compose())
                 .toArray();
     }
 }

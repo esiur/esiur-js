@@ -177,7 +177,7 @@ export default class IndexedDBStore extends IStore
 
             resource._id = doc.id;
 
-            Warehouse.put(resource, doc.name, self, null, null, null, null).then(ok=>{
+            Warehouse.put(doc.name, resource, self, null, null, null, null).then(ok=>{
                 self.parse(doc.attributes).then(attributes=>{
 
                     resource.instance.setAttributes(attributes);

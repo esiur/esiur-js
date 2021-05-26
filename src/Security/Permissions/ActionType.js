@@ -41,5 +41,7 @@ export default // ActionType =
     AddChild: 10,
     RemoveChild: 11,
     Rename: 12,
-    ReceiveEvent: 13
+    ReceiveEvent: 13,
+    ViewTemplate: 14
+
 };

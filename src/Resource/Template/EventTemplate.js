@@ -49,6 +49,7 @@ export default class EventTemplate extends MemberTemplate
             return rt.addUint8(this.listenable ? 0x58 : 0x50)
                      .addUint8(name.length)
                      .addUint8Array(name)
+                     .addUint8Array(this.argumentType.compose())
                      .addUint32(exp.length)
                      .addUint8Array(exp)
                      .toArray();
@@ -57,7 +58,7 @@ export default class EventTemplate extends MemberTemplate
             return rt.addUint8(this.listenable ? 0x48 : 0x40)
                      .addUint8(name.length)
                      .addUint8Array(name)
+                     .addUint8Array(this.argumentType.compose())
                      .toArray();
     }
-
 }

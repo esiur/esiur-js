@@ -1,4 +1,3 @@
-import DistributedConnection from "../../src/Net/IIP/DistributedConnection.js";
 import Warehouse from "../../src/Resource/Warehouse.js";
 
 import { createRequire } from 'module'

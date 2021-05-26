@@ -27,6 +27,8 @@ import PropertyTemplate from './PropertyTemplate.js';
 import EventTemplate from './EventTemplate.js';
 import SHA256 from '../../Security/Integrity/SHA256.js';
 import {DC, BL} from '../../Data/DataConverter.js';
+import ArgumentTemplate from './ArgumentTemplate.js';
+import TemplateDataType from "./TemplateDataType.js";
 
 export default class ResourceTemplate {
 
@@ -88,8 +90,120 @@ export default class ResourceTemplate {
      }
      */
 
+     
+     static getTypeGuid(type) {
+        return getTypeGuidByName(type.template.namespace + "." + type.prototype.constructor.name);
+     }
+
+     static getTypeGuidByName(typeName)
+     {
+         return SHA256.compute(DC.stringToBytes(this.className)).getGuid(0);
+     }     
+
+
+     static getDependencies(template)
+     {
+
+         var list = [];
+
+         list.add(template);
+
+         var getDependenciesFunc = null;
+
+         getDependenciesFunc = (tmp, bag) =>
+         {
+             if (template.resourceType == null)
+                 return;
+
+             // functions
+             for(var i = 0; i < tmp.functions.length; i++)
+             {
+                 f = tmp.functions[i];
+
+                 var frtt = Warehouse.getTemplateByType(f.methodInfo.returnType);
+                 if (frtt != null)
+                 {
+                     if (!bag.includes(frtt))
+                     {
+                         list.push(frtt);
+                         getDependenciesFunc(frtt, bag);
+                     }
+                 }
+
+                 var args = f.methodInfo.parameters;
+
+                 for(var i = 0; i < args.length - 1; i++)
+                 {
+                     var fpt = Warehouse.getTemplateByType(args[i].parameterType);
+                     if (fpt != null)
+                     {
+                         if (!bag.includes(fpt))
+                         {
+                             bag.push(fpt);
+                             getDependenciesFunc(fpt, bag);
+                         }
+                     }
+                 }
+
+                 // skip DistributedConnection argument
+                 if (args.length > 0)
+                 {
+                     var last = args[args.length - 1];
+                     if (last.parameterType == DistributedConnection)
+                     {
+                         var fpt = Warehouse.getTemplateByType(last.parameterType);
+                         if (fpt != null)
+                         {
+                             if (!bag.includes(fpt))
+                             {
+                                 bag.push(fpt);
+                                 getDependenciesFunc(fpt, bag);
+                             }
+                         }
+                     }
+                 }
+
+             }
+
+             // properties
+             for (var i = 0; i < tmp.properties.length; i++)
+             {
+                 var p = tmp.properties[i];
+                 var pt = Warehouse.getTemplateByType(p.propertyInfo.propertyType);
+                 if (pt != null)
+                 {
+                     if (!bag.includes(pt))
+                     {
+                         bag.push(pt);
+                         getDependenciesFunc(pt, bag);
+                     }
+                 }
+             }
+
+             // events
+             for(var i = 0; i < tmp.events.length; i++)
+             {
+                 var e = tmp.events[i];
+                 var et = Warehouse.getTemplateByType(e.eventInfo.eventHandlerType);
+
+                 if (et != null)
+                 {
+                     if (!bag.includes(et))
+                     {
+                         bag.Add(et);
+                         getDependenciesFunc(et, bag);
+                     }
+                 }
+             }
+         };
+
+         getDependenciesFunc(template, list);
+         return list;
+     }
+
     constructor(type) {
 
+        //@TODO: check if the type is IResource
 
         this.properties = [];
         this.events = [];
@@ -98,6 +212,8 @@ export default class ResourceTemplate {
 
         if (type === undefined)
             return;
+
+        this.resourceType = type;
 
         var template = type.template;
 
@@ -108,33 +224,56 @@ export default class ResourceTemplate {
 
         //byte currentIndex = 0;
 
-        for (var i = 0; i < template.properties?.length; i++) {
-            var pt = new PropertyTemplate();
-            pt.name = template.properties[i].name;
-            pt.index = i;
-            pt.readExpansion = template.properties[i].read;
-            pt.writeExpansion = template.properties[i].write;
-            pt.recordable = template.properties[i].recordable;
-            this.properties.push(pt);
-        }
+        if (template.properties != null)
+            for (var i = 0; i < template.properties.length; i++) {
+                //[name, type, {read: comment, write: comment, recordable: }]
+                var pi = template.properties[i];
+                var pt = new PropertyTemplate();
+                pt.name = pi[0];
+                pt.index = i;
+                pt.valueType = TemplateDataType.fromType(pi[1]),
+                pt.readExpansion = pi[2]?.read;
+                pt.writeExpansion = pi[2]?.write;
+                pt.recordable = pi[2]?.recordable;
+                pt.propertyInfo = pi;
+                this.properties.push(pt);
+            }
 
-        for (var i = 0; i < template.events?.length; i++) {
-            var et = new EventTemplate();
-            et.name = template.events[i].name;
-            et.index = i;
-            et.expansion = template.events[i].help;
-            et.listenable = template.events[i].listenable;
-            this.events.push(et);
-        }
+        if (template.events != null)
+            for (var i = 0; i < template.events.length; i++) {
 
-        for (var i = 0; i < template.functions?.length; i++) {
-            var ft = new FunctionTemplate();
-            ft.name = template.functions[i].name;
-            ft.index = i;
-            ft.isVoid = template.functions[i].void;
-            ft.expansion = template.functions[i].help;
-            this.functions.push(ft);
-        }
+                // [name, type, {listenable: true/false, help: ""}]
+                var ei = template.events[i];
+                var et = new EventTemplate();
+                et.name = ei[0];
+                et.index = i;
+                et.argumentType = TemplateDataType.fromType(ei[1]),
+                et.expansion = ei[2]?.help;
+                et.listenable = ei[2]?.listenable;
+                et.eventInfo = ei;
+                this.events.push(et);
+            }
+
+        if (template.functions != null)
+            for (var i = 0; i < template.functions.length; i++) {
+
+                var fi = template.functions[i];
+
+            // [name, {param1: type, param2: int}, returnType, "Description"]
+                var ft = new FunctionTemplate();
+                ft.name = fi[0];
+                ft.index = i;
+                ft.returnType = TemplateDataType.fromType(fi[2]);
+                ft.expansion = fi[3];
+                ft.arguments = [];
+
+                for(var arg in fi[1])
+                    ft.arguments.push(new ArgumentTemplate(arg, TemplateDataType.fromType(fi[1][arg])))
+
+                ft.methodInfo = fi;
+
+                this.functions.push(ft);
+            }
 
 
         // append signals
@@ -180,6 +319,14 @@ export default class ResourceTemplate {
         return result;
     }
 
+    static _getParamNames(func) {
+        var fnStr = func.toString().replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg, '');
+        var result = fnStr.slice(fnStr.indexOf('(')+1, fnStr.indexOf(')')).match(/([^\s,]+)/g);
+        if(result === null)
+            result = [];
+        return result;
+    }
+
     static parse(data, offset = 0, contentLength = -1) {
 
         if (contentLength == -1)
@@ -216,13 +363,32 @@ export default class ResourceTemplate {
             {
                 var ft = new FunctionTemplate();
                 ft.index = functionIndex++;
-                var expansion = ((data.getUint8(offset) & 0x10) == 0x10);
-                ft.isVoid = ((data.getUint8(offset++) & 0x08) == 0x08);
+                var hasExpansion = ((data.getUint8(offset++) & 0x10) == 0x10);
+
                 var len = data.getUint8(offset++);
                 ft.name = data.getString(offset, len);
                 offset += len;
 
-                if (expansion) // expansion ?
+                // return type
+                var {size, value: returnType} = TemplateDataType.parse(data, offset);
+                offset += size;
+
+                ft.returnType = returnType;
+
+                // arguments count
+                var argsCount = data.getUint8(offset++);
+                var args = [];
+
+                for (var a = 0; a < argsCount; a++)
+                {
+                    var {size, value: argType} = ArgumentTemplate.parse(data, offset);
+                    args.push(argType);
+                    offset += size;
+                }
+
+                ft.arguments = args;
+                
+                if (hasExpansion) // expansion ?
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;
@@ -237,15 +403,21 @@ export default class ResourceTemplate {
 
                 var pt = new PropertyTemplate();
                 pt.index = propertyIndex++;
-                var readExpansion = ((data.getUint8(offset) & 0x8) == 0x8);
-                var writeExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
+                var hasReadExpansion = ((data.getUint8(offset) & 0x8) == 0x8);
+                var hasWriteExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
                 pt.recordable = ((data.getUint8(offset) & 1) == 1);
                 pt.permission = ((data.getUint8(offset++) >> 1) & 0x3);
                 var len = data.getUint8(offset++);
                 pt.name = data.getString(offset, len);
                 offset += len;
 
-                if (readExpansion) // expansion ?
+                var {size, value: valueType} = TemplateDataType.parse(data, offset);
+
+                offset += size;
+
+                pt.valueType = valueType;
+
+                if (hasReadExpansion) // expansion ?
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;
@@ -253,7 +425,7 @@ export default class ResourceTemplate {
                     offset += cs;
                 }
 
-                if (writeExpansion) // expansion ?
+                if (hasWriteExpansion) // expansion ?
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;
@@ -267,14 +439,19 @@ export default class ResourceTemplate {
             {
                 var et = new EventTemplate();
                 et.index = eventIndex++;
-                var expansion = ((data.getUint8(offset) & 0x10) == 0x10);
+                var hasExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
                 et.listenable = ((data.getUint8(offset++) & 0x8) == 0x8);
                 var len = data.getUint8(offset++);
                 et.name = data.getString(offset, len);
 
                 offset += len;
 
-                if (expansion) // expansion ?
+                var {size, value: argType} = TemplateDataType.parse(data, offset);
+                    
+                offset += size;
+                et.argumentType = argType;
+
+                if (hasExpansion) // expansion ?
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;

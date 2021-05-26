@@ -12,10 +12,15 @@ export default class IMembership extends IResource
         return new AsyncReply(null);
     }
 
+    get guestsAllowed() {
+        return false;
+    }
+
     getToken(tokenIndex, domain)
     {
         return new AsyncReply(null);
     }
+    
     login(session)
     {
 

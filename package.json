@@ -1,6 +1,6 @@
 {
   "name": "esiur",
-  "version": "1.6.1",
+  "version": "1.6.8",
   "description": "Distributed Object Framework",
   "main": "esiur.js",
   "type": "module",
@@ -13,25 +13,22 @@
     "type": "git",
     "url": "git+https://github.com/esiur/esiur-js.git"
   },
-  "author": "Ahmed Zamil",
+  "author": "Ahmed Kh. Zamil",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/esiur/esiur-js/issues"
   },
   "homepage": "https://github.com/esiur/esiur-js#readme",
-  "dependencies": {
-    "@babel/polyfill": "^7.12.1",
-    "@babel/runtime": "^7.13.10",
-    "mongodb": "^3.6.6",
-    "ws": "^6.2.1"
-  },
   "devDependencies": {
-    "@babel/cli": "^7.13.14",
-    "@babel/core": "^7.13.15",
-    "@babel/plugin-transform-runtime": "^7.13.15",
+    "@babel/cli": "^7.13.16",
+    "@babel/core": "^7.13.16",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
     "@babel/preset-env": "^7.13.15",
-    "babel-cli": "^6.0.0",
     "babelify": "^10.0.0",
-    "browserify": "^16.5.2"
+    "browserify": "^17.0.0"
+  },
+  "dependencies": {
+    "mongodb": "^3.6.6",
+    "ws": "^7.4.5"
   }
 }

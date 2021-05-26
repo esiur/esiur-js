@@ -331,7 +331,8 @@ export default class IIPPacket
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
             }
-            else if (this.action == IIPPacketAction.QueryLink)
+            else if (this.action == IIPPacketAction.QueryLink
+                || this.action == IIPPacketAction.LinkTemplates)
             {
                 if (this.notEnough(offset, ends, 2))
                     return -this.dataLengthNeeded;
@@ -537,6 +538,8 @@ export default class IIPPacket
                 || this.action == IIPPacketAction.ResourceChildren
                 || this.action == IIPPacketAction.ResourceParents
                 || this.action == IIPPacketAction.ResourceHistory
+                || this.action == IIPPacketAction.LinkTemplates
+
                 // Attribute
                 || this.action == IIPPacketAction.GetAllAttributes
                 || this.action == IIPPacketAction.GetAttributes)

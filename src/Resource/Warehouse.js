@@ -35,7 +35,7 @@ import DistributedConnection from '../Net/IIP/DistributedConnection.js';
 import MemoryStore from '../Stores/MemoryStore.js';
 import Instance from '../Resource/Instance.js';
 import IStore from './IStore.js';
-import { ResourceTrigger } from './IResource.js';
+import IResource, { ResourceTrigger } from './IResource.js';
 import IndexedDBStore from '../Stores/IndexedDBStore.js';
 import ResourceProxy from '../Proxy/ResourceProxy.js';
 import AsyncBag from '../Core/AsyncBag.js';
@@ -80,7 +80,7 @@ export class WH extends IEventHandler
         {
             var rt = new AsyncReply();
 
-            this.put(res, name, store, parent, null, 0, manager, attributes)
+            this.put(name, res, store, parent, null, 0, manager, attributes)
                         .then((ok)=>rt.trigger(res))
                         .error((ex)=>rt.triggerError(ex));
 
@@ -117,7 +117,7 @@ export class WH extends IEventHandler
                     if (url[3].length > 0 && url[3] != "")
                         store.get(url[3]).then(r=>rt.trigger(r)).error(ex=>rt.triggerError(ex));
                     else
-                        rt.triggerError(store);
+                        rt.trigger(store);
                 }).error(ex=>{
                     rt.triggerError(ex);
                 });
@@ -192,7 +192,7 @@ export class WH extends IEventHandler
         return true;
     }
 
-    put(resource, name, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
+    put(name, resource, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
         
         var rt = new AsyncReply();
 
@@ -297,6 +297,12 @@ export class WH extends IEventHandler
     getTemplateByType(type)
     {
     
+        if (type == IResource)
+            return null;
+
+        if (!(type.prototype instanceof IResource))
+            return false;
+            
         let className = type.prototype.constructor.name;
 
         if (className.startsWith("E_"))
@@ -318,7 +324,7 @@ export class WH extends IEventHandler
     getTemplateByClassId(classId)
     {
         var template = this.templates.item(classId);
-        return new AsyncReply(template);
+        return template;
     }
 
     getTemplateByClassName(className)
