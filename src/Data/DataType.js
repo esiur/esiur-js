@@ -49,6 +49,7 @@ export default
     ResourceLink: 17,
     String: 18,
     Structure: 19,
+    Record: 20,
     //Stream,
     //Array = 0x80,
     VarArray: 0x80,
@@ -71,6 +72,7 @@ export default
     ResourceLinkArray: 0x91,
     StringArray: 0x92,
     StructureArray: 0x93,
+    RecordArray: 0x94,
     NotModified: 0x7f,
     Unspecified: 0xff,
 

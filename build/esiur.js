@@ -1308,7 +1308,7 @@ exports["default"] = void 0;
 
 var _DataType = _interopRequireDefault(require("./DataType.js"));
 
-var _ResourceComparisionResult = _interopRequireDefault(require("./ResourceComparisionResult.js"));
+var _ResourceComparisonResult = _interopRequireDefault(require("./ResourceComparisonResult.js"));
 
 var _StructureComparisonResult = _interopRequireDefault(require("./StructureComparisonResult.js"));
 
@@ -1329,6 +1329,12 @@ var _DistributedPropertyContext = _interopRequireDefault(require("../Net/IIP/Dis
 var _DistributedResource = _interopRequireDefault(require("../Net/IIP/DistributedResource.js"));
 
 var _IResource = _interopRequireDefault(require("../Resource/IResource.js"));
+
+var _RecordComparisonResult = _interopRequireDefault(require("./RecordComparisonResult.js"));
+
+var _IRecord = _interopRequireDefault(require("./IRecord.js"));
+
+var _Record = _interopRequireDefault(require("./Record.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -1428,6 +1434,9 @@ var Codec = /*#__PURE__*/function () {
 
           case _DataType["default"].Structure:
             return Codec.parseStructureArray(data, offset, contentLength, connection);
+
+          case _DataType["default"].Record:
+            return Codec.parseRecordArray(data, offset, contentLength, connection);
         }
       } else {
         switch (t) {
@@ -1487,6 +1496,9 @@ var Codec = /*#__PURE__*/function () {
 
           case _DataType["default"].Structure:
             return Codec.parseStructure(data, offset, contentLength, connection);
+
+          case _DataType["default"].Record:
+            return Codec.parseRecord(data, offset, contentLength, connection);
         }
       }
 
@@ -1528,10 +1540,10 @@ var Codec = /*#__PURE__*/function () {
 
       var result = data[offset++];
       var previous = null;
-      if (result == _ResourceComparisionResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _ResourceComparisionResult["default"].Local) {
+      if (result == _ResourceComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _ResourceComparisonResult["default"].Local) {
         previous = Warehouse.getById(data.getUint32(offset));
         offset += 4;
-      } else if (result == _ResourceComparisionResult["default"].Distributed) {
+      } else if (result == _ResourceComparisonResult["default"].Distributed) {
         previous = connection.fetch(data.getUint32(offset));
         offset += 4;
       }
@@ -1541,14 +1553,14 @@ var Codec = /*#__PURE__*/function () {
         result = data[offset++];
         var current = null;
 
-        if (result == _ResourceComparisionResult["default"].Null) {
+        if (result == _ResourceComparisonResult["default"].Null) {
           current = new _AsyncReply["default"](null);
-        } else if (result == _ResourceComparisionResult["default"].Same) {
+        } else if (result == _ResourceComparisonResult["default"].Same) {
           current = previous;
-        } else if (result == _ResourceComparisionResult["default"].Local) {
+        } else if (result == _ResourceComparisonResult["default"].Local) {
           current = Warehouse.getById(data.getUint32(offset));
           offset += 4;
-        } else if (result == _ResourceComparisionResult["default"].Distributed) {
+        } else if (result == _ResourceComparisonResult["default"].Distributed) {
           current = connection.fetch(data.getUint32(offset));
           offset += 4;
         }
@@ -1823,12 +1835,20 @@ var Codec = /*#__PURE__*/function () {
           rt.addUint8Array(Codec.composeVarArray(value, connection, true));
           break;
 
+        case _DataType["default"].Record:
+          rt.addUint8Array(Codec.composeRecord(value, connection, true, true));
+          break;
+
         case _DataType["default"].ResourceArray:
           rt.addUint8Array(Codec.composeResourceArray(value, connection, true));
           break;
 
         case _DataType["default"].StructureArray:
           rt.addUint8Array(Codec.composeStructureArray(value, connection, true));
+          break;
+
+        case _DataType["default"].RecordArray:
+          rt.addUint8Array(Codec.composeRecordArray(value, connection, true));
           break;
 
         default:
@@ -1898,6 +1918,157 @@ var Codec = /*#__PURE__*/function () {
 
       if (prependLength) rt.addUint32(rt.length, 0);
       return rt.toArray();
+    } /// <summary>
+    /// Compare two records
+    /// </summary>
+    /// <param name="initial">Initial record to compare with</param>
+    /// <param name="next">Next record to compare with the initial</param>
+    /// <param name="connection">DistributedConnection is required in case a structure holds items at the other end</param>
+
+  }, {
+    key: "compareRecords",
+    value: function compareRecords(initial, next) {
+      if (next == null) return _RecordComparisonResult["default"].Null;
+      if (initial == null) return _RecordComparisonResult["default"].Record;
+      if (next == initial) return _RecordComparisonResult["default"].Same;
+      if (next.constructor === initial.constructor) return _RecordComparisonResult["default"].RecordSameType;
+      return _RecordComparisonResult["default"].Record;
+    }
+  }, {
+    key: "parseRecordArray",
+    value: function parseRecordArray(data, offset, length, connection) {
+      var reply = new _AsyncBag["default"]();
+
+      if (length == 0) {
+        reply.seal();
+        return reply;
+      }
+
+      var end = offset + length;
+      var result = data.getUint8(offset++);
+      var previous = null;
+      var classId = null;
+      if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
+        var cs = data.getUint32(offset);
+        var recordLength = cs - 16;
+        offset += 4;
+        classId = data.getGuid(offset);
+        offset += 16;
+        previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+        offset += recordLength;
+      }
+      reply.Add(previous);
+
+      while (offset < end) {
+        result = data.getUint8(offset++);
+        if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
+          var cs = data.getUint32(offset);
+          var recordLength = cs - 16;
+          offset += 4;
+          classId = data.getGuid(offset);
+          offset += 16;
+          previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+          offset += recordLength;
+        } else if (result == _RecordComparisonResult["default"].RecordSameType) {
+          var cs = data.getUint32(offset);
+          offset += 4;
+          previous = Codec.parseRecord(data, offset, cs, connection, classId);
+          offset += cs;
+        } else if (result == _RecordComparisonResult["default"].Same) {// do nothing
+        }
+        reply.add(previous);
+      }
+
+      reply.seal();
+      return reply;
+    }
+  }, {
+    key: "parseRecord",
+    value: function parseRecord(data, offset, length, connection) {
+      var classId = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+      var reply = new _AsyncReply["default"]();
+
+      if (classId == null) {
+        classId = data.getGuid(offset);
+        offset += 16;
+        length -= 16;
+      }
+
+      var template = Warehouse.getTemplateByClassId(classId);
+
+      if (template != null) {
+        Codec.parseVarArray(data, offset, length, connection).then(function (ar) {
+          if (template.resourceType != null) {
+            var record = new template.resourceType();
+
+            for (var i = 0; i < template.properties.length; i++) {
+              record[template.properties[i].name] = ar[i];
+            }
+
+            reply.trigger(record);
+          } else {
+            var record = new _Record["default"]();
+
+            for (var i = 0; i < template.properties.Length; i++) {
+              record[template.properties[i].name] = ar[i];
+            }
+
+            reply.trigger(record);
+          }
+        });
+      } else {
+        connection.getTemplate(classId).then(function (tmp) {
+          Codec.parseVarArray(data, offset, length, connection).then(function (ar) {
+            var record = new _Record["default"]();
+
+            for (var i = 0; i < tmp.properties.length; i++) {
+              record[tmp.properties[i].name] = ar[i];
+            }
+
+            reply.trigger(record);
+          });
+        }).error(function (x) {
+          return reply.triggerError(x);
+        });
+      }
+
+      return reply;
+    }
+  }, {
+    key: "composeRecord",
+    value: function composeRecord(record, connection) {
+      var includeClassId = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+      var prependLength = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+      var rt = new _BinaryList["default"]();
+      var template = Warehouse.getTemplateByType(record.constructor);
+      if (includeClassId) rt.addGuid(template.classId);
+
+      for (var i = 0; i < template.properties.length; i++) {
+        var value = record[template.properties[i].name];
+        rt.addUint8Array(Codec.compose(value, connection));
+      }
+
+      if (prependLength) rt.insertInt32(0, rt.length);
+      return rt.toArray();
+    }
+  }, {
+    key: "composeRecordArray",
+    value: function composeRecordArray(records, connection) {
+      var prependLength = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+      if (records == null || (records === null || records === void 0 ? void 0 : records.length) == 0) return prependLength ? new _DataConverter.DC(4) : new _DataConverter.DC(0);
+      var rt = new _BinaryList["default"]();
+      var comparsion = Codec.compareRecords(null, records[0]);
+      rt.addUint8(comparsion);
+      if (comparsion == _RecordComparisonResult["default"].Record) rt.addUint8Array(Codec.composeRecord(records[0], connection, true, true));
+
+      for (var i = 1; i < records.length; i++) {
+        comparsion = Codec.compareRecords(records[i - 1], records[i]);
+        rt.addUint8(comparsion);
+        if (comparsion == _RecordComparisonResult["default"].Record) rt.addUint8Array(Codec.composeRecord(records[i], connection, true, true));else if (comparsion == _RecordComparisonResult["default"].RecordSameType) rt.addUint8Array(Codec.composeRecord(records[i], connection, false, true));
+      }
+
+      if (prependLength) rt.insertInt32(0, rt.length);
+      return rt.toArray();
     }
   }, {
     key: "compareStructure",
@@ -1950,7 +2121,7 @@ var Codec = /*#__PURE__*/function () {
   }, {
     key: "compareResource",
     value: function compareResource(previous, next, connection) {
-      if (next == null) return _ResourceComparisionResult["default"].Null;else if (next == previous) return _ResourceComparisionResult["default"].Same;else if (Codec.isLocalResource(next, connection)) return _ResourceComparisionResult["default"].Local;else return _ResourceComparisionResult["default"].Distributed;
+      if (next == null) return _ResourceComparisonResult["default"].Null;else if (next == previous) return _ResourceComparisonResult["default"].Same;else if (Codec.isLocalResource(next, connection)) return _ResourceComparisonResult["default"].Local;else return _ResourceComparisonResult["default"].Distributed;
     }
   }, {
     key: "composeResourceArray",
@@ -1961,12 +2132,12 @@ var Codec = /*#__PURE__*/function () {
       var rt = new _BinaryList["default"]();
       var comparsion = Codec.compareResource(null, resources[0], connection);
       rt.addUint8(comparsion);
-      if (comparsion == _ResourceComparisionResult["default"].Local) rt.addUint32(resources[0]._p.instanceId);else if (comparsion == _ResourceComparisionResult["default"].Distributed) rt.addUint32(resources[0].instance.id);
+      if (comparsion == _ResourceComparisonResult["default"].Local) rt.addUint32(resources[0]._p.instanceId);else if (comparsion == _ResourceComparisonResult["default"].Distributed) rt.addUint32(resources[0].instance.id);
 
       for (var i = 1; i < resources.length; i++) {
         comparsion = Codec.compareResource(resources[i - 1], resources[i], connection);
         rt.addUint8(comparsion);
-        if (comparsion == _ResourceComparisionResult["default"].Local) rt.addUint32(resources[i]._p.instanceId);else if (comparsion == _ResourceComparisionResult["default"].Distributed) rt.addUint32(resources[i].instance.id);
+        if (comparsion == _ResourceComparisonResult["default"].Local) rt.addUint32(resources[i]._p.instanceId);else if (comparsion == _ResourceComparisonResult["default"].Distributed) rt.addUint32(resources[i].instance.id);
       }
 
       if (prependLength) rt.addUint32(rt.length, 0);
@@ -2038,6 +2209,8 @@ var Codec = /*#__PURE__*/function () {
             return _DataType["default"].Float64;
           } else if (value instanceof _Structure["default"]) {
             return _DataType["default"].Structure;
+          } else if (value instanceof _IRecord["default"]) {
+            return _DataType["default"].Record;
           } else {
             return _DataType["default"].Void;
           }
@@ -2078,7 +2251,7 @@ var Codec = /*#__PURE__*/function () {
       if (result == _StructureComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _StructureComparisonResult["default"].Structure) {
         var cs = data.getUint32(offset);
         offset += 4;
-        previous = this.parseStructure(data, offset, cs, connection, metadata);
+        previous = Codec.parseStructure(data, offset, cs, connection, metadata);
         offset += cs;
       }
       reply.add(previous);
@@ -2088,17 +2261,17 @@ var Codec = /*#__PURE__*/function () {
         if (result == _StructureComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _StructureComparisonResult["default"].Structure) {
           var cs = data.getUint32(offset);
           offset += 4;
-          previous = this.parseStructure(data, offset, cs, connection, metadata);
+          previous = Codec.parseStructure(data, offset, cs, connection, metadata);
           offset += cs;
         } else if (result == _StructureComparisonResult["default"].StructureSameKeys) {
           var cs = data.getUint32(offset);
           offset += 4;
-          previous = this.parseStructure(data, offset, cs, connection, metadata, metadata.keys);
+          previous = Codec.parseStructure(data, offset, cs, connection, metadata, metadata.keys);
           offset += cs;
         } else if (result == _StructureComparisonResult["default"].StructureSameTypes) {
           var cs = data.getUint32(offset);
           offset += 4;
-          previous = this.parseStructure(data, offset, cs, connection, metadata, metadata.keys, metadata.types);
+          previous = Codec.parseStructure(data, offset, cs, connection, metadata, metadata.keys, metadata.types);
           offset += cs;
         }
         reply.add(previous);
@@ -2114,7 +2287,7 @@ var Codec = /*#__PURE__*/function () {
 
 exports["default"] = Codec;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Net/IIP/DistributedPropertyContext.js":23,"../Net/IIP/DistributedResource.js":24,"../Resource/IResource.js":42,"./BinaryList.js":11,"./DataConverter.js":13,"./DataType.js":14,"./PropertyValue.js":17,"./ResourceComparisionResult.js":18,"./Structure.js":19,"./StructureComparisonResult.js":21}],13:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Net/IIP/DistributedPropertyContext.js":26,"../Net/IIP/DistributedResource.js":27,"../Resource/IResource.js":45,"./BinaryList.js":11,"./DataConverter.js":13,"./DataType.js":14,"./IRecord.js":16,"./PropertyValue.js":18,"./Record.js":19,"./RecordComparisonResult.js":20,"./ResourceComparisonResult.js":21,"./Structure.js":22,"./StructureComparisonResult.js":24}],13:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -2843,6 +3016,7 @@ var _default = {
   ResourceLink: 17,
   String: 18,
   Structure: 19,
+  Record: 20,
   //Stream,
   //Array = 0x80,
   VarArray: 0x80,
@@ -2865,6 +3039,7 @@ var _default = {
   ResourceLinkArray: 0x91,
   StringArray: 0x92,
   StructureArray: 0x93,
+  RecordArray: 0x94,
   NotModified: 0x7f,
   Unspecified: 0xff,
   isArray: function isArray(type) {
@@ -2967,6 +3142,22 @@ var Guid = /*#__PURE__*/function () {
 exports["default"] = Guid;
 
 },{}],16:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var IRecord = function IRecord() {
+  _classCallCheck(this, IRecord);
+};
+
+exports["default"] = IRecord;
+
+},{}],17:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3150,7 +3341,7 @@ var KeyList = /*#__PURE__*/function () {
 
 exports["default"] = KeyList;
 
-},{"../Core/IDestructible.js":7}],17:[function(require,module,exports){
+},{"../Core/IDestructible.js":7}],18:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3195,7 +3386,69 @@ var PropertyValue = function PropertyValue(value, age, date) {
 
 exports["default"] = PropertyValue;
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _IRecord2 = _interopRequireDefault(require("./IRecord.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var Record = /*#__PURE__*/function (_IRecord) {
+  _inherits(Record, _IRecord);
+
+  var _super = _createSuper(Record);
+
+  function Record() {
+    _classCallCheck(this, Record);
+
+    return _super.apply(this, arguments);
+  }
+
+  return Record;
+}(_IRecord2["default"]);
+
+exports["default"] = Record;
+
+},{"./IRecord.js":16}],20:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var _default = // const ResourceComparisonResult =
+{
+  Null: 0,
+  Record: 1,
+  RecordSameType: 2,
+  Same: 3
+};
+exports["default"] = _default;
+
+},{}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3211,7 +3464,7 @@ var _default = // const ResourceComparisonResult =
 };
 exports["default"] = _default;
 
-},{}],19:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3302,7 +3555,7 @@ var Structure = /*#__PURE__*/function () {
 
 exports["default"] = Structure;
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3390,7 +3643,7 @@ var StructureArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = StructureArray;
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3407,7 +3660,7 @@ var _default = //const StructureComparisonResult =
 };
 exports["default"] = _default;
 
-},{}],22:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3520,7 +3773,7 @@ var _SocketState = _interopRequireDefault(require("../Sockets/SocketState.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
@@ -3736,6 +3989,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 case _IIPPacketAction["default"].ResourceHistory:
                   this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
                   break;
+
+                case _IIPPacketAction["default"].LinkTemplates:
+                  this.IIPRequestLinkTemplates(packet.callbackId, packet.resourceLink);
+                  break;
                 // Invoke
 
                 case _IIPPacketAction["default"].InvokeFunctionArrayArguments:
@@ -3762,14 +4019,6 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                 case _IIPPacketAction["default"].SetProperty:
                   this.IIPRequestSetProperty(packet.callbackId, packet.resourceId, packet.methodIndex, packet.content);
-                  break;
-
-                case _IIPPacketAction["default"].ResourceHistory:
-                  this.IIPRequestInquireResourceHistory(packet.callbackId, packet.resourceId, packet.fromDate, packet.toDate);
-                  break;
-
-                case _IIPPacketAction["default"].QueryLink:
-                  this.IIPRequestQueryResources(packet.callbackId, packet.resourceLink);
                   break;
                 // Attribute
 
@@ -3832,6 +4081,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 case _IIPPacketAction["default"].ResourceChildren:
                 case _IIPPacketAction["default"].ResourceParents:
                 case _IIPPacketAction["default"].ResourceHistory:
+                case _IIPPacketAction["default"].LinkTemplates:
                   this.IIPReply(packet.callbackId, packet.content);
                   break;
 
@@ -3944,6 +4194,24 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                   this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
                 }
+              } else if (authPacket.remoteMethod == _AuthenticationMethod["default"].None && authPacket.localMethod == _AuthenticationMethod["default"].None) {
+                try {
+                  var _this$server;
+
+                  // Check if guests are allowed
+                  if ((_this$server = this.server) !== null && _this$server !== void 0 && _this$server.membership.guestsAllowed) {
+                    this.session.remoteAuthentication.username = "g-" + Math.random().toString(36).substring(10);
+                    this.session.remoteAuthentication.domain = authPacket.domain;
+                    this.readyToEstablish = true;
+                    this.sendParams().addUint8(0x80).done();
+                  } else {
+                    this.sendParams().addUInt8(0xc0).addUint8(_ExceptionCode["default"].AccessDenied).addUint16(18).addString("Guests not allowed").done();
+                  }
+                } catch (ex) {
+                  var errMsg = _DataConverter.DC.stringToBytes(ex.message);
+
+                  this.sendParams().addUInt8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
+                }
               }
             } else if (authPacket.command == _IIPAuthPacketCommand["default"].Action) {
               if (authPacket.action == _IIPAuthPacketAction["default"].AuthenticateHash) {
@@ -3987,7 +4255,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                   this.sendParams().addUint8(0x28).addUint8Array(this.session.Id).done();
 
                   if (this.instance == null) {
-                    _Warehouse["default"].put(this, this.localUsername, null, this.server).then(function (x) {
+                    _Warehouse["default"].put(this.localUsername, this, null, this.server).then(function (x) {
                       var _this2$openReply, _this2$server;
 
                       _this2.ready = true;
@@ -4002,25 +4270,32 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                       (_this2$openReply2 = _this2.openReply) === null || _this2$openReply2 === void 0 ? void 0 : _this2$openReply2.triggerError(x);
                     });
                   } else {
-                    var _this$openReply, _this$server;
+                    var _this$openReply, _this$server2;
 
                     this.ready = true;
                     (_this$openReply = this.openReply) === null || _this$openReply === void 0 ? void 0 : _this$openReply.trigger(true);
 
                     this._emit("ready", this);
 
-                    (_this$server = this.server) === null || _this$server === void 0 ? void 0 : _this$server.membership.login(this.session);
+                    (_this$server2 = this.server) === null || _this$server2 === void 0 ? void 0 : _this$server2.membership.login(this.session);
                   }
+                } else {
+                  this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(9).addString("Not ready").done(); //     this.close();
                 }
               }
             }
           } else if (this.session.localAuthentication.type == _AuthenticationType["default"].Client) {
             if (authPacket.command == _IIPAuthPacketCommand["default"].Acknowledge) {
-              this.remoteNonce = authPacket.remoteNonce; // send our hash
+              if (authPacket.remoteMethod == _AuthenticationMethod["default"].None) {
+                // send establish
+                this.sendParams().addUint8(0x20).addUint16(0).done();
+              } else if (authPacket.remoteMethod == _AuthenticationMethod["default"].Credentials || authPacket.remoteMethod == _AuthenticationMethod["default"].Token) {
+                this.remoteNonce = authPacket.remoteNonce; // send our hash
 
-              var localHash = _SHA["default"].compute((0, _DataConverter.BL)().addUint8Array(this.localPasswordOrToken).addUint8Array(this.localNonce).addUint8Array(this.remoteNonce).toArray());
+                var localHash = _SHA["default"].compute((0, _DataConverter.BL)().addUint8Array(this.localPasswordOrToken).addUint8Array(this.localNonce).addUint8Array(this.remoteNonce).toArray());
 
-              this.sendParams().addUint8(0).addUint8Array(localHash).done();
+                this.sendParams().addUint8(0).addUint8Array(localHash).done();
+              }
             } else if (authPacket.command == _IIPAuthPacketCommand["default"].Action) {
               if (authPacket.action == _IIPAuthPacketAction["default"].AuthenticateHash) {
                 // check if the server knows my password
@@ -4044,7 +4319,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
 
                 if (this.instance == null) {
-                  _Warehouse["default"].put(this, this.localUsername, null, this.server).then(function (x) {
+                  _Warehouse["default"].put(this.localUsername, this, null, this.server).then(function (x) {
                     var _this2$openReply3;
 
                     (_this2$openReply3 = _this2.openReply) === null || _this2$openReply3 === void 0 ? void 0 : _this2$openReply3.trigger(true);
@@ -4228,15 +4503,17 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     key: "trigger",
     value: function trigger(_trigger) {
       if (_trigger == _IResource.ResourceTrigger.Open) {
+        if (this.server != null) return new _AsyncReply["default"](true);
+
         var _this$instance$attrib = this.instance.attributes.toObject(),
             _this$instance$attrib2 = _this$instance$attrib.domain,
             domain = _this$instance$attrib2 === void 0 ? null : _this$instance$attrib2,
             _this$instance$attrib3 = _this$instance$attrib.secure,
             secure = _this$instance$attrib3 === void 0 ? false : _this$instance$attrib3,
             _this$instance$attrib4 = _this$instance$attrib.username,
-            username = _this$instance$attrib4 === void 0 ? "guest" : _this$instance$attrib4,
+            username = _this$instance$attrib4 === void 0 ? null : _this$instance$attrib4,
             _this$instance$attrib5 = _this$instance$attrib.password,
-            password = _this$instance$attrib5 === void 0 ? "" : _this$instance$attrib5,
+            password = _this$instance$attrib5 === void 0 ? null : _this$instance$attrib5,
             _this$instance$attrib6 = _this$instance$attrib.checkInterval,
             checkInterval = _this$instance$attrib6 === void 0 ? 30 : _this$instance$attrib6,
             _this$instance$attrib7 = _this$instance$attrib.connectionTimeout,
@@ -4259,15 +4536,17 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
         var host = this.instance.name.split(':');
         var address = host[0];
-        var port = parseInt(host[1]);
+        var port = host.length > 1 ? parseInt(host[1]) : 10518;
 
-        if (token != null) {
-          var tk = token instanceof Uint8Array ? token : _DataConverter.DC.stringToBytes(token);
-          return this.connect(_AuthenticationMethod["default"].Token, null, address, port, null, tokenIndex, tk, domain, secure);
-        } else {
+        if (username != null && password != null) {
           var pw = _DataConverter.DC.stringToBytes(password);
 
           return this.connect(_AuthenticationMethod["default"].Credentials, null, address, port, username, null, pw, domain, secure);
+        } else if (token != null) {
+          var tk = token instanceof Uint8Array ? token : _DataConverter.DC.stringToBytes(token);
+          return this.connect(_AuthenticationMethod["default"].Token, null, address, port, null, tokenIndex, tk, domain, secure);
+        } else {
+          return this.connect(_AuthenticationMethod["default"].None, null, address, port, null, 0, null, domain);
         }
       }
 
@@ -4387,7 +4666,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "networkClose",
     value: function networkClose(socket) {
-      var _this$server2;
+      var _this$server3;
 
       this.readyToEstablish = false;
 
@@ -4415,7 +4694,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].remove(this);
 
-      if (this.ready) (_this$server2 = this.server) === null || _this$server2 === void 0 ? void 0 : _this$server2.membership.logout(this.session);
+      if (this.ready) (_this$server3 = this.server) === null || _this$server3 === void 0 ? void 0 : _this$server3.membership.logout(this.session);
       this.ready = false;
 
       this._emit("close", this);
@@ -4441,6 +4720,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
           try {
             while (buffer.available > 0 && !buffer["protected"]) {
+              //console.log("RX", buffer.length );
               this._dataReceived(buffer);
             }
           } catch (_unused2) {}
@@ -4823,7 +5103,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
               _Codec["default"].parseStructure(content, offset, cl, self).then(function (values) {
                 var resource = new (Function.prototype.bind.apply(type, values))();
 
-                _Warehouse["default"].put(resource, name, store, parent).then(function (ok) {
+                _Warehouse["default"].put(name, resource, store, parent).then(function (ok) {
                   self.sendReply(_IIPPacketAction["default"].CreateResource, callback).addUint32(resource.Instance.Id).done();
                 }).error(function (ex) {
                   // send some error
@@ -4855,6 +5135,40 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       });
     }
   }, {
+    key: "IIPRequestLinkTemplates",
+    value: function IIPRequestLinkTemplates(callback, resourceLink) {
+      var _this3 = this,
+          _this$server4;
+
+      var queryCallback = function queryCallback(r) {
+        if (r == null) _this3.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else {
+          var list = r.filter(function (x) {
+            return x.instance.applicable(_this3.session, _ActionType["default"].ViewTemplate, null) != _Ruling["default"].Denied;
+          });
+          if (list.length == 0) _this3.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else {
+            // get all templates related to this resource
+            var msg = new BinaryList();
+            var templates = [];
+
+            for (var i = 0; i < list.length; i++) {
+              templates = templates.concat(_ResourceTemplate["default"].getDependencies(list[i].instance.template).filter(function (x) {
+                return !templates.includes(x);
+              }));
+            }
+
+            for (var i = 0; i < templates.length; i++) {
+              msg.addInt32(templates[i].content.length).addUint8Array(templates[i].content);
+            } // send
+
+
+            _this3.sendReply(_IIPPacketAction["default"].LinkTemplates, callback).addInt32(msg.length).addUint8Array(msg.toArray()).done();
+          }
+        }
+      };
+
+      if (((_this$server4 = this.server) === null || _this$server4 === void 0 ? void 0 : _this$server4.entryPoint) != null) this.server.entryPoint.query(resourceLink, this).then(queryCallback);else _Warehouse["default"].query(resourceLink).then(queryCallback);
+    }
+  }, {
     key: "IIPRequestTemplateFromClassName",
     value: function IIPRequestTemplateFromClassName(callback, className) {
       var self = this;
@@ -4871,12 +5185,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     value: function IIPRequestTemplateFromClassId(callback, classId) {
       var self = this;
 
-      _Warehouse["default"].getTemplateByClassId(classId).then(function (t) {
-        if (t != null) self.sendReply(_IIPPacketAction["default"].TemplateFromClassId, callback).addUint32(t.content.length).addUint8Array(t.content).done();else {
-          // reply failed
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
-        }
-      });
+      var t = _Warehouse["default"].getTemplateByClassId(classId);
+
+      if (t != null) self.sendReply(_IIPPacketAction["default"].TemplateFromClassId, callback).addUint32(t.content.length).addUint8Array(t.content).done();else {
+        // reply failed
+        self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
+      }
     }
   }, {
     key: "IIPRequestTemplateFromResourceId",
@@ -5278,7 +5592,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "IIPRequestQueryResources",
     value: function IIPRequestQueryResources(callback, resourceLink) {
-      var _this$server3;
+      var _this$server5;
 
       var self = this;
 
@@ -5291,10 +5605,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         }
       };
 
-      if (((_this$server3 = this.server) === null || _this$server3 === void 0 ? void 0 : _this$server3.entryPoint) != null) {
-        var _this$server4;
+      if (((_this$server5 = this.server) === null || _this$server5 === void 0 ? void 0 : _this$server5.entryPoint) != null) {
+        var _this$server6;
 
-        (_this$server4 = this.server) === null || _this$server4 === void 0 ? void 0 : _this$server4.entryPoint.query(resourceLink, this).then(queryCallback);
+        (_this$server6 = this.server) === null || _this$server6 === void 0 ? void 0 : _this$server6.entryPoint.query(resourceLink, this).then(queryCallback);
       } else {
         _Warehouse["default"].query(resourceLink).then(queryCallback);
       }
@@ -5389,6 +5703,31 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       //    if (this.resources[r].instance.id == iid)
       //        return new AsyncReply(r);
       //return new AsyncReply(null);
+    }
+  }, {
+    key: "getLinkTemplates",
+    value: function getLinkTemplates(link) {
+      var reply = new _AsyncReply["default"]();
+
+      var l = _DataConverter.DC.stringToBytes(link);
+
+      this.sendRequest(_IIPPacketAction["default"].LinkTemplates).addUint16(l.length).addUint8Array(l).done().then(function (rt) {
+        var templates = []; // parse templates
+
+        var data = rt[0]; //var offset = 0;
+
+        for (var offset = 0; offset < data.length;) {
+          var cs = data.getUint32(offset);
+          offset += 4;
+          templates.push(_ResourceTemplate["default"].parse(data, offset, cs));
+          offset += cs;
+        }
+
+        reply.trigger(templates);
+      }).error(function (ex) {
+        reply.triggerError(ex);
+      });
+      return reply;
     } // Get a resource from the other end
 
   }, {
@@ -5408,11 +5747,19 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       this.resourceRequests.set(id, reply);
       var self = this;
       this.sendRequest(_IIPPacketAction["default"].AttachResource).addUint32(id).done().then(function (rt) {
-        var dr = resource || new _DistributedResource["default"](self, id, rt[1], rt[2]);
+        var dr;
+
+        if (resource == null) {
+          var template = _Warehouse["default"].getTemplateByClassId(rt[0]);
+
+          if ((template === null || template === void 0 ? void 0 : template.resourceType) != null) dr = new template.getDependencies(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
+        } else dr = resource; //let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
+
+
         self.getTemplate(rt[0]).then(function (tmp) {
           // ClassId, ResourceAge, ResourceLink, Content
           if (resource == null) {
-            var wp = _Warehouse["default"].put(dr, id.toString(), self, null, tmp).then(function (ok) {
+            var wp = _Warehouse["default"].put(id.toString(), dr, self, null, tmp).then(function (ok) {
               _Codec["default"].parsePropertyValueArray(rt[3], 0, rt[3].length, self).then(function (ar) {
                 dr._attach(ar);
 
@@ -5753,7 +6100,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncException.js":2,"../../Core/AsyncQueue.js":3,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../../Core/ProgressType.js":9,"../../Data/Codec.js":12,"../../Data/DataConverter.js":13,"../../Data/KeyList.js":16,"../../Resource/IResource.js":42,"../../Resource/IStore.js":43,"../../Resource/Template/ResourceTemplate.js":50,"../../Resource/Warehouse.js":51,"../../Security/Authority/Authentication.js":52,"../../Security/Authority/AuthenticationMethod.js":53,"../../Security/Authority/AuthenticationType.js":54,"../../Security/Authority/ClientAuthentication.js":55,"../../Security/Authority/HostAuthentication.js":56,"../../Security/Authority/Session.js":57,"../../Security/Integrity/SHA256.js":58,"../../Security/Permissions/ActionType.js":59,"../../Security/Permissions/Ruling.js":61,"../NetworkBuffer.js":27,"../Packets//IIPPacketReport.js":35,"../Packets/IIPAuthPacket.js":28,"../Packets/IIPAuthPacketAction.js":29,"../Packets/IIPAuthPacketCommand.js":30,"../Packets/IIPPacket.js":31,"../Packets/IIPPacketAction.js":32,"../Packets/IIPPacketCommand.js":33,"../Packets/IIPPacketEvent.js":34,"../SendList.js":36,"../Sockets/SocketState.js":38,"../Sockets/WSSocket.js":39,"./DistributedPropertyContext.js":23,"./DistributedResource.js":24,"./DistributedResourceQueueItem.js":25,"./DistributedResourceQueueItemType.js":26}],23:[function(require,module,exports){
+},{"../../Core/AsyncException.js":2,"../../Core/AsyncQueue.js":3,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../../Core/ProgressType.js":9,"../../Data/Codec.js":12,"../../Data/DataConverter.js":13,"../../Data/KeyList.js":17,"../../Resource/IResource.js":45,"../../Resource/IStore.js":46,"../../Resource/Template/ResourceTemplate.js":54,"../../Resource/Warehouse.js":57,"../../Security/Authority/Authentication.js":58,"../../Security/Authority/AuthenticationMethod.js":59,"../../Security/Authority/AuthenticationType.js":60,"../../Security/Authority/ClientAuthentication.js":61,"../../Security/Authority/HostAuthentication.js":62,"../../Security/Authority/Session.js":63,"../../Security/Integrity/SHA256.js":64,"../../Security/Permissions/ActionType.js":65,"../../Security/Permissions/Ruling.js":67,"../NetworkBuffer.js":30,"../Packets//IIPPacketReport.js":38,"../Packets/IIPAuthPacket.js":31,"../Packets/IIPAuthPacketAction.js":32,"../Packets/IIPAuthPacketCommand.js":33,"../Packets/IIPPacket.js":34,"../Packets/IIPPacketAction.js":35,"../Packets/IIPPacketCommand.js":36,"../Packets/IIPPacketEvent.js":37,"../SendList.js":39,"../Sockets/SocketState.js":41,"../Sockets/WSSocket.js":42,"./DistributedPropertyContext.js":26,"./DistributedResource.js":27,"./DistributedResourceQueueItem.js":28,"./DistributedResourceQueueItemType.js":29}],26:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -5801,7 +6148,7 @@ var DistributedPropertyContext = function DistributedPropertyContext(p1, p2) {
 
 exports["default"] = DistributedPropertyContext;
 
-},{}],24:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6086,7 +6433,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedResource;
 
-},{"../../Core//ExceptionCode.js":6,"../../Core/AsyncException.js":2,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Data/Codec.js":12,"../../Data/Structure.js":19,"../../Resource/IResource.js":42,"../../Resource/Template/EventTemplate.js":45,"../Packets//IIPPacketAction.js":32}],25:[function(require,module,exports){
+},{"../../Core//ExceptionCode.js":6,"../../Core/AsyncException.js":2,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Data/Codec.js":12,"../../Data/Structure.js":22,"../../Resource/IResource.js":45,"../../Resource/Template/EventTemplate.js":49,"../Packets//IIPPacketAction.js":35}],28:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6132,7 +6479,7 @@ var DistributedResourceQueueItem = function DistributedResourceQueueItem(resourc
 
 exports["default"] = DistributedResourceQueueItem;
 
-},{}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6145,7 +6492,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],27:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6283,7 +6630,7 @@ var NetworkBuffer = /*#__PURE__*/function () {
 
 exports["default"] = NetworkBuffer;
 
-},{"../Data/DataConverter.js":13}],28:[function(require,module,exports){
+},{"../Data/DataConverter.js":13}],31:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6433,9 +6780,11 @@ var IIPAuthPacket = /*#__PURE__*/function () {
         this.remoteMethod = data.getUint8(offset) >> 4 & 0x3;
         this.localMethod = data.getUint8(offset) >> 2 & 0x3;
         var encrypt = (data.getUint8(offset++) & 0x2) == 0x2;
-        if (this.notEnough(offset, ends, 1)) return -this.dataLengthNeeded;
 
-        if (this.remoteMethod == _AuthenticationMethod["default"].Credentials || this.remoteMethod == _AuthenticationMethod["default"].Token) {
+        if (this.remoteMethod == _AuthenticationMethod["default"].None) {
+          if (this.localMethod == _AuthenticationMethod["default"].None) {// do nothing
+          }
+        } else if (this.remoteMethod == _AuthenticationMethod["default"].Credentials || this.remoteMethod == _AuthenticationMethod["default"].Token) {
           if (this.localMethod == _AuthenticationMethod["default"].None) {
             if (this.notEnough(offset, ends, 32)) return -this.dataLengthNeeded;
             this.remoteNonce = data.clip(offset, 32);
@@ -6471,7 +6820,7 @@ var IIPAuthPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPAuthPacket;
 
-},{"../../Security/Authority/AuthenticationMethod.js":53,"./IIPAuthPacketAction.js":29,"./IIPAuthPacketCommand.js":30}],29:[function(require,module,exports){
+},{"../../Security/Authority/AuthenticationMethod.js":59,"./IIPAuthPacketAction.js":32,"./IIPAuthPacketCommand.js":33}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6488,7 +6837,7 @@ var _default = // const IIPAuthPacketAction =
 };
 exports["default"] = _default;
 
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6504,7 +6853,7 @@ var _default = //const IIPAuthPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],31:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6726,7 +7075,7 @@ var IIPPacket = /*#__PURE__*/function () {
           if (this.notEnough(offset, ends, 4)) return -this.dataLengthNeeded;
           this.resourceId = data.getUint32(offset);
           offset += 4;
-        } else if (this.action == _IIPPacketAction["default"].QueryLink) {
+        } else if (this.action == _IIPPacketAction["default"].QueryLink || this.action == _IIPPacketAction["default"].LinkTemplates) {
           if (this.notEnough(offset, ends, 2)) return -this.dataLengthNeeded;
           var cl = data.getUint16(offset);
           offset += 2;
@@ -6827,7 +7176,7 @@ var IIPPacket = /*#__PURE__*/function () {
           this.resourceId = data.getUint32(offset);
           offset += 4;
         } else if (this.action == _IIPPacketAction["default"].DetachResource) {// nothing to do
-        } else if (this.action == _IIPPacketAction["default"].TemplateFromClassName || this.action == _IIPPacketAction["default"].TemplateFromClassId || this.action == _IIPPacketAction["default"].TemplateFromResourceId || this.action == _IIPPacketAction["default"].QueryLink || this.action == _IIPPacketAction["default"].ResourceChildren || this.action == _IIPPacketAction["default"].ResourceParents || this.action == _IIPPacketAction["default"].ResourceHistory // Attribute
+        } else if (this.action == _IIPPacketAction["default"].TemplateFromClassName || this.action == _IIPPacketAction["default"].TemplateFromClassId || this.action == _IIPPacketAction["default"].TemplateFromResourceId || this.action == _IIPPacketAction["default"].QueryLink || this.action == _IIPPacketAction["default"].ResourceChildren || this.action == _IIPPacketAction["default"].ResourceParents || this.action == _IIPPacketAction["default"].ResourceHistory || this.action == _IIPPacketAction["default"].LinkTemplates // Attribute
         || this.action == _IIPPacketAction["default"].GetAllAttributes || this.action == _IIPPacketAction["default"].GetAttributes) {
           if (this.notEnough(offset, ends, 4)) return -this.dataLengthNeeded;
           var cl = data.getUint32(offset);
@@ -6907,7 +7256,7 @@ var IIPPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPPacket;
 
-},{"../../Data/DataType.js":14,"./IIPPacketAction.js":32,"./IIPPacketCommand.js":33,"./IIPPacketEvent.js":34,"./IIPPacketReport.js":35}],32:[function(require,module,exports){
+},{"../../Data/DataType.js":14,"./IIPPacketAction.js":35,"./IIPPacketCommand.js":36,"./IIPPacketEvent.js":37,"./IIPPacketReport.js":38}],35:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6933,6 +7282,7 @@ var _default = // const IIPPacketAction =
   ResourceHistory: 12,
   ResourceChildren: 13,
   ResourceParents: 14,
+  LinkTemplates: 15,
   // Request Invoke
   InvokeFunctionArrayArguments: 16,
   InvokeFunctionNamedArguments: 17,
@@ -6949,7 +7299,7 @@ var _default = // const IIPPacketAction =
 };
 exports["default"] = _default;
 
-},{}],33:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6965,7 +7315,7 @@ var _default = // IIPPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],34:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6988,7 +7338,7 @@ var IIPPacketEvent = {
 var _default = IIPPacketEvent;
 exports["default"] = _default;
 
-},{}],35:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7004,7 +7354,7 @@ var IIPPacketReport = {
 var _default = IIPPacketReport;
 exports["default"] = _default;
 
-},{}],36:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -7092,7 +7442,7 @@ var SendList = /*#__PURE__*/function (_BinaryList) {
 
 exports["default"] = SendList;
 
-},{"../Data/BinaryList.js":11}],37:[function(require,module,exports){
+},{"../Data/BinaryList.js":11}],40:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -7189,7 +7539,7 @@ var ISocket = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = ISocket;
 
-},{"../../Core/IDestructible.js":7,"./SocketState.js":38}],38:[function(require,module,exports){
+},{"../../Core/IDestructible.js":7,"./SocketState.js":41}],41:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7205,7 +7555,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],39:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -7412,7 +7762,7 @@ var WSSocket = /*#__PURE__*/function (_ISocket) {
 
 exports["default"] = WSSocket;
 
-},{"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../NetworkBuffer.js":27,"./ISocket.js":37,"./SocketState.js":38}],40:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../NetworkBuffer.js":30,"./ISocket.js":40,"./SocketState.js":41}],43:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7429,6 +7779,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var ResourceProxy = /*#__PURE__*/function () {
   function ResourceProxy() {
@@ -7468,9 +7820,10 @@ var ResourceProxy = /*#__PURE__*/function () {
 }();
 
 exports["default"] = ResourceProxy;
-ResourceProxy.cache = {};
 
-},{"../Resource/Warehouse.js":51}],41:[function(require,module,exports){
+_defineProperty(ResourceProxy, "cache", {});
+
+},{"../Resource/Warehouse.js":57}],44:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -7515,7 +7868,7 @@ var CustomResourceEvent = function CustomResourceEvent(issuer, receivers, args) 
 
 exports["default"] = CustomResourceEvent;
 
-},{}],42:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -7622,7 +7975,7 @@ var IResource = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = IResource;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IDestructible.js":7}],43:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IDestructible.js":7}],46:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -7717,7 +8070,7 @@ var IStore = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = IStore;
 
-},{"./IResource.js":42}],44:[function(require,module,exports){
+},{"./IResource.js":45}],47:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8077,7 +8430,67 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = Instance;
 
-},{"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/KeyList.js":16,"../Data/PropertyValue.js":17,"../Data/Structure.js":19,"../Data/StructureArray.js":20,"../Security/Permissions/IPermissionsManager.js":60,"../Security/Permissions/Ruling.js":61,"./CustomResourceEvent.js":41,"./Warehouse.js":51}],45:[function(require,module,exports){
+},{"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/KeyList.js":17,"../Data/PropertyValue.js":18,"../Data/Structure.js":22,"../Data/StructureArray.js":23,"../Security/Permissions/IPermissionsManager.js":66,"../Security/Permissions/Ruling.js":67,"./CustomResourceEvent.js":44,"./Warehouse.js":57}],48:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _DataConverter = _interopRequireDefault(require("../../Data/DataConverter.js"));
+
+var _BinaryList = _interopRequireDefault(require("../../Data/BinaryList.js"));
+
+var _TemplateDataType = _interopRequireDefault(require("./TemplateDataType.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var ArgumentTemplate = /*#__PURE__*/function () {
+  function ArgumentTemplate(name, type) {
+    _classCallCheck(this, ArgumentTemplate);
+
+    this.name = name;
+    this.type = type;
+  }
+
+  _createClass(ArgumentTemplate, [{
+    key: "compose",
+    value: function compose() {
+      var name = _DataConverter["default"].stringToBytes(this.name);
+
+      return new _BinaryList["default"]().addUint8(name.length).addUint8Array(name).addUint8Array(this.type.compose()).toArray();
+    }
+  }], [{
+    key: "parse",
+    value: function parse(data, offset) {
+      var cs = data[offset++];
+      var name = data.getString(offset, cs);
+      offset += cs;
+
+      var _TemplateDataType$par = _TemplateDataType["default"].parse(data, offset),
+          size = _TemplateDataType$par.size,
+          value = _TemplateDataType$par.value;
+
+      return {
+        size: cs + 1 + size,
+        value: new ArgumentTemplate(name, value)
+      };
+    }
+  }]);
+
+  return ArgumentTemplate;
+}();
+
+exports["default"] = ArgumentTemplate;
+
+},{"../../Data/BinaryList.js":11,"../../Data/DataConverter.js":13,"./TemplateDataType.js":55}],49:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8169,8 +8582,8 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
       if (this.expansion != null) {
         var exp = _DataConverter.DC.stringToBytes(this.expansion);
 
-        return rt.addUint8(this.listenable ? 0x58 : 0x50).addUint8(name.length).addUint8Array(name).addUint32(exp.length).addUint8Array(exp).toArray();
-      } else return rt.addUint8(this.listenable ? 0x48 : 0x40).addUint8(name.length).addUint8Array(name).toArray();
+        return rt.addUint8(this.listenable ? 0x58 : 0x50).addUint8(name.length).addUint8Array(name).addUint8Array(this.argumentType.compose()).addUint32(exp.length).addUint8Array(exp).toArray();
+      } else return rt.addUint8(this.listenable ? 0x48 : 0x40).addUint8(name.length).addUint8Array(name).addUint8Array(this.argumentType.compose()).toArray();
     }
   }]);
 
@@ -8179,7 +8592,7 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = EventTemplate;
 
-},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":47,"./MemberType.js":48}],46:[function(require,module,exports){
+},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":51,"./MemberType.js":52}],50:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8266,13 +8679,20 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
     value: function compose() {
       var name = _get(_getPrototypeOf(FunctionTemplate.prototype), "compose", this).call(this);
 
-      var rt = (0, _DataConverter.BL)();
+      var bl = (0, _DataConverter.BL)().addUint8(name.length).addUint8Array(name).addUint8Array(this.returnType.compose()).addUint8(this.arguments.length);
+
+      for (var i = 0; i < this.arguments.length; i++) {
+        bl.addUint8Array(this.arguments[i].compose());
+      }
 
       if (this.expansion != null) {
         var exp = _DataConverter.DC.stringToBytes(this.expansion);
 
-        return rt.addUint8(0x10 | (this.isVoid ? 0x8 : 0x0)).addUint8(name.length).addUint8Array(name).addUint32(exp.length).addUint8Array(exp).toArray();
-      } else return rt.addUint8(this.isVoid ? 0x8 : 0x0).addUint8(name.length).addUint8Array(name).toArray();
+        bl.addInt32(exp.length).addUint8Array(exp);
+        bl.insertUint8(0, 0x10);
+      } else bl.addUint8(0x0, 0);
+
+      return bl.toArray();
     }
   }]);
 
@@ -8281,7 +8701,7 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = FunctionTemplate;
 
-},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":47,"./MemberType.js":48}],47:[function(require,module,exports){
+},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":51,"./MemberType.js":52}],51:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8341,7 +8761,7 @@ var MemberTemplate = /*#__PURE__*/function () {
 
 exports["default"] = MemberTemplate;
 
-},{"../../Data/DataConverter.js":13}],48:[function(require,module,exports){
+},{"../../Data/DataConverter.js":13}],52:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8355,7 +8775,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],49:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8457,16 +8877,16 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
         var wexp = _DataConverter.DC.stringToBytes(this.writeExpansion);
 
-        return rt.addUint8(0x38 | pv).addUint8(name.length).addUint8Array(name).addUint32(wexp.length).addUint8Array(wexp).addUint32(rexp.length).addUint8Array(rexp).toArray();
+        return rt.addUint8(0x38 | pv).addUint8(name.length).addUint8Array(name).addUint8Array(this.valueType.compose()).addUint32(wexp.length).addUint8Array(wexp).addUint32(rexp.length).addUint8Array(rexp).toArray();
       } else if (this.writeExpansion != null) {
         var wexp = _DataConverter.DC.stringToBytes(this.writeExpansion);
 
-        return rt.addUint8(0x30 | pv).addUint8(name.length).addUint8Array(name).addUint32(wexp.length).addUint8Array(wexp).toArray();
+        return rt.addUint8(0x30 | pv).addUint8(name.length).addUint8Array(name).addUint8Array(this.valueType.compose()).addUint32(wexp.length).addUint8Array(wexp).toArray();
       } else if (this.readExpansion != null) {
         var rexp = _DataConverter.DC.stringToBytes(this.readExpansion);
 
-        return rt.addUint8(0x28 | pv).addUint8(name.length).addUint8Array(name).addUint32(rexp.length).addUint8Array(rexp).toArray();
-      } else return rt.addUint8(0x20 | pv).addUint8(name.length).addUint8Array(name).toArray();
+        return rt.addUint8(0x28 | pv).addUint8(name.length).addUint8Array(name).addUint8Array(this.valueType.compose()).addUint32(rexp.length).addUint8Array(rexp).toArray();
+      } else return rt.addUint8(0x20 | pv).addUint8(name.length).addUint8Array(name).addUint8Array(this.valueType.compose()).toArray();
     }
   }]);
 
@@ -8475,7 +8895,7 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = PropertyTemplate;
 
-},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":47,"./MemberType.js":48}],50:[function(require,module,exports){
+},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":51,"./MemberType.js":52}],54:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8514,6 +8934,16 @@ var _SHA = _interopRequireDefault(require("../../Security/Integrity/SHA256.js"))
 
 var _DataConverter = require("../../Data/DataConverter.js");
 
+var _ArgumentTemplate = _interopRequireDefault(require("./ArgumentTemplate.js"));
+
+var _TemplateDataType = _interopRequireDefault(require("./TemplateDataType.js"));
+
+var _IResource = _interopRequireDefault(require("../IResource.js"));
+
+var _IRecord = _interopRequireDefault(require("../../Data/IRecord.js"));
+
+var _TemplateType = _interopRequireDefault(require("./TemplateType.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -8523,17 +8953,6 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 var ResourceTemplate = /*#__PURE__*/function () {
-  /*
-     template: {
-   properties: [
-   {name: 'size', read: null, write: null}
-   ],
-   functions: [
-     ],
-   events: [
-     ]
-   }
-   */
   function ResourceTemplate(type) {
     _classCallCheck(this, ResourceTemplate);
 
@@ -8542,36 +8961,66 @@ var ResourceTemplate = /*#__PURE__*/function () {
     this.functions = [];
     this.members = [];
     if (type === undefined) return;
+    if (type.prototype instanceof _IRecord["default"]) this.templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IResource["default"]) this.templateType = _TemplateType["default"].Resource;else throw new Error("Type is neither a resource nor a record.");
+    this.resourceType = type;
     var template = type.template; // set guid
 
     this.className = template.namespace + "." + type.prototype.constructor.name;
     this.classId = _SHA["default"].compute(_DataConverter.DC.stringToBytes(this.className)).getGuid(0); //byte currentIndex = 0;
 
     if (template.properties != null) for (var i = 0; i < template.properties.length; i++) {
+      var _pi$, _pi$2, _pi$3;
+
+      //[name, type, {read: comment, write: comment, recordable: }]
+      var pi = template.properties[i];
       var pt = new _PropertyTemplate["default"]();
-      pt.name = template.properties[i].name;
+      pt.name = pi[0];
       pt.index = i;
-      pt.readExpansion = template.properties[i].read;
-      pt.writeExpansion = template.properties[i].write;
-      pt.recordable = template.properties[i].recordable;
+      pt.valueType = _TemplateDataType["default"].fromType(pi[1]), pt.readExpansion = (_pi$ = pi[2]) === null || _pi$ === void 0 ? void 0 : _pi$.read;
+      pt.writeExpansion = (_pi$2 = pi[2]) === null || _pi$2 === void 0 ? void 0 : _pi$2.write;
+      pt.recordable = (_pi$3 = pi[2]) === null || _pi$3 === void 0 ? void 0 : _pi$3.recordable;
+      pt.propertyInfo = pi;
       this.properties.push(pt);
     }
-    if (template.events != null) for (var i = 0; i < template.events.length; i++) {
-      var et = new _EventTemplate["default"]();
-      et.name = template.events[i].name;
-      et.index = i;
-      et.expansion = template.events[i].help;
-      et.listenable = template.events[i].listenable;
-      this.events.push(et);
-    }
-    if (template.functions != null) for (var i = 0; i < template.functions.length; i++) {
-      var ft = new _FunctionTemplate["default"]();
-      ft.name = template.functions[i].name;
-      ft.index = i;
-      ft.isVoid = template.functions[i]["void"];
-      ft.expansion = template.functions[i].help;
-      this.functions.push(ft);
+
+    if (this.templateType == _TemplateType["default"].Resource) {
+      if (template.events != null) {
+        for (var i = 0; i < template.events.length; i++) {
+          var _ei$, _ei$2;
+
+          // [name, type, {listenable: true/false, help: ""}]
+          var ei = template.events[i];
+          var et = new _EventTemplate["default"]();
+          et.name = ei[0];
+          et.index = i;
+          et.argumentType = _TemplateDataType["default"].fromType(ei[1]), et.expansion = (_ei$ = ei[2]) === null || _ei$ === void 0 ? void 0 : _ei$.help;
+          et.listenable = (_ei$2 = ei[2]) === null || _ei$2 === void 0 ? void 0 : _ei$2.listenable;
+          et.eventInfo = ei;
+          this.events.push(et);
+        }
+      }
+
+      if (template.functions != null) {
+        for (var i = 0; i < template.functions.length; i++) {
+          var fi = template.functions[i]; // [name, {param1: type, param2: int}, returnType, "Description"]
+
+          var ft = new _FunctionTemplate["default"]();
+          ft.name = fi[0];
+          ft.index = i;
+          ft.returnType = _TemplateDataType["default"].fromType(fi[2]);
+          ft.expansion = fi[3];
+          ft.arguments = [];
+
+          for (var arg in fi[1]) {
+            ft.arguments.push(new _ArgumentTemplate["default"](arg, _TemplateDataType["default"].fromType(fi[1][arg])));
+          }
+
+          ft.methodInfo = fi;
+          this.functions.push(ft);
+        }
+      }
     } // append signals
+
 
     for (var i = 0; i < this.events.length; i++) {
       this.members.push(this.events[i]);
@@ -8592,7 +9041,7 @@ var ResourceTemplate = /*#__PURE__*/function () {
 
     var cls = _DataConverter.DC.stringToBytes(this.className);
 
-    b.addUint8Array(this.classId.value).addUint8(cls.length).addUint8Array(cls).addUint32(template.version).addUint16(this.members.length);
+    b.addUint8(this.templateType).addUint8Array(this.classId.value).addUint8(cls.length).addUint8Array(cls).addUint32(template.version).addUint16(this.members.length);
 
     for (var i = 0; i < this.functions.length; i++) {
       b.addUint8Array(this.functions[i].compose());
@@ -8663,13 +9112,130 @@ var ResourceTemplate = /*#__PURE__*/function () {
 
       return null;
     }
+    /*
+       template: {
+     properties: [
+     {name: 'size', read: null, write: null}
+     ],
+     functions: [
+       ],
+     events: [
+       ]
+     }
+     */
+
   }], [{
+    key: "getTypeGuid",
+    value: function getTypeGuid(type) {
+      return getTypeGuidByName(type.template.namespace + "." + type.prototype.constructor.name);
+    }
+  }, {
+    key: "getTypeGuidByName",
+    value: function getTypeGuidByName(typeName) {
+      return _SHA["default"].compute(_DataConverter.DC.stringToBytes(this.className)).getGuid(0);
+    }
+  }, {
+    key: "getDependencies",
+    value: function getDependencies(template) {
+      var list = [];
+      list.add(template);
+      var _getDependenciesFunc = null;
+
+      _getDependenciesFunc = function getDependenciesFunc(tmp, bag) {
+        if (template.resourceType == null) return; // functions
+
+        for (var i = 0; i < tmp.functions.length; i++) {
+          f = tmp.functions[i];
+          var frtt = Warehouse.getTemplateByType(f.methodInfo.returnType);
+
+          if (frtt != null) {
+            if (!bag.includes(frtt)) {
+              list.push(frtt);
+
+              _getDependenciesFunc(frtt, bag);
+            }
+          }
+
+          var args = f.methodInfo.parameters;
+
+          for (var i = 0; i < args.length - 1; i++) {
+            var fpt = Warehouse.getTemplateByType(args[i].parameterType);
+
+            if (fpt != null) {
+              if (!bag.includes(fpt)) {
+                bag.push(fpt);
+
+                _getDependenciesFunc(fpt, bag);
+              }
+            }
+          } // skip DistributedConnection argument
+
+
+          if (args.length > 0) {
+            var last = args[args.length - 1];
+
+            if (last.parameterType == DistributedConnection) {
+              var fpt = Warehouse.getTemplateByType(last.parameterType);
+
+              if (fpt != null) {
+                if (!bag.includes(fpt)) {
+                  bag.push(fpt);
+
+                  _getDependenciesFunc(fpt, bag);
+                }
+              }
+            }
+          }
+        } // properties
+
+
+        for (var i = 0; i < tmp.properties.length; i++) {
+          var p = tmp.properties[i];
+          var pt = Warehouse.getTemplateByType(p.propertyInfo.propertyType);
+
+          if (pt != null) {
+            if (!bag.includes(pt)) {
+              bag.push(pt);
+
+              _getDependenciesFunc(pt, bag);
+            }
+          }
+        } // events
+
+
+        for (var i = 0; i < tmp.events.length; i++) {
+          var e = tmp.events[i];
+          var et = Warehouse.getTemplateByType(e.eventInfo.eventHandlerType);
+
+          if (et != null) {
+            if (!bag.includes(et)) {
+              bag.Add(et);
+
+              _getDependenciesFunc(et, bag);
+            }
+          }
+        }
+      };
+
+      _getDependenciesFunc(template, list);
+
+      return list;
+    }
+  }, {
     key: "getFunctionParameters",
     value: function getFunctionParameters(func) {
       var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
       var ARGUMENT_NAMES = /([^\s,]+)/g;
       var fnStr = func.toString().replace(STRIP_COMMENTS, '');
       var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+      if (result === null) result = [];
+      return result;
+    }
+  }, {
+    key: "_getParamNames",
+    value: function _getParamNames(func) {
+      var fnStr = func.toString().replace(/((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg, '');
+      var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(/([^\s,]+)/g);
       if (result === null) result = [];
       return result;
     }
@@ -8684,6 +9250,7 @@ var ResourceTemplate = /*#__PURE__*/function () {
 
       var od = new ResourceTemplate();
       od.content = data.clip(offset, contentLength);
+      od.templateType = data.getUint8(offset++);
       od.classId = data.getGuid(offset);
       offset += 16;
       od.className = data.getString(offset + 1, data.getUint8(offset));
@@ -8703,13 +9270,33 @@ var ResourceTemplate = /*#__PURE__*/function () {
           {
             var ft = new _FunctionTemplate["default"]();
             ft.index = functionIndex++;
-            var expansion = (data.getUint8(offset) & 0x10) == 0x10;
-            ft.isVoid = (data.getUint8(offset++) & 0x08) == 0x08;
+            var hasExpansion = (data.getUint8(offset++) & 0x10) == 0x10;
             var len = data.getUint8(offset++);
             ft.name = data.getString(offset, len);
-            offset += len;
+            offset += len; // return type
 
-            if (expansion) // expansion ?
+            var _TemplateDataType$par = _TemplateDataType["default"].parse(data, offset),
+                size = _TemplateDataType$par.size,
+                returnType = _TemplateDataType$par.value;
+
+            offset += size;
+            ft.returnType = returnType; // arguments count
+
+            var argsCount = data.getUint8(offset++);
+            var args = [];
+
+            for (var a = 0; a < argsCount; a++) {
+              var _ArgumentTemplate$par = _ArgumentTemplate["default"].parse(data, offset),
+                  size = _ArgumentTemplate$par.size,
+                  argType = _ArgumentTemplate$par.value;
+
+              args.push(argType);
+              offset += size;
+            }
+
+            ft.arguments = args;
+
+            if (hasExpansion) // expansion ?
               {
                 var cs = data.getUint32(offset);
                 offset += 4;
@@ -8722,15 +9309,22 @@ var ResourceTemplate = /*#__PURE__*/function () {
           {
             var pt = new _PropertyTemplate["default"]();
             pt.index = propertyIndex++;
-            var readExpansion = (data.getUint8(offset) & 0x8) == 0x8;
-            var writeExpansion = (data.getUint8(offset) & 0x10) == 0x10;
+            var hasReadExpansion = (data.getUint8(offset) & 0x8) == 0x8;
+            var hasWriteExpansion = (data.getUint8(offset) & 0x10) == 0x10;
             pt.recordable = (data.getUint8(offset) & 1) == 1;
             pt.permission = data.getUint8(offset++) >> 1 & 0x3;
             var len = data.getUint8(offset++);
             pt.name = data.getString(offset, len);
             offset += len;
 
-            if (readExpansion) // expansion ?
+            var _TemplateDataType$par2 = _TemplateDataType["default"].parse(data, offset),
+                size = _TemplateDataType$par2.size,
+                valueType = _TemplateDataType$par2.value;
+
+            offset += size;
+            pt.valueType = valueType;
+
+            if (hasReadExpansion) // expansion ?
               {
                 var cs = data.getUint32(offset);
                 offset += 4;
@@ -8738,7 +9332,7 @@ var ResourceTemplate = /*#__PURE__*/function () {
                 offset += cs;
               }
 
-            if (writeExpansion) // expansion ?
+            if (hasWriteExpansion) // expansion ?
               {
                 var cs = data.getUint32(offset);
                 offset += 4;
@@ -8751,13 +9345,20 @@ var ResourceTemplate = /*#__PURE__*/function () {
           {
             var et = new _EventTemplate["default"]();
             et.index = eventIndex++;
-            var expansion = (data.getUint8(offset) & 0x10) == 0x10;
+            var hasExpansion = (data.getUint8(offset) & 0x10) == 0x10;
             et.listenable = (data.getUint8(offset++) & 0x8) == 0x8;
             var len = data.getUint8(offset++);
             et.name = data.getString(offset, len);
             offset += len;
 
-            if (expansion) // expansion ?
+            var _TemplateDataType$par3 = _TemplateDataType["default"].parse(data, offset),
+                size = _TemplateDataType$par3.size,
+                argType = _TemplateDataType$par3.value;
+
+            offset += size;
+            et.argumentType = argType;
+
+            if (hasExpansion) // expansion ?
               {
                 var cs = data.getUint32(offset);
                 offset += 4;
@@ -8793,7 +9394,139 @@ var ResourceTemplate = /*#__PURE__*/function () {
 
 exports["default"] = ResourceTemplate;
 
-},{"../../Data/DataConverter.js":13,"../../Security/Integrity/SHA256.js":58,"./EventTemplate.js":45,"./FunctionTemplate.js":46,"./PropertyTemplate.js":49}],51:[function(require,module,exports){
+},{"../../Data/DataConverter.js":13,"../../Data/IRecord.js":16,"../../Security/Integrity/SHA256.js":64,"../IResource.js":45,"./ArgumentTemplate.js":48,"./EventTemplate.js":49,"./FunctionTemplate.js":50,"./PropertyTemplate.js":53,"./TemplateDataType.js":55,"./TemplateType.js":56}],55:[function(require,module,exports){
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _DataConverter = require("../../Data/DataConverter.js");
+
+var _DataType = _interopRequireDefault(require("../../Data/DataType.js"));
+
+var _Structure = _interopRequireDefault(require("../../Data/Structure.js"));
+
+var _IResource = _interopRequireDefault(require("../IResource.js"));
+
+var _ResourceTemplate = _interopRequireDefault(require("./ResourceTemplate.js"));
+
+var _IRecord = _interopRequireDefault(require("../../Data/IRecord.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var TemplateDataType = /*#__PURE__*/function () {
+  function TemplateDataType(type, guid) {
+    _classCallCheck(this, TemplateDataType);
+
+    this.type = type;
+    this.typeGuid = guid;
+  }
+
+  _createClass(TemplateDataType, [{
+    key: "typeTemplate",
+    get: function get() {
+      return this.typeGuid == null ? null : Warehouse.getTemplateByType(this.typeGuid);
+    } //@TODO: implement this
+
+  }, {
+    key: "compose",
+    value: function compose() {
+      if (this.type == _DataType["default"].Resource || this.type == _DataType["default"].ResourceArray || this.type == _DataType["default"].Record || this.type == _DataType["default"].RecordArray) {
+        return (0, _DataConverter.BL)().addUint8(this.type).addUint8Array(this.typeGuid).toDC();
+      } else return _DataConverter.DC.from([this.type]);
+    }
+  }], [{
+    key: "fromType",
+    value: function fromType(type) {
+      var _type, _type2;
+
+      var isArray = type instanceof Array;
+      if (isArray) type = type[0];
+      var dataType = 0;
+      var typeGuid = null;
+      if (!isNaN(type)) dataType = type;else if (type == _Structure["default"]) dataType = _DataType["default"].Structure;else if (typeof type == "string") {
+        var tIndex = this.typesDefinitions.indexOf(type);
+        dataType = tIndex > -1 ? tIndex : 0;
+      } else if (((_type = type) === null || _type === void 0 ? void 0 : _type.prototype) instanceof _IResource["default"]) {
+        dataType = _DataType["default"].Resource;
+        typeGuid = _ResourceTemplate["default"].getTypeGuid(type);
+      } else if (((_type2 = type) === null || _type2 === void 0 ? void 0 : _type2.prototype) instanceof _IRecord["default"]) {
+        dataType = _DataType["default"].Record;
+        typeGuid = _ResourceTemplate["default"].getTypeGuid(type);
+      }
+      if (isArray) dataType |= _DataType["default"].VarArray;
+      return new TemplateDataType(_DataType["default"].StructureArray);
+    }
+  }, {
+    key: "parse",
+    value: function parse(data, offset) {
+      var type = data.getUint8(offset++);
+
+      if (type == _DataType["default"].Resource || type == _DataType["default"].ResourceArray || type == _DataType["default"].Record || type == _DataType["default"].RecordArray) {
+        var guid = data.getGuid(offset);
+        return {
+          size: 17,
+          value: new TemplateDataType(type, guid)
+        };
+      } else return {
+        size: 1,
+        value: new TemplateDataType(type)
+      };
+    }
+  }]);
+
+  return TemplateDataType;
+}();
+
+exports["default"] = TemplateDataType;
+
+_defineProperty(TemplateDataType, "typesDefinitions", ["var", "bool", "sbyte", "byte", "char", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "date", "resource", "DistributedResource", "ResourceLink", "string", "structure"]);
+
+},{"../../Data/DataConverter.js":13,"../../Data/DataType.js":14,"../../Data/IRecord.js":16,"../../Data/Structure.js":22,"../IResource.js":45,"./ResourceTemplate.js":54}],56:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var _default = {
+  Resource: 0,
+  Record: 1
+};
+exports["default"] = _default;
+
+},{}],57:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8844,13 +9577,19 @@ var _Instance = _interopRequireDefault(require("../Resource/Instance.js"));
 
 var _IStore = _interopRequireDefault(require("./IStore.js"));
 
-var _IResource = require("./IResource.js");
+var _IResource = _interopRequireWildcard(require("./IResource.js"));
 
 var _IndexedDBStore = _interopRequireDefault(require("../Stores/IndexedDBStore.js"));
 
 var _ResourceProxy = _interopRequireDefault(require("../Proxy/ResourceProxy.js"));
 
 var _AsyncBag = _interopRequireDefault(require("../Core/AsyncBag.js"));
+
+var _IRecord = _interopRequireDefault(require("../Data/IRecord.js"));
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -8891,6 +9630,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     _this.resources = new _KeyList["default"]();
     _this.resourceCounter = 0;
     _this.templates = new _KeyList["default"]();
+    _this.wrapperTemplates = new _KeyList["default"]();
     _this.protocols = new _KeyList["default"]();
 
     _this._register("connected");
@@ -8927,7 +9667,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
       if (store != null || parent != null || res instanceof _IStore["default"]) {
         var rt = new _AsyncReply["default"]();
-        this.put(res, name, store, parent, null, 0, manager, attributes).then(function (ok) {
+        this.put(name, res, store, parent, null, 0, manager, attributes).then(function (ok) {
           return rt.trigger(res);
         }).error(function (ex) {
           return rt.triggerError(ex);
@@ -9023,7 +9763,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     }
   }, {
     key: "put",
-    value: function put(resource, name, store, parent) {
+    value: function put(name, resource, store, parent) {
       var customTemplate = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
       var age = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
       var manager = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
@@ -9102,11 +9842,19 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "putTemplate",
     value: function putTemplate(template) {
-      this.templates.add(template.classId.valueOf(), template);
+      var wrapper = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (wrapper) {
+        this.wrapperTemplates.add(template.classId.valueOf(), template);
+      } else {
+        this.templates.add(template.classId.valueOf(), template);
+      }
     }
   }, {
     key: "getTemplateByType",
     value: function getTemplateByType(type) {
+      if (type == _IResource["default"] || type == _IRecord["default"]) return null;
+      if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false;
       var className = type.prototype.constructor.name;
       if (className.startsWith("E_")) className = className.substr(2);
       className = type.template.namespace + "." + className; // loaded ?
@@ -9122,8 +9870,13 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "getTemplateByClassId",
     value: function getTemplateByClassId(classId) {
-      var template = this.templates.item(classId);
-      return new _AsyncReply["default"](template);
+      var wrapper = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (wrapper) {
+        return this.wrapperTemplates.item(classId);
+      } else {
+        return this.templates.item(classId);
+      }
     }
   }, {
     key: "getTemplateByClassName",
@@ -9277,7 +10030,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/KeyList.js":16,"../Net/IIP/DistributedConnection.js":22,"../Proxy/ResourceProxy.js":40,"../Resource/Instance.js":44,"../Resource/Template/ResourceTemplate.js":50,"../Stores/IndexedDBStore.js":62,"../Stores/MemoryStore.js":63,"./IResource.js":42,"./IStore.js":43}],52:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/IRecord.js":16,"../Data/KeyList.js":17,"../Net/IIP/DistributedConnection.js":25,"../Proxy/ResourceProxy.js":43,"../Resource/Instance.js":47,"../Resource/Template/ResourceTemplate.js":54,"../Stores/IndexedDBStore.js":68,"../Stores/MemoryStore.js":69,"./IResource.js":45,"./IStore.js":46}],58:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9340,7 +10093,7 @@ var Authentication = /*#__PURE__*/function () {
 
 exports["default"] = Authentication;
 
-},{}],53:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9355,7 +10108,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],54:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9371,7 +10124,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],55:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -9419,7 +10172,7 @@ var ClientAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = ClientAuthentication;
 
-},{"./Authentication.js":52,"./AuthenticationType.js":54}],56:[function(require,module,exports){
+},{"./Authentication.js":58,"./AuthenticationType.js":60}],62:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -9467,7 +10220,7 @@ var HostAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = HostAuthentication;
 
-},{"./Authentication.js":52,"./AuthenticationType.js":54}],57:[function(require,module,exports){
+},{"./Authentication.js":58,"./AuthenticationType.js":60}],63:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9514,7 +10267,7 @@ var Session = function Session(localAuthentication, remoteAuthentication) {
 
 exports["default"] = Session;
 
-},{}],58:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9650,7 +10403,7 @@ var SHA256 = /*#__PURE__*/function () {
 
 exports["default"] = SHA256;
 
-},{"../../Data/DataConverter.js":13}],59:[function(require,module,exports){
+},{"../../Data/DataConverter.js":13}],65:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9697,11 +10450,12 @@ var _default = // ActionType =
   AddChild: 10,
   RemoveChild: 11,
   Rename: 12,
-  ReceiveEvent: 13
+  ReceiveEvent: 13,
+  ViewTemplate: 14
 };
 exports["default"] = _default;
 
-},{}],60:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9769,7 +10523,7 @@ var IPermissionsManager = /*#__PURE__*/function () {
 
 exports["default"] = IPermissionsManager;
 
-},{}],61:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9809,7 +10563,7 @@ var _default = //Ruling =
 };
 exports["default"] = _default;
 
-},{}],62:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -10019,7 +10773,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
         self.resources.set(doc.id, resource);
         resource._id = doc.id;
 
-        _Warehouse["default"].put(resource, doc.name, self, null, null, null, null).then(function (ok) {
+        _Warehouse["default"].put(doc.name, resource, self, null, null, null, null).then(function (ok) {
           self.parse(doc.attributes).then(function (attributes) {
             resource.instance.setAttributes(attributes); // Apply store managers
 
@@ -10220,7 +10974,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = IndexedDBStore;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/ErrorType.js":5,"../Core/ExceptionCode.js":6,"../Data/Codec.js":12,"../Data/DataType.js":14,"../Resource/IResource.js":42,"../Resource/IStore.js":43,"../Resource/Warehouse.js":51}],63:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/ErrorType.js":5,"../Core/ExceptionCode.js":6,"../Data/Codec.js":12,"../Data/DataType.js":14,"../Resource/IResource.js":45,"../Resource/IStore.js":46,"../Resource/Warehouse.js":57}],69:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10335,7 +11089,7 @@ var MemoryStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = MemoryStore;
 
-},{"../Core/AsyncReply.js":4,"../Resource/IStore.js":43}],64:[function(require,module,exports){
+},{"../Core/AsyncReply.js":4,"../Resource/IStore.js":46}],70:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -10385,4 +11139,4 @@ var _default = _Warehouse["default"];
 exports["default"] = _default;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Data/Structure.js":19,"./Net/IIP/DistributedConnection.js":22,"./Net/IIP/DistributedResource.js":24,"./Proxy/ResourceProxy.js":40,"./Resource/IResource.js":42,"./Resource/Warehouse.js":51,"./Stores/IndexedDBStore.js":62,"./Stores/MemoryStore.js":63}]},{},[64]);
+},{"./Data/Structure.js":22,"./Net/IIP/DistributedConnection.js":25,"./Net/IIP/DistributedResource.js":27,"./Proxy/ResourceProxy.js":43,"./Resource/IResource.js":45,"./Resource/Warehouse.js":57,"./Stores/IndexedDBStore.js":68,"./Stores/MemoryStore.js":69}]},{},[70]);

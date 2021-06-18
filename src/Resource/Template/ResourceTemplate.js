@@ -29,6 +29,9 @@ import SHA256 from '../../Security/Integrity/SHA256.js';
 import {DC, BL} from '../../Data/DataConverter.js';
 import ArgumentTemplate from './ArgumentTemplate.js';
 import TemplateDataType from "./TemplateDataType.js";
+import IResource from '../IResource.js';
+import IRecord from '../../Data/IRecord.js';
+import TemplateType from './TemplateType.js'
 
 export default class ResourceTemplate {
 
@@ -203,7 +206,6 @@ export default class ResourceTemplate {
 
     constructor(type) {
 
-        //@TODO: check if the type is IResource
 
         this.properties = [];
         this.events = [];
@@ -212,6 +214,13 @@ export default class ResourceTemplate {
 
         if (type === undefined)
             return;
+            
+        if (type.prototype instanceof IRecord)
+            this.templateType = TemplateType.Record;
+        else if (type.prototype instanceof IResource)
+            this.templateType = TemplateType.Resource;
+        else
+            throw new Error("Type is neither a resource nor a record.");
 
         this.resourceType = type;
 
@@ -239,41 +248,49 @@ export default class ResourceTemplate {
                 this.properties.push(pt);
             }
 
-        if (template.events != null)
-            for (var i = 0; i < template.events.length; i++) {
+        if (this.templateType == TemplateType.Resource)
+        {
 
-                // [name, type, {listenable: true/false, help: ""}]
-                var ei = template.events[i];
-                var et = new EventTemplate();
-                et.name = ei[0];
-                et.index = i;
-                et.argumentType = TemplateDataType.fromType(ei[1]),
-                et.expansion = ei[2]?.help;
-                et.listenable = ei[2]?.listenable;
-                et.eventInfo = ei;
-                this.events.push(et);
+            if (template.events != null)
+            {
+                for (var i = 0; i < template.events.length; i++) {
+
+                    // [name, type, {listenable: true/false, help: ""}]
+                    var ei = template.events[i];
+                    var et = new EventTemplate();
+                    et.name = ei[0];
+                    et.index = i;
+                    et.argumentType = TemplateDataType.fromType(ei[1]),
+                    et.expansion = ei[2]?.help;
+                    et.listenable = ei[2]?.listenable;
+                    et.eventInfo = ei;
+                    this.events.push(et);
+                }
             }
 
-        if (template.functions != null)
-            for (var i = 0; i < template.functions.length; i++) {
+            if (template.functions != null)
+            {
+                for (var i = 0; i < template.functions.length; i++) {
 
-                var fi = template.functions[i];
+                    var fi = template.functions[i];
 
-            // [name, {param1: type, param2: int}, returnType, "Description"]
-                var ft = new FunctionTemplate();
-                ft.name = fi[0];
-                ft.index = i;
-                ft.returnType = TemplateDataType.fromType(fi[2]);
-                ft.expansion = fi[3];
-                ft.arguments = [];
+                // [name, {param1: type, param2: int}, returnType, "Description"]
+                    var ft = new FunctionTemplate();
+                    ft.name = fi[0];
+                    ft.index = i;
+                    ft.returnType = TemplateDataType.fromType(fi[2]);
+                    ft.expansion = fi[3];
+                    ft.arguments = [];
 
-                for(var arg in fi[1])
-                    ft.arguments.push(new ArgumentTemplate(arg, TemplateDataType.fromType(fi[1][arg])))
+                    for(var arg in fi[1])
+                        ft.arguments.push(new ArgumentTemplate(arg, TemplateDataType.fromType(fi[1][arg])))
 
-                ft.methodInfo = fi;
+                    ft.methodInfo = fi;
 
-                this.functions.push(ft);
+                    this.functions.push(ft);
+                }
             }
+        }
 
 
         // append signals
@@ -289,7 +306,8 @@ export default class ResourceTemplate {
         // bake it binarily
         var b = BL();
         var cls = DC.stringToBytes(this.className);
-        b.addUint8Array(this.classId.value)
+        b.addUint8(this.templateType)
+            .addUint8Array(this.classId.value)
             .addUint8(cls.length)
             .addUint8Array(cls)
             .addUint32(template.version)
@@ -340,6 +358,8 @@ export default class ResourceTemplate {
 
         var od = new ResourceTemplate();
         od.content = data.clip(offset, contentLength);
+
+        od.templateType = data.getUint8(offset++);
 
         od.classId = data.getGuid(offset);
         offset += 16;

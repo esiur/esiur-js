@@ -27,7 +27,7 @@
 "use strict";  
 
 import DataType from './DataType.js';
-import ResourceComparisonResult from './ResourceComparisionResult.js';
+import ResourceComparisonResult from './ResourceComparisonResult.js';
 import StructureComparisonResult from './StructureComparisonResult.js';
 
 import AsyncBag from '../Core/AsyncBag.js';
@@ -39,6 +39,9 @@ import BinaryList from './BinaryList.js';
 import DistributedPropertyContext from '../Net/IIP/DistributedPropertyContext.js';
 import DistributedResource from '../Net/IIP/DistributedResource.js'
 import IResource from '../Resource/IResource.js';
+import RecordComparisonResult from './RecordComparisonResult.js';
+import IRecord from './IRecord.js';
+import Record from './Record.js';
 
 export default class Codec {
 
@@ -132,6 +135,9 @@ export default class Codec {
 
                 case DataType.Structure:
                     return Codec.parseStructureArray(data, offset, contentLength, connection);
+
+                case DataType.Record:
+                    return Codec.parseRecordArray(data, offset, contentLength, connection);
             }
         }
         else {
@@ -192,6 +198,10 @@ export default class Codec {
 
                 case DataType.Structure:
                     return Codec.parseStructure(data, offset, contentLength, connection);
+
+                case DataType.Record:
+                    return Codec.parseRecord(data, offset, contentLength, connection);
+
             }
         }
 
@@ -582,12 +592,20 @@ export default class Codec {
                 rt.addUint8Array(Codec.composeVarArray(value, connection, true));
                 break;
 
+            case DataType.Record:
+                rt.addUint8Array(Codec.composeRecord(value, connection, true, true));
+                break;
+
             case DataType.ResourceArray:
                 rt.addUint8Array(Codec.composeResourceArray(value, connection, true));
                 break;
 
             case DataType.StructureArray:
                 rt.addUint8Array(Codec.composeStructureArray(value, connection, true));
+                break;
+
+            case DataType.RecordArray:
+                rt.addUint8Array(Codec.composeRecordArray(value, connection, true));
                 break;
 
             default:
@@ -661,6 +679,206 @@ export default class Codec {
 
         if (prependLength)
             rt.addUint32(rt.length, 0);
+
+        return rt.toArray();
+    }
+
+    
+    /// <summary>
+    /// Compare two records
+    /// </summary>
+    /// <param name="initial">Initial record to compare with</param>
+    /// <param name="next">Next record to compare with the initial</param>
+    /// <param name="connection">DistributedConnection is required in case a structure holds items at the other end</param>
+    static compareRecords(initial, next)
+    {
+        if (next == null)
+            return RecordComparisonResult.Null;
+
+        if (initial == null)
+            return RecordComparisonResult.Record;
+
+        if (next == initial)
+            return RecordComparisonResult.Same;
+
+        if (next.constructor === initial.constructor)
+            return RecordComparisonResult.RecordSameType;
+
+        return RecordComparisonResult.Record;
+    }
+
+    static parseRecordArray(data, offset, length, connection)
+    {
+
+        var reply = new AsyncBag();
+        if (length == 0)
+        {
+            reply.seal();
+            return reply;
+        }
+
+        var end = offset + length;
+
+        var result = data.getUint8(offset++);
+
+        var previous = null;
+        var classId = null;
+
+        if (result == RecordComparisonResult.Null)
+            previous = new AsyncReply(null);
+        else if (result == RecordComparisonResult.Record)
+        {
+            var cs = data.getUint32(offset);
+            var recordLength = cs - 16;
+            offset += 4;
+            classId = data.getGuid(offset);
+            offset += 16;
+            previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+            offset += recordLength;
+        }
+
+        reply.Add(previous);
+
+
+        while (offset < end)
+        {
+            result = data.getUint8(offset++);
+
+            if (result == RecordComparisonResult.Null)
+                previous = new AsyncReply(null);
+            else if (result == RecordComparisonResult.Record)
+            {
+                var cs = data.getUint32(offset);
+                var recordLength = cs - 16;
+                offset += 4;
+                classId = data.getGuid(offset);
+                offset += 16;
+                previous = Codec.parseRecord(data, offset, recordLength, connection, classId); 
+                offset += recordLength;
+            }
+            else if (result == RecordComparisonResult.RecordSameType)
+            {
+                var cs = data.getUint32(offset);
+                offset += 4;
+                previous = Codec.parseRecord(data, offset, cs, connection, classId);
+                offset += cs;
+            }
+            else if (result == RecordComparisonResult.Same)
+            {
+                // do nothing
+            }
+
+            reply.add(previous);
+        }
+
+        reply.seal();
+        return reply;
+    }
+
+    static parseRecord(data, offset, length, connection, classId = null)
+    {
+        var reply = new AsyncReply();
+
+        if (classId == null)
+        {
+            classId = data.getGuid(offset);
+
+            offset += 16;
+            length -= 16;
+        }
+
+        var template = Warehouse.getTemplateByClassId(classId);
+
+        if (template != null)
+        {
+            Codec.parseVarArray(data, offset, length, connection).then(ar =>
+            {
+                if (template.resourceType != null)
+                {
+                    var record = new template.resourceType();
+                    for (var i = 0; i < template.properties.length; i++)
+                        record[template.properties[i].name] = ar[i];
+
+                    reply.trigger(record);
+                }
+                else
+                {
+                    var record = new Record();
+
+                    for (var i = 0; i < template.properties.Length; i++)
+                        record[template.properties[i].name] = ar[i];
+
+                    reply.trigger(record);
+                }
+            });
+        }
+        else
+        {
+            connection.getTemplate(classId).then(tmp => {
+                Codec.parseVarArray(data, offset, length, connection).then(ar =>
+                {
+                    var record = new Record();
+
+                    for (var i = 0; i < tmp.properties.length; i++)
+                        record[tmp.properties[i].name] = ar[i];
+
+                    reply.trigger(record);
+                });
+            }).error(x=>reply.triggerError(x));
+        }
+
+        return reply;
+    }
+
+    static composeRecord(record, connection, includeClassId = true, prependLength = false)
+    {
+        var rt = new BinaryList();
+
+        var template = Warehouse.getTemplateByType(record.constructor);
+
+        if (includeClassId)
+            rt.addGuid(template.classId);
+
+        for(var i = 0; i < template.properties.length; i++)
+        {
+            var value = record[template.properties[i].name];
+            rt.addUint8Array(Codec.compose(value, connection));
+        }
+
+        if (prependLength)
+            rt.insertInt32(0, rt.length);
+
+        return rt.toArray();
+    }
+
+    static composeRecordArray(records, connection, prependLength = false)
+    {
+        if (records == null || records?.length == 0)
+            return prependLength ? new DC(4) : new DC(0);
+
+        var rt = new BinaryList();
+        var comparsion = Codec.compareRecords(null, records[0]);
+
+        rt.addUint8(comparsion);
+
+
+        if (comparsion == RecordComparisonResult.Record)
+            rt.addUint8Array(Codec.composeRecord(records[0], connection, true, true));
+
+        for (var i = 1; i < records.length; i++)
+        {
+            comparsion = Codec.compareRecords(records[i - 1], records[i]);
+            rt.addUint8(comparsion);
+
+            if (comparsion == RecordComparisonResult.Record)
+                rt.addUint8Array(Codec.composeRecord(records[i], connection, true, true));
+            else if (comparsion == RecordComparisonResult.RecordSameType)
+                rt.addUint8Array(Codec.composeRecord(records[i], connection, false, true));
+        }
+
+        if (prependLength)
+            rt.insertInt32(0, rt.length);
+
 
         return rt.toArray();
     }
@@ -854,6 +1072,9 @@ static getDataType(value, connection) {
                 else if (value instanceof Structure) {
                     return DataType.Structure;
                 }
+                else if (value instanceof IRecord){
+                    return DataType.Record;
+                }
                 else {
                     return DataType.Void
                 }
@@ -900,7 +1121,7 @@ static getDataType(value, connection) {
             {
                 var cs = data.getUint32(offset);
                 offset += 4;          
-                previous = this.parseStructure(data, offset, cs, connection, metadata);
+                previous = Codec.parseStructure(data, offset, cs, connection, metadata);
                 offset += cs;
             }
  
@@ -917,21 +1138,21 @@ static getDataType(value, connection) {
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;
-                    previous = this.parseStructure(data, offset, cs, connection, metadata);
+                    previous = Codec.parseStructure(data, offset, cs, connection, metadata);
                     offset += cs;
                 }
                 else if (result == StructureComparisonResult.StructureSameKeys)
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;
-                    previous = this.parseStructure(data, offset, cs, connection, metadata, metadata.keys);
+                    previous = Codec.parseStructure(data, offset, cs, connection, metadata, metadata.keys);
                     offset += cs;
                 }
                 else if (result == StructureComparisonResult.StructureSameTypes)
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;
-                    previous = this.parseStructure(data, offset, cs, connection, metadata, metadata.keys, metadata.types);
+                    previous = Codec.parseStructure(data, offset, cs, connection, metadata, metadata.keys, metadata.types);
                     offset += cs;
                 }
 

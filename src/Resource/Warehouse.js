@@ -39,6 +39,7 @@ import IResource, { ResourceTrigger } from './IResource.js';
 import IndexedDBStore from '../Stores/IndexedDBStore.js';
 import ResourceProxy from '../Proxy/ResourceProxy.js';
 import AsyncBag from '../Core/AsyncBag.js';
+import IRecord from '../Data/IRecord.js';
 
 
 export class WH extends IEventHandler
@@ -51,6 +52,7 @@ export class WH extends IEventHandler
         this.resources = new KeyList();
         this.resourceCounter = 0;
         this.templates = new KeyList();
+        this.wrapperTemplates = new KeyList();
         this.protocols = new KeyList();
         this._register("connected");
         this._register("disconnected");
@@ -289,18 +291,25 @@ export class WH extends IEventHandler
             value.instance.parents.add(value);
     }
 
-    putTemplate(template)
+    putTemplate(template, wrapper = false)
     {
-        this.templates.add(template.classId.valueOf(), template);
+        if (wrapper) {
+            this.wrapperTemplates.add(template.classId.valueOf(), template);
+        }
+        else {
+            this.templates.add(template.classId.valueOf(), template);
+        }
     }
 
     getTemplateByType(type)
     {
     
-        if (type == IResource)
+        if (type == IResource 
+            || type == IRecord)
             return null;
 
-        if (!(type.prototype instanceof IResource))
+        if (!(type.prototype instanceof IResource 
+            || type.prototype instanceof IRecord))
             return false;
             
         let className = type.prototype.constructor.name;
@@ -321,10 +330,14 @@ export class WH extends IEventHandler
         return template;
     }
 
-    getTemplateByClassId(classId)
+    getTemplateByClassId(classId, wrapper = false)
     {
-        var template = this.templates.item(classId);
-        return template;
+        if (wrapper) {
+            return this.wrapperTemplates.item(classId);
+        }
+        else {
+            return this.templates.item(classId);
+        }
     }
 
     getTemplateByClassName(className)

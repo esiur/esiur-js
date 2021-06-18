@@ -27,6 +27,7 @@ import DataType from "../../Data/DataType.js";
 import Structure from '../../Data/Structure.js';
 import IResource from '../IResource.js';
 import ResourceTemplate from './ResourceTemplate.js';
+import IRecord from '../../Data/IRecord.js';
 
 export default class TemplateDataType
 {
@@ -83,6 +84,11 @@ export default class TemplateDataType
             dataType = DataType.Resource;
             typeGuid = ResourceTemplate.getTypeGuid(type);
         }
+        else if (type?.prototype instanceof IRecord)
+        {
+            dataType = DataType.Record;
+            typeGuid = ResourceTemplate.getTypeGuid(type);
+        }
 
         if (isArray)
             dataType |= DataType.VarArray;
@@ -96,7 +102,9 @@ export default class TemplateDataType
     compose()
     {
         if (this.type == DataType.Resource ||
-                this.type == DataType.ResourceArray)
+            this.type == DataType.ResourceArray || 
+            this.type == DataType.Record || 
+            this.type == DataType.RecordArray)
         {
             return BL()
                 .addUint8(this.type)
@@ -116,7 +124,9 @@ export default class TemplateDataType
     {
         var type = data.getUint8(offset++);
         if (type == DataType.Resource ||
-            type == DataType.ResourceArray)
+            type == DataType.ResourceArray || 
+            type == DataType.Record || 
+            type == DataType.RecordArray)
         {
             var guid = data.getGuid(offset);
             return {size: 17, value: new TemplateDataType(type, guid)};

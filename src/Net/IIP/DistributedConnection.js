@@ -969,8 +969,6 @@ export default class DistributedConnection extends IStore {
 
     trigger(trigger) {
 
-        console.log(this, trigger);
-
         if (trigger == ResourceTrigger.Open) {
             if (this.server != null)
                 return new AsyncReply(true);
@@ -994,9 +992,9 @@ export default class DistributedConnection extends IStore {
 
             
             var host = this.instance.name.split(':');
-
+            
             var address = host[0];
-            var port = parseInt(host[1]);
+            var port = host.length > 1 ? parseInt(host[1]) : 10518;
 
             if (username != null 
                 && password != null)
