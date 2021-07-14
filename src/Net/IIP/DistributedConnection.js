@@ -58,7 +58,7 @@ import ProgressType from "../../Core/ProgressType.js";
 import ExceptionCode from "../../Core/ExceptionCode.js";
 
 import DistributedResource from './DistributedResource.js';
-import ResourceTemplate from '../../Resource/Template/ResourceTemplate.js';
+import TypeTemplate from '../../Resource/Template/TypeTemplate.js';
 
 import DistributedResourceQueueItem from './DistributedResourceQueueItem.js';
 import DistributedResourceQueueItemType from './DistributedResourceQueueItemType.js';
@@ -74,6 +74,7 @@ import WSSocket from '../Sockets/WSSocket.js';
 import ClientAuthentication from "../../Security/Authority/ClientAuthentication.js";
 import HostAuthentication from "../../Security/Authority/HostAuthentication.js";
 import SocketState from "../Sockets/SocketState.js";
+import TemplateType from '../../Resource/Template/TemplateType.js';
 
 export default class DistributedConnection extends IStore {
 
@@ -315,7 +316,7 @@ export default class DistributedConnection extends IStore {
                             case IIPPacketAction.TemplateFromClassName:
                             case IIPPacketAction.TemplateFromClassId:
                             case IIPPacketAction.TemplateFromResourceId:
-                                this.IIPReply(packet.callbackId, ResourceTemplate.parse(packet.content));
+                                this.IIPReply(packet.callbackId, TypeTemplate.parse(packet.content));
                                 break;
 
                             case IIPPacketAction.QueryLink:
@@ -1761,7 +1762,7 @@ export default class DistributedConnection extends IStore {
                     var templates = [];
                     for (var i = 0; i < list.length; i++)
                         templates = templates
-                                    .concat(ResourceTemplate.getDependencies(list[i].instance.template)
+                                    .concat(TypeTemplate.getDependencies(list[i].instance.template)
                                     .filter(x => !templates.includes(x)));
 
                     for(var i = 0; i < templates.length; i++) {
@@ -1788,17 +1789,16 @@ export default class DistributedConnection extends IStore {
 
         var self = this;
 
-        Warehouse.getTemplateByClassName(className).then(function (t) {
-            if (t != null)
-                self.sendReply(IIPPacketAction.TemplateFromClassName, callback)
-                    .addUint32(t.content.length)
-                    .addUint8Array(t.content)
-                    .done();
-            else {
-                // reply failed
-                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
-            }
-        });
+        var t = Warehouse.getTemplateByClassName(className);
+        if (t != null) {
+            self.sendReply(IIPPacketAction.TemplateFromClassName, callback)
+                .addUint32(t.content.length)
+                .addUint8Array(t.content)
+                .done();
+        } else {
+            // reply failed
+            self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+        }
     }
 
     IIPRequestTemplateFromClassId(callback, classId) {
@@ -1972,7 +1972,7 @@ export default class DistributedConnection extends IStore {
 
                             if (fi instanceof Function) {
 
-                                var pi = ResourceTemplate.getFunctionParameters(fi);
+                                var pi = TypeTemplate.getFunctionParameters(fi);
                                 var args = new Array(pi.length);
 
                                 for (var i = 0; i < pi.length; i++) {
@@ -2465,7 +2465,7 @@ export default class DistributedConnection extends IStore {
             {
                 var cs = data.getUint32(offset);
                 offset += 4;
-                templates.push(ResourceTemplate.parse(data, offset, cs));
+                templates.push(TypeTemplate.parse(data, offset, cs));
                 offset += cs;
             }
 
@@ -2512,8 +2512,8 @@ export default class DistributedConnection extends IStore {
 
                 if (resource == null)
                 {
-                    var template = Warehouse.getTemplateByClassId(rt[0]);
-                    if (template?.resourceType != null)
+                    var template = Warehouse.getTemplateByClassId(rt[0], TemplateType.Wrapper);
+                    if (template?.definedType != null)
                         dr = new template.getDependencies(self, id, rt[1], rt[2]);
                     else
                         dr = new DistributedResource(self, id, rt[1], rt[2]);

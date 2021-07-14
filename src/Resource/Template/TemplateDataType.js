@@ -26,7 +26,7 @@ import {DC, BL} from '../../Data/DataConverter.js';
 import DataType from "../../Data/DataType.js";
 import Structure from '../../Data/Structure.js';
 import IResource from '../IResource.js';
-import ResourceTemplate from './ResourceTemplate.js';
+import TypeTemplate from './TypeTemplate.js';
 import IRecord from '../../Data/IRecord.js';
 
 export default class TemplateDataType
@@ -82,12 +82,12 @@ export default class TemplateDataType
         else if (type?.prototype instanceof IResource)
         {
             dataType = DataType.Resource;
-            typeGuid = ResourceTemplate.getTypeGuid(type);
+            typeGuid = TypeTemplate.getTypeGuid(type);
         }
         else if (type?.prototype instanceof IRecord)
         {
             dataType = DataType.Record;
-            typeGuid = ResourceTemplate.getTypeGuid(type);
+            typeGuid = TypeTemplate.getTypeGuid(type);
         }
 
         if (isArray)

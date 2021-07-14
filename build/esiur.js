@@ -1945,22 +1945,38 @@ var Codec = /*#__PURE__*/function () {
       }
 
       var end = offset + length;
-      var result = data.getUint8(offset++);
-      var previous = null;
-      var classId = null;
-      if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
-        var cs = data.getUint32(offset);
-        var recordLength = cs - 16;
-        offset += 4;
-        classId = data.getGuid(offset);
-        offset += 16;
-        previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
-        offset += recordLength;
-      }
-      reply.Add(previous);
+      var isTyped = (data.getUint8(offset) & 0x10) == 0x10;
+      var result = data.getUint8(offset++) & 0xF;
 
-      while (offset < end) {
-        result = data.getUint8(offset++);
+      if (isTyped) {
+        var classId = data.getGuid(offset);
+        offset += 16;
+        var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
+        reply.arrayType = template.definedType;
+        var previous = null;
+        if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record || result == _RecordComparisonResult["default"].RecordSameType) {
+          var cs = data.getUint32(offset);
+          var recordLength = cs;
+          offset += 4;
+          previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+          offset += recordLength;
+        }
+        reply.add(previous);
+
+        while (offset < end) {
+          result = data.getUint8(offset++);
+          if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record || result == _RecordComparisonResult["default"].RecordSameType) {
+            var cs = data.getUint32(offset);
+            offset += 4;
+            previous = Codec.parseRecord(data, offset, cs, connection, classId);
+            offset += cs;
+          } else if (result == _RecordComparisonResult["default"].Same) {// do nothing
+          }
+          reply.add(previous);
+        }
+      } else {
+        var previous = null;
+        var classId = null;
         if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
           var cs = data.getUint32(offset);
           var recordLength = cs - 16;
@@ -1969,18 +1985,84 @@ var Codec = /*#__PURE__*/function () {
           offset += 16;
           previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
           offset += recordLength;
-        } else if (result == _RecordComparisonResult["default"].RecordSameType) {
-          var cs = data.getUint32(offset);
-          offset += 4;
-          previous = Codec.parseRecord(data, offset, cs, connection, classId);
-          offset += cs;
-        } else if (result == _RecordComparisonResult["default"].Same) {// do nothing
         }
-        reply.add(previous);
+        reply.Add(previous);
+
+        while (offset < end) {
+          result = data.getUint8(offset++);
+          if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
+            var cs = data.getUint32(offset);
+            var recordLength = cs - 16;
+            offset += 4;
+            classId = data.getGuid(offset);
+            offset += 16;
+            previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+            offset += recordLength;
+          } else if (result == _RecordComparisonResult["default"].RecordSameType) {
+            var cs = data.getUint32(offset);
+            offset += 4;
+            previous = ParseRecord(data, offset, cs, connection, classId);
+            offset += cs;
+          } else if (result == _RecordComparisonResult["default"].Same) {// do nothing
+          }
+          reply.add(previous);
+        }
       }
 
-      reply.seal();
-      return reply;
+      reply.Seal();
+      return reply; // var reply = new AsyncBag();
+      // if (length == 0)
+      // {
+      //     reply.seal();
+      //     return reply;
+      // }
+      // var end = offset + length;
+      // var result = data.getUint8(offset++);
+      // var previous = null;
+      // var classId = null;
+      // if (result == RecordComparisonResult.Null)
+      //     previous = new AsyncReply(null);
+      // else if (result == RecordComparisonResult.Record)
+      // {
+      //     var cs = data.getUint32(offset);
+      //     var recordLength = cs - 16;
+      //     offset += 4;
+      //     classId = data.getGuid(offset);
+      //     offset += 16;
+      //     previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+      //     offset += recordLength;
+      // }
+      // reply.Add(previous);
+      // while (offset < end)
+      // {
+      //     result = data.getUint8(offset++);
+      //     if (result == RecordComparisonResult.Null)
+      //         previous = new AsyncReply(null);
+      //     else if (result == RecordComparisonResult.Record)
+      //     {
+      //         var cs = data.getUint32(offset);
+      //         var recordLength = cs - 16;
+      //         offset += 4;
+      //         classId = data.getGuid(offset);
+      //         offset += 16;
+      //         previous = Codec.parseRecord(data, offset, recordLength, connection, classId); 
+      //         offset += recordLength;
+      //     }
+      //     else if (result == RecordComparisonResult.RecordSameType)
+      //     {
+      //         var cs = data.getUint32(offset);
+      //         offset += 4;
+      //         previous = Codec.parseRecord(data, offset, cs, connection, classId);
+      //         offset += cs;
+      //     }
+      //     else if (result == RecordComparisonResult.Same)
+      //     {
+      //         // do nothing
+      //     }
+      //     reply.add(previous);
+      // }
+      // reply.seal();
+      // return reply;
     }
   }, {
     key: "parseRecord",
@@ -1994,12 +2076,12 @@ var Codec = /*#__PURE__*/function () {
         length -= 16;
       }
 
-      var template = Warehouse.getTemplateByClassId(classId);
+      var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
 
       if (template != null) {
         Codec.parseVarArray(data, offset, length, connection).then(function (ar) {
-          if (template.resourceType != null) {
-            var record = new template.resourceType();
+          if (template.definedType != null) {
+            var record = new template.definedType();
 
             for (var i = 0; i < template.properties.length; i++) {
               record[template.properties[i].name] = ar[i];
@@ -3747,7 +3829,7 @@ var _ExceptionCode = _interopRequireDefault(require("../../Core/ExceptionCode.js
 
 var _DistributedResource = _interopRequireDefault(require("./DistributedResource.js"));
 
-var _ResourceTemplate = _interopRequireDefault(require("../../Resource/Template/ResourceTemplate.js"));
+var _TypeTemplate = _interopRequireDefault(require("../../Resource/Template/TypeTemplate.js"));
 
 var _DistributedResourceQueueItem = _interopRequireDefault(require("./DistributedResourceQueueItem.js"));
 
@@ -3770,6 +3852,8 @@ var _ClientAuthentication = _interopRequireDefault(require("../../Security/Autho
 var _HostAuthentication = _interopRequireDefault(require("../../Security/Authority/HostAuthentication.js"));
 
 var _SocketState = _interopRequireDefault(require("../Sockets/SocketState.js"));
+
+var _TemplateType = _interopRequireDefault(require("../../Resource/Template/TemplateType.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -4074,7 +4158,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 case _IIPPacketAction["default"].TemplateFromClassName:
                 case _IIPPacketAction["default"].TemplateFromClassId:
                 case _IIPPacketAction["default"].TemplateFromResourceId:
-                  this.IIPReply(packet.callbackId, _ResourceTemplate["default"].parse(packet.content));
+                  this.IIPReply(packet.callbackId, _TypeTemplate["default"].parse(packet.content));
                   break;
 
                 case _IIPPacketAction["default"].QueryLink:
@@ -5151,7 +5235,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
             var templates = [];
 
             for (var i = 0; i < list.length; i++) {
-              templates = templates.concat(_ResourceTemplate["default"].getDependencies(list[i].instance.template).filter(function (x) {
+              templates = templates.concat(_TypeTemplate["default"].getDependencies(list[i].instance.template).filter(function (x) {
                 return !templates.includes(x);
               }));
             }
@@ -5173,12 +5257,14 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     value: function IIPRequestTemplateFromClassName(callback, className) {
       var self = this;
 
-      _Warehouse["default"].getTemplateByClassName(className).then(function (t) {
-        if (t != null) self.sendReply(_IIPPacketAction["default"].TemplateFromClassName, callback).addUint32(t.content.length).addUint8Array(t.content).done();else {
-          // reply failed
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
-        }
-      });
+      var t = _Warehouse["default"].getTemplateByClassName(className);
+
+      if (t != null) {
+        self.sendReply(_IIPPacketAction["default"].TemplateFromClassName, callback).addUint32(t.content.length).addUint8Array(t.content).done();
+      } else {
+        // reply failed
+        self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
+      }
     }
   }, {
     key: "IIPRequestTemplateFromClassId",
@@ -5324,7 +5410,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 }
 
                 if (fi instanceof Function) {
-                  var pi = _ResourceTemplate["default"].getFunctionParameters(fi);
+                  var pi = _TypeTemplate["default"].getFunctionParameters(fi);
 
                   var args = new Array(pi.length);
 
@@ -5719,7 +5805,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         for (var offset = 0; offset < data.length;) {
           var cs = data.getUint32(offset);
           offset += 4;
-          templates.push(_ResourceTemplate["default"].parse(data, offset, cs));
+          templates.push(_TypeTemplate["default"].parse(data, offset, cs));
           offset += cs;
         }
 
@@ -5750,9 +5836,9 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         var dr;
 
         if (resource == null) {
-          var template = _Warehouse["default"].getTemplateByClassId(rt[0]);
+          var template = _Warehouse["default"].getTemplateByClassId(rt[0], _TemplateType["default"].Wrapper);
 
-          if ((template === null || template === void 0 ? void 0 : template.resourceType) != null) dr = new template.getDependencies(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
+          if ((template === null || template === void 0 ? void 0 : template.definedType) != null) dr = new template.getDependencies(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
         } else dr = resource; //let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
 
 
@@ -6100,7 +6186,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncException.js":2,"../../Core/AsyncQueue.js":3,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../../Core/ProgressType.js":9,"../../Data/Codec.js":12,"../../Data/DataConverter.js":13,"../../Data/KeyList.js":17,"../../Resource/IResource.js":45,"../../Resource/IStore.js":46,"../../Resource/Template/ResourceTemplate.js":54,"../../Resource/Warehouse.js":57,"../../Security/Authority/Authentication.js":58,"../../Security/Authority/AuthenticationMethod.js":59,"../../Security/Authority/AuthenticationType.js":60,"../../Security/Authority/ClientAuthentication.js":61,"../../Security/Authority/HostAuthentication.js":62,"../../Security/Authority/Session.js":63,"../../Security/Integrity/SHA256.js":64,"../../Security/Permissions/ActionType.js":65,"../../Security/Permissions/Ruling.js":67,"../NetworkBuffer.js":30,"../Packets//IIPPacketReport.js":38,"../Packets/IIPAuthPacket.js":31,"../Packets/IIPAuthPacketAction.js":32,"../Packets/IIPAuthPacketCommand.js":33,"../Packets/IIPPacket.js":34,"../Packets/IIPPacketAction.js":35,"../Packets/IIPPacketCommand.js":36,"../Packets/IIPPacketEvent.js":37,"../SendList.js":39,"../Sockets/SocketState.js":41,"../Sockets/WSSocket.js":42,"./DistributedPropertyContext.js":26,"./DistributedResource.js":27,"./DistributedResourceQueueItem.js":28,"./DistributedResourceQueueItemType.js":29}],26:[function(require,module,exports){
+},{"../../Core/AsyncException.js":2,"../../Core/AsyncQueue.js":3,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../../Core/ProgressType.js":9,"../../Data/Codec.js":12,"../../Data/DataConverter.js":13,"../../Data/KeyList.js":17,"../../Resource/IResource.js":45,"../../Resource/IStore.js":46,"../../Resource/Template/TemplateType.js":55,"../../Resource/Template/TypeTemplate.js":56,"../../Resource/Warehouse.js":57,"../../Security/Authority/Authentication.js":58,"../../Security/Authority/AuthenticationMethod.js":59,"../../Security/Authority/AuthenticationType.js":60,"../../Security/Authority/ClientAuthentication.js":61,"../../Security/Authority/HostAuthentication.js":62,"../../Security/Authority/Session.js":63,"../../Security/Integrity/SHA256.js":64,"../../Security/Permissions/ActionType.js":65,"../../Security/Permissions/Ruling.js":67,"../NetworkBuffer.js":30,"../Packets//IIPPacketReport.js":38,"../Packets/IIPAuthPacket.js":31,"../Packets/IIPAuthPacketAction.js":32,"../Packets/IIPAuthPacketCommand.js":33,"../Packets/IIPPacket.js":34,"../Packets/IIPPacketAction.js":35,"../Packets/IIPPacketCommand.js":36,"../Packets/IIPPacketEvent.js":37,"../SendList.js":39,"../Sockets/SocketState.js":41,"../Sockets/WSSocket.js":42,"./DistributedPropertyContext.js":26,"./DistributedResource.js":27,"./DistributedResourceQueueItem.js":28,"./DistributedResourceQueueItemType.js":29}],26:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -8490,7 +8576,7 @@ var ArgumentTemplate = /*#__PURE__*/function () {
 
 exports["default"] = ArgumentTemplate;
 
-},{"../../Data/BinaryList.js":11,"../../Data/DataConverter.js":13,"./TemplateDataType.js":55}],49:[function(require,module,exports){
+},{"../../Data/BinaryList.js":11,"../../Data/DataConverter.js":13,"./TemplateDataType.js":54}],49:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8924,6 +9010,140 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _DataConverter = require("../../Data/DataConverter.js");
+
+var _DataType = _interopRequireDefault(require("../../Data/DataType.js"));
+
+var _Structure = _interopRequireDefault(require("../../Data/Structure.js"));
+
+var _IResource = _interopRequireDefault(require("../IResource.js"));
+
+var _TypeTemplate = _interopRequireDefault(require("./TypeTemplate.js"));
+
+var _IRecord = _interopRequireDefault(require("../../Data/IRecord.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var TemplateDataType = /*#__PURE__*/function () {
+  function TemplateDataType(type, guid) {
+    _classCallCheck(this, TemplateDataType);
+
+    this.type = type;
+    this.typeGuid = guid;
+  }
+
+  _createClass(TemplateDataType, [{
+    key: "typeTemplate",
+    get: function get() {
+      return this.typeGuid == null ? null : Warehouse.getTemplateByType(this.typeGuid);
+    } //@TODO: implement this
+
+  }, {
+    key: "compose",
+    value: function compose() {
+      if (this.type == _DataType["default"].Resource || this.type == _DataType["default"].ResourceArray || this.type == _DataType["default"].Record || this.type == _DataType["default"].RecordArray) {
+        return (0, _DataConverter.BL)().addUint8(this.type).addUint8Array(this.typeGuid).toDC();
+      } else return _DataConverter.DC.from([this.type]);
+    }
+  }], [{
+    key: "fromType",
+    value: function fromType(type) {
+      var _type, _type2;
+
+      var isArray = type instanceof Array;
+      if (isArray) type = type[0];
+      var dataType = 0;
+      var typeGuid = null;
+      if (!isNaN(type)) dataType = type;else if (type == _Structure["default"]) dataType = _DataType["default"].Structure;else if (typeof type == "string") {
+        var tIndex = this.typesDefinitions.indexOf(type);
+        dataType = tIndex > -1 ? tIndex : 0;
+      } else if (((_type = type) === null || _type === void 0 ? void 0 : _type.prototype) instanceof _IResource["default"]) {
+        dataType = _DataType["default"].Resource;
+        typeGuid = _TypeTemplate["default"].getTypeGuid(type);
+      } else if (((_type2 = type) === null || _type2 === void 0 ? void 0 : _type2.prototype) instanceof _IRecord["default"]) {
+        dataType = _DataType["default"].Record;
+        typeGuid = _TypeTemplate["default"].getTypeGuid(type);
+      }
+      if (isArray) dataType |= _DataType["default"].VarArray;
+      return new TemplateDataType(_DataType["default"].StructureArray);
+    }
+  }, {
+    key: "parse",
+    value: function parse(data, offset) {
+      var type = data.getUint8(offset++);
+
+      if (type == _DataType["default"].Resource || type == _DataType["default"].ResourceArray || type == _DataType["default"].Record || type == _DataType["default"].RecordArray) {
+        var guid = data.getGuid(offset);
+        return {
+          size: 17,
+          value: new TemplateDataType(type, guid)
+        };
+      } else return {
+        size: 1,
+        value: new TemplateDataType(type)
+      };
+    }
+  }]);
+
+  return TemplateDataType;
+}();
+
+exports["default"] = TemplateDataType;
+
+_defineProperty(TemplateDataType, "typesDefinitions", ["var", "bool", "sbyte", "byte", "char", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "date", "resource", "DistributedResource", "ResourceLink", "string", "structure"]);
+
+},{"../../Data/DataConverter.js":13,"../../Data/DataType.js":14,"../../Data/IRecord.js":16,"../../Data/Structure.js":22,"../IResource.js":45,"./TypeTemplate.js":56}],55:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var _default = {
+  Unspecified: 0,
+  Resource: 1,
+  Record: 2,
+  Wrapper: 3
+};
+exports["default"] = _default;
+
+},{}],56:[function(require,module,exports){
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
 var _FunctionTemplate = _interopRequireDefault(require("./FunctionTemplate.js"));
 
 var _PropertyTemplate = _interopRequireDefault(require("./PropertyTemplate.js"));
@@ -8952,9 +9172,9 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var ResourceTemplate = /*#__PURE__*/function () {
-  function ResourceTemplate(type) {
-    _classCallCheck(this, ResourceTemplate);
+var TypeTemplate = /*#__PURE__*/function () {
+  function TypeTemplate(type, addToWarehouse) {
+    _classCallCheck(this, TypeTemplate);
 
     this.properties = [];
     this.events = [];
@@ -8962,11 +9182,12 @@ var ResourceTemplate = /*#__PURE__*/function () {
     this.members = [];
     if (type === undefined) return;
     if (type.prototype instanceof _IRecord["default"]) this.templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IResource["default"]) this.templateType = _TemplateType["default"].Resource;else throw new Error("Type is neither a resource nor a record.");
-    this.resourceType = type;
+    this.definedType = type;
     var template = type.template; // set guid
 
     this.className = template.namespace + "." + type.prototype.constructor.name;
-    this.classId = _SHA["default"].compute(_DataConverter.DC.stringToBytes(this.className)).getGuid(0); //byte currentIndex = 0;
+    this.classId = _SHA["default"].compute(_DataConverter.DC.stringToBytes(this.className)).getGuid(0);
+    if (addToWarehouse) addToWarehouse.putTemplate(this); //byte currentIndex = 0;
 
     if (template.properties != null) for (var i = 0; i < template.properties.length; i++) {
       var _pi$, _pi$2, _pi$3;
@@ -9058,7 +9279,7 @@ var ResourceTemplate = /*#__PURE__*/function () {
     this.content = b.toArray();
   }
 
-  _createClass(ResourceTemplate, [{
+  _createClass(TypeTemplate, [{
     key: "getEventTemplateByName",
     value: function getEventTemplateByName(eventName) {
       for (var i = 0; i < this.events.length; i++) {
@@ -9142,7 +9363,7 @@ var ResourceTemplate = /*#__PURE__*/function () {
       var _getDependenciesFunc = null;
 
       _getDependenciesFunc = function getDependenciesFunc(tmp, bag) {
-        if (template.resourceType == null) return; // functions
+        if (template.definedType == null) return; // functions
 
         for (var i = 0; i < tmp.functions.length; i++) {
           f = tmp.functions[i];
@@ -9248,7 +9469,7 @@ var ResourceTemplate = /*#__PURE__*/function () {
       var ends = offset + contentLength;
       var oOffset = offset; // start parsing...
 
-      var od = new ResourceTemplate();
+      var od = new TypeTemplate();
       od.content = data.clip(offset, contentLength);
       od.templateType = data.getUint8(offset++);
       od.classId = data.getGuid(offset);
@@ -9389,144 +9610,12 @@ var ResourceTemplate = /*#__PURE__*/function () {
     }
   }]);
 
-  return ResourceTemplate;
+  return TypeTemplate;
 }();
 
-exports["default"] = ResourceTemplate;
+exports["default"] = TypeTemplate;
 
-},{"../../Data/DataConverter.js":13,"../../Data/IRecord.js":16,"../../Security/Integrity/SHA256.js":64,"../IResource.js":45,"./ArgumentTemplate.js":48,"./EventTemplate.js":49,"./FunctionTemplate.js":50,"./PropertyTemplate.js":53,"./TemplateDataType.js":55,"./TemplateType.js":56}],55:[function(require,module,exports){
-/*
-* Copyright (c) 2017 Ahmed Kh. Zamil
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _DataConverter = require("../../Data/DataConverter.js");
-
-var _DataType = _interopRequireDefault(require("../../Data/DataType.js"));
-
-var _Structure = _interopRequireDefault(require("../../Data/Structure.js"));
-
-var _IResource = _interopRequireDefault(require("../IResource.js"));
-
-var _ResourceTemplate = _interopRequireDefault(require("./ResourceTemplate.js"));
-
-var _IRecord = _interopRequireDefault(require("../../Data/IRecord.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var TemplateDataType = /*#__PURE__*/function () {
-  function TemplateDataType(type, guid) {
-    _classCallCheck(this, TemplateDataType);
-
-    this.type = type;
-    this.typeGuid = guid;
-  }
-
-  _createClass(TemplateDataType, [{
-    key: "typeTemplate",
-    get: function get() {
-      return this.typeGuid == null ? null : Warehouse.getTemplateByType(this.typeGuid);
-    } //@TODO: implement this
-
-  }, {
-    key: "compose",
-    value: function compose() {
-      if (this.type == _DataType["default"].Resource || this.type == _DataType["default"].ResourceArray || this.type == _DataType["default"].Record || this.type == _DataType["default"].RecordArray) {
-        return (0, _DataConverter.BL)().addUint8(this.type).addUint8Array(this.typeGuid).toDC();
-      } else return _DataConverter.DC.from([this.type]);
-    }
-  }], [{
-    key: "fromType",
-    value: function fromType(type) {
-      var _type, _type2;
-
-      var isArray = type instanceof Array;
-      if (isArray) type = type[0];
-      var dataType = 0;
-      var typeGuid = null;
-      if (!isNaN(type)) dataType = type;else if (type == _Structure["default"]) dataType = _DataType["default"].Structure;else if (typeof type == "string") {
-        var tIndex = this.typesDefinitions.indexOf(type);
-        dataType = tIndex > -1 ? tIndex : 0;
-      } else if (((_type = type) === null || _type === void 0 ? void 0 : _type.prototype) instanceof _IResource["default"]) {
-        dataType = _DataType["default"].Resource;
-        typeGuid = _ResourceTemplate["default"].getTypeGuid(type);
-      } else if (((_type2 = type) === null || _type2 === void 0 ? void 0 : _type2.prototype) instanceof _IRecord["default"]) {
-        dataType = _DataType["default"].Record;
-        typeGuid = _ResourceTemplate["default"].getTypeGuid(type);
-      }
-      if (isArray) dataType |= _DataType["default"].VarArray;
-      return new TemplateDataType(_DataType["default"].StructureArray);
-    }
-  }, {
-    key: "parse",
-    value: function parse(data, offset) {
-      var type = data.getUint8(offset++);
-
-      if (type == _DataType["default"].Resource || type == _DataType["default"].ResourceArray || type == _DataType["default"].Record || type == _DataType["default"].RecordArray) {
-        var guid = data.getGuid(offset);
-        return {
-          size: 17,
-          value: new TemplateDataType(type, guid)
-        };
-      } else return {
-        size: 1,
-        value: new TemplateDataType(type)
-      };
-    }
-  }]);
-
-  return TemplateDataType;
-}();
-
-exports["default"] = TemplateDataType;
-
-_defineProperty(TemplateDataType, "typesDefinitions", ["var", "bool", "sbyte", "byte", "char", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "date", "resource", "DistributedResource", "ResourceLink", "string", "structure"]);
-
-},{"../../Data/DataConverter.js":13,"../../Data/DataType.js":14,"../../Data/IRecord.js":16,"../../Data/Structure.js":22,"../IResource.js":45,"./ResourceTemplate.js":54}],56:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-var _default = {
-  Resource: 0,
-  Record: 1
-};
-exports["default"] = _default;
-
-},{}],57:[function(require,module,exports){
+},{"../../Data/DataConverter.js":13,"../../Data/IRecord.js":16,"../../Security/Integrity/SHA256.js":64,"../IResource.js":45,"./ArgumentTemplate.js":48,"./EventTemplate.js":49,"./FunctionTemplate.js":50,"./PropertyTemplate.js":53,"./TemplateDataType.js":54,"./TemplateType.js":55}],57:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9561,7 +9650,7 @@ exports["default"] = exports.WH = void 0;
 
 var _AsyncReply = _interopRequireDefault(require("../Core/AsyncReply.js"));
 
-var _ResourceTemplate = _interopRequireDefault(require("../Resource/Template/ResourceTemplate.js"));
+var _TypeTemplate = _interopRequireDefault(require("../Resource/Template/TypeTemplate.js"));
 
 var _IEventHandler2 = _interopRequireDefault(require("../Core/IEventHandler.js"));
 
@@ -9586,6 +9675,8 @@ var _ResourceProxy = _interopRequireDefault(require("../Proxy/ResourceProxy.js")
 var _AsyncBag = _interopRequireDefault(require("../Core/AsyncBag.js"));
 
 var _IRecord = _interopRequireDefault(require("../Data/IRecord.js"));
+
+var _TemplateType = _interopRequireDefault(require("./Template/TemplateType.js"));
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
@@ -9630,7 +9721,15 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     _this.resources = new _KeyList["default"]();
     _this.resourceCounter = 0;
     _this.templates = new _KeyList["default"]();
-    _this.wrapperTemplates = new _KeyList["default"]();
+
+    _this.templates.add(_TemplateType["default"].Unspecified, new _KeyList["default"]());
+
+    _this.templates.add(_TemplateType["default"].Resource, new _KeyList["default"]());
+
+    _this.templates.add(_TemplateType["default"].Record, new _KeyList["default"]());
+
+    _this.templates.add(_TemplateType["default"].Wrapper, new _KeyList["default"]());
+
     _this.protocols = new _KeyList["default"]();
 
     _this._register("connected");
@@ -9842,50 +9941,72 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "putTemplate",
     value: function putTemplate(template) {
-      var wrapper = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-      if (wrapper) {
-        this.wrapperTemplates.add(template.classId.valueOf(), template);
-      } else {
-        this.templates.add(template.classId.valueOf(), template);
-      }
+      this.templates.get(template.type).add(template.classId, template);
     }
   }, {
     key: "getTemplateByType",
     value: function getTemplateByType(type) {
+      var templateType = _TemplateType["default"].Unspecified;
+      if (type.prototype instanceof DistributedResource) templateType = _TemplateType["default"].Wrapper;
+      if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else return null;
       if (type == _IResource["default"] || type == _IRecord["default"]) return null;
       if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false;
       var className = type.prototype.constructor.name;
       if (className.startsWith("E_")) className = className.substr(2);
-      className = type.template.namespace + "." + className; // loaded ?
+      className = type.template.namespace + "." + className;
+      var templates = this.templates.get(templateType); // loaded ?
 
-      for (var i = 0; i < this.templates.length; i++) {
-        if (this.templates.at(i).className == className) return this.templates.at(i);
+      for (var i = 0; i < templates.length; i++) {
+        if (templates.at(i).className == className) return templates.at(i);
       }
 
-      var template = new _ResourceTemplate["default"](type);
-      this.templates.add(template.classId.valueOf(), template);
+      var template = new _TypeTemplate["default"](type, this);
       return template;
     }
   }, {
     key: "getTemplateByClassId",
     value: function getTemplateByClassId(classId) {
-      var wrapper = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+      var templateType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _TemplateType["default"].Unspecified;
 
-      if (wrapper) {
-        return this.wrapperTemplates.item(classId);
-      } else {
-        return this.templates.item(classId);
-      }
+      if (templateType == _TemplateType["default"].Unspecified) {
+        // look in resources
+        var template = templates.get(_TemplateType["default"].Resource).get(classId);
+        if (template != null) return template; // look in records
+
+        template = templates.get(_TemplateType["default"].Record).get(classId);
+        if (template != null) return template; // look in wrappers
+
+        template = templates.get(_TemplateType["default"].Wrapper).get(classId);
+        return template;
+      } else return templates.get(templateType).get(classId);
     }
   }, {
     key: "getTemplateByClassName",
     value: function getTemplateByClassName(className) {
-      for (var i = 0; i < this.templates.length; i++) {
-        if (this.templates.at(i).className == className) return new _AsyncReply["default"](this.templates.at(i));
-      }
+      var templateType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _TemplateType["default"].Unspecified;
 
-      return new _AsyncReply["default"](null);
+      if (templateType == _TemplateType["default"].Unspecified) {
+        // look in resources
+        var template = templates[_TemplateType["default"].Resource].values.find(function (x) {
+          return x.className == className;
+        });
+
+        if (template != null) return template; // look in records
+
+        template = templates[_TemplateType["default"].Record].values.find(function (x) {
+          return x.className == className;
+        });
+        if (template != null) return template; // look in wrappers
+
+        template = templates[_TemplateType["default"].Wrapper].values.find(function (x) {
+          return x.className == className;
+        });
+        return template;
+      } else {
+        return templates[templateType].values.find(function (x) {
+          return x.className == className;
+        });
+      }
     }
   }, {
     key: "_qureyIn",
@@ -10030,7 +10151,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/IRecord.js":16,"../Data/KeyList.js":17,"../Net/IIP/DistributedConnection.js":25,"../Proxy/ResourceProxy.js":43,"../Resource/Instance.js":47,"../Resource/Template/ResourceTemplate.js":54,"../Stores/IndexedDBStore.js":68,"../Stores/MemoryStore.js":69,"./IResource.js":45,"./IStore.js":46}],58:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/IRecord.js":16,"../Data/KeyList.js":17,"../Net/IIP/DistributedConnection.js":25,"../Proxy/ResourceProxy.js":43,"../Resource/Instance.js":47,"../Resource/Template/TypeTemplate.js":56,"../Stores/IndexedDBStore.js":68,"../Stores/MemoryStore.js":69,"./IResource.js":45,"./IStore.js":46,"./Template/TemplateType.js":55}],58:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *

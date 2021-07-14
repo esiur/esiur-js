@@ -27,7 +27,7 @@
 "use strict";  
 
 import AsyncReply from '../Core/AsyncReply.js';
-import ResourceTemplate from '../Resource/Template/ResourceTemplate.js';
+import TypeTemplate from '../Resource/Template/TypeTemplate.js';
 import IEventHandler from '../Core/IEventHandler.js';
 import AutoList from '../Data/AutoList.js';
 import KeyList from '../Data/KeyList.js';
@@ -40,7 +40,7 @@ import IndexedDBStore from '../Stores/IndexedDBStore.js';
 import ResourceProxy from '../Proxy/ResourceProxy.js';
 import AsyncBag from '../Core/AsyncBag.js';
 import IRecord from '../Data/IRecord.js';
-
+import TemplateType from './Template/TemplateType.js';
 
 export class WH extends IEventHandler
 {
@@ -52,7 +52,12 @@ export class WH extends IEventHandler
         this.resources = new KeyList();
         this.resourceCounter = 0;
         this.templates = new KeyList();
-        this.wrapperTemplates = new KeyList();
+
+        this.templates.add(TemplateType.Unspecified, new KeyList());
+        this.templates.add(TemplateType.Resource, new KeyList());
+        this.templates.add(TemplateType.Record, new KeyList());
+        this.templates.add(TemplateType.Wrapper, new KeyList());
+
         this.protocols = new KeyList();
         this._register("connected");
         this._register("disconnected");
@@ -291,19 +296,24 @@ export class WH extends IEventHandler
             value.instance.parents.add(value);
     }
 
-    putTemplate(template, wrapper = false)
+    putTemplate(template)
     {
-        if (wrapper) {
-            this.wrapperTemplates.add(template.classId.valueOf(), template);
-        }
-        else {
-            this.templates.add(template.classId.valueOf(), template);
-        }
+        this.templates.get(template.type).add(template.classId, template);
     }
 
     getTemplateByType(type)
     {
-    
+        var templateType = TemplateType.Unspecified;
+
+        if (type.prototype instanceof DistributedResource)
+            templateType = TemplateType.Wrapper;
+        if (type.prototype instanceof IResource)
+            templateType = TemplateType.Resource;
+        else if (type.prototype instanceof IRecord)
+            templateType = TemplateType.Record;
+        else
+            return null;
+
         if (type == IResource 
             || type == IRecord)
             return null;
@@ -319,34 +329,63 @@ export class WH extends IEventHandler
         
         className = type.template.namespace + "." + className;
 
-        // loaded ?
-        for (var i = 0; i < this.templates.length; i++)
-            if (this.templates.at(i).className == className)
-                return this.templates.at(i);
+        var templates = this.templates.get(templateType);
 
-        var template = new ResourceTemplate(type);
-        this.templates.add(template.classId.valueOf(), template);
+        
+        // loaded ?
+        for(var i = 0; i < templates.length; i++)
+            if (templates.at(i).className == className)
+                return templates.at(i);
+                
+        var template = new TypeTemplate(type, this);
         
         return template;
     }
 
-    getTemplateByClassId(classId, wrapper = false)
+    getTemplateByClassId(classId, templateType = TemplateType.Unspecified)
     {
-        if (wrapper) {
-            return this.wrapperTemplates.item(classId);
+        if (templateType == TemplateType.Unspecified)
+        {
+            // look in resources
+            var template = templates.get(TemplateType.Resource).get(classId);
+            if (template != null)
+                return template;
+            
+            // look in records
+            template = templates.get(TemplateType.Record).get(classId);
+            if (template != null)
+                return template;
+
+            // look in wrappers
+            template = templates.get(TemplateType.Wrapper).get(classId);
+            return template;
         }
-        else {
-            return this.templates.item(classId);
-        }
+        else
+            return templates.get(templateType).get(classId);
     }
 
-    getTemplateByClassName(className)
+    getTemplateByClassName(className, templateType = TemplateType.Unspecified)
     {
-        for(var i = 0; i < this.templates.length; i++)
-            if (this.templates.at(i).className == className)
-                return new AsyncReply(this.templates.at(i));
-        
-        return new AsyncReply(null);
+        if (templateType == TemplateType.Unspecified)
+        {
+            // look in resources
+            var template = templates[TemplateType.Resource].values.find(x => x.className == className);
+            if (template != null)
+                return template;
+
+            // look in records
+            template = templates[TemplateType.Record].values.find(x => x.className == className);
+            if (template != null)
+                return template;
+
+            // look in wrappers
+            template = templates[TemplateType.Wrapper].values.find(x => x.className == className);
+            return template;
+        }
+        else
+        {
+            return templates[templateType].values.find(x => x.className == className);
+        }
     }
 
     _qureyIn(path, index, resources)

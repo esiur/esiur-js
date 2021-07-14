@@ -1,5 +1,7 @@
 export default 
 {
-    Resource: 0,
-    Record: 1
+    Unspecified: 0,
+    Resource: 1,
+    Record: 2,
+    Wrapper: 3,
 }

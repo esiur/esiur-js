@@ -33,7 +33,7 @@ import IResource from '../IResource.js';
 import IRecord from '../../Data/IRecord.js';
 import TemplateType from './TemplateType.js'
 
-export default class ResourceTemplate {
+export default class TypeTemplate {
 
     getEventTemplateByName(eventName) {
         for (var i = 0; i < this.events.length; i++)
@@ -115,7 +115,7 @@ export default class ResourceTemplate {
 
          getDependenciesFunc = (tmp, bag) =>
          {
-             if (template.resourceType == null)
+             if (template.definedType == null)
                  return;
 
              // functions
@@ -204,7 +204,7 @@ export default class ResourceTemplate {
          return list;
      }
 
-    constructor(type) {
+    constructor(type, addToWarehouse) {
 
 
         this.properties = [];
@@ -222,7 +222,7 @@ export default class ResourceTemplate {
         else
             throw new Error("Type is neither a resource nor a record.");
 
-        this.resourceType = type;
+        this.definedType = type;
 
         var template = type.template;
 
@@ -230,6 +230,10 @@ export default class ResourceTemplate {
         this.className = template.namespace + "." + type.prototype.constructor.name;
 
         this.classId = SHA256.compute(DC.stringToBytes(this.className)).getGuid(0);
+
+
+        if (addToWarehouse)
+            addToWarehouse.putTemplate(this);
 
         //byte currentIndex = 0;
 
@@ -356,7 +360,7 @@ export default class ResourceTemplate {
 
         // start parsing...
 
-        var od = new ResourceTemplate();
+        var od = new TypeTemplate();
         od.content = data.clip(offset, contentLength);
 
         od.templateType = data.getUint8(offset++);

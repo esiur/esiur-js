@@ -710,7 +710,9 @@ export default class Codec {
     static parseRecordArray(data, offset, length, connection)
     {
 
+        
         var reply = new AsyncBag();
+
         if (length == 0)
         {
             reply.seal();
@@ -719,30 +721,61 @@ export default class Codec {
 
         var end = offset + length;
 
-        var result = data.getUint8(offset++);
+        var isTyped = (data.getUint8(offset) & 0x10) == 0x10;
 
-        var previous = null;
-        var classId = null;
+        var result = data.getUint8(offset++) & 0xF;
 
-        if (result == RecordComparisonResult.Null)
-            previous = new AsyncReply(null);
-        else if (result == RecordComparisonResult.Record)
+        if (isTyped)
         {
-            var cs = data.getUint32(offset);
-            var recordLength = cs - 16;
-            offset += 4;
-            classId = data.getGuid(offset);
+            var classId = data.getGuid(offset);
             offset += 16;
-            previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
-            offset += recordLength;
+
+            var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
+
+            reply.arrayType = template.definedType;
+
+            var previous = null;
+
+            if (result == RecordComparisonResult.Null)
+                previous = new AsyncReply(null);
+            else if (result == RecordComparisonResult.Record
+                    || result == RecordComparisonResult.RecordSameType)
+            {
+                var cs = data.getUint32(offset);
+                var recordLength = cs;
+                offset += 4;
+                previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+                offset += recordLength;
+            }
+
+            reply.add(previous);
+
+            while (offset < end)
+            {
+                result = data.getUint8(offset++);
+
+                if (result == RecordComparisonResult.Null)
+                    previous = new AsyncReply(null);
+                else if (result == RecordComparisonResult.Record
+                    || result == RecordComparisonResult.RecordSameType)
+                {
+                    var cs = data.getUint32(offset);
+                    offset += 4;
+                    previous = Codec.parseRecord(data, offset, cs, connection, classId);
+                    offset += cs;
+                }
+                else if (result == RecordComparisonResult.Same)
+                {
+                    // do nothing
+                }
+
+                reply.add(previous);
+            }
         }
-
-        reply.Add(previous);
-
-
-        while (offset < end)
+        else
         {
-            result = data.getUint8(offset++);
+            var previous = null;
+            var classId = null;
 
             if (result == RecordComparisonResult.Null)
                 previous = new AsyncReply(null);
@@ -753,26 +786,113 @@ export default class Codec {
                 offset += 4;
                 classId = data.getGuid(offset);
                 offset += 16;
-                previous = Codec.parseRecord(data, offset, recordLength, connection, classId); 
+                previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
                 offset += recordLength;
-            }
-            else if (result == RecordComparisonResult.RecordSameType)
-            {
-                var cs = data.getUint32(offset);
-                offset += 4;
-                previous = Codec.parseRecord(data, offset, cs, connection, classId);
-                offset += cs;
-            }
-            else if (result == RecordComparisonResult.Same)
-            {
-                // do nothing
+
             }
 
-            reply.add(previous);
+            reply.Add(previous);
+
+
+            while (offset < end)
+            {
+                result = data.getUint8(offset++);
+
+                if (result == RecordComparisonResult.Null)
+                    previous = new AsyncReply(null);
+                else if (result == RecordComparisonResult.Record)
+                {
+                    var cs = data.getUint32(offset);
+                    var recordLength = cs - 16;
+                    offset += 4;
+                    classId = data.getGuid(offset);
+                    offset += 16;
+                    previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+                    offset += recordLength;
+                }
+                else if (result == RecordComparisonResult.RecordSameType)
+                {
+                    var cs = data.getUint32(offset);
+                    offset += 4;
+                    previous = ParseRecord(data, offset, cs, connection, classId);
+                    offset += cs;
+                }
+                else if (result == RecordComparisonResult.Same)
+                {
+                    // do nothing
+                }
+
+                reply.add(previous);
+            }
+
         }
 
-        reply.seal();
+        reply.Seal();
         return reply;
+
+        // var reply = new AsyncBag();
+        // if (length == 0)
+        // {
+        //     reply.seal();
+        //     return reply;
+        // }
+
+        // var end = offset + length;
+
+        // var result = data.getUint8(offset++);
+
+        // var previous = null;
+        // var classId = null;
+
+        // if (result == RecordComparisonResult.Null)
+        //     previous = new AsyncReply(null);
+        // else if (result == RecordComparisonResult.Record)
+        // {
+        //     var cs = data.getUint32(offset);
+        //     var recordLength = cs - 16;
+        //     offset += 4;
+        //     classId = data.getGuid(offset);
+        //     offset += 16;
+        //     previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
+        //     offset += recordLength;
+        // }
+
+        // reply.Add(previous);
+
+
+        // while (offset < end)
+        // {
+        //     result = data.getUint8(offset++);
+
+        //     if (result == RecordComparisonResult.Null)
+        //         previous = new AsyncReply(null);
+        //     else if (result == RecordComparisonResult.Record)
+        //     {
+        //         var cs = data.getUint32(offset);
+        //         var recordLength = cs - 16;
+        //         offset += 4;
+        //         classId = data.getGuid(offset);
+        //         offset += 16;
+        //         previous = Codec.parseRecord(data, offset, recordLength, connection, classId); 
+        //         offset += recordLength;
+        //     }
+        //     else if (result == RecordComparisonResult.RecordSameType)
+        //     {
+        //         var cs = data.getUint32(offset);
+        //         offset += 4;
+        //         previous = Codec.parseRecord(data, offset, cs, connection, classId);
+        //         offset += cs;
+        //     }
+        //     else if (result == RecordComparisonResult.Same)
+        //     {
+        //         // do nothing
+        //     }
+
+        //     reply.add(previous);
+        // }
+
+        // reply.seal();
+        // return reply;
     }
 
     static parseRecord(data, offset, length, connection, classId = null)
@@ -787,15 +907,15 @@ export default class Codec {
             length -= 16;
         }
 
-        var template = Warehouse.getTemplateByClassId(classId);
+        var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
 
         if (template != null)
         {
             Codec.parseVarArray(data, offset, length, connection).then(ar =>
             {
-                if (template.resourceType != null)
+                if (template.definedType != null)
                 {
-                    var record = new template.resourceType();
+                    var record = new template.definedType();
                     for (var i = 0; i < template.properties.length; i++)
                         record[template.properties[i].name] = ar[i];
 
