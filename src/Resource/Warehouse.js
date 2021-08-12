@@ -41,6 +41,7 @@ import ResourceProxy from '../Proxy/ResourceProxy.js';
 import AsyncBag from '../Core/AsyncBag.js';
 import IRecord from '../Data/IRecord.js';
 import TemplateType from './Template/TemplateType.js';
+import DistributedResource from '../Net/IIP/DistributedResource.js';
 
 export class WH extends IEventHandler
 {
@@ -62,7 +63,9 @@ export class WH extends IEventHandler
         this._register("connected");
         this._register("disconnected");
         ///this._urlRegex = /^(?:([\S]*):\/\/([^\/]*)\/?)/;
-        this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
+//        this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
+        this._urlRegex = /^(?:([^\s|:]*):\/\/([^/]*)\/?)/;
+
     }
 
     newInstance(type, properties)
@@ -81,6 +84,9 @@ export class WH extends IEventHandler
         var res = new proxyType();
 
         if (properties != null)
+        Object.assign(res, properties);
+
+        if (properties != null)
             Object.assign(res, properties);
 
         if (store != null || parent != null || res instanceof IStore)
@@ -88,7 +94,7 @@ export class WH extends IEventHandler
             var rt = new AsyncReply();
 
             this.put(name, res, store, parent, null, 0, manager, attributes)
-                        .then((ok)=>rt.trigger(res))
+                        .then(()=>rt.trigger(res))
                         .error((ex)=>rt.triggerError(ex));
 
             return rt;
@@ -104,10 +110,10 @@ export class WH extends IEventHandler
         return new AsyncReply(this.resources.item(id));
     }
     
-    get(path, attributes = null, parent = null, manager = null)
+    get(path, attributes = null)//, parent = null, manager = null)
     {
         var rt = new AsyncReply();
-        var self = this;
+       // var self = this;
 
         // Should we create a new store ?
         if (path.match(this._urlRegex))
@@ -134,7 +140,7 @@ export class WH extends IEventHandler
             {
                 if (!this.warehouseIsOpen)
                 {
-                    this.open().then((ok)=>{
+                    this.open().then(()=>{
                         initResource();
                     }).error(ex=>rt.triggerError(ex));
                 }
@@ -186,7 +192,7 @@ export class WH extends IEventHandler
             }
 
             if (toBeRemoved != null)
-                for(var i = 0; i < toBeRemoved.length; i++)
+                for(let i = 0; i < toBeRemoved.length; i++)
                 this.remove(toBeRemoved[i]);
 
             this._emit("disconnected", resource);
@@ -231,9 +237,9 @@ export class WH extends IEventHandler
 
             if (self.warehouseIsOpen)
             {
-                resource.trigger(ResourceTrigger.Initialize).then(x=>{
+                resource.trigger(ResourceTrigger.Initialize).then(()=>{
                     if (resource instanceof IStore)
-                        resource.trigger(ResourceTrigger.Open).then(y=>{ rt.trigger(true); 
+                        resource.trigger(ResourceTrigger.Open).then(()=>{ rt.trigger(true); 
                                                                         self._emit("connected", resource) 
                                                                     }).error(ex => {
                                                                         Warehouse.remove(resource);
@@ -261,7 +267,7 @@ export class WH extends IEventHandler
             initResource();
         }
         else
-            store.put(resource).then(ok=>{
+            store.put(resource).then(()=>{
                 initResource();
             }).error(ex=> { 
                 // failed to put
@@ -347,21 +353,21 @@ export class WH extends IEventHandler
         if (templateType == TemplateType.Unspecified)
         {
             // look in resources
-            var template = templates.get(TemplateType.Resource).get(classId);
+            var template = this.templates.get(TemplateType.Resource).get(classId);
             if (template != null)
                 return template;
             
             // look in records
-            template = templates.get(TemplateType.Record).get(classId);
+            template = this.templates.get(TemplateType.Record).get(classId);
             if (template != null)
                 return template;
 
             // look in wrappers
-            template = templates.get(TemplateType.Wrapper).get(classId);
+            template = this.templates.get(TemplateType.Wrapper).get(classId);
             return template;
         }
         else
-            return templates.get(templateType).get(classId);
+            return this.templates.get(templateType).get(classId);
     }
 
     getTemplateByClassName(className, templateType = TemplateType.Unspecified)
@@ -369,22 +375,22 @@ export class WH extends IEventHandler
         if (templateType == TemplateType.Unspecified)
         {
             // look in resources
-            var template = templates[TemplateType.Resource].values.find(x => x.className == className);
+            var template = this.templates.get(TemplateType.Resource).values.find(x => x.className == className);
             if (template != null)
                 return template;
 
             // look in records
-            template = templates[TemplateType.Record].values.find(x => x.className == className);
+            template = this.templates.get(TemplateType.Record).values.find(x => x.className == className);
             if (template != null)
                 return template;
 
             // look in wrappers
-            template = templates[TemplateType.Wrapper].values.find(x => x.className == className);
+            template = this.templates.get(TemplateType.Wrapper).values.find(x => x.className == className);
             return template;
         }
         else
         {
-            return templates[templateType].values.find(x => x.className == className);
+            return this.templates.get(templateType).values.find(x => x.className == className);
         }
     }
 
@@ -395,15 +401,15 @@ export class WH extends IEventHandler
         if (index == path.length - 1)
         {
             if (path[index] == "")
-                for(var i = 0; i < resources.length; i++)
+                for(let i = 0; i < resources.length; i++)
                     rt.push(resources.at(i));
              else
-                for(var i = 0; i < resources.length; i++)
+                for(let i = 0; i < resources.length; i++)
                     if (resources.at(i).instance.name == path[index])
                         rt.push(resources.at(i));
         }
         else
-            for(var i = 0; i < resources.length; i++)
+            for(let i = 0; i < resources.length; i++)
                 if (resources.at(i).instance.name == path[index])
                     rt = rt.concat(this._qureyIn(path, index+1, resources.at(i).instance.children));
 
@@ -488,13 +494,13 @@ export class WH extends IEventHandler
 
         initBag.then(ar => {
 
-            for(var i = 0; i < ar.length; i++)
+            for(let i = 0; i < ar.length; i++)
                 if (!ar[i])
                     console.log(`Resource failed at Initialize ${self.resources.at(i).instance.name} [${self.resources.at(i).instance.template.className}]`);
 
             var sysBag = new AsyncBag();
 
-            for (var i = 0; i < this.resources.length; i++)
+            for (let i = 0; i < this.resources.length; i++)
             {
                 var r = this.resources.at(i);
                 sysBag.add(r.trigger(ResourceTrigger.SystemInitialized));

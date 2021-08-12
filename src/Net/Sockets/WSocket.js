@@ -5,7 +5,7 @@ import ISocket from "./ISocket.js";
 import SocketState from "./SocketState.js";
 import NetworkBuffer from "../NetworkBuffer.js";
 
-export default class WSSocket extends ISocket
+export default class WSocket extends ISocket
 {
       //SocketState State { get; }
     //INetworkReceiver<ISocket> Receiver { get; set; }
@@ -37,7 +37,7 @@ export default class WSSocket extends ISocket
         this.receiveNetworkBuffer = null;
 
         this.receiver = null;
-        thsi.ws = null;
+        this.ws = null;
         this._emit("destroy");
     }
 

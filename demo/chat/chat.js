@@ -4,7 +4,7 @@ import { createRequire } from 'module'
 import AsyncReply from "../../src/Core/AsyncReply.js";
 import DistributedServer from "../../src/Net/IIP/DistributedServer.js";
 import IMembership from "../../src/Security/Membership/IMembership.js";
-import WSSocket from "../../src/Net/Sockets/WSSocket.js";
+import WSocket from "../../src/Net/Sockets/WSocket.js";
 import MemoryStore from "../../src/Stores/MemoryStore.js";
 import DC from "../../src/Data/DataConverter.js";
 import IResource from "../../src/Resource/IResource.js";
@@ -72,7 +72,7 @@ server = await Warehouse.new(DistributedServer, "dss", sys, null, null, {members
 wss.on('connection', function connection(ws) 
 {
   let con = server.add();
-  con.assign(new WSSocket(ws));
+  con.assign(new WSocket(ws));
   con.on("ready", (x)=>{
     chat._emit("login", x.session.remoteAuthentication.username);
   }).on("close", (x)=>{

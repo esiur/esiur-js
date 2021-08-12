@@ -69,12 +69,13 @@ import { ResourceTrigger } from '../../Resource/IResource.js';
 import Ruling from '../../Security/Permissions/Ruling.js';
 import ActionType from '../../Security/Permissions/ActionType.js';
 import AsyncException from '../../Core/AsyncException.js';
-import WSSocket from '../Sockets/WSSocket.js';
+import WSocket from '../Sockets/WSocket.js';
 
 import ClientAuthentication from "../../Security/Authority/ClientAuthentication.js";
 import HostAuthentication from "../../Security/Authority/HostAuthentication.js";
 import SocketState from "../Sockets/SocketState.js";
 import TemplateType from '../../Resource/Template/TemplateType.js';
+import AsyncBag from '../../Core/AsyncBag.js';
 
 export default class DistributedConnection extends IStore {
 
@@ -1010,7 +1011,7 @@ export default class DistributedConnection extends IStore {
             }
             else
             {
-                return this.connect(AuthenticationMethod.None, null, address, port, null, 0, null, domain);
+                return this.connect(AuthenticationMethod.None, null, address, port, null, 0, null, domain, secure);
             }
         }
 
@@ -1043,7 +1044,7 @@ export default class DistributedConnection extends IStore {
             throw new AsyncException(ErrorType.Exception, 0, "Session not initialized");
 
         if (socket == null)
-            socket = new WSSocket();// TCPSocket();
+            socket = new WSocket();// TCPSocket();
 
         if (port > 0)
             this._port = port;
@@ -2847,7 +2848,7 @@ export default class DistributedConnection extends IStore {
             .addUint32(resource._p.instanceId)
             .done()
             .then(function (d) {
-                Codec.parseResourceArray(d, 0, d.length, this).then(function (resources) {
+                Codec.parseResourceArray(d, 0, d.length, self).then(function (resources) {
                     rt.trigger(resources);
                 }).error(function (ex) { rt.triggerError(ex); });
             });
@@ -2893,7 +2894,7 @@ export default class DistributedConnection extends IStore {
             .addUint32(resource._p.instanceId)
             .addUint8Array(Codec.composeStructure(attributes, this, true, true, true))
             .done()
-            .then(function (ar) {
+            .then(function () {
                 rt.trigger(true);
             }).error(function (ex) { rt.triggerError(ex); });
 

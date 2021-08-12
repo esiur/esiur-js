@@ -32,6 +32,8 @@ import TemplateDataType from "./TemplateDataType.js";
 import IResource from '../IResource.js';
 import IRecord from '../../Data/IRecord.js';
 import TemplateType from './TemplateType.js'
+import Warehouse from '../Warehouse.js';
+import DistributedConnection from '../../Net/IIP/DistributedConnection.js';
 
 export default class TypeTemplate {
 
@@ -95,13 +97,13 @@ export default class TypeTemplate {
 
      
      static getTypeGuid(type) {
-        return getTypeGuidByName(type.template.namespace + "." + type.prototype.constructor.name);
+        return this.getTypeGuidByName(type.template.namespace + "." + type.prototype.constructor.name);
      }
 
      static getTypeGuidByName(typeName)
      {
-         return SHA256.compute(DC.stringToBytes(this.className)).getGuid(0);
-     }     
+         return SHA256.compute(DC.stringToBytes(typeName)).getGuid(0);
+     }
 
 
      static getDependencies(template)
@@ -119,11 +121,11 @@ export default class TypeTemplate {
                  return;
 
              // functions
-             for(var i = 0; i < tmp.functions.length; i++)
+             for(let i = 0; i < tmp.functions.length; i++)
              {
-                 f = tmp.functions[i];
+                 let ft = tmp.functions[i];
 
-                 var frtt = Warehouse.getTemplateByType(f.methodInfo.returnType);
+                 var frtt = Warehouse.getTemplateByType(ft.methodInfo.returnType);
                  if (frtt != null)
                  {
                      if (!bag.includes(frtt))
@@ -133,11 +135,11 @@ export default class TypeTemplate {
                      }
                  }
 
-                 var args = f.methodInfo.parameters;
+                 var args = ft.methodInfo.parameters;
 
-                 for(var i = 0; i < args.length - 1; i++)
+                 for(let j = 0; j < args.length - 1; j++)
                  {
-                     var fpt = Warehouse.getTemplateByType(args[i].parameterType);
+                     var fpt = Warehouse.getTemplateByType(args[j].parameterType);
                      if (fpt != null)
                      {
                          if (!bag.includes(fpt))
@@ -154,7 +156,7 @@ export default class TypeTemplate {
                      var last = args[args.length - 1];
                      if (last.parameterType == DistributedConnection)
                      {
-                         var fpt = Warehouse.getTemplateByType(last.parameterType);
+                         let fpt = Warehouse.getTemplateByType(last.parameterType);
                          if (fpt != null)
                          {
                              if (!bag.includes(fpt))
@@ -169,7 +171,7 @@ export default class TypeTemplate {
              }
 
              // properties
-             for (var i = 0; i < tmp.properties.length; i++)
+             for (let i = 0; i < tmp.properties.length; i++)
              {
                  var p = tmp.properties[i];
                  var pt = Warehouse.getTemplateByType(p.propertyInfo.propertyType);
@@ -184,7 +186,7 @@ export default class TypeTemplate {
              }
 
              // events
-             for(var i = 0; i < tmp.events.length; i++)
+             for(let i = 0; i < tmp.events.length; i++)
              {
                  var e = tmp.events[i];
                  var et = Warehouse.getTemplateByType(e.eventInfo.eventHandlerType);
@@ -202,6 +204,10 @@ export default class TypeTemplate {
 
          getDependenciesFunc(template, list);
          return list;
+     }
+
+     get type() {
+        return this.templateType;
      }
 
     constructor(type, addToWarehouse) {
@@ -257,7 +263,7 @@ export default class TypeTemplate {
 
             if (template.events != null)
             {
-                for (var i = 0; i < template.events.length; i++) {
+                for (let i = 0; i < template.events.length; i++) {
 
                     // [name, type, {listenable: true/false, help: ""}]
                     var ei = template.events[i];
@@ -274,7 +280,7 @@ export default class TypeTemplate {
 
             if (template.functions != null)
             {
-                for (var i = 0; i < template.functions.length; i++) {
+                for (let i = 0; i < template.functions.length; i++) {
 
                     var fi = template.functions[i];
 
@@ -298,13 +304,13 @@ export default class TypeTemplate {
 
 
         // append signals
-        for (var i = 0; i < this.events.length; i++)
+        for (let i = 0; i < this.events.length; i++)
             this.members.push(this.events[i]);
         // append slots
-        for (var i = 0; i < this.functions.length; i++)
+        for (let i = 0; i < this.functions.length; i++)
             this.members.push(this.functions[i]);
         // append properties
-        for (var i = 0; i < this.properties.length; i++)
+        for (let i = 0; i < this.properties.length; i++)
             this.members.push(this.properties[i]);
 
         // bake it binarily
@@ -317,13 +323,13 @@ export default class TypeTemplate {
             .addUint32(template.version)
             .addUint16(this.members.length);
 
-        for (var i = 0; i < this.functions.length; i++)
+        for (let i = 0; i < this.functions.length; i++)
             b.addUint8Array(this.functions[i].compose());
 
-        for (var i = 0; i < this.properties.length; i++)
+        for (let i = 0; i < this.properties.length; i++)
             b.addUint8Array(this.properties[i].compose());
 
-        for (var i = 0; i < this.events.length; i++)
+        for (let i = 0; i < this.events.length; i++)
             b.addUint8Array(this.events[i].compose());
 
         this.content = b.toArray();
@@ -331,7 +337,8 @@ export default class TypeTemplate {
 
     static getFunctionParameters(func)
     {
-        var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
+        var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,)]*))/mg;
+        //var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
         var ARGUMENT_NAMES = /([^\s,]+)/g;
         
         var fnStr = func.toString().replace(STRIP_COMMENTS, '');
@@ -354,9 +361,8 @@ export default class TypeTemplate {
         if (contentLength == -1)
             contentLength = data.length;
 
-        var ends = offset + contentLength;
-
-        var oOffset = offset;
+        //var ends = offset + contentLength;
+        //var oOffset = offset;
 
         // start parsing...
 
@@ -385,16 +391,16 @@ export default class TypeTemplate {
 
             if (type == 0) // function
             {
-                var ft = new FunctionTemplate();
+                let ft = new FunctionTemplate();
                 ft.index = functionIndex++;
-                var hasExpansion = ((data.getUint8(offset++) & 0x10) == 0x10);
+                let hasExpansion = ((data.getUint8(offset++) & 0x10) == 0x10);
 
-                var len = data.getUint8(offset++);
+                let len = data.getUint8(offset++);
                 ft.name = data.getString(offset, len);
                 offset += len;
 
                 // return type
-                var {size, value: returnType} = TemplateDataType.parse(data, offset);
+                let {size, value: returnType} = TemplateDataType.parse(data, offset);
                 offset += size;
 
                 ft.returnType = returnType;
@@ -405,9 +411,9 @@ export default class TypeTemplate {
 
                 for (var a = 0; a < argsCount; a++)
                 {
-                    var {size, value: argType} = ArgumentTemplate.parse(data, offset);
+                    let {size: argSize, value: argType} = ArgumentTemplate.parse(data, offset);
                     args.push(argType);
-                    offset += size;
+                    offset += argSize;
                 }
 
                 ft.arguments = args;
@@ -425,17 +431,17 @@ export default class TypeTemplate {
             else if (type == 1)    // property
             {
 
-                var pt = new PropertyTemplate();
+                let pt = new PropertyTemplate();
                 pt.index = propertyIndex++;
-                var hasReadExpansion = ((data.getUint8(offset) & 0x8) == 0x8);
-                var hasWriteExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
+                let hasReadExpansion = ((data.getUint8(offset) & 0x8) == 0x8);
+                let hasWriteExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
                 pt.recordable = ((data.getUint8(offset) & 1) == 1);
                 pt.permission = ((data.getUint8(offset++) >> 1) & 0x3);
-                var len = data.getUint8(offset++);
+                let len = data.getUint8(offset++);
                 pt.name = data.getString(offset, len);
                 offset += len;
 
-                var {size, value: valueType} = TemplateDataType.parse(data, offset);
+                let {size, value: valueType} = TemplateDataType.parse(data, offset);
 
                 offset += size;
 
@@ -443,7 +449,7 @@ export default class TypeTemplate {
 
                 if (hasReadExpansion) // expansion ?
                 {
-                    var cs = data.getUint32(offset);
+                    let cs = data.getUint32(offset);
                     offset += 4;
                     pt.readExpansion = data.getString(offset, cs);
                     offset += cs;
@@ -451,7 +457,7 @@ export default class TypeTemplate {
 
                 if (hasWriteExpansion) // expansion ?
                 {
-                    var cs = data.getUint32(offset);
+                    let cs = data.getUint32(offset);
                     offset += 4;
                     pt.writeExpansion = data.getString(offset, cs);
                     offset += cs;
@@ -461,23 +467,23 @@ export default class TypeTemplate {
             }
             else if (type == 2) // Event
             {
-                var et = new EventTemplate();
+                let et = new EventTemplate();
                 et.index = eventIndex++;
-                var hasExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
+                let hasExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
                 et.listenable = ((data.getUint8(offset++) & 0x8) == 0x8);
-                var len = data.getUint8(offset++);
+                let len = data.getUint8(offset++);
                 et.name = data.getString(offset, len);
 
                 offset += len;
 
-                var {size, value: argType} = TemplateDataType.parse(data, offset);
+                let {size, value: argType} = TemplateDataType.parse(data, offset);
                     
                 offset += size;
                 et.argumentType = argType;
 
                 if (hasExpansion) // expansion ?
                 {
-                    var cs = data.getUint32(offset);
+                    let cs = data.getUint32(offset);
                     offset += 4;
                     et.expansion = data.getString(offset, cs);
                     offset += cs;
@@ -489,13 +495,13 @@ export default class TypeTemplate {
         }
 
         // append signals
-        for (var i = 0; i < od.events.length; i++)
+        for (let i = 0; i < od.events.length; i++)
             od.members.push(od.events[i]);
         // append slots
-        for (var i = 0; i < od.functions.length; i++)
+        for (let i = 0; i < od.functions.length; i++)
             od.members.push(od.functions[i]);
         // append properties
-        for (var i = 0; i < od.properties.length; i++)
+        for (let i = 0; i < od.properties.length; i++)
             od.members.push(od.properties[i]);
 
 
