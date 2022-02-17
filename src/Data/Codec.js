@@ -954,7 +954,7 @@ export default class Codec {
                 {
                     let record = new Record();
 
-                    for (let i = 0; i < template.properties.Length; i++)
+                    for (let i = 0; i < template.properties.length; i++)
                         record[template.properties[i].name] = ar[i];
 
                     reply.trigger(record);
