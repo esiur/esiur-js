@@ -1,6 +1,6 @@
 {
   "name": "esiur",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "Distributed Object Framework",
   "main": "esiur.js",
   "type": "module",
