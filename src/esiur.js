@@ -1,5 +1,4 @@
 
-import wh from './Resource/Warehouse.js';
 import Structure from './Data/Structure.js';
 import DistributedResource from './Net/IIP/DistributedResource.js'
 import MemoryStore from './Stores/MemoryStore.js';
@@ -7,10 +6,118 @@ import IndexedDBStore from './Stores/IndexedDBStore.js';
 import IResource from './Resource/IResource.js';
 import ResourceProxy from './Proxy/ResourceProxy.js';
 import DistributedConnection from './Net/IIP/DistributedConnection.js';
+import IIPAuthPacket from './Net/Packets/IIPAuthPacket.js';
+import IIPPacketCommand from './Net/Packets/IIPPacketCommand.js';
+import IIPPacketEvent from './Net/Packets/IIPPacketEvent.js';
+import IIPPacketReport from './Net/Packets/IIPPacketReport.js';
+import ISocket from './Net/Sockets/ISocket.js';
+import SocketState from './Net/Sockets/SocketState.js';
+import WSocket from './Net/Sockets/WSocket.js';
+import AsyncReply from './Core/AsyncReply.js';
+import AsyncException from './Core/AsyncException.js';
+import AsyncQueue from './Core/AsyncQueue.js';
+import ErrorType from './Core/ErrorType.js';
+import ExceptionCode from './Core/ExceptionCode.js';
+import IDestructible from './Core/IDestructible.js';
+import IEventHandler from './Core/IEventHandler.js';
+import ProgressType from './Core/ProgressType.js';
+import AutoList from './Data/AutoList.js';
+import AutoMap from './Data/AutoMap.js';
+import BinaryList from './Data/BinaryList.js';
+import Codec from './Data/Codec.js';
+import DataConverter from './Data/DataConverter.js';
+import DataType from './Data/DataType.js';
+import Guid from './Data/Guid.js';
+import IRecord from './Data/IRecord.js';
+import KeyList from './Data/KeyList.js';
+import NotModified from './Data/NotModified.js';
+import PropertyValue from './Data/PropertyValue.js';
+import Record from './Data/Record.js';
+import ResourceComparisonResult from './Data/ResourceComparisonResult.js';
+import ResourceArrayType from './Data/ResourceArrayType.js';
+import ResourceArray from './Data/ResourceArray.js';
+import RecordComparisonResult from './Data/RecordComparisonResult.js';
+import StructureComparisonResult from './Data/StructureComparisonResult.js';
+import StructureArray from './Data/StructureArray.js';
+import INetworkReceiver from './Net/INetworkReceiver.js';
+import NetworkBuffer from './Net/NetworkBuffer.js';
+import NetworkConnections from './Net/NetworkConnections.js';
+import NetworkServer from './Net/NetworkServer.js';
+import NetworkSession from './Net/NetworkSession.js';
+import SendList from './Net/SendList.js';
+
+import DistributedPropertyContext from './Net/IIP/DistributedPropertyContext.js';
+import DistributedResourceQueueItem from './Net/IIP/DistributedResourceQueueItem.js';
+import DistributedResourceQueueItemType from './Net/IIP/DistributedResourceQueueItemType.js';
+import DistributedServer from './Net/IIP/DistributedServer.js';
+import EntryPoint from './Net/IIP/EntryPoint.js';
+import IIPAuthePacketAction from './Net/Packets/IIPAuthPacketAction.js';
+import IIPAuthPacketCommand from './Net/Packets/IIPAuthPacketCommand.js';
+import IIPPacketAction from './Net/Packets/IIPPacketAction.js';
+import IIPPacket from './Net/Packets/IIPPacket.js';
+
+import CustomResourceEvent from './Resource/CustomResourceEvent.js';
+import Instance from './Resource/Instance.js';
+import IStore from './Resource/IStore.js';
+import Warehouse from './Resource/Warehouse.js';
+
+import ArgumentTemplate from './Resource/Template/ArgumentTemplate.js';
+import EventTemplate from './Resource/Template/EventTemplate.js';
+import FunctionTemplate from './Resource/Template/FunctionTemplate.js';
+import MemberTemplate from './Resource/Template/MemberTemplate.js';
+import MemberType from './Resource/Template/MemberType.js';
+import PropertyTemplate from './Resource/Template/PropertyTemplate.js';
+import TemplateDataType from './Resource/Template/TemplateDataType.js';
+import TemplateType from './Resource/Template/TemplateType.js';
+import TypeTemplate from './Resource/Template/TypeTemplate.js';
+
+import Authentication from './Security/Authority/Authentication.js';
+import AuthenticationMethod from './Security/Authority/AuthenticationMethod.js';
+import AuthenticationType from './Security/Authority/AuthenticationType.js';
+import ClientAuthentication from './Security/Authority/ClientAuthentication.js';
+import HostAuthentication from './Security/Authority/HostAuthentication.js';
+import Session from './Security/Authority/Session.js';
+import SHA256 from './Security/Integrity/SHA256.js';
+import IMembership from './Security/Membership/IMembership.js';
+
+import ActionType from './Security/Permissions/ActionType.js';
+import IPermissionsManager from './Security/Permissions/IPermissionsManager.js';
+import Ruling from './Security/Permissions/Ruling.js';
+
+let namespace = {
+    Core: { AsyncReply, AsyncException, AsyncQueue, ErrorType, ExceptionCode, IDestructible, IEventHandler, ProgressType},
+    Data: {AutoList, AutoMap, BinaryList, Codec, DataConverter, DataType, Guid, IRecord, KeyList, NotModified, 
+        PropertyValue, Record, RecordComparisonResult, ResourceArray, ResourceArrayType, ResourceComparisonResult, Structure,
+         StructureArray, StructureComparisonResult },
+    Net: {INetworkReceiver, NetworkBuffer, NetworkConnections, NetworkServer, NetworkSession, SendList,        
+            IIP: {DistributedConnection, DistributedPropertyContext, DistributedResource, DistributedResourceQueueItem, 
+                DistributedResourceQueueItemType, DistributedServer, EntryPoint},
+            Packets: {IIPAuthPacket, IIPAuthePacketAction, IIPAuthPacketCommand, IIPPacket, IIPPacketAction, IIPPacketCommand, IIPPacketEvent, IIPPacketReport},
+            Sockets: {ISocket, SocketState, WSocket}
+        
+    },
+    Proxy: {ResourceProxy},
+    Resource: {CustomResourceEvent, Instance, IResource, IStore, Warehouse,
+                Template: {
+                    ArgumentTemplate, EventTemplate, FunctionTemplate, MemberTemplate,
+                    MemberType, PropertyTemplate, TemplateDataType, TemplateType, TypeTemplate
+                }
+              },
+    Security: {
+        Authority: {Authentication, AuthenticationMethod, AuthenticationType, ClientAuthentication, HostAuthentication,
+                    Session},
+        Integrity: {
+            SHA256
+        },
+        Membership: {IMembership},
+        Permissions: {ActionType, IPermissionsManager, Ruling},
+    },
+    Stores: {IndexedDBStore, MemoryStore},
+};
 
 if (typeof window !== 'undefined') 
 {
-    window.wh = wh;
+    window.wh = Warehouse;
     window.Structure = Structure;
     window.DistributedResource = DistributedResource;
     window.MemoryStore = MemoryStore;
@@ -18,16 +125,19 @@ if (typeof window !== 'undefined')
     window.IResource = IResource;
     window.ResourceProxy = ResourceProxy;
     window.DistributedConnection = DistributedConnection;
+
+    window.Esiur = namespace;
 }
 else if (typeof global !== 'undefined') 
 {
-    global.wh = wh;
+    global.wh = Warehouse;
     global.Structure = Structure;
     global.DistributedResource = DistributedResource;
     global.MemoryStore = MemoryStore;
     global.IndexedDBStore = IndexedDBStore;
     global.IResource = IResource;
     global.DistributedConnection = DistributedConnection;
+    global.Esiur = namespace;
 }
 
-export default wh;
+export default Warehouse;

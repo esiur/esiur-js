@@ -65,6 +65,7 @@ export default class DistributedServer extends IResource
         this.connections = [];
     }
 
+    //@TODO: con.off("close", ...)
     add() {
         let self = this;
         let con = new DistributedConnection(this);
@@ -75,7 +76,7 @@ export default class DistributedServer extends IResource
 
     remove(connection){
         let i = this.connections.indexOf(connection);
-        if (i > -1) 
+        if (i > -1)
             this.connections.splice(i, 1);
     }
 }

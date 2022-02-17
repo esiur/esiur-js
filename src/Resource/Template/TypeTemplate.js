@@ -250,7 +250,7 @@ export default class TypeTemplate {
                 var pt = new PropertyTemplate();
                 pt.name = pi[0];
                 pt.index = i;
-                pt.valueType = TemplateDataType.fromType(pi[1]),
+                pt.valueType = TemplateDataType.fromType(pi[1]);
                 pt.readExpansion = pi[2]?.read;
                 pt.writeExpansion = pi[2]?.write;
                 pt.recordable = pi[2]?.recordable;

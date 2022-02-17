@@ -39,7 +39,7 @@ export default class AutoMap extends IEventHandler
     add(key, value)
     {
         if (value instanceof IDestructible)
-            value.on("destroy", this._item_destroyed);
+            value.on("destroy", this.#_item_destroyed);
 
         this.dic[key] = value;
 
@@ -58,13 +58,13 @@ export default class AutoMap extends IEventHandler
     {
         if (this.dic[key] !== undefined) {
             if (this.dic[key] instanceof IDestructible)
-                this.dic[key].off("destroy", this._item_destroyed);
+                this.dic[key].off("destroy", this.#_item_destroyed);
 
             delete this.dic[key];
         }
     }
 
-    _item_destroyed(sender)
+    #_item_destroyed = function(sender)
     {
         this.remove(sender);
     }

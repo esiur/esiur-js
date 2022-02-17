@@ -45,7 +45,7 @@ export default class AutoList extends IEventHandler
     add(value)
     {
         if (value instanceof IDestructible)
-            value.on("destroy", this._item_destroyed, this);
+            value.on("destroy", this.#_item_destroyed, this);
 
         this.list.push(value);
 
@@ -58,10 +58,10 @@ export default class AutoList extends IEventHandler
             return;
 
         if (value instanceof IDestructible)
-            value.on("destroy", this._item_destroyed, this);
+            value.on("destroy", this.#_item_destroyed, this);
 
         if (this.list[index] instanceof IDestructible)
-            this.list[index].off("destroy", this._item_destroyed);
+            this.list[index].off("destroy", this.#_item_destroyed);
 
         this.list[index] = value;
     }
@@ -99,14 +99,14 @@ export default class AutoList extends IEventHandler
         var item = this.list[index];
 
         if (item instanceof IDestructible)
-            item.off("destroy", this._item_destroyed);
+            item.off("destroy", this.#_item_destroyed);
 
         this.list.splice(index, 1);
 
         this._emit("remove", item);
     }
 
-    _item_destroyed(sender)
+    #_item_destroyed = function(sender)
     {
         this.remove(sender);
     }

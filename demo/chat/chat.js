@@ -42,7 +42,7 @@ class MyChat extends IResource {
         };
     }
 
-    constructor(){
+    constructor() {
       super();
       this.messages = [new Structure({usr: "Admin", msg: "Welcome to Esiur", date: new Date()})];
       this.title = "Chat Room";

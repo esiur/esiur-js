@@ -37,7 +37,6 @@ import SendList from '../SendList.js';
 
 import AsyncReply from '../../Core/AsyncReply.js';
 import Codec from '../../Data/Codec.js';
-import NetworkBuffer from '../NetworkBuffer.js';
 import KeyList from '../../Data/KeyList.js';
 import AsyncQueue from '../../Core/AsyncQueue.js';
 import Warehouse from '../../Resource/Warehouse.js';
@@ -601,7 +600,7 @@ export default class DistributedConnection extends IStore {
                                 this.sendParams()
                                     .addUint8(0xc0)
                                     .addUint8(ExceptionCode.GeneralFailure)
-                                    .addUint16(errMsg.Length)
+                                    .addUint16(errMsg.length)
                                     .addUint8Array(errMsg)
                                     .done();
                             }
@@ -1151,9 +1150,9 @@ export default class DistributedConnection extends IStore {
     {
         for (let resource of this.subscriptions.keys()) {
 
-            resource.instance.off("ResourceEventOccurred", this._instance_eventOccurred, this);
-            resource.instance.off("ResourceModified", this._instance_propertyModified, this);
-            resource.instance.off("ResourceDestroyed", this._instance_resourceDestroyed, this);    
+            resource.instance.off("ResourceEventOccurred", this.#_instance_eventOccurred, this);
+            resource.instance.off("ResourceModified", this.#_instance_propertyModified, this);
+            resource.instance.off("ResourceDestroyed", this.#_instance_resourceDestroyed, this);    
         }
         
         this.subscriptions.clear();
@@ -1592,18 +1591,18 @@ export default class DistributedConnection extends IStore {
 
     _subscribe(resource)
     {
-        resource.instance.on("ResourceEventOccurred", this._instance_eventOccurred, this);
-        resource.instance.on("ResourceModified", this._instance_propertyModified, this);
-        resource.instance.on("ResourceDestroyed", this._instance_resourceDestroyed, this);
+        resource.instance.on("ResourceEventOccurred", this.#_instance_eventOccurred, this);
+        resource.instance.on("ResourceModified", this.#_instance_propertyModified, this);
+        resource.instance.on("ResourceDestroyed", this.#_instance_resourceDestroyed, this);
 
         this.subscriptions.set(resource, []);
     }
 
     _unsubscribe(resource)
     {
-        resource.instance.off("ResourceEventOccurred", this._instance_eventOccurred, this);
-        resource.instance.off("ResourceModified", this._instance_propertyModified, this);
-        resource.instance.off("ResourceDestroyed", this._instance_resourceDestroyed, this);
+        resource.instance.off("ResourceEventOccurred", this.#_instance_eventOccurred, this);
+        resource.instance.off("ResourceModified", this.#_instance_propertyModified, this);
+        resource.instance.off("ResourceDestroyed", this.#_instance_resourceDestroyed, this);
 
         this.subscriptions.delete(resource);
     }
@@ -2587,7 +2586,7 @@ export default class DistributedConnection extends IStore {
             return new AsyncReply(null);
     }
 
-    _instance_resourceDestroyed(resource) {
+    #_instance_resourceDestroyed = function(resource) {
 
         this._unsubscribe(resource);
         // compose the packet
@@ -2596,7 +2595,7 @@ export default class DistributedConnection extends IStore {
             .done();
     }
 
-    _instance_propertyModified(resource, name, newValue) {
+    #_instance_propertyModified = function(resource, name, newValue) {
         var pt = resource.instance.template.getPropertyTemplateByName(name);
 
         if (pt == null)
@@ -2609,7 +2608,7 @@ export default class DistributedConnection extends IStore {
             .done();
     }
 
-    _instance_eventOccurred(resource, issuer, receivers, name, args) {
+    #_instance_eventOccurred = function(resource, issuer, receivers, name, args) {
         var et = resource.instance.template.getEventTemplateByName(name);
 
         if (et == null)

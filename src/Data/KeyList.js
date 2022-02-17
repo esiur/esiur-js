@@ -57,12 +57,16 @@ export default class KeyList
 
      get(key)
      {
+         if (key.valueOf != null)
+            key = key.valueOf();
+
         for(var i = 0; i < this.keys.length; i++)
-            if (this.keys[i] == key)
-                return this.values[i];
+            if (this.keys[i].valueOf != null)
+                if (this.keys[i].valueOf() == key)
+                    return this.values[i];
      }
 
-     _item_destroyed(sender)
+     #_item_destroyed = function(sender)
      {
          for(var i = 0; i < this.values.length; i++)
             if (sender == this.values[i])
@@ -77,7 +81,7 @@ export default class KeyList
         this.remove(key);
 
         if (value instanceof IDestructible)
-            value.on("destroy", this._item_destroyed, this);
+            value.on("destroy", this.#_item_destroyed, this);
 
         this.keys.push(key);
         this.values.push(value);
@@ -116,7 +120,7 @@ export default class KeyList
      removeAt(index)
      {
         if (this.values[index] instanceof IDestructible)
-            this.values[index].off("destroy", this._item_destroyed);
+            this.values[index].off("destroy", this.#_item_destroyed);
 
         this.keys.splice(index, 1);
         this.values.splice(index, 1);

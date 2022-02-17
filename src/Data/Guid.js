@@ -37,4 +37,8 @@ export default class Guid
     {
         return this.value.getHex(0, 16);
     }
+
+    // [Symbol.toPrimitive](hint){
+    //     console.log(hint);
+    // }
 }

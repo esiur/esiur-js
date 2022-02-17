@@ -276,9 +276,12 @@ export default class Codec {
 
             var previous = null;
 
-            if (result == ResourceComparisonResult.Null)
+            if (result == ResourceComparisonResult.Empty) {
+                reply.seal();
+                return reply;
+            } else if (result == ResourceComparisonResult.Null) {
                 previous = new AsyncReply(null);
-            else if (result == ResourceComparisonResult.Local)
+            } else if (result == ResourceComparisonResult.Local)
             {
                 previous = Warehouse.getById(data.getUint32(offset));
                 offset += 4;
@@ -761,12 +764,19 @@ export default class Codec {
 
             var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
 
-            reply.arrayType = template.definedType;
+            reply.arrayType = template?.definedType;
 
             var previous = null;
 
-            if (result == RecordComparisonResult.Null)
+            if (result == RecordComparisonResult.Empty)
+            {
+                reply.seal();
+                return reply;
+            }
+            else if (result == RecordComparisonResult.Null)
+            {
                 previous = new AsyncReply(null);
+            }
             else if (result == RecordComparisonResult.Record
                     || result == RecordComparisonResult.RecordSameType)
             {
@@ -806,7 +816,12 @@ export default class Codec {
             let previous = null;
             let classId = null;
 
-            if (result == RecordComparisonResult.Null)
+            if (result == RecordComparisonResult.Empty)
+            {
+                reply.seal();
+                return reply;
+            }
+            else if (result == RecordComparisonResult.Null)
                 previous = new AsyncReply(null);
             else if (result == RecordComparisonResult.Record)
             {
@@ -820,7 +835,7 @@ export default class Codec {
 
             }
 
-            reply.Add(previous);
+            reply.add(previous);
 
 
             while (offset < end)
@@ -856,7 +871,7 @@ export default class Codec {
 
         }
 
-        reply.Seal();
+        reply.seal();
         return reply;
 
         // var reply = new AsyncBag();
@@ -954,7 +969,7 @@ export default class Codec {
                 {
                     let record = new Record();
 
-                    for (let i = 0; i < template.properties.Length; i++)
+                    for (let i = 0; i < template.properties.length; i++)
                         record[template.properties[i].name] = ar[i];
 
                     reply.trigger(record);
@@ -1002,11 +1017,12 @@ export default class Codec {
 
     static composeRecordArray(records, connection, prependLength = false)
     {
-        if (records == null || records?.length == 0)
+        if (records == null ) //|| records?.length == 0)
             return prependLength ? new DC(4) : new DC(0);
 
         var rt = new BinaryList();
-        var comparsion = Codec.compareRecords(null, records[0]);
+        //var comparsion = Codec.compareRecords(null, records[0]);
+        var comparsion = records.length == 0 ? RecordComparisonResult.Empty : Codec.compareRecords(null, records[0]);
 
         rt.addUint8(comparsion);
 
@@ -1101,11 +1117,11 @@ static isLocalResource(resource, connection) {
 
  static composeResourceArray(resources, connection, prependLength = false) {
 
-    if (resources == null || resources.length == 0)// || !(resources instanceof ResourceArray))
+    if (resources == null)// || resources.length == 0)// || !(resources instanceof ResourceArray))
         return prependLength ? new DC(4) : new DC(0);
 
     var rt = new BinaryList();
-    var comparsion = Codec.compareResource(null, resources[0], connection);
+    var comparsion = resources.length == 0 ? ResourceComparisonResult.Empty : Codec.compareResource(null, resources[0], connection);
 
     rt.addUint8(comparsion);
 

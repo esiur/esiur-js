@@ -1,13 +1,15 @@
 {
   "name": "esiur",
-  "version": "1.7.2",
+  "version": "1.8.2",
   "description": "Distributed Object Framework",
   "main": "esiur.js",
   "type": "module",
   "scripts": {
     "demo": "node ./demo/chat/chat.js",
     "babel": "./node_modules/.bin/babel src -d build",
-    "build": "browserify src/esiur.js -t babelify --outfile build/esiur.js"
+    "build": "browserify src/esiur.js -t babelify --outfile build/esiur.js",
+    "prepublish": "browserify src/esiur.js -t babelify --outfile build/esiur.js"
+
   },
   "repository": {
     "type": "git",

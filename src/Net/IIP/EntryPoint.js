@@ -1,4 +1,4 @@
-import IResource from "../../Resource/IResource";
+import IResource from "../../Resource/IResource.js";
 
 export default class EntryPoint extends IResource
 {

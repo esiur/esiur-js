@@ -111,7 +111,7 @@ export default class IndexedDBStore extends IStore
                  bag.seal();
                  bag.then((x) =>
                  {
-                     for (let i = 0; i < x.Length; i++)
+                     for (let i = 0; i < x.length; i++)
                          s[value.values[i].name] = x[i];
 
                      rt.trigger(s);
@@ -365,7 +365,7 @@ export default class IndexedDBStore extends IStore
      {
         var rt = [];
 
-        if (structures == null || structures.Length == 0)
+        if (structures == null || structures.length == 0)
              return rt;
 
         for(var i = 0; i < structures.length; i++)

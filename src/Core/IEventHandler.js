@@ -75,7 +75,7 @@ export default class IEventHandler
     
     off(event, fn)
     {
-        event = event.toLocaleString();
+        event = event.toLowerCase();
         if (this._events[event])
         {
             if (fn)

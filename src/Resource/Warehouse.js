@@ -210,8 +210,7 @@ export class WH extends IEventHandler
         var rt = new AsyncReply();
 
         resource.instance = new Instance(this.resourceCounter++, name, resource, store, customTemplate, age);
-        //resource.instance.children.on("add", Warehouse._onChildrenAdd).on("remove", Warehouse._onChildrenRemove);
-        //resource.instance.parents.on("add", Warehouse._onParentsAdd).on("remove", Warehouse._onParentsRemove);
+
         
         if (attributes != null)
             resource.instance.setAttributes(attributes);

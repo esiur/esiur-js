@@ -67,7 +67,7 @@ export default class DC extends Uint8Array
     {
         // convert hex to Uint8Array
         var rt = new DC(value.length/2);
-        for(var i = 0; i < ar.length; i++)
+        for(var i = 0; i < rt.length; i++)
             rt[i] = parseInt(value.substr(i*2, 2), 16);
         return rt;
     }
@@ -295,6 +295,11 @@ export default class DC extends Uint8Array
         return this.dv.getInt32(offset);
     }
 
+    getInt32Little(offset)
+    {
+        return this.dv.getInt32(offset, true);
+    }
+
     getUint32(offset)
     {
         return this.dv.getUint32(offset);
@@ -506,6 +511,7 @@ export default class DC extends Uint8Array
         return rt;
     }
 
+    // @TODO: Test numbers with bit 7 of h = 1 
     getInt64(offset)
     {
         var h = this.getInt32(offset);

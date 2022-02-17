@@ -28,6 +28,10 @@
 
 export default class Structure
 {
+    toArray() {
+        return this.toPairs();
+    }
+
     toPairs() {
         var rt = [];
         for (var i in this)

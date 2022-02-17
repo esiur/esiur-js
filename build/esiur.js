@@ -780,7 +780,7 @@ var IEventHandler = /*#__PURE__*/function () {
   }, {
     key: "off",
     value: function off(event, fn) {
-      event = event.toLocaleString();
+      event = event.toLowerCase();
 
       if (this._events[event]) {
         if (fn) {
@@ -876,6 +876,14 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+var _item_destroyed = /*#__PURE__*/new WeakMap();
+
 var AutoList = /*#__PURE__*/function (_IEventHandler) {
   _inherits(AutoList, _IEventHandler);
 
@@ -887,6 +895,14 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
     _classCallCheck(this, AutoList);
 
     _this = _super.call(this);
+
+    _item_destroyed.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: function value(sender) {
+        this.remove(sender);
+      }
+    });
+
     _this.list = [];
     return _this;
   }
@@ -899,7 +915,7 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "add",
     value: function add(value) {
-      if (value instanceof _IDestructible["default"]) value.on("destroy", this._item_destroyed, this);
+      if (value instanceof _IDestructible["default"]) value.on("destroy", _classPrivateFieldGet(this, _item_destroyed), this);
       this.list.push(value);
 
       this._emit("add", value);
@@ -908,8 +924,8 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
     key: "set",
     value: function set(index, value) {
       if (index >= this.list.length || index < 0) return;
-      if (value instanceof _IDestructible["default"]) value.on("destroy", this._item_destroyed, this);
-      if (this.list[index] instanceof _IDestructible["default"]) this.list[index].off("destroy", this._item_destroyed);
+      if (value instanceof _IDestructible["default"]) value.on("destroy", _classPrivateFieldGet(this, _item_destroyed), this);
+      if (this.list[index] instanceof _IDestructible["default"]) this.list[index].off("destroy", _classPrivateFieldGet(this, _item_destroyed));
       this.list[index] = value;
     }
   }, {
@@ -942,15 +958,10 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
     value: function removeAt(index) {
       if (index >= this.list.length || index < 0) return;
       var item = this.list[index];
-      if (item instanceof _IDestructible["default"]) item.off("destroy", this._item_destroyed);
+      if (item instanceof _IDestructible["default"]) item.off("destroy", _classPrivateFieldGet(this, _item_destroyed));
       this.list.splice(index, 1);
 
       this._emit("remove", item);
-    }
-  }, {
-    key: "_item_destroyed",
-    value: function _item_destroyed(sender) {
-      this.remove(sender);
     }
   }]);
 
@@ -960,6 +971,127 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
 exports["default"] = AutoList;
 
 },{"../Core/IDestructible.js":7,"../Core/IEventHandler.js":8}],11:[function(require,module,exports){
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 05/09/2017.
+ */
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _IEventHandler2 = _interopRequireDefault(require("../Core/IEventHandler.js"));
+
+var _IDestructible = _interopRequireDefault(require("../Core/IDestructible.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+var _item_destroyed = /*#__PURE__*/new WeakMap();
+
+var AutoMap = /*#__PURE__*/function (_IEventHandler) {
+  _inherits(AutoMap, _IEventHandler);
+
+  var _super = _createSuper(AutoMap);
+
+  function AutoMap() {
+    var _this;
+
+    _classCallCheck(this, AutoMap);
+
+    _this = _super.call(this);
+
+    _item_destroyed.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: function value(sender) {
+        this.remove(sender);
+      }
+    });
+
+    _this.dic = {};
+    return _this;
+  }
+
+  _createClass(AutoMap, [{
+    key: "add",
+    value: function add(key, value) {
+      if (value instanceof _IDestructible["default"]) value.on("destroy", _classPrivateFieldGet(this, _item_destroyed));
+      this.dic[key] = value;
+
+      this._emit("add", key, value);
+    }
+  }, {
+    key: "set",
+    value: function set(key, value) {
+      if (this.dic[key] !== undefined) this.remove(key);
+      this.add(key, value);
+    }
+  }, {
+    key: "remove",
+    value: function remove(key) {
+      if (this.dic[key] !== undefined) {
+        if (this.dic[key] instanceof _IDestructible["default"]) this.dic[key].off("destroy", _classPrivateFieldGet(this, _item_destroyed));
+        delete this.dic[key];
+      }
+    }
+  }]);
+
+  return AutoMap;
+}(_IEventHandler2["default"]);
+
+exports["default"] = AutoMap;
+
+},{"../Core/IDestructible.js":7,"../Core/IEventHandler.js":8}],12:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1273,7 +1405,7 @@ var BinaryList = /*#__PURE__*/function () {
 
 exports["default"] = BinaryList;
 
-},{"./DataConverter.js":13,"./DataType.js":14}],12:[function(require,module,exports){
+},{"./DataConverter.js":14,"./DataType.js":15}],13:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1336,6 +1468,18 @@ var _IRecord = _interopRequireDefault(require("./IRecord.js"));
 
 var _Record = _interopRequireDefault(require("./Record.js"));
 
+var _ResourceArrayType = _interopRequireDefault(require("./ResourceArrayType.js"));
+
+var _Warehouse = _interopRequireDefault(require("../Resource/Warehouse.js"));
+
+var _TemplateType = _interopRequireDefault(require("../Resource/Template/TemplateType.js"));
+
+var _NotModified = _interopRequireDefault(require("./NotModified.js"));
+
+var _KeyList = _interopRequireDefault(require("./KeyList.js"));
+
+var _StructureArray = _interopRequireDefault(require("./StructureArray.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -1355,8 +1499,8 @@ var Codec = /*#__PURE__*/function () {
     key: "parse",
     value: function parse(data, offset, sizeObject, connection) {
       var dataType = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : _DataType["default"].Unspecified;
-      var size;
-      var reply = new _AsyncReply["default"]();
+      var size; //var reply = new AsyncReply();
+
       var isArray;
       var t;
 
@@ -1441,7 +1585,7 @@ var Codec = /*#__PURE__*/function () {
       } else {
         switch (t) {
           case _DataType["default"].NotModified:
-            return new _AsyncReply["default"](new NotModified());
+            return new _AsyncReply["default"](new _NotModified["default"]());
 
           case _DataType["default"].Void:
             return new _AsyncReply["default"](null);
@@ -1500,14 +1644,15 @@ var Codec = /*#__PURE__*/function () {
           case _DataType["default"].Record:
             return Codec.parseRecord(data, offset, contentLength, connection);
         }
-      }
+      } // @TODO: Throw exception
 
-      return null;
+
+      return new _AsyncReply["default"](null);
     }
   }, {
     key: "parseResource",
     value: function parseResource(data, offset) {
-      return Warehouse.getById(data.getUint32(offset));
+      return _Warehouse["default"].getById(data.getUint32(offset));
     }
   }, {
     key: "parseDistributedResource",
@@ -1537,16 +1682,45 @@ var Codec = /*#__PURE__*/function () {
       }
 
       var end = offset + length; // 
+      //var result = data[offset++];
 
-      var result = data[offset++];
+      var type = data[offset] & 0xF0;
+      var result = data[offset++] & 0xF;
+
+      if (type == _ResourceArrayType["default"].Wrapper) {
+        var classId = data.getGuid(offset);
+        offset += 16;
+
+        var tmp = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Resource); // not mine, look if the type is elsewhere
+
+
+        if (tmp == null) _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Wrapper);
+        reply.arrayType = tmp === null || tmp === void 0 ? void 0 : tmp.definedType;
+      } else if (type == _ResourceArrayType["default"].Static) {
+        var _classId = data.getGuid(offset);
+
+        offset += 16;
+
+        var _tmp = _Warehouse["default"].getTemplateByClassId(_classId, _TemplateType["default"].Wrapper);
+
+        reply.arrayType = _tmp === null || _tmp === void 0 ? void 0 : _tmp.definedType;
+      }
+
       var previous = null;
-      if (result == _ResourceComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _ResourceComparisonResult["default"].Local) {
-        previous = Warehouse.getById(data.getUint32(offset));
+
+      if (result == _ResourceComparisonResult["default"].Empty) {
+        reply.seal();
+        return reply;
+      } else if (result == _ResourceComparisonResult["default"].Null) {
+        previous = new _AsyncReply["default"](null);
+      } else if (result == _ResourceComparisonResult["default"].Local) {
+        previous = _Warehouse["default"].getById(data.getUint32(offset));
         offset += 4;
       } else if (result == _ResourceComparisonResult["default"].Distributed) {
         previous = connection.fetch(data.getUint32(offset));
         offset += 4;
       }
+
       reply.add(previous);
 
       while (offset < end) {
@@ -1558,7 +1732,7 @@ var Codec = /*#__PURE__*/function () {
         } else if (result == _ResourceComparisonResult["default"].Same) {
           current = previous;
         } else if (result == _ResourceComparisonResult["default"].Local) {
-          current = Warehouse.getById(data.getUint32(offset));
+          current = _Warehouse["default"].getById(data.getUint32(offset));
           offset += 4;
         } else if (result == _ResourceComparisonResult["default"].Distributed) {
           current = connection.fetch(data.getUint32(offset));
@@ -1641,7 +1815,7 @@ var Codec = /*#__PURE__*/function () {
   }, {
     key: "parseHistory",
     value: function parseHistory(data, offset, length, resource, connection) {
-      var list = new KeyList();
+      var list = new _KeyList["default"]();
       var reply = new _AsyncReply["default"]();
       var bagOfBags = new _AsyncBag["default"]();
       var ends = offset + length;
@@ -1740,25 +1914,25 @@ var Codec = /*#__PURE__*/function () {
 
         while (contentLength > 0) {
           typelist.push(data[offset]);
-          var rt = {};
-          bag.add(Codec.parse(data, offset, rt, connection));
-          contentLength -= rt.size;
-          offset += rt.size;
+          var _rt = {};
+          bag.add(Codec.parse(data, offset, _rt, connection));
+          contentLength -= _rt.size;
+          offset += _rt.size;
         }
       } else {
-        for (var i = 0; i < keys.length; i++) {
-          keylist.push(keys[i]);
-          typelist.push(types[i]);
+        for (var _i2 = 0; _i2 < keys.length; _i2++) {
+          keylist.push(keys[_i2]);
+          typelist.push(types[_i2]);
         }
 
-        var i = 0;
+        var _i = 0;
 
         while (contentLength > 0) {
-          var rt = {};
-          bag.add(Codec.parse(data, offset, rt, connection, types[i]));
-          contentLength -= rt.size;
-          offset += rt.size;
-          i++;
+          var _rt2 = {};
+          bag.add(Codec.parse(data, offset, _rt2, connection, types[_i]));
+          contentLength -= _rt2.size;
+          offset += _rt2.size;
+          _i++;
         }
       }
 
@@ -1892,8 +2066,8 @@ var Codec = /*#__PURE__*/function () {
           rt.addUint8(key.length).addUint8Array(key).addUint8Array(Codec.compose(value[keys[i]], connection));
         }
       } else {
-        for (var i = 0; i < keys.length; i++) {
-          rt.addUint8Array(Codec.compose(value[keys[i]], connection, includeTypes));
+        for (var _i3 = 0; _i3 < keys.length; _i3++) {
+          rt.addUint8Array(Codec.compose(value[keys[_i3]], connection, includeTypes));
         }
       }
 
@@ -1904,7 +2078,7 @@ var Codec = /*#__PURE__*/function () {
     key: "composeStructureArray",
     value: function composeStructureArray(structures, connection) {
       var prependLength = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      if (structures == null || structures.length == 0 || !(structures instanceof StructureArray)) return new _DataConverter.DC(0);
+      if (structures == null || structures.length == 0 || !(structures instanceof _StructureArray["default"])) return new _DataConverter.DC(0);
       var rt = new _BinaryList["default"]();
       var comparision = _StructureComparisonResult["default"].Structure;
       rt.addUint8(comparision);
@@ -1951,65 +2125,85 @@ var Codec = /*#__PURE__*/function () {
       if (isTyped) {
         var classId = data.getGuid(offset);
         offset += 16;
-        var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
-        reply.arrayType = template.definedType;
+
+        var template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Record);
+
+        reply.arrayType = template === null || template === void 0 ? void 0 : template.definedType;
         var previous = null;
-        if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record || result == _RecordComparisonResult["default"].RecordSameType) {
+
+        if (result == _RecordComparisonResult["default"].Empty) {
+          reply.seal();
+          return reply;
+        } else if (result == _RecordComparisonResult["default"].Null) {
+          previous = new _AsyncReply["default"](null);
+        } else if (result == _RecordComparisonResult["default"].Record || result == _RecordComparisonResult["default"].RecordSameType) {
           var cs = data.getUint32(offset);
           var recordLength = cs;
           offset += 4;
           previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
           offset += recordLength;
         }
+
         reply.add(previous);
 
         while (offset < end) {
           result = data.getUint8(offset++);
           if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record || result == _RecordComparisonResult["default"].RecordSameType) {
-            var cs = data.getUint32(offset);
+            var _cs = data.getUint32(offset);
+
             offset += 4;
-            previous = Codec.parseRecord(data, offset, cs, connection, classId);
-            offset += cs;
+            previous = Codec.parseRecord(data, offset, _cs, connection, classId);
+            offset += _cs;
           } else if (result == _RecordComparisonResult["default"].Same) {// do nothing
           }
           reply.add(previous);
         }
       } else {
-        var previous = null;
-        var classId = null;
-        if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
-          var cs = data.getUint32(offset);
-          var recordLength = cs - 16;
+        var _previous = null;
+        var _classId2 = null;
+
+        if (result == _RecordComparisonResult["default"].Empty) {
+          reply.seal();
+          return reply;
+        } else if (result == _RecordComparisonResult["default"].Null) _previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
+          var _cs2 = data.getUint32(offset);
+
+          var _recordLength = _cs2 - 16;
+
           offset += 4;
-          classId = data.getGuid(offset);
+          _classId2 = data.getGuid(offset);
           offset += 16;
-          previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
-          offset += recordLength;
+          _previous = Codec.parseRecord(data, offset, _recordLength, connection, _classId2);
+          offset += _recordLength;
         }
-        reply.Add(previous);
+
+        reply.add(_previous);
 
         while (offset < end) {
           result = data.getUint8(offset++);
-          if (result == _RecordComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
-            var cs = data.getUint32(offset);
-            var recordLength = cs - 16;
+          if (result == _RecordComparisonResult["default"].Null) _previous = new _AsyncReply["default"](null);else if (result == _RecordComparisonResult["default"].Record) {
+            var _cs3 = data.getUint32(offset);
+
+            var _recordLength2 = _cs3 - 16;
+
             offset += 4;
-            classId = data.getGuid(offset);
+            _classId2 = data.getGuid(offset);
             offset += 16;
-            previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
-            offset += recordLength;
+            _previous = Codec.parseRecord(data, offset, _recordLength2, connection, _classId2);
+            offset += _recordLength2;
           } else if (result == _RecordComparisonResult["default"].RecordSameType) {
-            var cs = data.getUint32(offset);
+            var _cs4 = data.getUint32(offset);
+
             offset += 4;
-            previous = ParseRecord(data, offset, cs, connection, classId);
-            offset += cs;
+            _previous = this.parseRecord(data, offset, _cs4, connection, _classId2);
+            offset += _cs4;
           } else if (result == _RecordComparisonResult["default"].Same) {// do nothing
           }
-          reply.add(previous);
+          reply.add(_previous);
         }
       }
 
-      reply.Seal();
+      reply.seal();
       return reply; // var reply = new AsyncBag();
       // if (length == 0)
       // {
@@ -2076,7 +2270,7 @@ var Codec = /*#__PURE__*/function () {
         length -= 16;
       }
 
-      var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
+      var template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Record);
 
       if (template != null) {
         Codec.parseVarArray(data, offset, length, connection).then(function (ar) {
@@ -2089,13 +2283,13 @@ var Codec = /*#__PURE__*/function () {
 
             reply.trigger(record);
           } else {
-            var record = new _Record["default"]();
+            var _record = new _Record["default"]();
 
-            for (var i = 0; i < template.properties.Length; i++) {
-              record[template.properties[i].name] = ar[i];
+            for (var _i4 = 0; _i4 < template.properties.Length; _i4++) {
+              _record[template.properties[_i4].name] = ar[_i4];
             }
 
-            reply.trigger(record);
+            reply.trigger(_record);
           }
         });
       } else {
@@ -2122,7 +2316,9 @@ var Codec = /*#__PURE__*/function () {
       var includeClassId = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
       var prependLength = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
       var rt = new _BinaryList["default"]();
-      var template = Warehouse.getTemplateByType(record.constructor);
+
+      var template = _Warehouse["default"].getTemplateByType(record.constructor);
+
       if (includeClassId) rt.addGuid(template.classId);
 
       for (var i = 0; i < template.properties.length; i++) {
@@ -2137,9 +2333,11 @@ var Codec = /*#__PURE__*/function () {
     key: "composeRecordArray",
     value: function composeRecordArray(records, connection) {
       var prependLength = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      if (records == null || (records === null || records === void 0 ? void 0 : records.length) == 0) return prependLength ? new _DataConverter.DC(4) : new _DataConverter.DC(0);
-      var rt = new _BinaryList["default"]();
-      var comparsion = Codec.compareRecords(null, records[0]);
+      if (records == null) //|| records?.length == 0)
+        return prependLength ? new _DataConverter.DC(4) : new _DataConverter.DC(0);
+      var rt = new _BinaryList["default"](); //var comparsion = Codec.compareRecords(null, records[0]);
+
+      var comparsion = records.length == 0 ? _RecordComparisonResult["default"].Empty : Codec.compareRecords(null, records[0]);
       rt.addUint8(comparsion);
       if (comparsion == _RecordComparisonResult["default"].Record) rt.addUint8Array(Codec.composeRecord(records[0], connection, true, true));
 
@@ -2169,8 +2367,8 @@ var Codec = /*#__PURE__*/function () {
       var previousTypes = Codec.getStructureDateTypes(previous, connection);
       var nextTypes = Codec.getStructureDateTypes(next, connection);
 
-      for (var i = 0; i < previousTypes.length; i++) {
-        if (previousTypes[i] != nextTypes[i]) return _StructureComparisonResult["default"].StructureSameKeys;
+      for (var _i5 = 0; _i5 < previousTypes.length; _i5++) {
+        if (previousTypes[_i5] != nextTypes[_i5]) return _StructureComparisonResult["default"].StructureSameKeys;
       }
 
       return _StructureComparisonResult["default"].StructureSameTypes;
@@ -2209,10 +2407,10 @@ var Codec = /*#__PURE__*/function () {
     key: "composeResourceArray",
     value: function composeResourceArray(resources, connection) {
       var prependLength = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-      if (resources == null || resources.length == 0) // || !(resources instanceof ResourceArray))
+      if (resources == null) // || resources.length == 0)// || !(resources instanceof ResourceArray))
         return prependLength ? new _DataConverter.DC(4) : new _DataConverter.DC(0);
       var rt = new _BinaryList["default"]();
-      var comparsion = Codec.compareResource(null, resources[0], connection);
+      var comparsion = resources.Length == 0 ? _ResourceComparisonResult["default"].Empty : Codec.compareResource(null, resources[0], connection);
       rt.addUint8(comparsion);
       if (comparsion == _ResourceComparisonResult["default"].Local) rt.addUint32(resources[0]._p.instanceId);else if (comparsion == _ResourceComparisonResult["default"].Distributed) rt.addUint32(resources[0].instance.id);
 
@@ -2269,8 +2467,6 @@ var Codec = /*#__PURE__*/function () {
             return _DataType["default"].Float64;
           }
 
-          break;
-
         case "string":
           return _DataType["default"].String;
 
@@ -2296,8 +2492,6 @@ var Codec = /*#__PURE__*/function () {
           } else {
             return _DataType["default"].Void;
           }
-
-          break;
 
         default:
           return _DataType["default"].Void;
@@ -2341,20 +2535,23 @@ var Codec = /*#__PURE__*/function () {
       while (offset < end) {
         result = data[offset++];
         if (result == _StructureComparisonResult["default"].Null) previous = new _AsyncReply["default"](null);else if (result == _StructureComparisonResult["default"].Structure) {
-          var cs = data.getUint32(offset);
+          var _cs5 = data.getUint32(offset);
+
           offset += 4;
-          previous = Codec.parseStructure(data, offset, cs, connection, metadata);
-          offset += cs;
+          previous = Codec.parseStructure(data, offset, _cs5, connection, metadata);
+          offset += _cs5;
         } else if (result == _StructureComparisonResult["default"].StructureSameKeys) {
-          var cs = data.getUint32(offset);
+          var _cs6 = data.getUint32(offset);
+
           offset += 4;
-          previous = Codec.parseStructure(data, offset, cs, connection, metadata, metadata.keys);
-          offset += cs;
+          previous = Codec.parseStructure(data, offset, _cs6, connection, metadata, metadata.keys);
+          offset += _cs6;
         } else if (result == _StructureComparisonResult["default"].StructureSameTypes) {
-          var cs = data.getUint32(offset);
+          var _cs7 = data.getUint32(offset);
+
           offset += 4;
-          previous = Codec.parseStructure(data, offset, cs, connection, metadata, metadata.keys, metadata.types);
-          offset += cs;
+          previous = Codec.parseStructure(data, offset, _cs7, connection, metadata, metadata.keys, metadata.types);
+          offset += _cs7;
         }
         reply.add(previous);
       }
@@ -2369,7 +2566,7 @@ var Codec = /*#__PURE__*/function () {
 
 exports["default"] = Codec;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Net/IIP/DistributedPropertyContext.js":26,"../Net/IIP/DistributedResource.js":27,"../Resource/IResource.js":45,"./BinaryList.js":11,"./DataConverter.js":13,"./DataType.js":14,"./IRecord.js":16,"./PropertyValue.js":18,"./Record.js":19,"./RecordComparisonResult.js":20,"./ResourceComparisonResult.js":21,"./Structure.js":22,"./StructureComparisonResult.js":24}],13:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Net/IIP/DistributedPropertyContext.js":30,"../Net/IIP/DistributedResource.js":31,"../Resource/IResource.js":55,"../Resource/Template/TemplateType.js":65,"../Resource/Warehouse.js":67,"./BinaryList.js":12,"./DataConverter.js":14,"./DataType.js":15,"./IRecord.js":17,"./KeyList.js":18,"./NotModified.js":19,"./PropertyValue.js":20,"./Record.js":21,"./RecordComparisonResult.js":22,"./ResourceArrayType.js":24,"./ResourceComparisonResult.js":25,"./Structure.js":26,"./StructureArray.js":27,"./StructureComparisonResult.js":28}],14:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3044,7 +3241,7 @@ function BL() {
 
 ;
 
-},{"./BinaryList.js":11,"./Guid.js":15}],14:[function(require,module,exports){
+},{"./BinaryList.js":12,"./Guid.js":16}],15:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3165,7 +3362,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3215,7 +3412,10 @@ var Guid = /*#__PURE__*/function () {
     key: "valueOf",
     value: function valueOf() {
       return this.value.getHex(0, 16);
-    }
+    } // [Symbol.toPrimitive](hint){
+    //     console.log(hint);
+    // }
+
   }]);
 
   return Guid;
@@ -3223,7 +3423,7 @@ var Guid = /*#__PURE__*/function () {
 
 exports["default"] = Guid;
 
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3239,7 +3439,7 @@ var IRecord = function IRecord() {
 
 exports["default"] = IRecord;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3284,9 +3484,29 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+var _item_destroyed = /*#__PURE__*/new WeakMap();
+
 var KeyList = /*#__PURE__*/function () {
   function KeyList() {
     _classCallCheck(this, KeyList);
+
+    _item_destroyed.set(this, {
+      writable: true,
+      value: function value(sender) {
+        for (var i = 0; i < this.values.length; i++) {
+          if (sender == this.values[i]) {
+            this.removeAt(i);
+            break;
+          }
+        }
+      }
+    });
 
     this.keys = [];
     this.values = [];
@@ -3318,25 +3538,17 @@ var KeyList = /*#__PURE__*/function () {
   }, {
     key: "get",
     value: function get(key) {
+      if (key.valueOf != null) key = key.valueOf();
+
       for (var i = 0; i < this.keys.length; i++) {
-        if (this.keys[i] == key) return this.values[i];
-      }
-    }
-  }, {
-    key: "_item_destroyed",
-    value: function _item_destroyed(sender) {
-      for (var i = 0; i < this.values.length; i++) {
-        if (sender == this.values[i]) {
-          this.removeAt(i);
-          break;
-        }
+        if (this.keys[i].valueOf != null) if (this.keys[i].valueOf() == key) return this.values[i];
       }
     }
   }, {
     key: "add",
     value: function add(key, value) {
       this.remove(key);
-      if (value instanceof _IDestructible["default"]) value.on("destroy", this._item_destroyed, this);
+      if (value instanceof _IDestructible["default"]) value.on("destroy", _classPrivateFieldGet(this, _item_destroyed), this);
       this.keys.push(key);
       this.values.push(value);
     }
@@ -3373,7 +3585,7 @@ var KeyList = /*#__PURE__*/function () {
   }, {
     key: "removeAt",
     value: function removeAt(index) {
-      if (this.values[index] instanceof _IDestructible["default"]) this.values[index].off("destroy", this._item_destroyed);
+      if (this.values[index] instanceof _IDestructible["default"]) this.values[index].off("destroy", _classPrivateFieldGet(this, _item_destroyed));
       this.keys.splice(index, 1);
       this.values.splice(index, 1);
     }
@@ -3423,7 +3635,48 @@ var KeyList = /*#__PURE__*/function () {
 
 exports["default"] = KeyList;
 
-},{"../Core/IDestructible.js":7}],18:[function(require,module,exports){
+},{"../Core/IDestructible.js":7}],19:[function(require,module,exports){
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 26/08/2017.
+ */
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NotModified = function NotModified() {
+  _classCallCheck(this, NotModified);
+};
+
+exports["default"] = NotModified;
+
+},{}],20:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3468,7 +3721,7 @@ var PropertyValue = function PropertyValue(value, age, date) {
 
 exports["default"] = PropertyValue;
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -3514,7 +3767,7 @@ var Record = /*#__PURE__*/function (_IRecord) {
 
 exports["default"] = Record;
 
-},{"./IRecord.js":16}],20:[function(require,module,exports){
+},{"./IRecord.js":17}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3526,11 +3779,114 @@ var _default = // const ResourceComparisonResult =
   Null: 0,
   Record: 1,
   RecordSameType: 2,
-  Same: 3
+  Same: 3,
+  Empty: 4
 };
 exports["default"] = _default;
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 26/08/2017.
+ */
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
+
+function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
+
+function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var ResourceArray = /*#__PURE__*/function (_Array) {
+  _inherits(ResourceArray, _Array);
+
+  var _super = _createSuper(ResourceArray);
+
+  function ResourceArray() {
+    _classCallCheck(this, ResourceArray);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(ResourceArray, [{
+    key: "push",
+    value: function push(value) {
+      if (value instanceof IResource) _get(_getPrototypeOf(ResourceArray.prototype), "push", this).call(this, value);else return;
+    }
+  }]);
+
+  return ResourceArray;
+}( /*#__PURE__*/_wrapNativeSuper(Array));
+
+exports["default"] = ResourceArray;
+
+},{}],24:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var _default = {
+  Dynamic: 0x0,
+  Static: 0x10,
+  Wrapper: 0x20
+};
+exports["default"] = _default;
+
+},{}],25:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3542,11 +3898,12 @@ var _default = // const ResourceComparisonResult =
   Null: 0,
   Distributed: 1,
   Local: 2,
-  Same: 3
+  Same: 3,
+  Empty: 4
 };
 exports["default"] = _default;
 
-},{}],22:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3595,6 +3952,11 @@ var Structure = /*#__PURE__*/function () {
   }
 
   _createClass(Structure, [{
+    key: "toArray",
+    value: function toArray() {
+      return this.toPairs();
+    }
+  }, {
     key: "toPairs",
     value: function toPairs() {
       var rt = [];
@@ -3637,7 +3999,7 @@ var Structure = /*#__PURE__*/function () {
 
 exports["default"] = Structure;
 
-},{}],23:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3725,7 +4087,7 @@ var StructureArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = StructureArray;
 
-},{}],24:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3742,7 +4104,7 @@ var _default = //const StructureComparisonResult =
 };
 exports["default"] = _default;
 
-},{}],25:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3795,8 +4157,6 @@ var _AsyncReply = _interopRequireDefault(require("../../Core/AsyncReply.js"));
 
 var _Codec = _interopRequireDefault(require("../../Data/Codec.js"));
 
-var _NetworkBuffer = _interopRequireDefault(require("../NetworkBuffer.js"));
-
 var _KeyList = _interopRequireDefault(require("../../Data/KeyList.js"));
 
 var _AsyncQueue = _interopRequireDefault(require("../../Core/AsyncQueue.js"));
@@ -3845,7 +4205,7 @@ var _ActionType = _interopRequireDefault(require("../../Security/Permissions/Act
 
 var _AsyncException = _interopRequireDefault(require("../../Core/AsyncException.js"));
 
-var _WSSocket = _interopRequireDefault(require("../Sockets/WSSocket.js"));
+var _WSocket = _interopRequireDefault(require("../Sockets/WSocket.js"));
 
 var _ClientAuthentication = _interopRequireDefault(require("../../Security/Authority/ClientAuthentication.js"));
 
@@ -3854,6 +4214,8 @@ var _HostAuthentication = _interopRequireDefault(require("../../Security/Authori
 var _SocketState = _interopRequireDefault(require("../Sockets/SocketState.js"));
 
 var _TemplateType = _interopRequireDefault(require("../../Resource/Template/TemplateType.js"));
+
+var _AsyncBag = _interopRequireDefault(require("../../Core/AsyncBag.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -3887,6 +4249,18 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
+function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
+
+function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
+
+function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
+
+var _instance_resourceDestroyed = /*#__PURE__*/new WeakMap();
+
+var _instance_propertyModified = /*#__PURE__*/new WeakMap();
+
+var _instance_eventOccurred = /*#__PURE__*/new WeakMap();
+
 var DistributedConnection = /*#__PURE__*/function (_IStore) {
   _inherits(DistributedConnection, _IStore);
 
@@ -3898,6 +4272,44 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     _classCallCheck(this, DistributedConnection);
 
     _this = _super.call(this);
+
+    _instance_resourceDestroyed.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: function value(resource) {
+        this._unsubscribe(resource); // compose the packet
+
+
+        this.sendEvent(_IIPPacketEvent["default"].ResourceDestroyed).addUint32(resource.instance.id).done();
+      }
+    });
+
+    _instance_propertyModified.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: function value(resource, name, newValue) {
+        var pt = resource.instance.template.getPropertyTemplateByName(name);
+        if (pt == null) return;
+        this.sendEvent(_IIPPacketEvent["default"].PropertyUpdated).addUint32(resource.instance.id).addUint8(pt.index).addUint8Array(_Codec["default"].compose(newValue, this)).done();
+      }
+    });
+
+    _instance_eventOccurred.set(_assertThisInitialized(_this), {
+      writable: true,
+      value: function value(resource, issuer, receivers, name, args) {
+        var et = resource.instance.template.getEventTemplateByName(name);
+        if (et == null) return;
+
+        if (et.listenable) {
+          // check the client requested listen
+          if (!this.subscriptions.has(resource)) return;
+          if (!this.subscriptions.get(resource).includes(et.index)) return;
+        }
+
+        if (receivers instanceof Function) if (!receivers(this.sessions)) return;
+        if (resource.instance.applicable(this.session, _ActionType["default"].ReceiveEvent, et, issuer) == _Ruling["default"].Denied) return; // compose the packet
+
+        this.sendEvent(_IIPPacketEvent["default"].EventOccurred).addUint32(resource.instance.id).addUint8(et.index).addUint8Array(_Codec["default"].compose(args, this, true)).done();
+      }
+    });
 
     _this._register("ready");
 
@@ -4630,7 +5042,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           var tk = token instanceof Uint8Array ? token : _DataConverter.DC.stringToBytes(token);
           return this.connect(_AuthenticationMethod["default"].Token, null, address, port, null, tokenIndex, tk, domain, secure);
         } else {
-          return this.connect(_AuthenticationMethod["default"].None, null, address, port, null, 0, null, domain);
+          return this.connect(_AuthenticationMethod["default"].None, null, address, port, null, 0, null, domain, secure);
         }
       }
 
@@ -4661,7 +5073,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       }
 
       if (this.session == null) throw new _AsyncException["default"](_ErrorType["default"].Exception, 0, "Session not initialized");
-      if (socket == null) socket = new _WSSocket["default"](); // TCPSocket();
+      if (socket == null) socket = new _WSocket["default"](); // TCPSocket();
 
       if (port > 0) this._port = port;
       if (hostname != null) this._hostname = hostname;
@@ -4728,9 +5140,9 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var resource = _step.value;
-          resource.instance.off("ResourceEventOccurred", this._instance_eventOccurred, this);
-          resource.instance.off("ResourceModified", this._instance_propertyModified, this);
-          resource.instance.off("ResourceDestroyed", this._instance_resourceDestroyed, this);
+          resource.instance.off("ResourceEventOccurred", _classPrivateFieldGet(this, _instance_eventOccurred), this);
+          resource.instance.off("ResourceModified", _classPrivateFieldGet(this, _instance_propertyModified), this);
+          resource.instance.off("ResourceDestroyed", _classPrivateFieldGet(this, _instance_resourceDestroyed), this);
         }
       } catch (err) {
         _iterator.e(err);
@@ -5084,17 +5496,17 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "_subscribe",
     value: function _subscribe(resource) {
-      resource.instance.on("ResourceEventOccurred", this._instance_eventOccurred, this);
-      resource.instance.on("ResourceModified", this._instance_propertyModified, this);
-      resource.instance.on("ResourceDestroyed", this._instance_resourceDestroyed, this);
+      resource.instance.on("ResourceEventOccurred", _classPrivateFieldGet(this, _instance_eventOccurred), this);
+      resource.instance.on("ResourceModified", _classPrivateFieldGet(this, _instance_propertyModified), this);
+      resource.instance.on("ResourceDestroyed", _classPrivateFieldGet(this, _instance_resourceDestroyed), this);
       this.subscriptions.set(resource, []);
     }
   }, {
     key: "_unsubscribe",
     value: function _unsubscribe(resource) {
-      resource.instance.off("ResourceEventOccurred", this._instance_eventOccurred, this);
-      resource.instance.off("ResourceModified", this._instance_propertyModified, this);
-      resource.instance.off("ResourceDestroyed", this._instance_resourceDestroyed, this);
+      resource.instance.off("ResourceEventOccurred", _classPrivateFieldGet(this, _instance_eventOccurred), this);
+      resource.instance.off("ResourceModified", _classPrivateFieldGet(this, _instance_propertyModified), this);
+      resource.instance.off("ResourceDestroyed", _classPrivateFieldGet(this, _instance_resourceDestroyed), this);
       this.subscriptions["delete"](resource);
     }
   }, {
@@ -5891,38 +6303,6 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       } else return new _AsyncReply["default"](null);
     }
   }, {
-    key: "_instance_resourceDestroyed",
-    value: function _instance_resourceDestroyed(resource) {
-      this._unsubscribe(resource); // compose the packet
-
-
-      this.sendEvent(_IIPPacketEvent["default"].ResourceDestroyed).addUint32(resource.instance.id).done();
-    }
-  }, {
-    key: "_instance_propertyModified",
-    value: function _instance_propertyModified(resource, name, newValue) {
-      var pt = resource.instance.template.getPropertyTemplateByName(name);
-      if (pt == null) return;
-      this.sendEvent(_IIPPacketEvent["default"].PropertyUpdated).addUint32(resource.instance.id).addUint8(pt.index).addUint8Array(_Codec["default"].compose(newValue, this)).done();
-    }
-  }, {
-    key: "_instance_eventOccurred",
-    value: function _instance_eventOccurred(resource, issuer, receivers, name, args) {
-      var et = resource.instance.template.getEventTemplateByName(name);
-      if (et == null) return;
-
-      if (et.listenable) {
-        // check the client requested listen
-        if (!this.subscriptions.has(resource)) return;
-        if (!this.subscriptions.get(resource).includes(et.index)) return;
-      }
-
-      if (receivers instanceof Function) if (!receivers(this.sessions)) return;
-      if (resource.instance.applicable(this.session, _ActionType["default"].ReceiveEvent, et, issuer) == _Ruling["default"].Denied) return; // compose the packet
-
-      this.sendEvent(_IIPPacketEvent["default"].EventOccurred).addUint32(resource.instance.id).addUint8(et.index).addUint8Array(_Codec["default"].compose(args, this, true)).done();
-    }
-  }, {
     key: "IIPRequestAddChild",
     value: function IIPRequestAddChild(callback, parentId, childId) {
       var self = this;
@@ -6099,7 +6479,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var rt = new _AsyncReply["default"]();
       var self = this;
       this.sendRequest(_IIPPacketAction["default"].ResourceParents).addUint32(resource._p.instanceId).done().then(function (d) {
-        _Codec["default"].parseResourceArray(d, 0, d.length, this).then(function (resources) {
+        _Codec["default"].parseResourceArray(d, 0, d.length, self).then(function (resources) {
           rt.trigger(resources);
         }).error(function (ex) {
           rt.triggerError(ex);
@@ -6134,7 +6514,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var clearAttributes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       if (resource._p.connection != this) return new _AsyncReply["default"](null);
       var rt = new _AsyncReply["default"]();
-      this.sendRequest(clearAttributes ? _IIPPacketAction["default"].UpdateAllAttributes : _IIPPacketAction["default"].UpdateAttributes).addUint32(resource._p.instanceId).addUint8Array(_Codec["default"].composeStructure(attributes, this, true, true, true)).done().then(function (ar) {
+      this.sendRequest(clearAttributes ? _IIPPacketAction["default"].UpdateAllAttributes : _IIPPacketAction["default"].UpdateAttributes).addUint32(resource._p.instanceId).addUint8Array(_Codec["default"].composeStructure(attributes, this, true, true, true)).done().then(function () {
         rt.trigger(true);
       }).error(function (ex) {
         rt.triggerError(ex);
@@ -6186,7 +6566,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncException.js":2,"../../Core/AsyncQueue.js":3,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../../Core/ProgressType.js":9,"../../Data/Codec.js":12,"../../Data/DataConverter.js":13,"../../Data/KeyList.js":17,"../../Resource/IResource.js":45,"../../Resource/IStore.js":46,"../../Resource/Template/TemplateType.js":55,"../../Resource/Template/TypeTemplate.js":56,"../../Resource/Warehouse.js":57,"../../Security/Authority/Authentication.js":58,"../../Security/Authority/AuthenticationMethod.js":59,"../../Security/Authority/AuthenticationType.js":60,"../../Security/Authority/ClientAuthentication.js":61,"../../Security/Authority/HostAuthentication.js":62,"../../Security/Authority/Session.js":63,"../../Security/Integrity/SHA256.js":64,"../../Security/Permissions/ActionType.js":65,"../../Security/Permissions/Ruling.js":67,"../NetworkBuffer.js":30,"../Packets//IIPPacketReport.js":38,"../Packets/IIPAuthPacket.js":31,"../Packets/IIPAuthPacketAction.js":32,"../Packets/IIPAuthPacketCommand.js":33,"../Packets/IIPPacket.js":34,"../Packets/IIPPacketAction.js":35,"../Packets/IIPPacketCommand.js":36,"../Packets/IIPPacketEvent.js":37,"../SendList.js":39,"../Sockets/SocketState.js":41,"../Sockets/WSSocket.js":42,"./DistributedPropertyContext.js":26,"./DistributedResource.js":27,"./DistributedResourceQueueItem.js":28,"./DistributedResourceQueueItemType.js":29}],26:[function(require,module,exports){
+},{"../../Core/AsyncBag.js":1,"../../Core/AsyncException.js":2,"../../Core/AsyncQueue.js":3,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../../Core/ProgressType.js":9,"../../Data/Codec.js":13,"../../Data/DataConverter.js":14,"../../Data/KeyList.js":18,"../../Resource/IResource.js":55,"../../Resource/IStore.js":56,"../../Resource/Template/TemplateType.js":65,"../../Resource/Template/TypeTemplate.js":66,"../../Resource/Warehouse.js":67,"../../Security/Authority/Authentication.js":68,"../../Security/Authority/AuthenticationMethod.js":69,"../../Security/Authority/AuthenticationType.js":70,"../../Security/Authority/ClientAuthentication.js":71,"../../Security/Authority/HostAuthentication.js":72,"../../Security/Authority/Session.js":73,"../../Security/Integrity/SHA256.js":74,"../../Security/Permissions/ActionType.js":76,"../../Security/Permissions/Ruling.js":78,"../Packets//IIPPacketReport.js":48,"../Packets/IIPAuthPacket.js":41,"../Packets/IIPAuthPacketAction.js":42,"../Packets/IIPAuthPacketCommand.js":43,"../Packets/IIPPacket.js":44,"../Packets/IIPPacketAction.js":45,"../Packets/IIPPacketCommand.js":46,"../Packets/IIPPacketEvent.js":47,"../SendList.js":49,"../Sockets/SocketState.js":51,"../Sockets/WSocket.js":52,"./DistributedPropertyContext.js":30,"./DistributedResource.js":31,"./DistributedResourceQueueItem.js":32,"./DistributedResourceQueueItemType.js":33}],30:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -6234,7 +6614,7 @@ var DistributedPropertyContext = function DistributedPropertyContext(p1, p2) {
 
 exports["default"] = DistributedPropertyContext;
 
-},{}],27:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6519,7 +6899,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedResource;
 
-},{"../../Core//ExceptionCode.js":6,"../../Core/AsyncException.js":2,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Data/Codec.js":12,"../../Data/Structure.js":22,"../../Resource/IResource.js":45,"../../Resource/Template/EventTemplate.js":49,"../Packets//IIPPacketAction.js":35}],28:[function(require,module,exports){
+},{"../../Core//ExceptionCode.js":6,"../../Core/AsyncException.js":2,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Data/Codec.js":13,"../../Data/Structure.js":26,"../../Resource/IResource.js":55,"../../Resource/Template/EventTemplate.js":59,"../Packets//IIPPacketAction.js":45}],32:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6565,7 +6945,7 @@ var DistributedResourceQueueItem = function DistributedResourceQueueItem(resourc
 
 exports["default"] = DistributedResourceQueueItem;
 
-},{}],29:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6578,7 +6958,266 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],30:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
+/*
+* Copyright (c) 2017-2021 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
+/**
+ * Created by Ahmed Zamil on 03/05/2021.
+ */
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _IResource2 = _interopRequireDefault(require("../../Resource/IResource.js"));
+
+var _AsyncReply = _interopRequireDefault(require("../../Core/AsyncReply.js"));
+
+var _Codec = _interopRequireDefault(require("../../Data/Codec.js"));
+
+var _Structure = _interopRequireDefault(require("../../Data/Structure.js"));
+
+var _IIPPacketAction = _interopRequireDefault(require("../Packets//IIPPacketAction.js"));
+
+var _EventTemplate = _interopRequireDefault(require("../../Resource/Template/EventTemplate.js"));
+
+var _AsyncException = _interopRequireDefault(require("../../Core/AsyncException.js"));
+
+var _ExceptionCode = _interopRequireDefault(require("../../Core//ExceptionCode.js"));
+
+var _ErrorType = _interopRequireDefault(require("../../Core/ErrorType.js"));
+
+var _DistributedConnection = _interopRequireDefault(require("./DistributedConnection.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var DistributedServer = /*#__PURE__*/function (_IResource) {
+  _inherits(DistributedServer, _IResource);
+
+  var _super = _createSuper(DistributedServer);
+
+  function DistributedServer() {
+    var _this;
+
+    _classCallCheck(this, DistributedServer);
+
+    _this = _super.call(this);
+    _this.connections = [];
+    return _this;
+  } //@TODO: con.off("close", ...)
+
+
+  _createClass(DistributedServer, [{
+    key: "destroy",
+    value: function destroy() {
+      this.connections = [];
+      this.destroyed = true;
+
+      this._emit("destroy", this);
+    }
+  }, {
+    key: "trigger",
+    value: function trigger(type) {
+      return new _AsyncReply["default"](true);
+    }
+  }, {
+    key: "membership",
+    get: function get() {
+      return this.instance.attributes.get("membership");
+    }
+  }, {
+    key: "entryPoint",
+    get: function get() {
+      return this.instance.attributes.get("entryPoint");
+    }
+  }, {
+    key: "add",
+    value: function add() {
+      var self = this;
+      var con = new _DistributedConnection["default"](this);
+      con.on("close", function () {
+        return self.remove(con);
+      });
+      this.connections.push(con);
+      return con;
+    }
+  }, {
+    key: "remove",
+    value: function remove(connection) {
+      var i = this.connections.indexOf(connection);
+      if (i > -1) this.connections.splice(i, 1);
+    }
+  }]);
+
+  return DistributedServer;
+}(_IResource2["default"]);
+
+exports["default"] = DistributedServer;
+
+},{"../../Core//ExceptionCode.js":6,"../../Core/AsyncException.js":2,"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Data/Codec.js":13,"../../Data/Structure.js":26,"../../Resource/IResource.js":55,"../../Resource/Template/EventTemplate.js":59,"../Packets//IIPPacketAction.js":45,"./DistributedConnection.js":29}],35:[function(require,module,exports){
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _IResource2 = _interopRequireDefault(require("../../Resource/IResource.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var EntryPoint = /*#__PURE__*/function (_IResource) {
+  _inherits(EntryPoint, _IResource);
+
+  var _super = _createSuper(EntryPoint);
+
+  function EntryPoint() {
+    _classCallCheck(this, EntryPoint);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(EntryPoint, [{
+    key: "query",
+    value: function query(path, sender) {}
+  }, {
+    key: "create",
+    value: function create() {}
+  }]);
+
+  return EntryPoint;
+}(_IResource2["default"]);
+
+exports["default"] = EntryPoint;
+
+},{"../../Resource/IResource.js":55}],36:[function(require,module,exports){
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _IDestructible2 = _interopRequireDefault(require("../Core/IDestructible.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var INetworkReceiver = /*#__PURE__*/function (_IDestructible) {
+  _inherits(INetworkReceiver, _IDestructible);
+
+  var _super = _createSuper(INetworkReceiver);
+
+  function INetworkReceiver() {
+    _classCallCheck(this, INetworkReceiver);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(INetworkReceiver, [{
+    key: "networkClose",
+    value: function networkClose(sender) {}
+  }, {
+    key: "networkReceive",
+    value: function networkReceive(sender, buffer) {}
+  }, {
+    key: "networkConnect",
+    value: function networkConnect(sender) {}
+  }]);
+
+  return INetworkReceiver;
+}(_IDestructible2["default"]);
+
+exports["default"] = INetworkReceiver;
+
+},{"../Core/IDestructible.js":7}],37:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6716,7 +7355,85 @@ var NetworkBuffer = /*#__PURE__*/function () {
 
 exports["default"] = NetworkBuffer;
 
-},{"../Data/DataConverter.js":13}],31:[function(require,module,exports){
+},{"../Data/DataConverter.js":14}],38:[function(require,module,exports){
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _INetworkReceiver2 = _interopRequireDefault(require("./INetworkReceiver.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var NetowrkConnection = /*#__PURE__*/function (_INetworkReceiver) {
+  _inherits(NetowrkConnection, _INetworkReceiver);
+
+  var _super = _createSuper(NetowrkConnection);
+
+  function NetowrkConnection() {
+    _classCallCheck(this, NetowrkConnection);
+
+    return _super.apply(this, arguments);
+  }
+
+  return NetowrkConnection;
+}(_INetworkReceiver2["default"]);
+
+exports["default"] = NetowrkConnection;
+
+},{"./INetworkReceiver.js":36}],39:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NetworkServer = function NetworkServer() {
+  _classCallCheck(this, NetworkServer);
+};
+
+exports["default"] = NetworkServer;
+
+},{}],40:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NetworkSession = function NetworkSession() {
+  _classCallCheck(this, NetworkSession);
+};
+
+exports["default"] = NetworkSession;
+
+},{}],41:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -6906,7 +7623,7 @@ var IIPAuthPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPAuthPacket;
 
-},{"../../Security/Authority/AuthenticationMethod.js":59,"./IIPAuthPacketAction.js":32,"./IIPAuthPacketCommand.js":33}],32:[function(require,module,exports){
+},{"../../Security/Authority/AuthenticationMethod.js":69,"./IIPAuthPacketAction.js":42,"./IIPAuthPacketCommand.js":43}],42:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6923,7 +7640,7 @@ var _default = // const IIPAuthPacketAction =
 };
 exports["default"] = _default;
 
-},{}],33:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6939,7 +7656,7 @@ var _default = //const IIPAuthPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],34:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -7342,7 +8059,7 @@ var IIPPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPPacket;
 
-},{"../../Data/DataType.js":14,"./IIPPacketAction.js":35,"./IIPPacketCommand.js":36,"./IIPPacketEvent.js":37,"./IIPPacketReport.js":38}],35:[function(require,module,exports){
+},{"../../Data/DataType.js":15,"./IIPPacketAction.js":45,"./IIPPacketCommand.js":46,"./IIPPacketEvent.js":47,"./IIPPacketReport.js":48}],45:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7385,7 +8102,7 @@ var _default = // const IIPPacketAction =
 };
 exports["default"] = _default;
 
-},{}],36:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7401,7 +8118,7 @@ var _default = // IIPPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],37:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7424,7 +8141,7 @@ var IIPPacketEvent = {
 var _default = IIPPacketEvent;
 exports["default"] = _default;
 
-},{}],38:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7440,7 +8157,7 @@ var IIPPacketReport = {
 var _default = IIPPacketReport;
 exports["default"] = _default;
 
-},{}],39:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -7528,7 +8245,7 @@ var SendList = /*#__PURE__*/function (_BinaryList) {
 
 exports["default"] = SendList;
 
-},{"../Data/BinaryList.js":11}],40:[function(require,module,exports){
+},{"../Data/BinaryList.js":12}],50:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -7625,7 +8342,7 @@ var ISocket = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = ISocket;
 
-},{"../../Core/IDestructible.js":7,"./SocketState.js":41}],41:[function(require,module,exports){
+},{"../../Core/IDestructible.js":7,"./SocketState.js":51}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7641,7 +8358,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],42:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -7685,17 +8402,17 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-var WSSocket = /*#__PURE__*/function (_ISocket) {
-  _inherits(WSSocket, _ISocket);
+var WSocket = /*#__PURE__*/function (_ISocket) {
+  _inherits(WSocket, _ISocket);
 
-  var _super = _createSuper(WSSocket);
+  var _super = _createSuper(WSocket);
 
   //SocketState State { get; }
   //INetworkReceiver<ISocket> Receiver { get; set; }
-  function WSSocket(websocket) {
+  function WSocket(websocket) {
     var _this;
 
-    _classCallCheck(this, WSSocket);
+    _classCallCheck(this, WSocket);
 
     _this = _super.call(this);
     _this.receiveNetworkBuffer = new _NetworkBuffer["default"]();
@@ -7721,13 +8438,13 @@ var WSSocket = /*#__PURE__*/function (_ISocket) {
     return _this;
   }
 
-  _createClass(WSSocket, [{
+  _createClass(WSocket, [{
     key: "destroy",
     value: function destroy() {
       this.close();
       this.receiveNetworkBuffer = null;
       this.receiver = null;
-      thsi.ws = null;
+      this.ws = null;
 
       this._emit("destroy");
     }
@@ -7837,7 +8554,7 @@ var WSSocket = /*#__PURE__*/function (_ISocket) {
     }
   }]);
 
-  return WSSocket;
+  return WSocket;
 }(_ISocket2["default"]); // if (this.holdSending) {
 //     //console.log("hold ", data.length);
 //     this.sendBuffer.writeAll(data);
@@ -7846,9 +8563,9 @@ var WSSocket = /*#__PURE__*/function (_ISocket) {
 //     //console.log("Send", data.length);
 
 
-exports["default"] = WSSocket;
+exports["default"] = WSocket;
 
-},{"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../NetworkBuffer.js":30,"./ISocket.js":40,"./SocketState.js":41}],43:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":4,"../../Core/ErrorType.js":5,"../../Core/ExceptionCode.js":6,"../NetworkBuffer.js":37,"./ISocket.js":50,"./SocketState.js":51}],53:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -7909,7 +8626,7 @@ exports["default"] = ResourceProxy;
 
 _defineProperty(ResourceProxy, "cache", {});
 
-},{"../Resource/Warehouse.js":57}],44:[function(require,module,exports){
+},{"../Resource/Warehouse.js":67}],54:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -7954,7 +8671,7 @@ var CustomResourceEvent = function CustomResourceEvent(issuer, receivers, args) 
 
 exports["default"] = CustomResourceEvent;
 
-},{}],45:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8061,7 +8778,7 @@ var IResource = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = IResource;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IDestructible.js":7}],46:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IDestructible.js":7}],56:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8156,7 +8873,7 @@ var IStore = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = IStore;
 
-},{"./IResource.js":45}],47:[function(require,module,exports){
+},{"./IResource.js":55}],57:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8516,7 +9233,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = Instance;
 
-},{"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/KeyList.js":17,"../Data/PropertyValue.js":18,"../Data/Structure.js":22,"../Data/StructureArray.js":23,"../Security/Permissions/IPermissionsManager.js":66,"../Security/Permissions/Ruling.js":67,"./CustomResourceEvent.js":44,"./Warehouse.js":57}],48:[function(require,module,exports){
+},{"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/KeyList.js":18,"../Data/PropertyValue.js":20,"../Data/Structure.js":26,"../Data/StructureArray.js":27,"../Security/Permissions/IPermissionsManager.js":77,"../Security/Permissions/Ruling.js":78,"./CustomResourceEvent.js":54,"./Warehouse.js":67}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8576,7 +9293,7 @@ var ArgumentTemplate = /*#__PURE__*/function () {
 
 exports["default"] = ArgumentTemplate;
 
-},{"../../Data/BinaryList.js":11,"../../Data/DataConverter.js":13,"./TemplateDataType.js":54}],49:[function(require,module,exports){
+},{"../../Data/BinaryList.js":12,"../../Data/DataConverter.js":14,"./TemplateDataType.js":64}],59:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8678,7 +9395,7 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = EventTemplate;
 
-},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":51,"./MemberType.js":52}],50:[function(require,module,exports){
+},{"../../Data/DataConverter.js":14,"./MemberTemplate.js":61,"./MemberType.js":62}],60:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8787,7 +9504,7 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = FunctionTemplate;
 
-},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":51,"./MemberType.js":52}],51:[function(require,module,exports){
+},{"../../Data/DataConverter.js":14,"./MemberTemplate.js":61,"./MemberType.js":62}],61:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8847,7 +9564,7 @@ var MemberTemplate = /*#__PURE__*/function () {
 
 exports["default"] = MemberTemplate;
 
-},{"../../Data/DataConverter.js":13}],52:[function(require,module,exports){
+},{"../../Data/DataConverter.js":14}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8861,7 +9578,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],53:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8981,7 +9698,7 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = PropertyTemplate;
 
-},{"../../Data/DataConverter.js":13,"./MemberTemplate.js":51,"./MemberType.js":52}],54:[function(require,module,exports){
+},{"../../Data/DataConverter.js":14,"./MemberTemplate.js":61,"./MemberType.js":62}],64:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9100,7 +9817,7 @@ exports["default"] = TemplateDataType;
 
 _defineProperty(TemplateDataType, "typesDefinitions", ["var", "bool", "sbyte", "byte", "char", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "date", "resource", "DistributedResource", "ResourceLink", "string", "structure"]);
 
-},{"../../Data/DataConverter.js":13,"../../Data/DataType.js":14,"../../Data/IRecord.js":16,"../../Data/Structure.js":22,"../IResource.js":45,"./TypeTemplate.js":56}],55:[function(require,module,exports){
+},{"../../Data/DataConverter.js":14,"../../Data/DataType.js":15,"../../Data/IRecord.js":17,"../../Data/Structure.js":26,"../IResource.js":55,"./TypeTemplate.js":66}],65:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9115,7 +9832,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],56:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9164,6 +9881,10 @@ var _IRecord = _interopRequireDefault(require("../../Data/IRecord.js"));
 
 var _TemplateType = _interopRequireDefault(require("./TemplateType.js"));
 
+var _Warehouse = _interopRequireDefault(require("../Warehouse.js"));
+
+var _DistributedConnection = _interopRequireDefault(require("../../Net/IIP/DistributedConnection.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -9197,7 +9918,8 @@ var TypeTemplate = /*#__PURE__*/function () {
       var pt = new _PropertyTemplate["default"]();
       pt.name = pi[0];
       pt.index = i;
-      pt.valueType = _TemplateDataType["default"].fromType(pi[1]), pt.readExpansion = (_pi$ = pi[2]) === null || _pi$ === void 0 ? void 0 : _pi$.read;
+      pt.valueType = _TemplateDataType["default"].fromType(pi[1]);
+      pt.readExpansion = (_pi$ = pi[2]) === null || _pi$ === void 0 ? void 0 : _pi$.read;
       pt.writeExpansion = (_pi$2 = pi[2]) === null || _pi$2 === void 0 ? void 0 : _pi$2.write;
       pt.recordable = (_pi$3 = pi[2]) === null || _pi$3 === void 0 ? void 0 : _pi$3.recordable;
       pt.propertyInfo = pi;
@@ -9206,14 +9928,14 @@ var TypeTemplate = /*#__PURE__*/function () {
 
     if (this.templateType == _TemplateType["default"].Resource) {
       if (template.events != null) {
-        for (var i = 0; i < template.events.length; i++) {
+        for (var _i = 0; _i < template.events.length; _i++) {
           var _ei$, _ei$2;
 
           // [name, type, {listenable: true/false, help: ""}]
-          var ei = template.events[i];
+          var ei = template.events[_i];
           var et = new _EventTemplate["default"]();
           et.name = ei[0];
-          et.index = i;
+          et.index = _i;
           et.argumentType = _TemplateDataType["default"].fromType(ei[1]), et.expansion = (_ei$ = ei[2]) === null || _ei$ === void 0 ? void 0 : _ei$.help;
           et.listenable = (_ei$2 = ei[2]) === null || _ei$2 === void 0 ? void 0 : _ei$2.listenable;
           et.eventInfo = ei;
@@ -9222,12 +9944,12 @@ var TypeTemplate = /*#__PURE__*/function () {
       }
 
       if (template.functions != null) {
-        for (var i = 0; i < template.functions.length; i++) {
-          var fi = template.functions[i]; // [name, {param1: type, param2: int}, returnType, "Description"]
+        for (var _i2 = 0; _i2 < template.functions.length; _i2++) {
+          var fi = template.functions[_i2]; // [name, {param1: type, param2: int}, returnType, "Description"]
 
           var ft = new _FunctionTemplate["default"]();
           ft.name = fi[0];
-          ft.index = i;
+          ft.index = _i2;
           ft.returnType = _TemplateDataType["default"].fromType(fi[2]);
           ft.expansion = fi[3];
           ft.arguments = [];
@@ -9243,18 +9965,18 @@ var TypeTemplate = /*#__PURE__*/function () {
     } // append signals
 
 
-    for (var i = 0; i < this.events.length; i++) {
-      this.members.push(this.events[i]);
+    for (var _i3 = 0; _i3 < this.events.length; _i3++) {
+      this.members.push(this.events[_i3]);
     } // append slots
 
 
-    for (var i = 0; i < this.functions.length; i++) {
-      this.members.push(this.functions[i]);
+    for (var _i4 = 0; _i4 < this.functions.length; _i4++) {
+      this.members.push(this.functions[_i4]);
     } // append properties
 
 
-    for (var i = 0; i < this.properties.length; i++) {
-      this.members.push(this.properties[i]);
+    for (var _i5 = 0; _i5 < this.properties.length; _i5++) {
+      this.members.push(this.properties[_i5]);
     } // bake it binarily
 
 
@@ -9264,16 +9986,16 @@ var TypeTemplate = /*#__PURE__*/function () {
 
     b.addUint8(this.templateType).addUint8Array(this.classId.value).addUint8(cls.length).addUint8Array(cls).addUint32(template.version).addUint16(this.members.length);
 
-    for (var i = 0; i < this.functions.length; i++) {
-      b.addUint8Array(this.functions[i].compose());
+    for (var _i6 = 0; _i6 < this.functions.length; _i6++) {
+      b.addUint8Array(this.functions[_i6].compose());
     }
 
-    for (var i = 0; i < this.properties.length; i++) {
-      b.addUint8Array(this.properties[i].compose());
+    for (var _i7 = 0; _i7 < this.properties.length; _i7++) {
+      b.addUint8Array(this.properties[_i7].compose());
     }
 
-    for (var i = 0; i < this.events.length; i++) {
-      b.addUint8Array(this.events[i].compose());
+    for (var _i8 = 0; _i8 < this.events.length; _i8++) {
+      b.addUint8Array(this.events[_i8].compose());
     }
 
     this.content = b.toArray();
@@ -9345,15 +10067,20 @@ var TypeTemplate = /*#__PURE__*/function () {
      }
      */
 
+  }, {
+    key: "type",
+    get: function get() {
+      return this.templateType;
+    }
   }], [{
     key: "getTypeGuid",
     value: function getTypeGuid(type) {
-      return getTypeGuidByName(type.template.namespace + "." + type.prototype.constructor.name);
+      return this.getTypeGuidByName(type.template.namespace + "." + type.prototype.constructor.name);
     }
   }, {
     key: "getTypeGuidByName",
     value: function getTypeGuidByName(typeName) {
-      return _SHA["default"].compute(_DataConverter.DC.stringToBytes(this.className)).getGuid(0);
+      return _SHA["default"].compute(_DataConverter.DC.stringToBytes(typeName)).getGuid(0);
     }
   }, {
     key: "getDependencies",
@@ -9366,8 +10093,9 @@ var TypeTemplate = /*#__PURE__*/function () {
         if (template.definedType == null) return; // functions
 
         for (var i = 0; i < tmp.functions.length; i++) {
-          f = tmp.functions[i];
-          var frtt = Warehouse.getTemplateByType(f.methodInfo.returnType);
+          var ft = tmp.functions[i];
+
+          var frtt = _Warehouse["default"].getTemplateByType(ft.methodInfo.returnType);
 
           if (frtt != null) {
             if (!bag.includes(frtt)) {
@@ -9377,10 +10105,10 @@ var TypeTemplate = /*#__PURE__*/function () {
             }
           }
 
-          var args = f.methodInfo.parameters;
+          var args = ft.methodInfo.parameters;
 
-          for (var i = 0; i < args.length - 1; i++) {
-            var fpt = Warehouse.getTemplateByType(args[i].parameterType);
+          for (var j = 0; j < args.length - 1; j++) {
+            var fpt = _Warehouse["default"].getTemplateByType(args[j].parameterType);
 
             if (fpt != null) {
               if (!bag.includes(fpt)) {
@@ -9395,14 +10123,14 @@ var TypeTemplate = /*#__PURE__*/function () {
           if (args.length > 0) {
             var last = args[args.length - 1];
 
-            if (last.parameterType == DistributedConnection) {
-              var fpt = Warehouse.getTemplateByType(last.parameterType);
+            if (last.parameterType == _DistributedConnection["default"]) {
+              var _fpt = _Warehouse["default"].getTemplateByType(last.parameterType);
 
-              if (fpt != null) {
-                if (!bag.includes(fpt)) {
-                  bag.push(fpt);
+              if (_fpt != null) {
+                if (!bag.includes(_fpt)) {
+                  bag.push(_fpt);
 
-                  _getDependenciesFunc(fpt, bag);
+                  _getDependenciesFunc(_fpt, bag);
                 }
               }
             }
@@ -9410,9 +10138,10 @@ var TypeTemplate = /*#__PURE__*/function () {
         } // properties
 
 
-        for (var i = 0; i < tmp.properties.length; i++) {
-          var p = tmp.properties[i];
-          var pt = Warehouse.getTemplateByType(p.propertyInfo.propertyType);
+        for (var _i9 = 0; _i9 < tmp.properties.length; _i9++) {
+          var p = tmp.properties[_i9];
+
+          var pt = _Warehouse["default"].getTemplateByType(p.propertyInfo.propertyType);
 
           if (pt != null) {
             if (!bag.includes(pt)) {
@@ -9424,9 +10153,10 @@ var TypeTemplate = /*#__PURE__*/function () {
         } // events
 
 
-        for (var i = 0; i < tmp.events.length; i++) {
-          var e = tmp.events[i];
-          var et = Warehouse.getTemplateByType(e.eventInfo.eventHandlerType);
+        for (var _i10 = 0; _i10 < tmp.events.length; _i10++) {
+          var e = tmp.events[_i10];
+
+          var et = _Warehouse["default"].getTemplateByType(e.eventInfo.eventHandlerType);
 
           if (et != null) {
             if (!bag.includes(et)) {
@@ -9445,7 +10175,8 @@ var TypeTemplate = /*#__PURE__*/function () {
   }, {
     key: "getFunctionParameters",
     value: function getFunctionParameters(func) {
-      var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
+      var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,)]*))/mg; //var STRIP_COMMENTS = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)|(\s*=[^,\)]*(('(?:\\'|[^'\r\n])*')|("(?:\\"|[^"\r\n])*"))|(\s*=[^,\)]*))/mg;
+
       var ARGUMENT_NAMES = /([^\s,]+)/g;
       var fnStr = func.toString().replace(STRIP_COMMENTS, '');
       var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
@@ -9465,9 +10196,9 @@ var TypeTemplate = /*#__PURE__*/function () {
     value: function parse(data) {
       var offset = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
       var contentLength = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : -1;
-      if (contentLength == -1) contentLength = data.length;
-      var ends = offset + contentLength;
-      var oOffset = offset; // start parsing...
+      if (contentLength == -1) contentLength = data.length; //var ends = offset + contentLength;
+      //var oOffset = offset;
+      // start parsing...
 
       var od = new TypeTemplate();
       od.content = data.clip(offset, contentLength);
@@ -9508,11 +10239,11 @@ var TypeTemplate = /*#__PURE__*/function () {
 
             for (var a = 0; a < argsCount; a++) {
               var _ArgumentTemplate$par = _ArgumentTemplate["default"].parse(data, offset),
-                  size = _ArgumentTemplate$par.size,
+                  argSize = _ArgumentTemplate$par.size,
                   argType = _ArgumentTemplate$par.value;
 
               args.push(argType);
-              offset += size;
+              offset += argSize;
             }
 
             ft.arguments = args;
@@ -9534,31 +10265,35 @@ var TypeTemplate = /*#__PURE__*/function () {
             var hasWriteExpansion = (data.getUint8(offset) & 0x10) == 0x10;
             pt.recordable = (data.getUint8(offset) & 1) == 1;
             pt.permission = data.getUint8(offset++) >> 1 & 0x3;
-            var len = data.getUint8(offset++);
-            pt.name = data.getString(offset, len);
-            offset += len;
+
+            var _len = data.getUint8(offset++);
+
+            pt.name = data.getString(offset, _len);
+            offset += _len;
 
             var _TemplateDataType$par2 = _TemplateDataType["default"].parse(data, offset),
-                size = _TemplateDataType$par2.size,
+                _size = _TemplateDataType$par2.size,
                 valueType = _TemplateDataType$par2.value;
 
-            offset += size;
+            offset += _size;
             pt.valueType = valueType;
 
             if (hasReadExpansion) // expansion ?
               {
-                var cs = data.getUint32(offset);
+                var _cs = data.getUint32(offset);
+
                 offset += 4;
-                pt.readExpansion = data.getString(offset, cs);
-                offset += cs;
+                pt.readExpansion = data.getString(offset, _cs);
+                offset += _cs;
               }
 
             if (hasWriteExpansion) // expansion ?
               {
-                var cs = data.getUint32(offset);
+                var _cs2 = data.getUint32(offset);
+
                 offset += 4;
-                pt.writeExpansion = data.getString(offset, cs);
-                offset += cs;
+                pt.writeExpansion = data.getString(offset, _cs2);
+                offset += _cs2;
               }
 
             od.properties.push(pt);
@@ -9566,25 +10301,30 @@ var TypeTemplate = /*#__PURE__*/function () {
           {
             var et = new _EventTemplate["default"]();
             et.index = eventIndex++;
-            var hasExpansion = (data.getUint8(offset) & 0x10) == 0x10;
+
+            var _hasExpansion = (data.getUint8(offset) & 0x10) == 0x10;
+
             et.listenable = (data.getUint8(offset++) & 0x8) == 0x8;
-            var len = data.getUint8(offset++);
-            et.name = data.getString(offset, len);
-            offset += len;
+
+            var _len2 = data.getUint8(offset++);
+
+            et.name = data.getString(offset, _len2);
+            offset += _len2;
 
             var _TemplateDataType$par3 = _TemplateDataType["default"].parse(data, offset),
-                size = _TemplateDataType$par3.size,
-                argType = _TemplateDataType$par3.value;
+                _size2 = _TemplateDataType$par3.size,
+                _argType = _TemplateDataType$par3.value;
 
-            offset += size;
-            et.argumentType = argType;
+            offset += _size2;
+            et.argumentType = _argType;
 
-            if (hasExpansion) // expansion ?
+            if (_hasExpansion) // expansion ?
               {
-                var cs = data.getUint32(offset);
+                var _cs3 = data.getUint32(offset);
+
                 offset += 4;
-                et.expansion = data.getString(offset, cs);
-                offset += cs;
+                et.expansion = data.getString(offset, _cs3);
+                offset += _cs3;
               }
 
             od.events.push(et);
@@ -9592,18 +10332,18 @@ var TypeTemplate = /*#__PURE__*/function () {
       } // append signals
 
 
-      for (var i = 0; i < od.events.length; i++) {
-        od.members.push(od.events[i]);
+      for (var _i11 = 0; _i11 < od.events.length; _i11++) {
+        od.members.push(od.events[_i11]);
       } // append slots
 
 
-      for (var i = 0; i < od.functions.length; i++) {
-        od.members.push(od.functions[i]);
+      for (var _i12 = 0; _i12 < od.functions.length; _i12++) {
+        od.members.push(od.functions[_i12]);
       } // append properties
 
 
-      for (var i = 0; i < od.properties.length; i++) {
-        od.members.push(od.properties[i]);
+      for (var _i13 = 0; _i13 < od.properties.length; _i13++) {
+        od.members.push(od.properties[_i13]);
       }
 
       return od;
@@ -9615,7 +10355,7 @@ var TypeTemplate = /*#__PURE__*/function () {
 
 exports["default"] = TypeTemplate;
 
-},{"../../Data/DataConverter.js":13,"../../Data/IRecord.js":16,"../../Security/Integrity/SHA256.js":64,"../IResource.js":45,"./ArgumentTemplate.js":48,"./EventTemplate.js":49,"./FunctionTemplate.js":50,"./PropertyTemplate.js":53,"./TemplateDataType.js":54,"./TemplateType.js":55}],57:[function(require,module,exports){
+},{"../../Data/DataConverter.js":14,"../../Data/IRecord.js":17,"../../Net/IIP/DistributedConnection.js":29,"../../Security/Integrity/SHA256.js":74,"../IResource.js":55,"../Warehouse.js":67,"./ArgumentTemplate.js":58,"./EventTemplate.js":59,"./FunctionTemplate.js":60,"./PropertyTemplate.js":63,"./TemplateDataType.js":64,"./TemplateType.js":65}],67:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9678,6 +10418,8 @@ var _IRecord = _interopRequireDefault(require("../Data/IRecord.js"));
 
 var _TemplateType = _interopRequireDefault(require("./Template/TemplateType.js"));
 
+var _DistributedResource = _interopRequireDefault(require("../Net/IIP/DistributedResource.js"));
+
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -9735,9 +10477,10 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     _this._register("connected");
 
     _this._register("disconnected"); ///this._urlRegex = /^(?:([\S]*):\/\/([^\/]*)\/?)/;
+    //        this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
 
 
-    _this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
+    _this._urlRegex = /^(?:([^\s|:]*):\/\/([^/]*)\/?)/;
     return _this;
   }
 
@@ -9763,10 +10506,11 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
       var res = new proxyType();
       if (properties != null) Object.assign(res, properties);
+      if (properties != null) Object.assign(res, properties);
 
       if (store != null || parent != null || res instanceof _IStore["default"]) {
         var rt = new _AsyncReply["default"]();
-        this.put(name, res, store, parent, null, 0, manager, attributes).then(function (ok) {
+        this.put(name, res, store, parent, null, 0, manager, attributes).then(function () {
           return rt.trigger(res);
         }).error(function (ex) {
           return rt.triggerError(ex);
@@ -9783,12 +10527,11 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     }
   }, {
     key: "get",
-    value: function get(path) {
+    value: function get(path) //, parent = null, manager = null)
+    {
       var attributes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-      var parent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-      var manager = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-      var rt = new _AsyncReply["default"]();
-      var self = this; // Should we create a new store ?
+      var rt = new _AsyncReply["default"](); // var self = this;
+      // Should we create a new store ?
 
       if (path.match(this._urlRegex)) {
         // with port
@@ -9811,7 +10554,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
         if (handler = this.protocols.item(url[1])) {
           if (!this.warehouseIsOpen) {
-            this.open().then(function (ok) {
+            this.open().then(function () {
               initResource();
             }).error(function (ex) {
               return rt.triggerError(ex);
@@ -9849,8 +10592,8 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
           }
         }
 
-        if (toBeRemoved != null) for (var i = 0; i < toBeRemoved.length; i++) {
-          this.remove(toBeRemoved[i]);
+        if (toBeRemoved != null) for (var _i = 0; _i < toBeRemoved.length; _i++) {
+          this.remove(toBeRemoved[_i]);
         }
 
         this._emit("disconnected", resource);
@@ -9868,9 +10611,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
       var manager = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
       var attributes = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
       var rt = new _AsyncReply["default"]();
-      resource.instance = new _Instance["default"](this.resourceCounter++, name, resource, store, customTemplate, age); //resource.instance.children.on("add", Warehouse._onChildrenAdd).on("remove", Warehouse._onChildrenRemove);
-      //resource.instance.parents.on("add", Warehouse._onParentsAdd).on("remove", Warehouse._onParentsRemove);
-
+      resource.instance = new _Instance["default"](this.resourceCounter++, name, resource, store, customTemplate, age);
       if (attributes != null) resource.instance.setAttributes(attributes);
       if (manager != null) resource.instance.managers.add(manager);
 
@@ -9886,8 +10627,8 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
         self.resources.add(resource.instance.id, resource);
 
         if (self.warehouseIsOpen) {
-          resource.trigger(_IResource.ResourceTrigger.Initialize).then(function (x) {
-            if (resource instanceof _IStore["default"]) resource.trigger(_IResource.ResourceTrigger.Open).then(function (y) {
+          resource.trigger(_IResource.ResourceTrigger.Initialize).then(function () {
+            if (resource instanceof _IStore["default"]) resource.trigger(_IResource.ResourceTrigger.Open).then(function () {
               rt.trigger(true);
 
               self._emit("connected", resource);
@@ -9908,7 +10649,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
       if (resource instanceof _IStore["default"]) {
         this.stores.add(resource);
         initResource();
-      } else store.put(resource).then(function (ok) {
+      } else store.put(resource).then(function () {
         initResource();
       }).error(function (ex) {
         // failed to put
@@ -9947,7 +10688,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     key: "getTemplateByType",
     value: function getTemplateByType(type) {
       var templateType = _TemplateType["default"].Unspecified;
-      if (type.prototype instanceof DistributedResource) templateType = _TemplateType["default"].Wrapper;
+      if (type.prototype instanceof _DistributedResource["default"]) templateType = _TemplateType["default"].Wrapper;
       if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else return null;
       if (type == _IResource["default"] || type == _IRecord["default"]) return null;
       if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false;
@@ -9970,15 +10711,15 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
       if (templateType == _TemplateType["default"].Unspecified) {
         // look in resources
-        var template = templates.get(_TemplateType["default"].Resource).get(classId);
+        var template = this.templates.get(_TemplateType["default"].Resource).get(classId);
         if (template != null) return template; // look in records
 
-        template = templates.get(_TemplateType["default"].Record).get(classId);
+        template = this.templates.get(_TemplateType["default"].Record).get(classId);
         if (template != null) return template; // look in wrappers
 
-        template = templates.get(_TemplateType["default"].Wrapper).get(classId);
+        template = this.templates.get(_TemplateType["default"].Wrapper).get(classId);
         return template;
-      } else return templates.get(templateType).get(classId);
+      } else return this.templates.get(templateType).get(classId);
     }
   }, {
     key: "getTemplateByClassName",
@@ -9987,23 +10728,22 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
       if (templateType == _TemplateType["default"].Unspecified) {
         // look in resources
-        var template = templates[_TemplateType["default"].Resource].values.find(function (x) {
+        var template = this.templates.get(_TemplateType["default"].Resource).values.find(function (x) {
           return x.className == className;
         });
-
         if (template != null) return template; // look in records
 
-        template = templates[_TemplateType["default"].Record].values.find(function (x) {
+        template = this.templates.get(_TemplateType["default"].Record).values.find(function (x) {
           return x.className == className;
         });
         if (template != null) return template; // look in wrappers
 
-        template = templates[_TemplateType["default"].Wrapper].values.find(function (x) {
+        template = this.templates.get(_TemplateType["default"].Wrapper).values.find(function (x) {
           return x.className == className;
         });
         return template;
       } else {
-        return templates[templateType].values.find(function (x) {
+        return this.templates.get(templateType).values.find(function (x) {
           return x.className == className;
         });
       }
@@ -10016,11 +10756,11 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
       if (index == path.length - 1) {
         if (path[index] == "") for (var i = 0; i < resources.length; i++) {
           rt.push(resources.at(i));
-        } else for (var i = 0; i < resources.length; i++) {
-          if (resources.at(i).instance.name == path[index]) rt.push(resources.at(i));
+        } else for (var _i2 = 0; _i2 < resources.length; _i2++) {
+          if (resources.at(_i2).instance.name == path[index]) rt.push(resources.at(_i2));
         }
-      } else for (var i = 0; i < resources.length; i++) {
-        if (resources.at(i).instance.name == path[index]) rt = rt.concat(this._qureyIn(path, index + 1, resources.at(i).instance.children));
+      } else for (var _i3 = 0; _i3 < resources.length; _i3++) {
+        if (resources.at(_i3).instance.name == path[index]) rt = rt.concat(this._qureyIn(path, index + 1, resources.at(_i3).instance.children));
       }
 
       return rt;
@@ -10097,14 +10837,14 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
       initBag.seal();
       initBag.then(function (ar) {
-        for (var i = 0; i < ar.length; i++) {
-          if (!ar[i]) console.log("Resource failed at Initialize ".concat(self.resources.at(i).instance.name, " [").concat(self.resources.at(i).instance.template.className, "]"));
+        for (var _i4 = 0; _i4 < ar.length; _i4++) {
+          if (!ar[_i4]) console.log("Resource failed at Initialize ".concat(self.resources.at(_i4).instance.name, " [").concat(self.resources.at(_i4).instance.template.className, "]"));
         }
 
         var sysBag = new _AsyncBag["default"]();
 
-        for (var i = 0; i < _this3.resources.length; i++) {
-          var r = _this3.resources.at(i);
+        for (var _i5 = 0; _i5 < _this3.resources.length; _i5++) {
+          var r = _this3.resources.at(_i5);
 
           sysBag.add(r.trigger(_IResource.ResourceTrigger.SystemInitialized));
         }
@@ -10151,7 +10891,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/IRecord.js":16,"../Data/KeyList.js":17,"../Net/IIP/DistributedConnection.js":25,"../Proxy/ResourceProxy.js":43,"../Resource/Instance.js":47,"../Resource/Template/TypeTemplate.js":56,"../Stores/IndexedDBStore.js":68,"../Stores/MemoryStore.js":69,"./IResource.js":45,"./IStore.js":46,"./Template/TemplateType.js":55}],58:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/IEventHandler.js":8,"../Data/AutoList.js":10,"../Data/IRecord.js":17,"../Data/KeyList.js":18,"../Net/IIP/DistributedConnection.js":29,"../Net/IIP/DistributedResource.js":31,"../Proxy/ResourceProxy.js":53,"../Resource/Instance.js":57,"../Resource/Template/TypeTemplate.js":66,"../Stores/IndexedDBStore.js":79,"../Stores/MemoryStore.js":80,"./IResource.js":55,"./IStore.js":56,"./Template/TemplateType.js":65}],68:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10214,7 +10954,7 @@ var Authentication = /*#__PURE__*/function () {
 
 exports["default"] = Authentication;
 
-},{}],59:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10229,7 +10969,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],60:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10245,7 +10985,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],61:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -10293,7 +11033,7 @@ var ClientAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = ClientAuthentication;
 
-},{"./Authentication.js":58,"./AuthenticationType.js":60}],62:[function(require,module,exports){
+},{"./Authentication.js":68,"./AuthenticationType.js":70}],72:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -10341,7 +11081,7 @@ var HostAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = HostAuthentication;
 
-},{"./Authentication.js":58,"./AuthenticationType.js":60}],63:[function(require,module,exports){
+},{"./Authentication.js":68,"./AuthenticationType.js":70}],73:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10388,7 +11128,7 @@ var Session = function Session(localAuthentication, remoteAuthentication) {
 
 exports["default"] = Session;
 
-},{}],64:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10524,7 +11264,90 @@ var SHA256 = /*#__PURE__*/function () {
 
 exports["default"] = SHA256;
 
-},{"../../Data/DataConverter.js":13}],65:[function(require,module,exports){
+},{"../../Data/DataConverter.js":14}],75:[function(require,module,exports){
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _AsyncReply = _interopRequireDefault(require("../../Core/AsyncReply.js"));
+
+var _IResource2 = _interopRequireDefault(require("../../Resource/IResource.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+var IMembership = /*#__PURE__*/function (_IResource) {
+  _inherits(IMembership, _IResource);
+
+  var _super = _createSuper(IMembership);
+
+  function IMembership() {
+    _classCallCheck(this, IMembership);
+
+    return _super.apply(this, arguments);
+  }
+
+  _createClass(IMembership, [{
+    key: "userExists",
+    value: function userExists(username, domain) {
+      return new _AsyncReply["default"](false);
+    }
+  }, {
+    key: "getPassword",
+    value: function getPassword(username, domain) {
+      return new _AsyncReply["default"](null);
+    }
+  }, {
+    key: "guestsAllowed",
+    get: function get() {
+      return false;
+    }
+  }, {
+    key: "getToken",
+    value: function getToken(tokenIndex, domain) {
+      return new _AsyncReply["default"](null);
+    }
+  }, {
+    key: "login",
+    value: function login(session) {}
+  }, {
+    key: "logout",
+    value: function logout(session) {}
+  }, {
+    key: "tokenExists",
+    value: function tokenExists(tokenIndex, domain) {}
+  }]);
+
+  return IMembership;
+}(_IResource2["default"]);
+
+exports["default"] = IMembership;
+
+},{"../../Core/AsyncReply.js":4,"../../Resource/IResource.js":55}],76:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10576,7 +11399,7 @@ var _default = // ActionType =
 };
 exports["default"] = _default;
 
-},{}],66:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10644,7 +11467,7 @@ var IPermissionsManager = /*#__PURE__*/function () {
 
 exports["default"] = IPermissionsManager;
 
-},{}],67:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10684,7 +11507,7 @@ var _default = //Ruling =
 };
 exports["default"] = _default;
 
-},{}],68:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -11095,7 +11918,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = IndexedDBStore;
 
-},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/ErrorType.js":5,"../Core/ExceptionCode.js":6,"../Data/Codec.js":12,"../Data/DataType.js":14,"../Resource/IResource.js":45,"../Resource/IStore.js":46,"../Resource/Warehouse.js":57}],69:[function(require,module,exports){
+},{"../Core/AsyncBag.js":1,"../Core/AsyncReply.js":4,"../Core/ErrorType.js":5,"../Core/ExceptionCode.js":6,"../Data/Codec.js":13,"../Data/DataType.js":15,"../Resource/IResource.js":55,"../Resource/IStore.js":56,"../Resource/Warehouse.js":67}],80:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11210,7 +12033,7 @@ var MemoryStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = MemoryStore;
 
-},{"../Core/AsyncReply.js":4,"../Resource/IStore.js":46}],70:[function(require,module,exports){
+},{"../Core/AsyncReply.js":4,"../Resource/IStore.js":56}],81:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -11218,8 +12041,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
-
-var _Warehouse = _interopRequireDefault(require("./Resource/Warehouse.js"));
 
 var _Structure = _interopRequireDefault(require("./Data/Structure.js"));
 
@@ -11235,7 +12056,263 @@ var _ResourceProxy = _interopRequireDefault(require("./Proxy/ResourceProxy.js"))
 
 var _DistributedConnection = _interopRequireDefault(require("./Net/IIP/DistributedConnection.js"));
 
+var _IIPAuthPacket = _interopRequireDefault(require("./Net/Packets/IIPAuthPacket.js"));
+
+var _IIPPacketCommand = _interopRequireDefault(require("./Net/Packets/IIPPacketCommand.js"));
+
+var _IIPPacketEvent = _interopRequireDefault(require("./Net/Packets/IIPPacketEvent.js"));
+
+var _IIPPacketReport = _interopRequireDefault(require("./Net/Packets/IIPPacketReport.js"));
+
+var _ISocket = _interopRequireDefault(require("./Net/Sockets/ISocket.js"));
+
+var _SocketState = _interopRequireDefault(require("./Net/Sockets/SocketState.js"));
+
+var _WSocket = _interopRequireDefault(require("./Net/Sockets/WSocket.js"));
+
+var _AsyncReply = _interopRequireDefault(require("./Core/AsyncReply.js"));
+
+var _AsyncException = _interopRequireDefault(require("./Core/AsyncException.js"));
+
+var _AsyncQueue = _interopRequireDefault(require("./Core/AsyncQueue.js"));
+
+var _ErrorType = _interopRequireDefault(require("./Core/ErrorType.js"));
+
+var _ExceptionCode = _interopRequireDefault(require("./Core/ExceptionCode.js"));
+
+var _IDestructible = _interopRequireDefault(require("./Core/IDestructible.js"));
+
+var _IEventHandler = _interopRequireDefault(require("./Core/IEventHandler.js"));
+
+var _ProgressType = _interopRequireDefault(require("./Core/ProgressType.js"));
+
+var _AutoList = _interopRequireDefault(require("./Data/AutoList.js"));
+
+var _AutoMap = _interopRequireDefault(require("./Data/AutoMap.js"));
+
+var _BinaryList = _interopRequireDefault(require("./Data/BinaryList.js"));
+
+var _Codec = _interopRequireDefault(require("./Data/Codec.js"));
+
+var _DataConverter = _interopRequireDefault(require("./Data/DataConverter.js"));
+
+var _DataType = _interopRequireDefault(require("./Data/DataType.js"));
+
+var _Guid = _interopRequireDefault(require("./Data/Guid.js"));
+
+var _IRecord = _interopRequireDefault(require("./Data/IRecord.js"));
+
+var _KeyList = _interopRequireDefault(require("./Data/KeyList.js"));
+
+var _NotModified = _interopRequireDefault(require("./Data/NotModified.js"));
+
+var _PropertyValue = _interopRequireDefault(require("./Data/PropertyValue.js"));
+
+var _Record = _interopRequireDefault(require("./Data/Record.js"));
+
+var _ResourceComparisonResult = _interopRequireDefault(require("./Data/ResourceComparisonResult.js"));
+
+var _ResourceArrayType = _interopRequireDefault(require("./Data/ResourceArrayType.js"));
+
+var _ResourceArray = _interopRequireDefault(require("./Data/ResourceArray.js"));
+
+var _RecordComparisonResult = _interopRequireDefault(require("./Data/RecordComparisonResult.js"));
+
+var _StructureComparisonResult = _interopRequireDefault(require("./Data/StructureComparisonResult.js"));
+
+var _StructureArray = _interopRequireDefault(require("./Data/StructureArray.js"));
+
+var _INetworkReceiver = _interopRequireDefault(require("./Net/INetworkReceiver.js"));
+
+var _NetworkBuffer = _interopRequireDefault(require("./Net/NetworkBuffer.js"));
+
+var _NetworkConnections = _interopRequireDefault(require("./Net/NetworkConnections.js"));
+
+var _NetworkServer = _interopRequireDefault(require("./Net/NetworkServer.js"));
+
+var _NetworkSession = _interopRequireDefault(require("./Net/NetworkSession.js"));
+
+var _SendList = _interopRequireDefault(require("./Net/SendList.js"));
+
+var _DistributedPropertyContext = _interopRequireDefault(require("./Net/IIP/DistributedPropertyContext.js"));
+
+var _DistributedResourceQueueItem = _interopRequireDefault(require("./Net/IIP/DistributedResourceQueueItem.js"));
+
+var _DistributedResourceQueueItemType = _interopRequireDefault(require("./Net/IIP/DistributedResourceQueueItemType.js"));
+
+var _DistributedServer = _interopRequireDefault(require("./Net/IIP/DistributedServer.js"));
+
+var _EntryPoint = _interopRequireDefault(require("./Net/IIP/EntryPoint.js"));
+
+var _IIPAuthPacketAction = _interopRequireDefault(require("./Net/Packets/IIPAuthPacketAction.js"));
+
+var _IIPAuthPacketCommand = _interopRequireDefault(require("./Net/Packets/IIPAuthPacketCommand.js"));
+
+var _IIPPacketAction = _interopRequireDefault(require("./Net/Packets/IIPPacketAction.js"));
+
+var _IIPPacket = _interopRequireDefault(require("./Net/Packets/IIPPacket.js"));
+
+var _CustomResourceEvent = _interopRequireDefault(require("./Resource/CustomResourceEvent.js"));
+
+var _Instance = _interopRequireDefault(require("./Resource/Instance.js"));
+
+var _IStore = _interopRequireDefault(require("./Resource/IStore.js"));
+
+var _Warehouse = _interopRequireDefault(require("./Resource/Warehouse.js"));
+
+var _ArgumentTemplate = _interopRequireDefault(require("./Resource/Template/ArgumentTemplate.js"));
+
+var _EventTemplate = _interopRequireDefault(require("./Resource/Template/EventTemplate.js"));
+
+var _FunctionTemplate = _interopRequireDefault(require("./Resource/Template/FunctionTemplate.js"));
+
+var _MemberTemplate = _interopRequireDefault(require("./Resource/Template/MemberTemplate.js"));
+
+var _MemberType = _interopRequireDefault(require("./Resource/Template/MemberType.js"));
+
+var _PropertyTemplate = _interopRequireDefault(require("./Resource/Template/PropertyTemplate.js"));
+
+var _TemplateDataType = _interopRequireDefault(require("./Resource/Template/TemplateDataType.js"));
+
+var _TemplateType = _interopRequireDefault(require("./Resource/Template/TemplateType.js"));
+
+var _TypeTemplate = _interopRequireDefault(require("./Resource/Template/TypeTemplate.js"));
+
+var _Authentication = _interopRequireDefault(require("./Security/Authority/Authentication.js"));
+
+var _AuthenticationMethod = _interopRequireDefault(require("./Security/Authority/AuthenticationMethod.js"));
+
+var _AuthenticationType = _interopRequireDefault(require("./Security/Authority/AuthenticationType.js"));
+
+var _ClientAuthentication = _interopRequireDefault(require("./Security/Authority/ClientAuthentication.js"));
+
+var _HostAuthentication = _interopRequireDefault(require("./Security/Authority/HostAuthentication.js"));
+
+var _Session = _interopRequireDefault(require("./Security/Authority/Session.js"));
+
+var _SHA = _interopRequireDefault(require("./Security/Integrity/SHA256.js"));
+
+var _IMembership = _interopRequireDefault(require("./Security/Membership/IMembership.js"));
+
+var _ActionType = _interopRequireDefault(require("./Security/Permissions/ActionType.js"));
+
+var _IPermissionsManager = _interopRequireDefault(require("./Security/Permissions/IPermissionsManager.js"));
+
+var _Ruling = _interopRequireDefault(require("./Security/Permissions/Ruling.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+var namespace = {
+  Core: {
+    AsyncReply: _AsyncReply["default"],
+    AsyncException: _AsyncException["default"],
+    AsyncQueue: _AsyncQueue["default"],
+    ErrorType: _ErrorType["default"],
+    ExceptionCode: _ExceptionCode["default"],
+    IDestructible: _IDestructible["default"],
+    IEventHandler: _IEventHandler["default"],
+    ProgressType: _ProgressType["default"]
+  },
+  Data: {
+    AutoList: _AutoList["default"],
+    AutoMap: _AutoMap["default"],
+    BinaryList: _BinaryList["default"],
+    Codec: _Codec["default"],
+    DataConverter: _DataConverter["default"],
+    DataType: _DataType["default"],
+    Guid: _Guid["default"],
+    IRecord: _IRecord["default"],
+    KeyList: _KeyList["default"],
+    NotModified: _NotModified["default"],
+    PropertyValue: _PropertyValue["default"],
+    Record: _Record["default"],
+    RecordComparisonResult: _RecordComparisonResult["default"],
+    ResourceArray: _ResourceArray["default"],
+    ResourceArrayType: _ResourceArrayType["default"],
+    ResourceComparisonResult: _ResourceComparisonResult["default"],
+    Structure: _Structure["default"],
+    StructureArray: _StructureArray["default"],
+    StructureComparisonResult: _StructureComparisonResult["default"]
+  },
+  Net: {
+    INetworkReceiver: _INetworkReceiver["default"],
+    NetworkBuffer: _NetworkBuffer["default"],
+    NetworkConnections: _NetworkConnections["default"],
+    NetworkServer: _NetworkServer["default"],
+    NetworkSession: _NetworkSession["default"],
+    SendList: _SendList["default"],
+    IIP: {
+      DistributedConnection: _DistributedConnection["default"],
+      DistributedPropertyContext: _DistributedPropertyContext["default"],
+      DistributedResource: _DistributedResource["default"],
+      DistributedResourceQueueItem: _DistributedResourceQueueItem["default"],
+      DistributedResourceQueueItemType: _DistributedResourceQueueItemType["default"],
+      DistributedServer: _DistributedServer["default"],
+      EntryPoint: _EntryPoint["default"]
+    },
+    Packets: {
+      IIPAuthPacket: _IIPAuthPacket["default"],
+      IIPAuthePacketAction: _IIPAuthPacketAction["default"],
+      IIPAuthPacketCommand: _IIPAuthPacketCommand["default"],
+      IIPPacket: _IIPPacket["default"],
+      IIPPacketAction: _IIPPacketAction["default"],
+      IIPPacketCommand: _IIPPacketCommand["default"],
+      IIPPacketEvent: _IIPPacketEvent["default"],
+      IIPPacketReport: _IIPPacketReport["default"]
+    },
+    Sockets: {
+      ISocket: _ISocket["default"],
+      SocketState: _SocketState["default"],
+      WSocket: _WSocket["default"]
+    }
+  },
+  Proxy: {
+    ResourceProxy: _ResourceProxy["default"]
+  },
+  Resource: {
+    CustomResourceEvent: _CustomResourceEvent["default"],
+    Instance: _Instance["default"],
+    IResource: _IResource["default"],
+    IStore: _IStore["default"],
+    Warehouse: _Warehouse["default"],
+    Template: {
+      ArgumentTemplate: _ArgumentTemplate["default"],
+      EventTemplate: _EventTemplate["default"],
+      FunctionTemplate: _FunctionTemplate["default"],
+      MemberTemplate: _MemberTemplate["default"],
+      MemberType: _MemberType["default"],
+      PropertyTemplate: _PropertyTemplate["default"],
+      TemplateDataType: _TemplateDataType["default"],
+      TemplateType: _TemplateType["default"],
+      TypeTemplate: _TypeTemplate["default"]
+    }
+  },
+  Security: {
+    Authority: {
+      Authentication: _Authentication["default"],
+      AuthenticationMethod: _AuthenticationMethod["default"],
+      AuthenticationType: _AuthenticationType["default"],
+      ClientAuthentication: _ClientAuthentication["default"],
+      HostAuthentication: _HostAuthentication["default"],
+      Session: _Session["default"]
+    },
+    Integrity: {
+      SHA256: _SHA["default"]
+    },
+    Membership: {
+      IMembership: _IMembership["default"]
+    },
+    Permissions: {
+      ActionType: _ActionType["default"],
+      IPermissionsManager: _IPermissionsManager["default"],
+      Ruling: _Ruling["default"]
+    }
+  },
+  Stores: {
+    IndexedDBStore: _IndexedDBStore["default"],
+    MemoryStore: _MemoryStore["default"]
+  }
+};
 
 if (typeof window !== 'undefined') {
   window.wh = _Warehouse["default"];
@@ -11246,6 +12323,7 @@ if (typeof window !== 'undefined') {
   window.IResource = _IResource["default"];
   window.ResourceProxy = _ResourceProxy["default"];
   window.DistributedConnection = _DistributedConnection["default"];
+  window.Esiur = namespace;
 } else if (typeof global !== 'undefined') {
   global.wh = _Warehouse["default"];
   global.Structure = _Structure["default"];
@@ -11254,10 +12332,11 @@ if (typeof window !== 'undefined') {
   global.IndexedDBStore = _IndexedDBStore["default"];
   global.IResource = _IResource["default"];
   global.DistributedConnection = _DistributedConnection["default"];
+  global.Esiur = namespace;
 }
 
 var _default = _Warehouse["default"];
 exports["default"] = _default;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Data/Structure.js":22,"./Net/IIP/DistributedConnection.js":25,"./Net/IIP/DistributedResource.js":27,"./Proxy/ResourceProxy.js":43,"./Resource/IResource.js":45,"./Resource/Warehouse.js":57,"./Stores/IndexedDBStore.js":68,"./Stores/MemoryStore.js":69}]},{},[70]);
+},{"./Core/AsyncException.js":2,"./Core/AsyncQueue.js":3,"./Core/AsyncReply.js":4,"./Core/ErrorType.js":5,"./Core/ExceptionCode.js":6,"./Core/IDestructible.js":7,"./Core/IEventHandler.js":8,"./Core/ProgressType.js":9,"./Data/AutoList.js":10,"./Data/AutoMap.js":11,"./Data/BinaryList.js":12,"./Data/Codec.js":13,"./Data/DataConverter.js":14,"./Data/DataType.js":15,"./Data/Guid.js":16,"./Data/IRecord.js":17,"./Data/KeyList.js":18,"./Data/NotModified.js":19,"./Data/PropertyValue.js":20,"./Data/Record.js":21,"./Data/RecordComparisonResult.js":22,"./Data/ResourceArray.js":23,"./Data/ResourceArrayType.js":24,"./Data/ResourceComparisonResult.js":25,"./Data/Structure.js":26,"./Data/StructureArray.js":27,"./Data/StructureComparisonResult.js":28,"./Net/IIP/DistributedConnection.js":29,"./Net/IIP/DistributedPropertyContext.js":30,"./Net/IIP/DistributedResource.js":31,"./Net/IIP/DistributedResourceQueueItem.js":32,"./Net/IIP/DistributedResourceQueueItemType.js":33,"./Net/IIP/DistributedServer.js":34,"./Net/IIP/EntryPoint.js":35,"./Net/INetworkReceiver.js":36,"./Net/NetworkBuffer.js":37,"./Net/NetworkConnections.js":38,"./Net/NetworkServer.js":39,"./Net/NetworkSession.js":40,"./Net/Packets/IIPAuthPacket.js":41,"./Net/Packets/IIPAuthPacketAction.js":42,"./Net/Packets/IIPAuthPacketCommand.js":43,"./Net/Packets/IIPPacket.js":44,"./Net/Packets/IIPPacketAction.js":45,"./Net/Packets/IIPPacketCommand.js":46,"./Net/Packets/IIPPacketEvent.js":47,"./Net/Packets/IIPPacketReport.js":48,"./Net/SendList.js":49,"./Net/Sockets/ISocket.js":50,"./Net/Sockets/SocketState.js":51,"./Net/Sockets/WSocket.js":52,"./Proxy/ResourceProxy.js":53,"./Resource/CustomResourceEvent.js":54,"./Resource/IResource.js":55,"./Resource/IStore.js":56,"./Resource/Instance.js":57,"./Resource/Template/ArgumentTemplate.js":58,"./Resource/Template/EventTemplate.js":59,"./Resource/Template/FunctionTemplate.js":60,"./Resource/Template/MemberTemplate.js":61,"./Resource/Template/MemberType.js":62,"./Resource/Template/PropertyTemplate.js":63,"./Resource/Template/TemplateDataType.js":64,"./Resource/Template/TemplateType.js":65,"./Resource/Template/TypeTemplate.js":66,"./Resource/Warehouse.js":67,"./Security/Authority/Authentication.js":68,"./Security/Authority/AuthenticationMethod.js":69,"./Security/Authority/AuthenticationType.js":70,"./Security/Authority/ClientAuthentication.js":71,"./Security/Authority/HostAuthentication.js":72,"./Security/Authority/Session.js":73,"./Security/Integrity/SHA256.js":74,"./Security/Membership/IMembership.js":75,"./Security/Permissions/ActionType.js":76,"./Security/Permissions/IPermissionsManager.js":77,"./Security/Permissions/Ruling.js":78,"./Stores/IndexedDBStore.js":79,"./Stores/MemoryStore.js":80}]},{},[81]);
