@@ -2285,7 +2285,7 @@ var Codec = /*#__PURE__*/function () {
           } else {
             var _record = new _Record["default"]();
 
-            for (var _i4 = 0; _i4 < template.properties.Length; _i4++) {
+            for (var _i4 = 0; _i4 < template.properties.length; _i4++) {
               _record[template.properties[_i4].name] = ar[_i4];
             }
 
@@ -2410,7 +2410,7 @@ var Codec = /*#__PURE__*/function () {
       if (resources == null) // || resources.length == 0)// || !(resources instanceof ResourceArray))
         return prependLength ? new _DataConverter.DC(4) : new _DataConverter.DC(0);
       var rt = new _BinaryList["default"]();
-      var comparsion = resources.Length == 0 ? _ResourceComparisonResult["default"].Empty : Codec.compareResource(null, resources[0], connection);
+      var comparsion = resources.length == 0 ? _ResourceComparisonResult["default"].Empty : Codec.compareResource(null, resources[0], connection);
       rt.addUint8(comparsion);
       if (comparsion == _ResourceComparisonResult["default"].Local) rt.addUint32(resources[0]._p.instanceId);else if (comparsion == _ResourceComparisonResult["default"].Distributed) rt.addUint32(resources[0].instance.id);
 
@@ -2702,6 +2702,11 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
       return this.dv.getInt32(offset);
     }
   }, {
+    key: "getInt32Little",
+    value: function getInt32Little(offset) {
+      return this.dv.getInt32(offset, true);
+    }
+  }, {
     key: "getUint32",
     value: function getUint32(offset) {
       return this.dv.getUint32(offset);
@@ -2912,7 +2917,8 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
       }
 
       return rt;
-    }
+    } // @TODO: Test numbers with bit 7 of h = 1 
+
   }, {
     key: "getInt64",
     value: function getInt64(offset) {
@@ -3021,7 +3027,7 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
       // convert hex to Uint8Array
       var rt = new DC(value.length / 2);
 
-      for (var i = 0; i < ar.length; i++) {
+      for (var i = 0; i < rt.length; i++) {
         rt[i] = parseInt(value.substr(i * 2, 2), 16);
       }
 
@@ -4743,7 +4749,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                   var errMsg = _DataConverter.DC.stringToBytes(ex.message);
 
-                  this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.Length).addUint8Array(errMsg).done();
+                  this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
                 }
               } else if (authPacket.action == _IIPAuthPacketAction["default"].NewConnection) {
                 if (this.readyToEstablish) {
@@ -11663,7 +11669,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
             bag.seal();
             bag.then(function (x) {
-              for (var _i2 = 0; _i2 < x.Length; _i2++) {
+              for (var _i2 = 0; _i2 < x.length; _i2++) {
                 _s[value.values[_i2].name] = x[_i2];
               }
 
@@ -11889,7 +11895,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
     key: "composeStructureArray",
     value: function composeStructureArray(structures) {
       var rt = [];
-      if (structures == null || structures.Length == 0) return rt;
+      if (structures == null || structures.length == 0) return rt;
 
       for (var i = 0; i < structures.length; i++) {
         rt.push(this.composeStructure(structures[s]));
