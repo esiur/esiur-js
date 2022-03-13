@@ -26,10 +26,21 @@
 
 "use strict";  
 
-import DC from '../../Data/DataConverter.js';
+import DC from '../../Data/DC.js';
+
 
 export default class MemberTemplate {
-    compose() {
-        return DC.stringToBytes(this.name);
-    }
+
+  constructor(template, index, name, inherited) {
+      this.template = template;
+      this.index = index;
+      this.name = name;
+      this.inherited = inherited;
+  }
+
+  get fullname() {return this.template.className + "." + this.name;}
+
+  compose() {
+    return DC.stringToBytes(this.name);
+  }
 }

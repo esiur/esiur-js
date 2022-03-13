@@ -21,8 +21,8 @@ export default  // const IIPPacketAction =
     LinkTemplates: 15,
 
     // Request Invoke
-    InvokeFunctionArrayArguments: 16,
-    InvokeFunctionNamedArguments: 17,
+    InvokeFunction: 16,
+    Reserved: 17,
     Listen: 18,
     Unlisten: 19,
     SetProperty: 20,

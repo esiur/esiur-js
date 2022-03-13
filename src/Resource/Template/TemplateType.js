@@ -4,4 +4,5 @@ export default
     Resource: 1,
     Record: 2,
     Wrapper: 3,
+    Enum: 4
 }

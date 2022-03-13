@@ -4,22 +4,18 @@ import ExceptionCode from "../../Core/ExceptionCode.js";
 import ISocket from "./ISocket.js";
 import SocketState from "./SocketState.js";
 import NetworkBuffer from "../NetworkBuffer.js";
-
+  
 export default class WSocket extends ISocket
 {
-      //SocketState State { get; }
-    //INetworkReceiver<ISocket> Receiver { get; set; }
     constructor(websocket){
         super();
         this.receiveNetworkBuffer = new NetworkBuffer();
         this.sendNetworkBuffer = new NetworkBuffer();
         this.held = false;
 
-        if (websocket != null)// instanceof WebSocket)
+        if (websocket != null)
         {
-            //websocket.onerror = () => {
-            //    self.state = SocketState.Closed;
-            //};   
+
             websocket.onopen = () => {
                 self.state = SocketState.Established;
             };
@@ -47,6 +43,8 @@ export default class WSocket extends ISocket
 
     sendAll(message)
     {
+       // console.log("Out ", message.byteLength);
+
         if (this.held)
             this.sendNetworkBuffer.writeAll(message);
         else
@@ -68,31 +66,53 @@ export default class WSocket extends ISocket
         this.ws.close();
     }
     
+    static webSocket = null;
+
+    static async getWebScoket(){
+        if (WSocket.webSocket == null) {
+            if (typeof window === 'undefined') {
+                 const  wsModule  = await import('ws');
+                 WSocket.webSocket = wsModule.default;
+            }
+            else
+            {
+                WSocket.webSocket = WebSocket;
+            }
+        }
+        return WSocket.webSocket;
+    }
+
     connect(hostname, port, secure = false) {
 
         let self = this;
-
         var rt = new AsyncReply();
-
         this.state = SocketState.Connecting;
-
         this.url = `ws${secure ? 's' : ''}://${hostname}:${port}`;
 
-        let ws = new WebSocket(this.url, "iip");
-        ws.binaryType = "arraybuffer";
+        WSocket.getWebScoket().then(webSocket => 
+        {
 
-        ws.onopen = () => {
-            self.state = SocketState.Established;
-            rt.trigger(true);
-        };
+            let ws;
 
-        ws.onerror = () => {
-            self.state = SocketState.Closed;
-            rt.triggerError(ErrorType.Management, ExceptionCode.HostNotReachable);
-        };
+            ws = new webSocket(this.url, "iip");
+            
+    
+            ws.binaryType = "arraybuffer";
+    
+            ws.onopen = () => {
+                self.state = SocketState.Established;
+                rt.trigger(true);
+            };
+    
+            ws.onerror = () => {
+                self.state = SocketState.Closed;
+                rt.triggerError(ErrorType.Management, ExceptionCode.HostNotReachable);
+            };
+    
+            self._assign(ws);
+            
+        });
 
-        this._assign(ws);
-        
         return rt;// new AsyncReply(true);
     }
 
@@ -106,6 +126,7 @@ export default class WSocket extends ISocket
         };
 
         ws.onmessage = function(msg) {
+            //console.log("WREC ", msg.data.byteLength);
             self.receiveNetworkBuffer.writeAll(msg.data);
             self.receiver.networkReceive(this, self.receiveNetworkBuffer);
             //self.lastAction = new Date();
@@ -156,10 +177,3 @@ export default class WSocket extends ISocket
         }
     }
 }
-
-    // if (this.holdSending) {
-    //     //console.log("hold ", data.length);
-    //     this.sendBuffer.writeAll(data);
-    // }
-    // else
-    //     //console.log("Send", data.length);

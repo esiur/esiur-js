@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 Ahmed Kh. Zamil
+* Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -24,74 +24,66 @@
  * Created by Ahmed Zamil on 27/08/2017.
  */
 
-"use strict";  
-
-import {DC, BL} from '../../Data/DataConverter.js';
+import {DC, BL} from '../../Data/DC.js';
 import MemberTemplate from './MemberTemplate.js';
-import MemberType from './MemberType.js';
 
-export const PropertyPermission = {
-    Read: 1,
-    Write: 2,
-    ReadWrite: 3
-};
+export default class PropertyTemplate extends MemberTemplate {
 
-export default class PropertyTemplate extends MemberTemplate
-{
+  compose() {
+    var name = super.compose();
+    var pv = (this.permission << 1) | (this.recordable ? 1 : 0);
 
-    constructor()
-    {
-        super();
-        this.type = MemberType.Property;
-    }
+    if (this.inherited) pv |= 0x80;
 
-    compose()
-    {
-        var name = super.compose();
-        var rt = BL();
-        var pv = (this.permission << 1) | (this.recordable ? 1 : 0);
+    if (this.writeExpansion != null && this.readExpansion != null) {
+      let rexp = DC.stringToBytes(this.readExpansion);
+      let wexp = DC.stringToBytes(this.writeExpansion);
+      return (BL()
+            .addUint8(0x38 | pv)
+            .addUint8(name.length)
+            .addDC(name)
+            .addDC(this.valueType.compose())
+            .addInt32(wexp.length)
+            .addDC(wexp)
+            .addInt32(rexp.length)
+            .addDC(rexp))
+          .toDC();
+    } else if (this.writeExpansion != null) {
+      let wexp = DC.stringToBytes(this.writeExpansion);
+      return (BL()
+            .addUint8(0x30 | pv)
+            .addUint8(name.length)
+            .addDC(name)
+            .addDC(this.valueType.compose())
+            .addInt32(wexp.length)
+            .addDC(wexp))
+          .toDC();
+    } else if (this.readExpansion != null) {
+      let rexp = DC.stringToBytes(this.readExpansion);
+      return (BL()
+            .addUint8(0x28 | pv)
+            .addUint8(name.length)
+            .addDC(name)
+            .addDC(this.valueType.compose())
+            .addInt32(rexp.length)
+            .addDC(rexp))
+          .toDC();
+    } else
+      return (BL()
+            .addUint8(0x20 | pv)
+            .addUint8(name.length)
+            .addDC(name)
+            .addDC(this.valueType.compose()))
+          .toDC();
+  }
 
-        if (this.writeExpansion != null && this.readExpansion != null)
-        {
-            var rexp = DC.stringToBytes(this.readExpansion);
-            var wexp = DC.stringToBytes(this.writeExpansion);
-            return rt.addUint8(0x38 | pv)
-                .addUint8(name.length)
-                .addUint8Array(name)
-                .addUint8Array(this.valueType.compose())
-                .addUint32(wexp.length)
-                .addUint8Array(wexp)
-                .addUint32(rexp.length)
-                .addUint8Array(rexp)
-                .toArray();
-        }
-        else if (this.writeExpansion != null)
-        {
-            var wexp = DC.stringToBytes(this.writeExpansion);
-            return rt.addUint8(0x30 | pv)
-                .addUint8(name.length)
-                .addUint8Array(name)
-                .addUint8Array(this.valueType.compose())
-                .addUint32(wexp.length)
-                .addUint8Array(wexp)
-                .toArray();
-        }
-        else if (this.readExpansion != null)
-        {
-            var rexp = DC.stringToBytes(this.readExpansion);
-            return rt.addUint8(0x28 | pv)
-                .addUint8(name.length)                
-                .addUint8Array(name)
-                .addUint8Array(this.valueType.compose())
-                .addUint32(rexp.length)
-                .addUint8Array(rexp)
-                .toArray();
-        }
-        else
-            return rt.addUint8(0x20 | pv)
-                .addUint8(name.length)
-                .addUint8Array(name)
-                .addUint8Array(this.valueType.compose())
-                .toArray();
-    }
+  constructor(template, index, name,
+      inherited, valueType, readExpansion = null, writeExpansion = null, recordable = false)
+      {
+        super(template, index, name, inherited);
+        this.valueType = valueType;
+        this.readExpansion = readExpansion;
+        this.writeExpansion  = writeExpansion;
+        this.recordable = recordable;
+      }
 }

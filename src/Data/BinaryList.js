@@ -26,8 +26,7 @@
 
 "use strict";  
 
-import DataType from './DataType.js';
-import DC from './DataConverter.js';
+import DC from './DC.js';
 
 export default class BinaryList
 {
@@ -35,216 +34,198 @@ export default class BinaryList
     constructor()
     {
         this.list = [];
+        //this.data = [];
     }
 
-
-    addRange(bl)
-    {
-        for(var i = 0; i < bl.list.length; i++)
-            this.list.push(bl.list[i]);
-
+    addDateTime(value, endian) {
+        this.addDC(DC.dateTimeToBytes(value, endian));
         return this;
     }
-
-    add(typedValue, position)
-    {
-        if (position !== undefined)
-            this.list.splice(position, 0, typedValue);
-        else
-            this.list.push(typedValue);
+    
+    insertDateTime(position, value, endian) {
+        this.insertDC(position, DC.dateTimeToBytes(value, endian));
         return this;
     }
+    
+    addDateTimeArray(value, endian) {
+        this.addDC(DC.dateTimeArrayToBytes(value, endian));
+        return this;
+    }
+    
+    insertDateTimeArray(position, value, endian) {
+        this.insertDC(position, DC.dateTimeArrayToBytes(value, endian));
+        return this;
+    }
+    
+    addGuid(value) {
+        this.addDC(DC.guidToBytes(value));
+        return this;
+    }
+    
+    insertGuid(position, value) {
+        this.insertDC(position, DC.guidToBytes(value));
+        return this;
+    }
+    
+    addUint8Array(value) {
+        this.addDC(value);
+        return this;
+    }
+    
+    addDC(value) {
+        this.list.push(...value);
+        return this;
+    }
+    
+    insertUint8Array(position, value) {
+        this.insertDC(position, value);
+        return this;
+    }
+    
+    addString(value) {
+        this.addDC(DC.stringToBytes(value));
+        return this;
+    }
+    
+    insertString(position, value) {
+        this.insertDC(position, DC.stringToBytes(value));
+        return this;
+    }
+    
+    insertUint8(position, value) {
+        this.list.splice(position, 0, value);
+        return this;
+    }
+    
+    addUint8(value) {
+       this.list.push(value);
+       return this;
+    }
+    
+    addInt8(value) {
+        this.list.push(value);
+        return this;
+    }
+    
+    insertInt8(position, value) {
+        this.list.splice(position, 0, value);
+        return this;
+    }
+    
+    addChar(value) {
+        this.addDC(DC.charToBytes(value));
+        return this;
+    }
+    
+    insertChar(position, value) {
+        this.insertDC(position, DC.charToBytes(value));
+        return this;
+    }
+    
+    addBoolean(value) {
+        this.addDC(DC.boolToBytes(value));
+        return this;
+    }
+    
+    insertBoolean(position, value) {
+        this.insertDC(position, DC.boolToBytes(value));
+        return this;
+     }
+    
+    addUint16(value, endian) {
+        this.addDC(DC.uint16ToBytes(value, endian));
+        return this;
+    }
+    
+    insertUint16(position, value, endian) {
+        this.insertDC(position, DC.uint16ToBytes(value, endian));
+        return this;
+    }
+    
+    addInt16(value, endian) {
+        this.addDC(DC.int16ToBytes(value, endian));
+        return this;
+    }
+    
+    insertInt16(position, value, endian) {
+        this.insertDC(position, DC.int16ToBytes(value, endian));
+        return this;
+    }
+    
+    addUint32(value, endian) {
+        this.addDC(DC.uint32ToBytes(value, endian));
+        return this;
+    }
+    
+    insertUint32(position, value,  endian ) {
+        this.insertDC(position, DC.uint32ToBytes(value, endian));
+        return this;
+    }
+    
+    addInt32(value,  endian) {
+        this.addDC(DC.int32ToBytes(value, endian));
+        return this;
+    }
+    
+    insertInt32(position, value,  endian) {
+        this.insertDC(position, DC.int32ToBytes(value, endian));
+        return this;
+      }
+    
+    addUint64(value,  endian) {
+        this.addDC(DC.uint64ToBytes(value, endian));
+        return this;
+      }
+    
+    insertUint64( position,  value,  endian) {
+        this.insertDC(position, DC.uint64ToBytes(value, endian));
+        return this;
+      }
+    
+    addInt64(value,  endian) {
+        this.addDC(DC.int64ToBytes(value, endian));
+        return this;
+    }
+    
+    insertInt64(position, value, endian) {
+        this.insertDC(position, DC.int64ToBytes(value, endian));
+        return this;
+      }
+    
+    addFloat32(value, endian) {
+        this.addDC(DC.float32ToBytes(value, endian));
+        return this;
+      }
+    
+      insertFloat32(position, value, endian ) {
+        this.insertDC(position, DC.float32ToBytes(value, endian));
+        return this;
+      }
+    
+      addFloat64(value, endian) {
+        this.addDC(DC.float64ToBytes(value, endian));
+        return this;
+      }
+    
+      insertFloat64(position, value, endian) {
+        this.insertDC(position, DC.float64ToBytes(value, endian));
+        return this;
+      }
+    
+
 
     get length()
     {
-        return this.toArray().length;
+        return this.list.length;
     }
 
     toArray()
     {
-        var ars = [];
-        // calculate length
-        for(var i = 0; i < this.list.length; i++)
-        {
-            switch (this.list[i].type)
-            {
-                case DataType.Bool:
-                    ars.push(DC.boolToBytes(this.list[i].value));
-                    break;
-                case DataType.UInt8:
-                    ars.push(DC.uint8ToBytes(this.list[i].value));
-                    break;
-                case DataType.Int8:
-                    ars.push(DC.int8ToBytes(this.list[i].value));
-                    break;
-                case DataType.Char:
-                    ars.push(DC.charToBytes(this.list[i].value));
-                    break;
-                case DataType.UInt16:
-                    ars.push(DC.uint16ToBytes(this.list[i].value));
-                    break;
-                case DataType.Int16:
-                    ars.push(DC.int16ToBytes(this.list[i].value));
-                    break;
-                case DataType.UInt32:
-                    ars.push(DC.uint32ToBytes(this.list[i].value));
-                    break;
-                case DataType.Int32:
-                    ars.push(DC.int32ToBytes(this.list[i].value));
-                    break;
-                case DataType.UInt64:
-                    ars.push(DC.uint64ToBytes(this.list[i].value));
-                    break;
-                case DataType.Int64:
-                    ars.push(DC.int64ToBytes(this.list[i].value));
-                    break;
-                case DataType.Float32:
-                    ars.push(DC.float32ToBytes(this.list[i].value));
-                    break;
-                case DataType.Float64:
-                    ars.push(DC.float64ToBytes(this.list[i].value));
-                    break;
-                case DataType.String:
-                    ars.push(DC.stringToBytes(this.list[i].value));
-                    break;
-                case DataType.DateTime:
-                    ars.push(DC.dateTimeToBytes(this.list[i].value));
-                    break;
-                case DataType.UInt8Array:
-                    ars.push(this.list[i].value);
-                    break;
-
-                case DataType.UInt16Array:
-                    ars.push(DC.uint16ArrayToBytes(this.list[i].value));
-                    break;
-    
-                case DataType.UInt32Array:
-                    ars.push(DC.uint32ArrayToBytes(this.list[i].value));
-                    break;
-
-                case DataType.Int16Array:
-                    ars.push(DC.int16ArrayToBytes(this.list[i].value));
-                    break;
-
-                case DataType.Int32Array:
-                    ars.push(DC.int32ArrayToBytes(this.list[i].value));
-                    break;
-
-                case DataType.Float32Array:
-                    ars.push(DC.float32ArrayToBytes(this.list[i].value));
-                    break;
-
-                case DataType.Float64Array:
-                    ars.push(DC.float64ArrayToBytes(this.list[i].value));
-                    break;
-
-                //case DataType.Resource:
-                //    ars.push(DC.uint32ToBytes(this.list[i].value.instance.id));
-                //    break;
-                //case DataType.DistributedResource:
-                //    ars.push(DC.int8ToBytes(this.list[i].value));
-                //    break;
-
-
-
-            }
-        }
-
-        var length = 0;
-        ars.forEach(function(a){
-            length += a.length ;//?? a.byteLength;
-        });
-
-        var rt = new Uint8Array(length);
-
-        var offset = 0;
-        for(var i = 0; i < ars.length; i++) {
-            rt.set(ars[i], offset);
-            offset+=ars[i].length;// ?? ars[i].byteLength;
-        }
-
-        return rt;
+        return new Uint8Array(this.list);
     }
 
     toDC()
     {
-        return new DC(this.toArray());
+        return new DC(this.list);
     }
-    
-    addDateTime(value, position)
-    {
-        return this.add({type: DataType.DateTime, value: value}, position);
-    }
-
-    addUint8Array(value, position)
-    {
-        return this.add({type: DataType.UInt8Array, value: value}, position);
-    }
-
-
-    addHex(value, position)
-    {
-        return this.addUint8Array(DC.hexToBytes(value), position);
-    }
-
-    addString(value, position)
-    {
-        return this.add({type: DataType.String, value: value}, position);
-    }
-
-    addUint8(value, position)
-    {
-        return this.add({type: DataType.UInt8, value: value}, position);
-    }
-
-    addInt8(value, position)
-    {
-        return this.add({type: DataType.Int8, value: value}, position);
-    }
-
-    addChar(value, position)
-    {
-        return this.add({type: DataType.Char, value: value}, position);
-    }
-
-    addUint16(value, position)
-    {
-        return this.add({type: DataType.UInt16, value: value}, position);
-    }
-
-    addInt16(value, position)
-    {
-        return this.add({type: DataType.Int16, value: value}, position);
-    }
-
-    addUint32(value, position)
-    {
-        return this.add({type: DataType.UInt32, value: value}, position);
-    }
-
-    addInt32(value, position)
-    {
-        return this.add({type: DataType.Int32, value: value}, position);
-    }
-
-    addUint64(value, position)
-    {
-        return this.add({type: DataType.UInt64, value: value}, position);
-    }
-
-    addInt64(value, position)
-    {
-        return this.add({type: DataType.Int64, value: value}, position);
-    }
-
-    addFloat32(value, position)
-    {
-        return this.add({type: DataType.Float32, value: value}, position);
-    }
-
-    addFloat64(value, position)
-    {
-        return this.add({type: DataType.Float64, value: value}, position);
-    }
-
 }

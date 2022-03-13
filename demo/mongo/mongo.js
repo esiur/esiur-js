@@ -6,7 +6,7 @@ import DistributedServer from "../../src/Net/IIP/DistributedServer.js";
 import IMembership from "../../src/Security/Membership/IMembership.js";
 import WSocket from "../../src/Net/Sockets/WSocket.js";
 import MemoryStore from "../../src/Stores/MemoryStore.js";
-import DC from "../../src/Data/DataConverter.js";
+import DC from "../../src/Data/DC.js";
 import IResource from "../../src/Resource/IResource.js";
 import Structure from "../../src/Data/Structure.js";
 import MongoDBStore from "../../src/Stores/MongoDBStore.js";

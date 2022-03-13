@@ -26,7 +26,7 @@
  * Ref: https://en.wikipedia.org/wiki/SHA-2
  */
 
-import {DC, BL} from '../../Data/DataConverter.js';
+import { DC, BL, Endian } from '../../Data/DC.js';
 
 export default class SHA256
 {
@@ -82,7 +82,7 @@ export default class SHA256
         var paddingBytes = new Uint8Array(paddingLength);
         paddingBytes[0] = 0x80;
 
-        var data = new DC(BL().addUint8Array(msg).addUint8Array(paddingBytes).addUint64(L).toArray());
+        var data = BL().addUint8Array(msg).addUint8Array(paddingBytes).addUint64(L, Endian.Big).toDC();
 
         
         
@@ -99,8 +99,8 @@ export default class SHA256
             // copy chunk into first 16 words w[0..15] of the message schedule array
 
             var w = new Uint32Array(64);
-            for(var i = 0; i < 16; i++)
-                w[i] = data.getInt32(chunk + (i * 4));
+            for(let i = 0; i < 16; i++)
+                w[i] = data.getUint32(chunk + (i * 4), Endian.Big);
 
             //for(var i = 16; i < 64; i++)
               //  w[i] = 0;
@@ -111,7 +111,7 @@ export default class SHA256
             //        s1 := (w[i-2] rightrotate 17) xor (w[i-2] rightrotate 19) xor (w[i-2] rightshift 10)
             //        w[i] := w[i-16] + s0 + w[i-7] + s1
             
-            for (var i = 16; i < 64; i++)
+            for (let i = 16; i < 64; i++)
             {
                     var s0 = SHA256.RROT(w[i-15], 7) ^ SHA256.RROT(w[i-15], 18) ^ (w[i-15] >>> 3);
                     var s1 = SHA256.RROT(w[i-2], 17) ^ SHA256.RROT(w[i-2], 19) ^ (w[i-2] >>> 10);
@@ -130,7 +130,7 @@ export default class SHA256
 
                     
             // Compression function main loop:
-            for (var i = 0; i < 64; i++)
+            for (let i = 0; i < 64; i++)
             {
                 var S1 = SHA256.RROT(e, 6) ^ SHA256.RROT(e, 11) ^ SHA256.RROT(e, 25);
                 var ch = (e & f) ^ ((~e) & g);
@@ -170,8 +170,8 @@ export default class SHA256
         //digest := hash := h0 append h1 append h2 append h3 append h4 append h5 append h6 append h7
 
         var results = BL();
-        for(var i = 0; i < 8; i++)
-            results.addUint32(hash[i]);
+        for(let i = 0; i < 8; i++)
+            results.addUint32(hash[i], Endian.Big);
         
 
         return results.toDC();

@@ -26,14 +26,19 @@ import FunctionTemplate from './FunctionTemplate.js';
 import PropertyTemplate from './PropertyTemplate.js';
 import EventTemplate from './EventTemplate.js';
 import SHA256 from '../../Security/Integrity/SHA256.js';
-import {DC, BL} from '../../Data/DataConverter.js';
+import {DC, BL} from '../../Data/DC.js';
 import ArgumentTemplate from './ArgumentTemplate.js';
-import TemplateDataType from "./TemplateDataType.js";
 import IResource from '../IResource.js';
 import IRecord from '../../Data/IRecord.js';
 import TemplateType from './TemplateType.js'
 import Warehouse from '../Warehouse.js';
 import DistributedConnection from '../../Net/IIP/DistributedConnection.js';
+
+import ConstantTemplate from './ConstantTemplate.js';
+import IEnum from '../../Data/IEnum.js';
+import DistributedResource from '../../Net/IIP/DistributedResource.js';
+import RepresentationType from '../../Data/RepresentationType.js';
+import Codec from '../../Data/Codec.js';
 
 export default class TypeTemplate {
 
@@ -76,6 +81,20 @@ export default class TypeTemplate {
         for (var i = 0; i < this.properties.length; i++)
             if (this.properties[i].index == index)
                 return this.properties[i];
+        return null;
+    }
+
+    getConstantTemplateByName(constantName) {
+        for (var i = 0; i < this.constants.length; i++)
+            if (this.constants[i].name == constantName)
+                return this.constants[i];
+        return null;
+    }
+
+    getConstantTemplateByIndex(index) {
+        for (var i = 0; i < this.constants.length; i++)
+            if (this.constants[i].index == index)
+                return this.constants[i];
         return null;
     }
 
@@ -217,16 +236,22 @@ export default class TypeTemplate {
         this.events = [];
         this.functions = [];
         this.members = [];
+        this.constants = [];
 
+        
         if (type === undefined)
             return;
-            
+        
+        if (type.prototype instanceof DistributedResource)
+            this.templateType = TemplateType.Wrapper;
         if (type.prototype instanceof IRecord)
             this.templateType = TemplateType.Record;
         else if (type.prototype instanceof IResource)
             this.templateType = TemplateType.Resource;
+        else if (type.prototype instanceof IEnum)
+            this.templateType = TemplateType.Enum;
         else
-            throw new Error("Type is neither a resource nor a record.");
+            throw new Error("Type must implement IResource, IRecord, IEnum or a subtype of DistributedResource.");
 
         this.definedType = type;
 
@@ -244,35 +269,38 @@ export default class TypeTemplate {
         //byte currentIndex = 0;
 
         if (template.properties != null)
-            for (var i = 0; i < template.properties.length; i++) {
+            for (let i = 0; i < template.properties.length; i++) {
                 //[name, type, {read: comment, write: comment, recordable: }]
-                var pi = template.properties[i];
-                var pt = new PropertyTemplate();
-                pt.name = pi[0];
-                pt.index = i;
-                pt.valueType = TemplateDataType.fromType(pi[1]);
-                pt.readExpansion = pi[2]?.read;
-                pt.writeExpansion = pi[2]?.write;
-                pt.recordable = pi[2]?.recordable;
+                let pi = template.properties[i];
+                let pt = new PropertyTemplate(this, i, pi[0], false,
+                     RepresentationType.fromType(pi[1]) ?? RepresentationType.Void, 
+                     pi[2]?.read, pi[2]?.write, pi[2]?.recordable);
                 pt.propertyInfo = pi;
                 this.properties.push(pt);
             }
 
+        
+        if (template.constants != null)
+            for (let i = 0; i < template.constants.length; i++) {
+                let ci = template.constants[i];
+                let ct = new ConstantTemplate(this, i, ci[0], false,
+                     RepresentationType.fromType(ci[1]) ?? RepresentationType.Void, 
+                     ci.value, ci.help);
+                ct.propertyInfo = ci;
+                this.constants.push(ct);
+            }
+
         if (this.templateType == TemplateType.Resource)
         {
-
             if (template.events != null)
             {
                 for (let i = 0; i < template.events.length; i++) {
 
                     // [name, type, {listenable: true/false, help: ""}]
                     var ei = template.events[i];
-                    var et = new EventTemplate();
-                    et.name = ei[0];
-                    et.index = i;
-                    et.argumentType = TemplateDataType.fromType(ei[1]),
-                    et.expansion = ei[2]?.help;
-                    et.listenable = ei[2]?.listenable;
+                    var et = new EventTemplate(this, i, ei[0], false,
+                         RepresentationType.fromType(ei[1]) ?? RepresentationType.Void, 
+                         ei[2]?.help, ei[2]?.listenable)
                     et.eventInfo = ei;
                     this.events.push(et);
                 }
@@ -284,16 +312,15 @@ export default class TypeTemplate {
 
                     var fi = template.functions[i];
 
-                // [name, {param1: type, param2: int}, returnType, "Description"]
-                    var ft = new FunctionTemplate();
-                    ft.name = fi[0];
-                    ft.index = i;
-                    ft.returnType = TemplateDataType.fromType(fi[2]);
-                    ft.expansion = fi[3];
-                    ft.arguments = [];
+                    let args = [];
+                    for(let ai = 0; ai < fi[1].length; ai++)
+                        args.push(new ArgumentTemplate(fi[1][ai][0], RepresentationType.fromType(fi[1][ai][1])
+                        ?? RepresentationType.Dynamic, fi[1][ai][2]?.optional, ai));
 
-                    for(var arg in fi[1])
-                        ft.arguments.push(new ArgumentTemplate(arg, TemplateDataType.fromType(fi[1][arg])))
+                // [name, {param1: type, param2: int}, returnType, "Description"]
+                    var ft = new FunctionTemplate(this, i, fi[0], false, args,
+                         RepresentationType.fromType(fi[2]) ?? RepresentationType.Void,
+                          fi[3]);
 
                     ft.methodInfo = fi;
 
@@ -312,6 +339,9 @@ export default class TypeTemplate {
         // append properties
         for (let i = 0; i < this.properties.length; i++)
             this.members.push(this.properties[i]);
+        // append constants
+        for (let i = 0; i < this.constants.length; i++)
+            this.members.push(this.constants[i]);
 
         // bake it binarily
         var b = BL();
@@ -369,41 +399,52 @@ export default class TypeTemplate {
         var od = new TypeTemplate();
         od.content = data.clip(offset, contentLength);
 
-        od.templateType = data.getUint8(offset++);
+        let hasParent = (data.getUint8(offset) & 0x80) > 0;
+
+        od.templateType = data.getUint8(offset++) & 0xF;
+    
 
         od.classId = data.getGuid(offset);
         offset += 16;
         od.className = data.getString(offset + 1, data.getUint8(offset));
         offset += data.getUint8(offset) + 1;
 
+        if (hasParent) {
+            od.parentId = data.getGuid(offset);
+            offset += 16;
+        }
+
         od.version = data.getInt32(offset);
         offset += 4;
 
-        var methodsCount = data.getUint16(offset);
+        let methodsCount = data.getUint16(offset);
         offset += 2;
 
-        var functionIndex = 0;
-        var propertyIndex = 0;
-        var eventIndex = 0;
+        let functionIndex = 0;
+        let propertyIndex = 0;
+        let eventIndex = 0;
+        let constantIndex = 0;
 
-        for (var i = 0; i < methodsCount; i++) {
-            var type = data.getUint8(offset) >> 5;
+        for (let i = 0; i < methodsCount; i++) {
 
+            let inherited = (data.getUint8(offset) & 0x80) > 0;
+            let type = (data.getUint8(offset) >> 5) & 0x3;
+      
             if (type == 0) // function
             {
-                let ft = new FunctionTemplate();
-                ft.index = functionIndex++;
+                let expansion = null;
                 let hasExpansion = ((data.getUint8(offset++) & 0x10) == 0x10);
 
                 let len = data.getUint8(offset++);
-                ft.name = data.getString(offset, len);
+                let name = data.getString(offset, len);
                 offset += len;
 
                 // return type
-                let {size, value: returnType} = TemplateDataType.parse(data, offset);
-                offset += size;
+                let dt = RepresentationType.parse(data, offset);
 
-                ft.returnType = returnType;
+                offset += dt.size;
+
+                //ft.returnType = returnType;
 
                 // arguments count
                 var argsCount = data.getUint8(offset++);
@@ -411,47 +452,45 @@ export default class TypeTemplate {
 
                 for (var a = 0; a < argsCount; a++)
                 {
-                    let {size: argSize, value: argType} = ArgumentTemplate.parse(data, offset);
+                    let {size: argSize, value: argType} = ArgumentTemplate.parse(data, offset, a);
                     args.push(argType);
                     offset += argSize;
                 }
 
-                ft.arguments = args;
-                
                 if (hasExpansion) // expansion ?
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;
-                    ft.expansion = data.getString(offset, cs);
+                    expansion = data.getString(offset, cs);
                     offset += cs;
                 }
 
+                let ft = new FunctionTemplate(od, functionIndex++, name, inherited,
+                    args, dt.type, expansion);
+        
                 od.functions.push(ft);
             }
             else if (type == 1)    // property
             {
 
-                let pt = new PropertyTemplate();
-                pt.index = propertyIndex++;
                 let hasReadExpansion = ((data.getUint8(offset) & 0x8) == 0x8);
                 let hasWriteExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
-                pt.recordable = ((data.getUint8(offset) & 1) == 1);
-                pt.permission = ((data.getUint8(offset++) >> 1) & 0x3);
+                let readExpansion, writeExpansion;
+                let recordable = ((data.getUint8(offset) & 1) == 1);
+                let permission = ((data.getUint8(offset++) >> 1) & 0x3);
                 let len = data.getUint8(offset++);
-                pt.name = data.getString(offset, len);
+                let name = data.getString(offset, len);
                 offset += len;
 
-                let {size, value: valueType} = TemplateDataType.parse(data, offset);
+                var dt = RepresentationType.parse(data, offset);
 
-                offset += size;
-
-                pt.valueType = valueType;
+                offset += dt.size;
 
                 if (hasReadExpansion) // expansion ?
                 {
                     let cs = data.getUint32(offset);
                     offset += 4;
-                    pt.readExpansion = data.getString(offset, cs);
+                    readExpansion = data.getString(offset, cs);
                     offset += cs;
                 }
 
@@ -459,38 +498,69 @@ export default class TypeTemplate {
                 {
                     let cs = data.getUint32(offset);
                     offset += 4;
-                    pt.writeExpansion = data.getString(offset, cs);
+                    writeExpansion = data.getString(offset, cs);
                     offset += cs;
                 }
+
+                let pt = new PropertyTemplate(od, propertyIndex++, name, inherited, dt.type, readExpansion, writeExpansion, recordable);
 
                 od.properties.push(pt);
             }
             else if (type == 2) // Event
             {
-                let et = new EventTemplate();
-                et.index = eventIndex++;
                 let hasExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
-                et.listenable = ((data.getUint8(offset++) & 0x8) == 0x8);
+                let listenable = ((data.getUint8(offset++) & 0x8) == 0x8);
                 let len = data.getUint8(offset++);
-                et.name = data.getString(offset, len);
+                let name = data.getString(offset, len);
+                let expansion;
 
                 offset += len;
 
-                let {size, value: argType} = TemplateDataType.parse(data, offset);
+                let dt = RepresentationType.parse(data, offset);
                     
-                offset += size;
-                et.argumentType = argType;
+                offset += dt.size;
 
+                
                 if (hasExpansion) // expansion ?
                 {
                     let cs = data.getUint32(offset);
                     offset += 4;
-                    et.expansion = data.getString(offset, cs);
+                    expansion = data.getString(offset, cs);
                     offset += cs;
                 }
 
+                let et = new EventTemplate(od, eventIndex++, name, inherited, dt.type, expansion, listenable);
                 od.events.push(et);
 
+            }
+            else if (type == 3) // constant
+            {
+                let expansion = null;
+                let hasExpansion = ((data[offset++] & 0x10) == 0x10);
+        
+                let name = data.getString(offset + 1, data[offset]);
+                offset += data[offset] + 1;
+        
+                let dt = RepresentationType.parse(data, offset);
+        
+                offset += dt.size;
+        
+                let parsed = Codec.parse(data, offset, null);
+        
+                offset += parsed.size;
+        
+                if (hasExpansion) // expansion ?
+                {
+                  let cs = data.getUint32(offset);
+                  offset += 4;
+                  expansion = data.getString(offset, cs);
+                  offset += cs;
+                }
+        
+                let ct = new ConstantTemplate(this, constantIndex++, name, inherited,
+                    dt.type, parsed.reply.result, expansion);
+        
+                od.constants.push(ct);
             }
         }
 
@@ -503,6 +573,9 @@ export default class TypeTemplate {
         // append properties
         for (let i = 0; i < od.properties.length; i++)
             od.members.push(od.properties[i]);
+        // append constants
+        for (let i = 0; i < od.constants.length; i++)
+            od.members.push(od.constants[i]);
 
 
         return od;

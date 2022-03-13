@@ -24,9 +24,8 @@
  * Created by Ahmed Zamil on 01/09/2017.
  */
 
-"use strict";  
 
-import DC from '../Data/DataConverter.js';
+import DC from '../Data/DC.js';
 
 export default class NetworkBuffer {
     constructor() {

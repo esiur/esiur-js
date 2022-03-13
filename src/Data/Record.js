@@ -28,5 +28,5 @@ import IRecord from './IRecord.js';
 
 export default class Record extends IRecord
 {
-
+    
 }

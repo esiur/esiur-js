@@ -22,7 +22,7 @@
 
 "use strict";
 
-import {DC, BL} from '../../Data/DataConverter.js';
+import {DC, BL} from '../../Data/DC.js';
 import DataType from "../../Data/DataType.js";
 import Structure from '../../Data/Structure.js';
 import IResource from '../IResource.js';

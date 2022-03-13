@@ -34,7 +34,7 @@
             {
                 let el = document.createElement("div");
                 let list = document.getElementById("list");
-                el.innerHTML = `<span>${message.usr}</span><span>${message.msg}</span><span>${message.date.toLocaleTimeString()}</span>`;
+                el.innerHTML = `<span>${message.get("usr")}</span><span>${message.get("msg")}</span><span>${message.get("date").toLocaleTimeString()}</span>`;
                 list.append(el);
                 list.scrollTop = list.scrollHeight;
             }

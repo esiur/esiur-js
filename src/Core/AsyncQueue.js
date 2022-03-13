@@ -71,7 +71,6 @@ export default class AsyncQueue extends AsyncReply
 
     remove(reply)
     {
-        console.log("REMOVE QUEUE");
         this.list.splice(this.list.indexOf(reply), 1);
         this.processQueue();
     }

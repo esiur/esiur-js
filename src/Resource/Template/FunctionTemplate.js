@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 Ahmed Kh. Zamil
+* Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -26,38 +26,38 @@
 
 "use strict";  
 
-import {DC, BL} from '../../Data/DataConverter.js';
+import {DC, BL} from '../../Data/DC.js';
 import MemberTemplate from './MemberTemplate.js';
-import MemberType from './MemberType.js';
 
 export default class FunctionTemplate extends MemberTemplate {
-    compose() {
-        var name = super.compose();
+   compose() {
+    var name = super.compose();
 
-        var bl = BL()
-                .addUint8(name.length)
-                .addUint8Array(name)
-                .addUint8Array(this.returnType.compose())
-                .addUint8(this.arguments.length);
+    var bl = new BL()
+      .addUint8(name.length)
+      .addDC(name)
+      .addDC(this.returnType.compose())
+      .addUint8(this.args.length);
 
-        for (var i = 0; i < this.arguments.length; i++)
-            bl.addUint8Array(this.arguments[i].compose());
+    for (var i = 0; i < this.args.length; i++) bl.addDC(this.args[i].compose());
 
-        if (this.expansion != null)
-        {
-            var exp = DC.stringToBytes(this.expansion);
-            bl.addInt32(exp.length)
-              .addUint8Array(exp);
-            bl.insertUint8(0, 0x10);
-        }
-        else
-            bl.addUint8(0x0, 0);
-        
-        return bl.toArray();
-    }
+    if (this.expansion != null) {
+      var exp = DC.stringToBytes(this.expansion);
+      bl
+        .addInt32(exp.length)
+        .addDC(exp);
+      bl.insertUint8(0, this.inherited ? 0x90 : 0x10);
+    } else
+      bl.insertUint8(0, this.inherited ? 0x80 : 0x0);
 
-    constructor() {
-        super();
-        this.type = MemberType.Function;
-    }
+    return bl.toDC();
+  }
+
+  constructor(template, index, name, inherited, args, returnType, expansion = null){
+        super(template, index, name, inherited);
+
+        this.args = args;
+        this.returnType = returnType;
+        this.expansion = expansion;
+      }
 }

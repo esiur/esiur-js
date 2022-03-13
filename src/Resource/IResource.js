@@ -53,6 +53,10 @@ export default class IResource extends IDestructible
         super();
     }
 
+    toString(){
+        return this?.instance?.template?.namespace ?? "IResource";
+    }
+
     static get template()
     {
         return {

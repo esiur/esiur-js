@@ -24,8 +24,8 @@
  * Created by Ahmed Zamil on 02/09/2017.
  */
 
-"use strict";  
 
+import DC from './DC.js';
 export default class Guid
 {
     constructor(dc)
@@ -38,6 +38,14 @@ export default class Guid
         return this.value.getHex(0, 16);
     }
 
+    static fromString(data) {
+        this.value = DC.fromHex(data, '');
+    }
+
+    toString() {
+        return this.vlue.toHex('');
+     }
+    
     // [Symbol.toPrimitive](hint){
     //     console.log(hint);
     // }

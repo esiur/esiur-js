@@ -26,39 +26,48 @@
 
 "use strict";  
 
-import {DC, BL} from '../../Data/DataConverter.js';
+import {DC, BL} from '../../Data/DC.js';
 import MemberTemplate from './MemberTemplate.js';
-import MemberType from './MemberType.js';
+ 
 
-export default class EventTemplate extends MemberTemplate
-{
+export default class EventTemplate extends MemberTemplate {
 
-    constructor()
-    {
-        super();
-        this.type = MemberType.Event;
+    compose() {
+    let name = super.compose();
+
+    let hdr = this.inherited ? 0x80 : 0;
+
+    if (this.listenable) hdr |= 0x8;
+
+    if (this.expansion != null) {
+        let exp = DC.stringToBytes(this.expansion);
+        hdr |= 0x50;
+      return (BL()
+            .addUint8(hdr)
+            .addUint8(name.length)
+            .addDC(name)
+            .addDC(this.argumentType.compose())
+            .addInt32(exp.length)
+            .addDC(exp))
+          .toDC();
+    } else {
+      hdr |= 0x40;
+      return (BL()
+            .addUint8(hdr)
+            .addUint8(name.length)
+            .addDC(name)
+            .addDC(this.argumentType.compose()))
+          .toDC();
+    }
+  }
+
+  constructor(template, index, name, inherited, argumentType,
+      expansion = null, listenable = false)
+    { 
+        super(template, index, name, inherited) ;
+        this.argumentType = argumentType;
+        this.expansion = expansion;
+        this.listenable = listenable;
     }
 
-    compose()
-    {
-        var rt = BL();
-
-        var name = super.compose();
-        if (this.expansion != null) {
-            var exp = DC.stringToBytes(this.expansion);
-            return rt.addUint8(this.listenable ? 0x58 : 0x50)
-                     .addUint8(name.length)
-                     .addUint8Array(name)
-                     .addUint8Array(this.argumentType.compose())
-                     .addUint32(exp.length)
-                     .addUint8Array(exp)
-                     .toArray();
-        }
-        else
-            return rt.addUint8(this.listenable ? 0x48 : 0x40)
-                     .addUint8(name.length)
-                     .addUint8Array(name)
-                     .addUint8Array(this.argumentType.compose())
-                     .toArray();
-    }
 }

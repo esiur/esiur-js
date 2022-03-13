@@ -46,6 +46,11 @@ export default class IStore extends IResource {
 
     }
 
+    modify(resource, propertyName, value, age, dateTime)
+    {
+        
+    }
+
     getRecord(resource, fromDate, toDate)
     {
 

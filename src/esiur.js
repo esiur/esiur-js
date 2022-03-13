@@ -25,7 +25,7 @@ import AutoList from './Data/AutoList.js';
 import AutoMap from './Data/AutoMap.js';
 import BinaryList from './Data/BinaryList.js';
 import Codec from './Data/Codec.js';
-import DataConverter from './Data/DataConverter.js';
+import DC from './Data/DC.js';
 import DataType from './Data/DataType.js';
 import Guid from './Data/Guid.js';
 import IRecord from './Data/IRecord.js';
@@ -86,7 +86,7 @@ import Ruling from './Security/Permissions/Ruling.js';
 
 let namespace = {
     Core: { AsyncReply, AsyncException, AsyncQueue, ErrorType, ExceptionCode, IDestructible, IEventHandler, ProgressType},
-    Data: {AutoList, AutoMap, BinaryList, Codec, DataConverter, DataType, Guid, IRecord, KeyList, NotModified, 
+    Data: {AutoList, AutoMap, BinaryList, Codec, DC, DataType, Guid, IRecord, KeyList, NotModified, 
         PropertyValue, Record, RecordComparisonResult, ResourceArray, ResourceArrayType, ResourceComparisonResult, Structure,
          StructureArray, StructureComparisonResult },
     Net: {INetworkReceiver, NetworkBuffer, NetworkConnections, NetworkServer, NetworkSession, SendList,        

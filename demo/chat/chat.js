@@ -6,10 +6,10 @@ import DistributedServer from "../../src/Net/IIP/DistributedServer.js";
 import IMembership from "../../src/Security/Membership/IMembership.js";
 import WSocket from "../../src/Net/Sockets/WSocket.js";
 import MemoryStore from "../../src/Stores/MemoryStore.js";
-import DC from "../../src/Data/DataConverter.js";
+import DC from "../../src/Data/DC.js";
 import IResource from "../../src/Resource/IResource.js";
-import Structure from "../../src/Data/Structure.js";
-import DataType from "../../src/Data/DataType.js";
+import TransmissionType, { TransmissionTypeIdentifier } from "../../src/Data/TransmissionType.js";
+import TypedMap from "../../src/Data/TypedMap.js";
 
 const require = createRequire(import.meta.url);
 
@@ -36,15 +36,15 @@ class MyChat extends IResource {
     static get template() {
         return {
             namespace: "Chat",
-            properties: [["title", DataType.String], ["messages", DataType.StructureArray], ["users", DataType.StringArray]],
-            events: [["message", DataType.Structure], ["voice", 0, {listenable: true }], ["login"], ["logout"]],
-            functions: [[ "send", {msg: DataType.String} ]]
+            properties: [["title", String], ["messages", Array], ["users", Array]],
+            events: [["message", Map], ["voice", 0, {listenable: true }], ["login"], ["logout"]],
+            functions: [[ "send", [["msg", String, {optional: true}] ]]]
         };
     }
 
     constructor() {
       super();
-      this.messages = [new Structure({usr: "Admin", msg: "Welcome to Esiur", date: new Date()})];
+      this.messages = [new TypedMap({usr: "Admin", msg: "Welcome to Esiur", date: new Date()})];
       this.title = "Chat Room";
     }
 
@@ -54,7 +54,7 @@ class MyChat extends IResource {
 
     send(msg, sender)
     {
-      let s = new Structure({ msg, usr: sender.session.remoteAuthentication.username, date: new Date()});
+      let s = new TypedMap({ msg, usr: sender.session.remoteAuthentication.username, date: new Date()});
       this.messages.push(s);
       this._emit("message", s);
     }
@@ -63,6 +63,10 @@ class MyChat extends IResource {
       return new AsyncReply([this]);
     }
 }
+
+
+let x = TransmissionType.compose(TransmissionTypeIdentifier.List, new DC([1,2,3,4,5,6]));
+let tt = TransmissionType.parse(x, 0, x.length);
 
 let sys = await Warehouse.new(MemoryStore, "sys");
 let ms = await Warehouse.new(MyMembership, "ms");

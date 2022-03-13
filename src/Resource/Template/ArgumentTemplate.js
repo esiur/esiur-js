@@ -1,32 +1,38 @@
-import DC from "../../Data/DataConverter.js";
-import BinaryList from "../../Data/BinaryList.js";
-import TemplateDataType from "./TemplateDataType.js";
 
-export default class ArgumentTemplate
-{
-    static parse(data, offset)
-    {
-        var cs = data[offset++];
-        var name = data.getString(offset, cs);
-        offset += cs;
-        var {size, value} = TemplateDataType.parse(data, offset);
+import {DC, BL} from '../../Data/DC.js';
+import RepresentationType from '../../Data/RepresentationType.js';
 
-        return {size: cs + 1 + size, value: new ArgumentTemplate(name, value)};
-    }
+import ParseResult from "../../Data/ParseResult.js";
 
-    constructor(name, type){
-        this.name = name;
-        this.type = type;
-    }
+export default class ArgumentTemplate {
 
-    compose()
-    {
-        var name = DC.stringToBytes(this.name);
+    static parse(data, offset, index) {
+    var optional = (data[offset++] & 0x1) == 0x1;
 
-        return new BinaryList()
-                .addUint8(name.length)
-                .addUint8Array(name)
-                .addUint8Array(this.type.compose())
-                .toArray();
-    }
+    var cs = data[offset++];
+    var name = data.getString(offset, cs);
+    offset += cs;
+    var tdr = RepresentationType.parse(data, offset);
+
+    return new ParseResult(
+        cs + 2 + tdr.size, new ArgumentTemplate(name, tdr.type, optional, index));
+  }
+
+  constructor(name, type, optional, index){
+      this.name = name;
+      this.type = type;
+      this.optional = optional;
+      this.index = index;
+  }
+
+  compose() {
+    var name = DC.stringToBytes(this.name);
+
+    return (BL()
+          .addUint8(this.optional ? 1 : 0)
+          .addUint8(name.length)
+          .addDC(name)
+          .addDC(this.type.compose()))
+        .toDC();
+  }
 }

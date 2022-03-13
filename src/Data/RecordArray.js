@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017-2018 Ahmed Kh. Zamil
+* Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -21,17 +21,20 @@
 */
 
 /**
- * Created by Ahmed Zamil on 10/11/2018.
+ * Created by Ahmed Zamil on 26/08/2017. 
  */
 
-"use strict";  
+ "use strict";  
 
-export default class CustomResourceEvent
+ import IRecord from "./IRecord.js";
+
+export default class RecordArray extends Array
 {
-    constructor(issuer, receivers, value)
-    {
-        this.issuer = issuer;
-        this.receivers = receivers;
-        this.value = value;
-    }
-}
+     push(value)
+     {
+         if (value instanceof IRecord)
+             super.push(value);
+         else
+             return;
+     }
+ }

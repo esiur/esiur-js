@@ -28,7 +28,6 @@
 
 import IEventHandler from '../Core/IEventHandler.js';
 import IPermissionsManager from '../Security/Permissions/IPermissionsManager.js';
-import StructureArray from '../Data/StructureArray.js';
 import AutoList from '../Data/AutoList.js';
 import KeyList from '../Data/KeyList.js';
 import Structure from '../Data/Structure.js';
@@ -36,6 +35,11 @@ import PropertyValue from '../Data/PropertyValue.js';
 import CustomResourceEvent from './CustomResourceEvent.js';
 import Warehouse from './Warehouse.js';
 import Ruling from '../Security/Permissions/Ruling.js';
+import TypedMap from '../Data/TypedMap.js';
+import TypedList from '../Data/TypedList.js';
+import EventOccurredInfo from './EventOccurredInfo.js';
+import PropertyModificationInfo from './PropertyModificationInfo.js';
+import PropertyValueArray from '../Data/PropertyValueArray.js';
 
 export default class Instance extends IEventHandler
 {
@@ -110,7 +114,7 @@ export default class Instance extends IEventHandler
 
     serialize()
     {
-        var props = [];
+        var props = new PropertyValueArray();
 
         for (var i = 0; i < this.template.properties.length; i++)
             props.push(new PropertyValue(this.resource[this.template.properties[i].name], 
@@ -122,7 +126,7 @@ export default class Instance extends IEventHandler
 
     isStorable()
     {
-        return resource instanceof Storable;
+        return false;
     }
 
     emitModification(pt, value)
@@ -136,10 +140,17 @@ export default class Instance extends IEventHandler
         
         if (pt.recordable)
             this.store.record(this.resource, pt.name, value, this.ages[pt.index], now);
+        else
+            this.store.modify(this.resource, pt.name, value, this.ages[pt.index], now);
 
-        super._emit("ResourceModified", this.resource, pt.name, value);  
-        //this.resource._emit("modified", pt.name, value);
-        this.resource._emit(":" + pt.name, value);
+        let pmInfo = new PropertyModificationInfo(this.resource, pt, value, this.instanceAge);
+
+        super._emit("PropertyModified", pmInfo);
+        this.resource._emit(`:${pt.name}`, value);
+        //this.resource.emitProperty(pmInfo);
+    
+        //super._emit("ResourceModified", this.resource, pt.name, value);  
+        //this.resource._emit(":" + pt.name, value);
     }
 
     modified(propertyName = null)
@@ -155,9 +166,11 @@ export default class Instance extends IEventHandler
         }
     }
 
-    _emitResourceEvent(issuer, receivers, name, args)
+    _emitResourceEvent(issuer, receivers, eventTemplate, value)
     {
-        super._emit("ResourceEventOccurred", this.resource, issuer, receivers, name, args);
+        super._emit("EventOccurred",
+            new EventOccurredInfo(this.resource, eventTemplate, value, issuer, receivers));
+        //super._emit("ResourceEventOccurred", this.resource, issuer, receivers, name, args);
     }
 
     getPropertyValue(name, resultObject)
@@ -173,6 +186,9 @@ export default class Instance extends IEventHandler
     }
 
 
+    get age() {
+        return this.instanceAge;
+    }
 
     constructor(id, name, resource, store, customTemplate = null, age = 0)
     {
@@ -223,20 +239,20 @@ export default class Instance extends IEventHandler
         }
 
         // connect events
-        for (var i = 0; i < this.template.events.length; i++)
-           this.resource.on(this.template.events[i].name, this._makeHandler(this.template.events[i].name));
+        for (let i = 0; i < this.template.events.length; i++)
+           this.resource.on(this.template.events[i].name, this._makeHandler(this.template.events[i]));
         
     }
 
-    _makeHandler(name)
+    _makeHandler(eventTemplate)
     {
         var self = this;
-        return function(args)
+        return function(argument)
         {
-            if (args instanceof CustomResourceEvent)
-                self._emitResourceEvent(args.issuer, args.receivers, name, args.args);
+            if (argument instanceof CustomResourceEvent)
+                self._emitResourceEvent(argument.issuer, argument.receivers, eventTemplate, argument.value);
             else
-                self._emitResourceEvent(null, null, name, args);
+                self._emitResourceEvent(null, null, eventTemplate, argument);
         };
     }
 
@@ -294,14 +310,14 @@ export default class Instance extends IEventHandler
 
             else if (attr == "managers")
             {
-                var mngrs = new StructureArray();
+                var mngrs = new (TypedList.of(TypedMap.of(String, Object)));
 
                 for(var j = 0; j < this.managers.length; j++)
                 {
                     var manager = this.managers.item(j);
-                    var sm = new Structure();
-                    sm["type"] = manager.constructor.name;
-                    sm["settings"] = manager.settings;
+                    var sm = new (TypedMap.of(String, Object));
+                    sm.set("type",  manager.constructor.name);
+                    sm.set("settings", manager.settings);
                     
                     mngrs.push(sm);
                 }

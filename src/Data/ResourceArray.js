@@ -26,6 +26,7 @@
 
 "use strict";  
 
+import IResource from "../Resource/IResource.js";
 export default class ResourceArray extends Array
 {
     push(value)

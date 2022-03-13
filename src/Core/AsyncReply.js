@@ -153,7 +153,7 @@ export default class AsyncReply extends Promise
         this.chunkCallbacks = [];
         this.exception = new AsyncException();// null;
 
-        var self = this;
+        //var self = this;
  
         if (result !== undefined && !(result instanceof Function)) {
             this.result = result;

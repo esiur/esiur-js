@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 Ahmed Kh. Zamil
+* Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ import IIPPacketCommand from "./IIPPacketCommand.js";
 import IIPPacketEvent from "./IIPPacketEvent.js";
 import IIPPacketReport from "./IIPPacketReport.js";
 import DataType from '../../Data/DataType.js';
+import TransmissionType from '../../Data/TransmissionType.js';
 
 export default class IIPPacket
 {
@@ -42,7 +43,7 @@ export default class IIPPacket
         this.resourceId = 0;
         this.newResourceId = 0;
         this.resourceAge = 0;
-        this.content = [];
+        //this.content = [];
         this.errorCode = 0;
         this.errorMessage = "";
         this.className = "";
@@ -53,6 +54,8 @@ export default class IIPPacket
         this.callbackId = 0;
         this.dataLengthNeeded = 0;
         this.originalOffset = 0;
+        this.resourceName = "";
+        this.dataType = null;
     }
 
     notEnough(offset, ends, needed)
@@ -136,14 +139,13 @@ export default class IIPPacket
                 if (this.notEnough(offset, ends, 2))
                     return -this.dataLengthNeeded;
 
-                var cl = data.getUint16(offset);
+                let cl = data.getUint16(offset);
                 offset += 2;
 
                 if (this.notEnough(offset, ends, cl))
                     return -this.dataLengthNeeded;
 
-                this.content = data.clip(offset, cl);
-
+                this.resourceName = data.getString(offset, cl);
                 offset += cl;
             }
             else if (this.event == IIPPacketEvent.PropertyUpdated 
@@ -154,61 +156,28 @@ export default class IIPPacket
 
                 this.methodIndex = data[offset++];
 
-                var dt = data.getUint8(offset++);
-                var size = DataType.sizeOf(dt);
+                var parsed = TransmissionType.parse(data, offset, ends);
 
-                if (size < 0)
-                {
-                    if (this.notEnough(offset, ends, 4))
-                        return -this.dataLengthNeeded;
-
-                    var cl = data.getUint32(offset);
-                    offset += 4;
-
-                    if (this.notEnough(offset, ends, cl))
-                        return -this.dataLengthNeeded;
-
-                    this.content = data.clip(offset - 5, cl + 5);
-                    offset += cl;
-                }
-                else
-                {
-                    if (this.notEnough(offset, ends, size))
-                        return -this.dataLengthNeeded;
-
-                    this.content = data.clip(offset - 1, size + 1);
-                    offset += size;
-                }
+                if (parsed.type == null) return -parsed.size;
+        
+                this.dataType = parsed.type;
+                offset += parsed.size;
+        
             }
-            // else if (this.event == IIPPacketEvent.EventOccurred)
-            // {
-            //     if (this.notEnough(offset, ends, 5))
-            //         return -this.dataLengthNeeded;
-
-            //     this.methodIndex = data.getUint8(offset++);
-
-            //     var cl = data.getUint32(offset);
-            //     offset += 4;
-
-            //     if (this.notEnough(offset, ends, cl))
-            //         return -this.dataLengthNeeded;
-
-            //     this.content = data.clip(offset, cl);
-            //     offset += cl;
-            // }
             // Attribute
             else if (this.event == IIPPacketEvent.AttributesUpdated)
             {
                 if (this.notEnough(offset, ends, 4))
                     return -this.dataLengthNeeded;
 
-                var cl = data.getUint32(offset);
+                let cl = data.getUint32(offset);
                 offset += 4;
 
                 if (this.notEnough(offset, ends, cl))
                     return -this.dataLengthNeeded;
 
-                this.content = data.clip(offset, cl);
+                //@TODO: fix this
+                //this.content = data.clip(offset, cl);
 
                 offset += cl;
             }
@@ -246,20 +215,21 @@ export default class IIPPacket
             else if (this.action == IIPPacketAction.CreateResource)
             {
                 if (this.notEnough(offset, ends, 12))
-                    return -dataLengthNeeded;
+                    return -this.dataLengthNeeded;
 
                 this.storeId = data.getUint32(offset);
                 offset += 4;
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
 
-                var cl = data.getUint32(offset);
+                let cl = data.getUint32(offset);
                 offset += 4;
 
                 if (this.notEnough(offset, ends, cl))
-                    return -dataLengthNeeded;
+                    return -this.dataLengthNeeded;
 
-                this.content = data.clip(offset, cl);
+                //@TODO: fix this
+                //this.content = data.clip(offset, cl);
             }
             else if (this.action == IIPPacketAction.DeleteResource)
             {
@@ -291,13 +261,13 @@ export default class IIPPacket
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
 
-                var cl = data.getUint16(offset);
+                let cl = data.getUint16(offset);
                 offset += 2;
 
                 if (this.notEnough(offset, ends, cl))
                     return -this.dataLengthNeeded;
 
-                this.content = data.clip(offset, cl);
+                this.resourceName = data.getString(offset, cl);
                 offset += cl;
 
             }
@@ -306,7 +276,7 @@ export default class IIPPacket
                 if (this.notEnough(offset, ends, 1))
                     return -this.dataLengthNeeded;
 
-                var cl = data.getUint8(offset++);
+                let cl = data.getUint8(offset++);
 
                 if (this.notEnough(offset, ends, cl))
                     return -this.dataLengthNeeded;
@@ -337,7 +307,7 @@ export default class IIPPacket
                 if (this.notEnough(offset, ends, 2))
                     return -this.dataLengthNeeded;
 
-                var cl = data.getUint16(offset);
+                let cl = data.getUint16(offset);
                 offset += 2;
 
                 if (this.notEnough(offset, ends, cl))
@@ -370,8 +340,7 @@ export default class IIPPacket
                 offset += 8;
 
             }
-            else if (  this.action == IIPPacketAction.InvokeFunctionArrayArguments 
-                    || this.action == IIPPacketAction.InvokeFunctionNamedArguments)
+            else if (  this.action == IIPPacketAction.InvokeFunction )
             {
                 
                 if (this.notEnough(offset, ends, 9))
@@ -382,14 +351,13 @@ export default class IIPPacket
 
                 this.methodIndex = data.getUint8(offset++);
 
-                var cl = data.getUint32(offset);
-                offset += 4;
+                
+                let parsed = TransmissionType.parse(data, offset, ends);
 
-                if (this.notEnough(offset, ends, cl))
-                    return -this.dataLengthNeeded;
+                if (parsed.type == null) return -parsed.size;
 
-                this.content = data.clip(offset, cl);
-                offset += cl;
+                this.dataType = parsed.type;
+                offset += parsed.size;
 
             }
             else if (this.action == IIPPacketAction.Listen 
@@ -428,33 +396,13 @@ export default class IIPPacket
                 offset += 4;
 
                 this.methodIndex = data[offset++];
+                let parsed = TransmissionType.parse(data, offset, ends);
 
-
-                var dt = data.getUint8(offset++);
-                var size = DataType.sizeOf(dt);
-
-                if (size < 0)
-                {
-                    if (this.notEnough(offset, ends, 4))
-                        return -this.dataLengthNeeded;
-
-                    var cl = data.getUint32(offset);
-                    offset += 4;
-
-                    if (this.notEnough(offset, ends, cl))
-                        return -this.dataLengthNeeded;
-
-                    this.content = data.clip(offset-5, cl + 5);
-                    offset += cl;
-                }
-                else
-                {
-                    if (this.notEnough(offset, ends, size))
-                      return -this.dataLengthNeeded;
-
-                    this.content = data.clip(offset-1, size + 1);
-                    offset += size;
-                }
+                if (parsed.type == null) return -parsed.size;
+        
+                this.dataType = parsed.type;
+                offset += parsed.size;
+        
             }
 
             // Attribute
@@ -468,13 +416,14 @@ export default class IIPPacket
 
                 this.resourceId = data.getUint32(offset);
                 offset += 4;
-                var cl = data.getUint32(offset);
+                let cl = data.getUint32(offset);
                 offset += 4;
 
                 if (this.notEnough(offset, ends, cl))
                     return -this.dataLengthNeeded;
 
-                this.content = data.clip(offset, cl);
+                // @TODO: fix this
+                //this.content = data.clip(offset, cl);
                 offset += cl;
             }
 
@@ -493,7 +442,7 @@ export default class IIPPacket
                 this.resourceAge = data.getUint64(offset);
                 offset += 8;
 
-                var cl = data.getUint16(offset);
+                let cl = data.getUint16(offset);
                 offset+=2;
 
                 if (this.notEnough(offset, ends, cl))
@@ -502,17 +451,13 @@ export default class IIPPacket
                 this.resourceLink = data.getString(offset, cl);
                 offset += cl;
 
-                if (this.notEnough(offset, ends, 4))
-                    return -this.dataLengthNeeded;
+                let parsed = TransmissionType.parse(data, offset, ends);
 
-                cl = data.getUint32(offset);
-                offset += 4;
-
-                if (this.notEnough(offset, ends, cl))
-                    return -this.dataLengthNeeded;
-
-                this.content = data.clip(offset, cl);
-                offset += cl;
+                if (parsed.type == null) return -parsed.size;
+        
+                this.dataType = parsed.type;
+                offset += parsed.size;
+        
             }
             else if (this.action == IIPPacketAction.DetachResource)
             {
@@ -544,52 +489,30 @@ export default class IIPPacket
                 || this.action == IIPPacketAction.GetAllAttributes
                 || this.action == IIPPacketAction.GetAttributes)
             {
-                if (this.notEnough(offset, ends, 4))
-                    return -this.dataLengthNeeded;
 
-                var cl = data.getUint32(offset);
-                offset += 4;
+                if (this.notEnough(offset, ends, 1)) return -this.dataLengthNeeded;
 
-                if (this.notEnough(offset, ends, cl))
-                    return -this.dataLengthNeeded;
+                let parsed = TransmissionType.parse(data, offset, ends);
+        
+                if (parsed.type == null) return -parsed.size;
+        
+                this.dataType = parsed.type;
+                offset += parsed.size;
 
-                this.content = data.clip(offset, cl);
-                offset += cl;
             }
-            else if (this.action == IIPPacketAction.InvokeFunctionArrayArguments
-                || this.action == IIPPacketAction.InvokeFunctionNamedArguments)
-                //|| this.action == IIPPacketAction.GetProperty
-                //|| this.action == IIPPacketAction.GetPropertyIfModified)
+            else if (this.action == IIPPacketAction.InvokeFunction)
             {
 
                 if (this.notEnough(offset, ends, 1))
                     return -this.dataLengthNeeded;
 
-                var dt = data.getUint8(offset++);
-                var size = DataType.sizeOf(dt);
+                let parsed = TransmissionType.parse(data, offset, ends);
 
-                if (size < 0)
-                {
-                    if (this.notEnough(offset, ends, 4))
-                        return -this.dataLengthNeeded;
-
-                    var cl = data.getUint32(offset);
-                    offset += 4;
-
-                    if (this.notEnough(offset, ends, cl))
-                        return -this.dataLengthNeeded;
-
-                    this.content = data.clip(offset - 5, cl + 5);
-                    offset += cl;
-                }
-                else
-                {
-                    if (this.notEnough(offset, ends, size))
-                         return -this.dataLengthNeeded;
-
-                    this.content = data.clip(offset - 1, size + 1);
-                    offset += size;
-                }
+                if (parsed.type == null) return -parsed.size;
+        
+                this.dataType = parsed.type;
+                offset += parsed.size;
+            
             }
             else if (this.action == IIPPacketAction.SetProperty 
                 || this.action == IIPPacketAction.Listen 
@@ -619,7 +542,7 @@ export default class IIPPacket
                 if (this.notEnough(offset, ends, 2))
                     return -this.dataLengthNeeded;
 
-                var cl = data.getUint16(offset);
+                let cl = data.getUint16(offset);
                 offset += 2;
 
                 if (this.notEnough(offset, ends, cl))
@@ -640,31 +563,16 @@ export default class IIPPacket
             }
             else if (this.report == IIPPacketReport.ChunkStream)
             {
-                var dt = data.getUint8(offset++);
-                var size = DataType.sizeOf(dt);
+                if (this.notEnough(offset, ends, 1)) 
+                    return -this.dataLengthNeeded;
 
-                if (size < 0)
-                {
-                    if (this.notEnough(offset, ends, 4))
-                        return -this.dataLengthNeeded;
-
-                    var cl = data.getUint32(offset);
-                    offset += 4;
-
-                    if (this.notEnough(offset, ends, cl))
-                        return -this.dataLengthNeeded;
-
-                    this.content = data.clip(offset - 5, cl + 5);
-                    offset += cl;
-                }
-                else
-                {
-                    if (this.notEnough(offset, ends, size))
-                         return -this.dataLengthNeeded;
-
-                    this.content = data.clip(offset - 1, size + 1);
-                    offset += size;
-                }
+                let parsed = TransmissionType.parse(data, offset, ends);
+        
+                if (parsed.type == null) return -parsed.size;
+        
+                this.dataType = parsed.type;
+                offset += parsed.size;
+          
             }
         }
 

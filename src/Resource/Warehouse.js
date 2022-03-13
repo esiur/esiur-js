@@ -42,7 +42,12 @@ import AsyncBag from '../Core/AsyncBag.js';
 import IRecord from '../Data/IRecord.js';
 import TemplateType from './Template/TemplateType.js';
 import DistributedResource from '../Net/IIP/DistributedResource.js';
-
+import TypedList from '../Data/TypedList.js';
+import { Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Float32, Float64 } from '../Data/ExtendedTypes.js';
+import Record from '../Data/Record.js';
+import TypedMap from '../Data/TypedMap.js';
+import {RepresentationType, RepresentationTypeIdentifier} from '../Data/RepresentationType.js';
+import FactoryEntry from './FactoryEntry.js'; './FactoryEntry.js';
 export class WH extends IEventHandler
 {
     constructor()
@@ -58,8 +63,12 @@ export class WH extends IEventHandler
         this.templates.add(TemplateType.Resource, new KeyList());
         this.templates.add(TemplateType.Record, new KeyList());
         this.templates.add(TemplateType.Wrapper, new KeyList());
+        this.templates.add(TemplateType.Enum, new KeyList());
 
         this.protocols = new KeyList();
+
+        this.typesFactory = this._getBuiltInTypes();
+
         this._register("connected");
         this._register("disconnected");
         ///this._urlRegex = /^(?:([\S]*):\/\/([^\/]*)\/?)/;
@@ -529,6 +538,91 @@ export class WH extends IEventHandler
         return rt;
     }
 
+    /**
+     * @param {Function} instanceCreator - creator
+     * @param {RepresentationType} representationType - type
+     */
+    _getTypeEntries(type, representationType) {
+
+        let listType = TypedList.of(type);
+        
+
+        var entry = new FactoryEntry(type, representationType);
+        let nullableEntry = new FactoryEntry(entry.nullableType, representationType.toNullable());
+        let listEntry = new FactoryEntry(listType, 
+            new RepresentationType(RepresentationTypeIdentifier.TypedList, false,
+                null, [representationType]));
+        let nullableList = new FactoryEntry(listEntry.nullableType,
+            new RepresentationType(RepresentationTypeIdentifier.TypedList, true, null,
+                [representationType]));
+
+        let nullableItemListType = TypedList.of(entry.nullableType);
+        let listNullableItemEntry = new FactoryEntry(nullableItemListType,
+            new RepresentationType(RepresentationTypeIdentifier.TypedList, false,
+                null, [representationType.toNullable()]));
+        
+        let nullableListNullableItemEntry = new FactoryEntry(nullableItemListType,
+            new RepresentationType(RepresentationTypeIdentifier.TypedList, true, null,
+                [representationType.toNullable()]));
+
+      return [
+        entry, nullableEntry, listEntry, nullableList, listNullableItemEntry, nullableListNullableItemEntry
+      ];
+    }
+  
+    
+    /**
+     * @param {Function} instanceCreator - creator
+     * @param {RepresentationType} representationType - type
+     */
+    defineType(type, representationType) {
+        var entries = this._getTypeEntries(type, representationType);
+
+        for(var e of entries)
+            this.typesFactory[e.type] = e; //.push(e);
+    }
+  
+    _getBuiltInTypes() {
+      
+      let entries =  [
+          ...this._getTypeEntries(Int8, new RepresentationType(RepresentationTypeIdentifier.Int8, false)),
+          ...this._getTypeEntries(UInt8, new RepresentationType(RepresentationTypeIdentifier.UInt8, false)),
+          ...this._getTypeEntries(Int16, new RepresentationType(RepresentationTypeIdentifier.Int16, false)),
+          ...this._getTypeEntries(UInt16, new RepresentationType(RepresentationTypeIdentifier.UInt16, false)),
+          ...this._getTypeEntries(Int32, new RepresentationType(RepresentationTypeIdentifier.Int32, false)),
+          ...this._getTypeEntries(UInt32, new RepresentationType(RepresentationTypeIdentifier.UInt32, false)),
+          ...this._getTypeEntries(Int64, new RepresentationType(RepresentationTypeIdentifier.Int64, false)),
+          ...this._getTypeEntries(UInt64, new RepresentationType(RepresentationTypeIdentifier.UInt64, false)),
+          ...this._getTypeEntries(Float32, new RepresentationType(RepresentationTypeIdentifier.Float32, false)),
+          ...this._getTypeEntries(Float64, new RepresentationType(RepresentationTypeIdentifier.Float64, false)),
+          ...this._getTypeEntries(String, new RepresentationType(RepresentationTypeIdentifier.Int8, String)),
+          ...this._getTypeEntries(Date, new RepresentationType(RepresentationTypeIdentifier.Int8, Date)),
+          ...this._getTypeEntries(Record, new RepresentationType(RepresentationTypeIdentifier.Record, false)),
+          ...this._getTypeEntries(IResource, new RepresentationType(RepresentationTypeIdentifier.Resource, false)),
+          ...this._getTypeEntries(Array, new RepresentationType(RepresentationTypeIdentifier.List, false)),
+          ...this._getTypeEntries(Map, new RepresentationType(RepresentationTypeIdentifier.Map, false)),
+          //...this._getTypeEntries(IResource, new RepresentationType(RepresentationTypeIdentifier.Resource, false)),
+          //...this._getTypeEntries(TypedMap, new RepresentationType(RepresentationTypeIdentifier.Resource, false)),
+
+          ...this._getTypeEntries(TypedMap.of(String, Object), new RepresentationType(RepresentationTypeIdentifier.TypedMap, false, null, [
+                                            new RepresentationType(RepresentationTypeIdentifier.String, false), 
+                                            RepresentationType.Dynamic])),
+
+           ...this._getTypeEntries(TypedMap.of(UInt8, Object), new RepresentationType(RepresentationTypeIdentifier.TypedMap, false, null, [
+                new RepresentationType(RepresentationTypeIdentifier.UInt8, false), 
+                RepresentationType.Dynamic])),
+
+          ...this._getTypeEntries(TypedMap.of(Int32, Object), new RepresentationType(RepresentationTypeIdentifier.TypedMap, false, null, [
+                new RepresentationType(RepresentationTypeIdentifier.Int32, false), 
+                RepresentationType.Dynamic])),
+        
+          ];
+
+        let rt = {};
+        for(let entry of entries)
+          rt[entry.type] = entry;
+        return rt;
+    }
 }
 
 let Warehouse  = new WH();

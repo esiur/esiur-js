@@ -29,12 +29,15 @@
 import IResource from '../../Resource/IResource.js';
 import AsyncReply from '../../Core/AsyncReply.js';
 import Codec from '../../Data/Codec.js';
-import Structure from '../../Data/Structure.js';
 import IIPPacketAction from '../Packets//IIPPacketAction.js';
 import EventTemplate from '../../Resource/Template/EventTemplate.js';
 import AsyncException from '../../Core/AsyncException.js';
 import ExceptionCode from '../../Core//ExceptionCode.js';
 import ErrorType from '../../Core/ErrorType.js';
+import {UInt8} from '../../Data/ExtendedTypes.js';
+import TypedMap from '../../Data/TypedMap.js';
+import PropertyValueArray from '../../Data/PropertyValueArray.js';
+import PropertyValue  from '../../Data/PropertyValue.js';
 
 export default class DistributedResource extends IResource
 {
@@ -74,7 +77,7 @@ export default class DistributedResource extends IResource
 
     _serialize()
     {
-        var props = [];
+        var props = new PropertyValueArray();
 
         for (var i = 0; i < this._p.properties.length; i++)
             props.push(new PropertyValue(this._p.properties[i], 
@@ -112,25 +115,37 @@ export default class DistributedResource extends IResource
 
             var self = this;
 
-            var makeFunc = function(index)
+            var makeFunc = function(ft)
             {
               var func = function () {
+
+                var argsMap = new (TypedMap.of(UInt8, Object));
 
                   if (   arguments.length == 1 
                       && arguments[0] instanceof Object 
                       && arguments[0].constructor.name == "Object")
                   {
-                      var namedArgs = new Structure(arguments[0]);
-                      return self._invokeByNamedArguments(index, namedArgs);
+                      
+                      // named args
+                      for (let i = 0; i < ft.args.length; i++){
+                            let arg = ft.args[i];
+                            if (arguments[arg.name] != undefined) {
+                                argsMap.set(new UInt8(arg.index), arguments[arg.name]);
+                            }
+                        }
+
+                      return self._invoke(ft.index, argsMap);
                   }
                   else
                   {
-                      return self._invokeByArrayArguments(index, arguments);
+                      for(let i = 0; (i < arguments.length) && (i < ft.args.length); i++)
+                        argsMap.set(new UInt8(i), arguments[i]);
+                      return self._invoke(ft.index, argsMap);
                   }
               };
 
               // get expansion
-              func.help = self.instance.template.functions[index].expansion;
+              func.help = self.instance.template.functions[ft.index].expansion;
               return func;
             };
 
@@ -148,15 +163,15 @@ export default class DistributedResource extends IResource
                 };
             };
 
-            for(var i = 0; i < this.instance.template.functions.length; i++)
+            for(let i = 0; i < this.instance.template.functions.length; i++)
             {
-                var ft = this.instance.template.functions[i];
-                this[ft.name] = makeFunc(ft.index);
+                let ft = this.instance.template.functions[i];
+                this[ft.name] = makeFunc(ft);
             }
 
-            for(var i = 0; i < this.instance.template.properties.length; i++)
+            for(let i = 0; i < this.instance.template.properties.length; i++)
             {
-                var pt = this.instance.template.properties[i];
+                let pt = this.instance.template.properties[i];
 
                 Object.defineProperty(this, pt.name, {
                     get: makeGetter(pt.index),
@@ -202,10 +217,10 @@ export default class DistributedResource extends IResource
         //@TODO if  array _emitArgs
         //this._emitArgs(et.name, [args]);
         this._emit(et.name, args);
-        this.instance._emitResourceEvent(null, null, et.name, args);
+        this.instance._emitResourceEvent(null, null, et, args);
     }
 
-    _invokeByArrayArguments(index, args) {
+    _invoke(index, args) {
         if (this.destroyed)
             throw new Error("Trying to access destroyed object");
 
@@ -215,20 +230,7 @@ export default class DistributedResource extends IResource
         if (index >= this.instance.template.functions.length)
             throw new Error("Function index is incorrect");
 
-        return this._p.connection.sendInvokeByArrayArguments(this._p.instanceId, index, args);
-    }
-
-    _invokeByNamedArguments(index, namedArgs) {
-        if (this.destroyed)
-            throw new Error("Trying to access destroyed object");
-
-        if (this._p.suspended)
-            throw new Error("Trying to access suspended object");
-
-        if (index >= this.instance.template.functions.length)
-            throw new Error("Function index is incorrect");
-
-        return this._p.connection.sendInvokeByNamedArguments(this._p.instanceId, index, namedArgs);
+        return this._p.connection.sendInvoke(this._p.instanceId, index, args);
     }
 
     _get(index)
