@@ -29,12 +29,13 @@
 import { ResourceTrigger } from '../Resource/IResource.js';
 import IStore from '../Resource/IStore.js'
 import AsyncReply from '../Core/AsyncReply.js';
-import Codec from '../Data/Codec.js';
 import Warehouse from '../Resource/Warehouse.js';
-import DataType from '../Data/DataType.js';
 import AsyncBag from '../Core/AsyncBag.js';
 import ErrorType from '../Core/ErrorType.js';
 import ExceptionCode from '../Core/ExceptionCode.js';
+import {RepresentationType, RepresentationTypeIdentifier} from '../Data/RepresentationType.js';
+import TypedMap from '../Data/TypedMap.js';
+import ResourceProxy from '../Proxy/ResourceProxy.js';
 
 export default class IndexedDBStore extends IStore
  {
@@ -47,32 +48,33 @@ export default class IndexedDBStore extends IStore
 
      compose(value)
      {
-         let type = Codec.getDataType(value, null);
+         let type = RepresentationType.fromType(value);
 
-         switch (type)
+         switch (type.identifier)
          {
-             case DataType.Void:
+             
+             case RepresentationTypeIdentifier.Void:
                  // nothing to do;
                  return null;
 
-             case DataType.String:
+             case RepresentationTypeIdentifier.String:
                  return value;
 
-             case DataType.Resource:
-             case DataType.DistributedResource:
+             case RepresentationTypeIdentifier.Resource:
+             case RepresentationTypeIdentifier.DistributedResource:
                  return  { "type": 0 , "link": value.instance.link };
 
-             case DataType.Structure:
-                 return this.composeStructure(value);
+             case RepresentationTypeIdentifier.Map:
+                 return this.composeMap(value);
 
-             case DataType.VarArray:
-                 return this.composeVarArray(value);
+             case RepresentationTypeIdentifier.List:
+                 return this.composeList(value);
 
-             case DataType.ResourceArray:
-                 return this.composeResourceArray(value);
+            //  case RepresentationTypeIdentifier.List:
+            //      return this.composeResourceArray(value);
 
-             case DataType.StructureArray:
-                 return this.composeStructureArray(value);
+             //case RepresentationTypeIdentifier.Typed:
+             //    return this.composeStructureArray(value);
 
              default:
                  return value;
@@ -103,7 +105,7 @@ export default class IndexedDBStore extends IStore
                  var bag = new AsyncBag();
                  var rt = new AsyncReply();
 
-                 let s = new Structure();
+                 let s = new (TypedMap.of(String, Object))();
 
                  for (let i = 0; i < value.values.length; i++)
                      bag.add(this.parse(value.values[i].value));
@@ -112,7 +114,7 @@ export default class IndexedDBStore extends IStore
                  bag.then((x) =>
                  {
                      for (let i = 0; i < x.length; i++)
-                         s[value.values[i].name] = x[i];
+                         s.set(value.values[i].name, x[i]);
 
                      rt.trigger(s);
                  });
@@ -190,7 +192,7 @@ export default class IndexedDBStore extends IStore
         
                     var bag = new AsyncBag();
 
-                    for(var i = 0; i < doc.values.length; i++)
+                    for(let i = 0; i < doc.values.length; i++)
                     {
                         let v = doc.values[i];
 
@@ -347,12 +349,15 @@ export default class IndexedDBStore extends IStore
      }
 
 
-     composeStructure(value)
+     composeMap(value)
      {
-         return {type: 1, values: value.toObject()};
+         var values = {};
+         for(let [k,v] of value)
+            values[[k]] = v;
+         return {type: 1, values};
      }
 
-     composeVarArray(array)
+     composeList(array)
      {
          var rt = [];
 
@@ -361,25 +366,25 @@ export default class IndexedDBStore extends IStore
          return rt;
      }
 
-     composeStructureArray(structures)
-     {
-        var rt = [];
+    //  composeStructureArray(structures)
+    //  {
+    //     var rt = [];
 
-        if (structures == null || structures.length == 0)
-             return rt;
+    //     if (structures == null || structures.length == 0)
+    //          return rt;
 
-        for(var i = 0; i < structures.length; i++)
-            rt.push(this.composeStructure(structures[s]));
+    //     for(var i = 0; i < structures.length; i++)
+    //         rt.push(this.composeStructure(structures[s]));
     
-         return rt;
-     }
+    //      return rt;
+    //  }
 
-     composeResourceArray(array)
-     {
-         var rt = [];
-         for (var i = 0; i < array.length; i++)
-             rt.push({ "type": 0 , "link": array[i].instance.link });
-         return rt;
-     }
+    //  composeResourceArray(array)
+    //  {
+    //      var rt = [];
+    //      for (var i = 0; i < array.length; i++)
+    //          rt.push({ "type": 0 , "link": array[i].instance.link });
+    //      return rt;
+    //  }
 
  }

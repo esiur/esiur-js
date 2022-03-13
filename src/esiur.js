@@ -1,5 +1,7 @@
 
-import Structure from './Data/Structure.js';
+import TypedMap from './Data/TypedMap.js';
+import TypedList from './Data/TypedList.js';
+
 import DistributedResource from './Net/IIP/DistributedResource.js'
 import MemoryStore from './Stores/MemoryStore.js';
 import IndexedDBStore from './Stores/IndexedDBStore.js';
@@ -26,19 +28,14 @@ import AutoMap from './Data/AutoMap.js';
 import BinaryList from './Data/BinaryList.js';
 import Codec from './Data/Codec.js';
 import DC from './Data/DC.js';
-import DataType from './Data/DataType.js';
 import Guid from './Data/Guid.js';
 import IRecord from './Data/IRecord.js';
 import KeyList from './Data/KeyList.js';
 import NotModified from './Data/NotModified.js';
 import PropertyValue from './Data/PropertyValue.js';
 import Record from './Data/Record.js';
-import ResourceComparisonResult from './Data/ResourceComparisonResult.js';
 import ResourceArrayType from './Data/ResourceArrayType.js';
 import ResourceArray from './Data/ResourceArray.js';
-import RecordComparisonResult from './Data/RecordComparisonResult.js';
-import StructureComparisonResult from './Data/StructureComparisonResult.js';
-import StructureArray from './Data/StructureArray.js';
 import INetworkReceiver from './Net/INetworkReceiver.js';
 import NetworkBuffer from './Net/NetworkBuffer.js';
 import NetworkConnections from './Net/NetworkConnections.js';
@@ -67,9 +64,11 @@ import FunctionTemplate from './Resource/Template/FunctionTemplate.js';
 import MemberTemplate from './Resource/Template/MemberTemplate.js';
 import MemberType from './Resource/Template/MemberType.js';
 import PropertyTemplate from './Resource/Template/PropertyTemplate.js';
-import TemplateDataType from './Resource/Template/TemplateDataType.js';
 import TemplateType from './Resource/Template/TemplateType.js';
 import TypeTemplate from './Resource/Template/TypeTemplate.js';
+
+import {RepresentationType, RepresentationTypeIdentifier} from './Data/RepresentationType.js';
+import {TransmissionType, TransmissionTypeIdentifier} from './Data/TransmissionType.js';
 
 import Authentication from './Security/Authority/Authentication.js';
 import AuthenticationMethod from './Security/Authority/AuthenticationMethod.js';
@@ -84,11 +83,14 @@ import ActionType from './Security/Permissions/ActionType.js';
 import IPermissionsManager from './Security/Permissions/IPermissionsManager.js';
 import Ruling from './Security/Permissions/Ruling.js';
 
+import { Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, UInt64, Int128, UInt128, Float32, Float64, Float128, Char16, Char8 } from './Data/ExtendedTypes.js';
+
 let namespace = {
     Core: { AsyncReply, AsyncException, AsyncQueue, ErrorType, ExceptionCode, IDestructible, IEventHandler, ProgressType},
-    Data: {AutoList, AutoMap, BinaryList, Codec, DC, DataType, Guid, IRecord, KeyList, NotModified, 
-        PropertyValue, Record, RecordComparisonResult, ResourceArray, ResourceArrayType, ResourceComparisonResult, Structure,
-         StructureArray, StructureComparisonResult },
+    Data: {AutoList, AutoMap, BinaryList, Codec, DC, TypedList, TypedMap, Guid, IRecord, KeyList, NotModified, 
+        PropertyValue, Record, ResourceArray, RepresentationType, RepresentationTypeIdentifier, TransmissionType, TransmissionTypeIdentifier,
+        Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, UInt64, Int128, UInt128, Float32, Float64, Float128, Char16, Char8
+    },
     Net: {INetworkReceiver, NetworkBuffer, NetworkConnections, NetworkServer, NetworkSession, SendList,        
             IIP: {DistributedConnection, DistributedPropertyContext, DistributedResource, DistributedResourceQueueItem, 
                 DistributedResourceQueueItemType, DistributedServer, EntryPoint},
@@ -100,7 +102,7 @@ let namespace = {
     Resource: {CustomResourceEvent, Instance, IResource, IStore, Warehouse,
                 Template: {
                     ArgumentTemplate, EventTemplate, FunctionTemplate, MemberTemplate,
-                    MemberType, PropertyTemplate, TemplateDataType, TemplateType, TypeTemplate
+                    MemberType, PropertyTemplate, TemplateType, TypeTemplate
                 }
               },
     Security: {
@@ -118,7 +120,8 @@ let namespace = {
 if (typeof window !== 'undefined') 
 {
     window.wh = Warehouse;
-    window.Structure = Structure;
+    window.TypedMap = TypedMap;
+    window.TypedList = TypedList;
     window.DistributedResource = DistributedResource;
     window.MemoryStore = MemoryStore;
     window.IndexedDBStore = IndexedDBStore;
@@ -131,7 +134,8 @@ if (typeof window !== 'undefined')
 else if (typeof global !== 'undefined') 
 {
     global.wh = Warehouse;
-    global.Structure = Structure;
+    global.TypedMap = TypedMap;
+    global.TypedList = TypedList;
     global.DistributedResource = DistributedResource;
     global.MemoryStore = MemoryStore;
     global.IndexedDBStore = IndexedDBStore;

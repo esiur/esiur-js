@@ -30,7 +30,6 @@ import IEventHandler from '../Core/IEventHandler.js';
 import IPermissionsManager from '../Security/Permissions/IPermissionsManager.js';
 import AutoList from '../Data/AutoList.js';
 import KeyList from '../Data/KeyList.js';
-import Structure from '../Data/Structure.js';
 import PropertyValue from '../Data/PropertyValue.js';
 import CustomResourceEvent from './CustomResourceEvent.js';
 import Warehouse from './Warehouse.js';
@@ -293,7 +292,7 @@ export default class Instance extends IEventHandler
 
     getAttributes(attributes = null)
     {
-        var st = new Structure();
+        var st = new (TypedMap.of(String, Object))();
 
         if (attributes == null)
         {
@@ -306,7 +305,7 @@ export default class Instance extends IEventHandler
             var attr = attributes[i];
 
             if (attr == "name")
-                st["name"] = this.name;
+                st.set("name", this.name);
 
             else if (attr == "managers")
             {
@@ -322,11 +321,11 @@ export default class Instance extends IEventHandler
                     mngrs.push(sm);
                 }
 
-                st["managers"] = mngrs;
+                st.set("managers", mngrs);
 
             }
             else
-                st[attr] = this.attributes.item(attr);
+                st.set(attr, this.attributes.item(attr));
         }
 
         return st;

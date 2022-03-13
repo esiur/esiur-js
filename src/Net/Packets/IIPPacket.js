@@ -30,7 +30,6 @@ import IIPPacketAction from "./IIPPacketAction.js";
 import IIPPacketCommand from "./IIPPacketCommand.js";
 import IIPPacketEvent from "./IIPPacketEvent.js";
 import IIPPacketReport from "./IIPPacketReport.js";
-import DataType from '../../Data/DataType.js';
 import TransmissionType from '../../Data/TransmissionType.js';
 
 export default class IIPPacket

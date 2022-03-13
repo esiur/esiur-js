@@ -1429,17 +1429,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = exports.CodecParseResults = exports.CodecComposeResults = void 0;
 
-var _DataType = _interopRequireDefault(require("./DataType.js"));
-
-var _ResourceComparisonResult = _interopRequireDefault(require("./ResourceComparisonResult.js"));
-
-var _StructureComparisonResult = _interopRequireDefault(require("./StructureComparisonResult.js"));
-
 var _AsyncBag = _interopRequireDefault(require("../Core/AsyncBag.js"));
 
 var _AsyncReply = _interopRequireDefault(require("../Core/AsyncReply.js"));
-
-var _Structure = _interopRequireDefault(require("./Structure.js"));
 
 var _PropertyValue = _interopRequireDefault(require("./PropertyValue.js"));
 
@@ -1452,8 +1444,6 @@ var _DistributedPropertyContext = _interopRequireDefault(require("../Net/IIP/Dis
 var _DistributedResource = _interopRequireDefault(require("../Net/IIP/DistributedResource.js"));
 
 var _IResource = _interopRequireDefault(require("../Resource/IResource.js"));
-
-var _RecordComparisonResult = _interopRequireDefault(require("./RecordComparisonResult.js"));
 
 var _IRecord = _interopRequireDefault(require("./IRecord.js"));
 
@@ -1468,8 +1458,6 @@ var _TemplateType = _interopRequireDefault(require("../Resource/Template/Templat
 var _NotModified = _interopRequireDefault(require("./NotModified.js"));
 
 var _KeyList = _interopRequireDefault(require("./KeyList.js"));
-
-var _StructureArray = _interopRequireDefault(require("./StructureArray.js"));
 
 var _DataSerializer = _interopRequireDefault(require("./DataSerializer.js"));
 
@@ -1505,1010 +1493,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// export default class Codec {
-//     static parse(data, offset, sizeObject, connection, dataType = DataType.Unspecified) {
-//         var size;
-//         //var reply = new AsyncReply();
-//         var isArray;
-//         var t;
-//         if (dataType == DataType.Unspecified) {
-//             size = 1;
-//             dataType = data[offset++];
-//         }
-//         else
-//             size = 0;
-//         t = dataType & 0x7F;
-//         isArray = (dataType & 0x80) == 0x80;
-//         var payloadSize = DataType.sizeOf(dataType);
-//         var contentLength = 0;
-//         // check if we have the enough data
-//         if (payloadSize == -1) {
-//             contentLength = data.getUint32(offset);
-//             offset += 4;
-//             size += 4 + contentLength;
-//         }
-//         else
-//             size += payloadSize;
-//         sizeObject.size = size;
-//         if (isArray) {
-//             switch (t) {
-//                 // VarArray ?
-//                 case DataType.Void:
-//                     return Codec.parseVarArray(data, offset, contentLength, connection);
-//                 case DataType.Bool:
-//                     return new AsyncReply(data.getBooleanArray(offset, contentLength));
-//                 case DataType.UInt8:
-//                     return new AsyncReply(data.getUint8Array(offset, contentLength));
-//                 case DataType.Int8:
-//                     return new AsyncReply(data.getInt8Array(offset, contentLength));
-//                 case DataType.Char:
-//                     return new AsyncReply(data.getCharArray(offset, contentLength));
-//                 case DataType.Int16:
-//                     return new AsyncReply(data.getInt16Array(offset, contentLength));
-//                 case DataType.UInt16:
-//                     return new AsyncReply(data.getUint16Array(offset, contentLength));
-//                 case DataType.Int32:
-//                     return new AsyncReply(data.getInt32Array(offset, contentLength));
-//                 case DataType.UInt32:
-//                     return new AsyncReply(data.getUint32Array(offset, contentLength));
-//                 case DataType.Int64:
-//                     return new AsyncReply(data.getInt64Array(offset, contentLength));
-//                 case DataType.UInt64:
-//                     return new AsyncReply(data.getUint64Array(offset, contentLength));
-//                 case DataType.Float32:
-//                     return new AsyncReply(data.getFloat32Array(offset, contentLength));
-//                 case DataType.Float64:
-//                     return new AsyncReply(data.getFloat64Array(offset, contentLength));
-//                 case DataType.String:
-//                     return new AsyncReply(data.getStringArray(offset, contentLength));
-//                 case DataType.Resource:
-//                 case DataType.DistributedResource:
-//                     return Codec.parseResourceArray(data, offset, contentLength, connection);
-//                 case DataType.DateTime:
-//                     return new AsyncReply(data.getDateTimeArray(offset, contentLength));
-//                 case DataType.Structure:
-//                     return Codec.parseStructureArray(data, offset, contentLength, connection);
-//                 case DataType.Record:
-//                     return Codec.parseRecordArray(data, offset, contentLength, connection);
-//             }
-//         }
-//         else {
-//             switch (t) {
-//                 case DataType.NotModified:
-//                     return new AsyncReply(new NotModified());
-//                 case DataType.Void:
-//                     return new AsyncReply(null);
-//                 case DataType.Bool:
-//                     return new AsyncReply(data.getBoolean(offset));
-//                 case DataType.UInt8:
-//                     return new AsyncReply(data[offset]);
-//                 case DataType.Int8:
-//                     return new AsyncReply(data.getInt8(offset));
-//                 case DataType.Char:
-//                     return new AsyncReply(data.getChar(offset));
-//                 case DataType.Int16:
-//                     return new AsyncReply(data.getInt16(offset));
-//                 case DataType.UInt16:
-//                     return new AsyncReply(data.getUint16(offset));
-//                 case DataType.Int32:
-//                     return new AsyncReply(data.getInt32(offset));
-//                 case DataType.UInt32:
-//                     return new AsyncReply(data.getUint32(offset));
-//                 case DataType.Int64:
-//                     return new AsyncReply(data.getInt64(offset));
-//                 case DataType.UInt64:
-//                     return new AsyncReply(data.getUint64(offset));
-//                 case DataType.Float32:
-//                     return new AsyncReply(data.getFloat32(offset));
-//                 case DataType.Float64:
-//                     return new AsyncReply(data.getFloat64(offset));
-//                 case DataType.String:
-//                     return new AsyncReply(data.getString(offset, contentLength));
-//                 case DataType.Resource:
-//                     return Codec.parseResource(data, offset);
-//                 case DataType.DistributedResource:
-//                     return Codec.parseDistributedResource(data, offset, connection);
-//                 case DataType.DateTime:
-//                     return new AsyncReply(data.getDateTime(offset));
-//                 case DataType.Structure:
-//                     return Codec.parseStructure(data, offset, contentLength, connection);
-//                 case DataType.Record:
-//                     return Codec.parseRecord(data, offset, contentLength, connection);
-//             }
-//         }
-//         // @TODO: Throw exception
-//         return new AsyncReply(null);
-//     }
-//     static parseResource(data, offset) {
-//         return Warehouse.getById(data.getUint32(offset));
-//     }
-//     static parseDistributedResource(data, offset, connection) {
-//         //var g = data.getGuid(offset);
-//         //offset += 16;
-//         // find the object
-//         var iid = data.getUint32(offset);
-//         return connection.fetch(iid);// Warehouse.getById(iid);
-//     }
-//             /// <summary>
-//         /// Parse an array of bytes into array of resources
-//         /// </summary>
-//         /// <param name="data">Array of bytes.</param>
-//         /// <param name="length">Number of bytes to parse.</param>
-//         /// <param name="offset">Zero-indexed offset.</param>
-//         /// <param name="connection">DistributedConnection is required to fetch resources.</param>
-//         /// <returns>Array of resources.</returns>
-//         static parseResourceArray(data, offset, length, connection)
-//         {
-//             var reply = new AsyncBag();
-//             if (length == 0)
-//             {
-//                 reply.seal();
-//                 return reply;
-//             }
-//             var end = offset + length;
-//             // 
-//             //var result = data[offset++];
-//             var type = data[offset] & 0xF0;
-//             var result = data[offset++] & 0xF;
-//             if (type == ResourceArrayType.Wrapper)
-//             {
-//                 let classId = data.getGuid(offset);
-//                 offset += 16;
-//                 let tmp = Warehouse.getTemplateByClassId(classId, TemplateType.Resource);
-//                 // not mine, look if the type is elsewhere
-//                 if (tmp == null)
-//                     Warehouse.getTemplateByClassId(classId, TemplateType.Wrapper);
-//                 reply.arrayType = tmp?.definedType;
-//             }
-//             else if (type == ResourceArrayType.Static)
-//             {
-//                 let classId = data.getGuid(offset);
-//                 offset += 16;
-//                 let tmp = Warehouse.getTemplateByClassId(classId, TemplateType.Wrapper);
-//                 reply.arrayType = tmp?.definedType;
-//             }
-//             var previous = null;
-//             if (result == ResourceComparisonResult.Empty) {
-//                 reply.seal();
-//                 return reply;
-//             } else if (result == ResourceComparisonResult.Null) {
-//                 previous = new AsyncReply(null);
-//             } else if (result == ResourceComparisonResult.Local)
-//             {
-//                 previous = Warehouse.getById(data.getUint32(offset));
-//                 offset += 4;
-//             }
-//             else if (result == ResourceComparisonResult.Distributed)
-//             {
-//                 previous = connection.fetch(data.getUint32(offset));
-//                 offset += 4;
-//             }
-//             reply.add(previous);
-//             while (offset < end)
-//             {
-//                 result = data[offset++];
-//                 var current = null;
-//                 if (result == ResourceComparisonResult.Null)
-//                 {
-//                     current = new AsyncReply(null);
-//                 }
-//                 else if (result == ResourceComparisonResult.Same)
-//                 {
-//                     current = previous;
-//                 }
-//                 else if (result == ResourceComparisonResult.Local)
-//                 {
-//                     current = Warehouse.getById(data.getUint32(offset));
-//                     offset += 4;
-//                 }
-//                 else if (result == ResourceComparisonResult.Distributed)
-//                 {
-//                     current = connection.fetch(data.getUint32(offset));
-//                     offset += 4;
-//                 }
-//                 reply.add(current);
-//                 previous = current;
-//             }
-//             reply.seal();
-//             return reply;
-//         }
-//         /// <summary>
-//         /// Compose an array of property values.
-//         /// </summary>
-//         /// <param name="array">PropertyValue array.</param>
-//         /// <param name="connection">DistributedConnection is required to check locality.</param>
-//         /// <param name="prependLength">If True, prepend the length as UInt32 at the beginning of the output.</param>
-//         /// <returns>Array of bytes in the network byte order.</returns>
-//         static composePropertyValueArray(array, connection, prependLength = false)
-//         {
-//             var rt = BL();
-//             for (var i = 0; i < array.length; i++)
-//                 rt.addUint8Array(Codec.composePropertyValue(array[i], connection));
-//             if (prependLength)
-//                 rt.addUint32(rt.length, 0);
-//             return rt.toArray();
-//         }
-//         /// <summary>
-//         /// Compose a property value.
-//         /// </summary>
-//         /// <param name="propertyValue">Property value</param>
-//         /// <param name="connection">DistributedConnection is required to check locality.</param>
-//         /// <returns>Array of bytes in the network byte order.</returns>
-//         static composePropertyValue(propertyValue, connection)
-//         {
-//             // age, date, value
-//             return BL().addUint64(propertyValue.age)
-//                        .addDateTime(propertyValue.date)
-//                        .addUint8Array(Codec.compose(propertyValue.value, connection))
-//                        .toArray();
-//         }
-//         /// <summary>
-//         /// Parse property value.
-//         /// </summary>
-//         /// <param name="data">Array of bytes.</param>
-//         /// <param name="offset">Zero-indexed offset.</param>
-//         /// <param name="connection">DistributedConnection is required to fetch resources.</param>
-//         /// <param name="cs">Output content size.</param>
-//         /// <returns>PropertyValue.</returns>
-//         static parsePropertyValue(data, offset, sizeObject, connection)
-//         {
-//             var reply = new AsyncReply();
-//             var age = data.getUint64(offset);
-//             offset += 8;
-//             var date = data.getDateTime(offset);
-//             offset += 8;
-//             var cs = {};
-//             Codec.parse(data, offset, cs, connection).then(function(value)
-//             {
-//                 reply.trigger(new PropertyValue(value, age, date));
-//             });
-//             sizeObject.size = 16 + cs.size;
-//             return reply;
-//         }
-//         /// <summary>
-//         /// Parse resource history
-//         /// </summary>
-//         /// <param name="data">Array of bytes.</param>
-//         /// <param name="offset">Zero-indexed offset.</param>
-//         /// <param name="length">Number of bytes to parse.</param>
-//         /// <param name="resource">Resource</param>
-//         /// <param name="fromAge">Starting age.</param>
-//         /// <param name="toAge">Ending age.</param>
-//         /// <param name="connection">DistributedConnection is required to fetch resources.</param>
-//         /// <returns></returns>
-//         static parseHistory(data, offset, length, resource, connection)
-//         {
-//             var list = new KeyList();
-//             var reply = new AsyncReply();
-//             var bagOfBags = new AsyncBag();
-//             var ends = offset + length;
-//             while (offset < ends)
-//             {
-//                 var index = data[offset++];
-//                 var pt = resource.instance.template.getPropertyTemplateByIndex(index);
-//                 list.add(pt, null);
-//                 var cs = data.getUint32(offset);
-//                 offset += 4;
-//                 bagOfBags.add(Codec.parsePropertyValueArray(data, offset, cs, connection));
-//                 offset += cs;
-//             }
-//             bagOfBags.seal();
-//             bagOfBags.then(x =>
-//             {
-//                 for(var i = 0; i < list.length; i++)
-//                     list.values[i] = x[i];
-//                 reply.trigger(list);
-//             });
-//             return reply;
-//         }
-//         /// <summary>
-//         /// Compose resource history
-//         /// </summary>
-//         /// <param name="history">History</param>
-//         /// <param name="connection">DistributedConnection is required to fetch resources.</param>
-//         /// <returns></returns>
-//         static composeHistory(history, connection, prependLength = false)
-//         {
-//             var rt = new BinaryList();
-//             for (var i = 0; i < history.length; i++)
-//                 rt.addUint8(history.keys[i].index).addUint8Array(Codec.composePropertyValueArray(history.values[i], connection, true));
-//             if (prependLength)
-//                 rt.addUint32(rt.length, 0);
-//             return rt.toArray();
-//         }
-//         /// <summary>
-//         /// Parse an array of ProperyValue.
-//         /// </summary>
-//         /// <param name="data">Array of bytes.</param>
-//         /// <param name="offset">Zero-indexed offset.</param>
-//         /// <param name="length">Number of bytes to parse.</param>
-//         /// <param name="connection">DistributedConnection is required to fetch resources.</param>
-//         /// <returns></returns>
-//         static parsePropertyValueArray(data, offset, length, connection)
-//         {
-//             var rt = new AsyncBag();
-//             while (length > 0)
-//             {
-//                 var cs = {};
-//                 rt.add(Codec.parsePropertyValue(data, offset, cs, connection));
-//                 if (cs.size > 0)
-//                 {
-//                     offset += cs.size;
-//                     length -= cs.size;
-//                 }
-//                 else
-//                     throw new Error("Error while parsing ValueInfo structured data");
-//             }
-//             rt.seal();
-//             return rt;
-//         }
-//         static parseStructure(data, offset, contentLength, connection, metadata = null, keys = null, types = null) 
-//         {
-//             var reply = new AsyncReply();
-//             var bag = new AsyncBag();
-//             var keylist = [];
-//             var typelist = [];
-//         if (keys == null) {
-//             while (contentLength > 0) {
-//                 var len = data[offset++];
-//                 keylist.push(data.getString(offset, len));
-//                 offset += len;
-//                 typelist.push(data[offset]);
-//                 var rt = {};
-//                 bag.add(Codec.parse(data, offset, rt, connection));
-//                 contentLength -= rt.size + len + 1;
-//                 offset += rt.size;
-//             }
-//         }
-//         else if (types == null) {
-//             for (var i = 0; i < keys.length; i++)
-//                 keylist.push(keys[i]);
-//             while (contentLength > 0) {
-//                 typelist.push(data[offset]);
-//                 let rt = {};
-//                 bag.add(Codec.parse(data, offset, rt, connection));
-//                 contentLength -= rt.size;
-//                 offset += rt.size;
-//             }
-//         }
-//         else {
-//             for (let i = 0; i < keys.length; i++) {
-//                 keylist.push(keys[i]);
-//                 typelist.push(types[i]);
-//             }
-//             let i = 0;
-//             while (contentLength > 0) {
-//                 let rt = {};
-//                 bag.add(Codec.parse(data, offset, rt, connection, types[i]));
-//                 contentLength -= rt.size;
-//                 offset += rt.size;
-//                 i++;
-//             }
-//         }
-//         bag.seal();
-//         bag.then(function (res) {
-//             // compose the list
-//             var s = new Structure();
-//             for (var i = 0; i < keylist.length; i++)
-//                 s[keylist[i]] = res[i];
-//             reply.trigger(s);
-//         });
-//         if (metadata != null)
-//         {
-//             metadata.keys = keylist;
-//             metadata.types = typelist;
-//         }
-//         return reply;
-//     }
-//     static parseVarArray(data, offset, contentLength, connection) {
-//         var rt = new AsyncBag();
-//         while (contentLength > 0) {
-//             var cs = {};
-//             rt.add(Codec.parse(data, offset, cs, connection));
-//             if (cs.size > 0) {
-//                 offset += cs.size;
-//                 contentLength -= cs.size;
-//             }
-//             else
-//                 throw new Error("Error while parsing structured data");
-//         }
-//         rt.seal();
-//         return rt;
-//     }
-//     static compose(value, connection, prependType = true) {
-//         if (value instanceof Function)
-//             value = value(connection);
-//         else if (value instanceof DistributedPropertyContext)
-//             value = value.method(this);
-//         var type = Codec.getDataType(value, connection);
-//         var rt = new BinaryList();
-//         switch (type) {
-//             case DataType.Void:
-//                 // nothing to do;
-//                 break;
-//             case DataType.String:
-//                 var st = DC.stringToBytes(value);
-//                 rt.addUint32(st.length).addUint8Array(st);
-//                 break;
-//             case DataType.Resource:
-//                 rt.addUint32(value._p.instanceId);
-//                 break;
-//             case DataType.DistributedResource:
-// //                rt.addUint8Array(DC.stringToBytes(value.instance.template.classId)).addUint32(value.instance.id);
-//                 rt.addUint32(value.instance.id);
-//                 break;
-//             case DataType.Structure:
-//                 rt.addUint8Array(Codec.composeStructure(value, connection, true, true, true));
-//                 break;
-//             case DataType.VarArray:
-//                 rt.addUint8Array(Codec.composeVarArray(value, connection, true));
-//                 break;
-//             case DataType.Record:
-//                 rt.addUint8Array(Codec.composeRecord(value, connection, true, true));
-//                 break;
-//             case DataType.ResourceArray:
-//                 rt.addUint8Array(Codec.composeResourceArray(value, connection, true));
-//                 break;
-//             case DataType.StructureArray:
-//                 rt.addUint8Array(Codec.composeStructureArray(value, connection, true));
-//                 break;
-//             case DataType.RecordArray:
-//                 rt.addUint8Array(Codec.composeRecordArray(value, connection, true));
-//                 break;
-//             default:
-//                 rt.add({type: type, value: value});
-//                 if (DataType.isArray(type))
-//                     rt.addUint32(rt.length, 0);
-//                 break;
-//         }
-//         if (prependType)
-//             rt.addUint8(type, 0);
-//         return rt.toArray();
-//     }
-//     static composeVarArray(array, connection, prependLength = false) {
-//         var rt = new BinaryList();
-//         for (var i = 0; i < array.length; i++)
-//             rt.addUint8Array(Codec.compose(array[i], connection));
-//         if (prependLength)
-//             rt.addUint32(rt.length, 0);
-//         return rt.toArray();
-//     }
-//     static composeStructure(value, connection, includeKeys = true, includeTypes = true, prependLength = false) {
-//         let rt = new BinaryList();
-//         let keys = value.getKeys();
-//         if (includeKeys) {
-//             for (let i = 0; i < keys.length; i++) {
-//                 let key = DC.stringToBytes(keys[i]);
-//                 rt.addUint8(key.length).addUint8Array(key).addUint8Array(Codec.compose(value[keys[i]], connection));
-//             }
-//         }
-//         else {
-//             for (let i = 0; i < keys.length; i++)
-//                 rt.addUint8Array(Codec.compose(value[keys[i]], connection, includeTypes));
-//         }
-//         if (prependLength)
-//             rt.addUint32(rt.length, 0);
-//         return rt.toArray();
-//     }
-//     static composeStructureArray(structures, connection, prependLength = false) {
-//         if (structures == null || structures.length == 0 || !(structures instanceof StructureArray))
-//             return new DC(0);
-//         var rt = new BinaryList();
-//         var comparision = StructureComparisonResult.Structure;
-//         rt.addUint8(comparision);
-//         rt.addUint8Array(Codec.composeStructure(structures[0], connection));
-//         for (var i = 1; i < structures.length; i++) {
-//             comparision = Codec.compareStructure(structures[i - 1], structures[i], connection);
-//             rt.addUint8(comparision);
-//             if (comparision == StructureComparisonResult.Structure)
-//                 rt.addUint8Array(Codec.composeStructure(structures[i], connection));
-//             else if (comparision == StructureComparisonResult.StructureSameKeys)
-//                 rt.addUint8Array(Codec.composeStructure(structures[i], connection, false));
-//             else if (comparision == StructureComparisonResult.StructureSameTypes)
-//                 rt.addUint8Array(Codec.composeStructure(structures[i], connection, false, false));
-//         }
-//         if (prependLength)
-//             rt.addUint32(rt.length, 0);
-//         return rt.toArray();
-//     }
-//     /// <summary>
-//     /// Compare two records
-//     /// </summary>
-//     /// <param name="initial">Initial record to compare with</param>
-//     /// <param name="next">Next record to compare with the initial</param>
-//     /// <param name="connection">DistributedConnection is required in case a structure holds items at the other end</param>
-//     static compareRecords(initial, next)
-//     {
-//         if (next == null)
-//             return RecordComparisonResult.Null;
-//         if (initial == null)
-//             return RecordComparisonResult.Record;
-//         if (next == initial)
-//             return RecordComparisonResult.Same;
-//         if (next.constructor === initial.constructor)
-//             return RecordComparisonResult.RecordSameType;
-//         return RecordComparisonResult.Record;
-//     }
-//     static parseRecordArray(data, offset, length, connection)
-//     {
-//         var reply = new AsyncBag();
-//         if (length == 0)
-//         {
-//             reply.seal();
-//             return reply;
-//         }
-//         var end = offset + length;
-//         var isTyped = (data.getUint8(offset) & 0x10) == 0x10;
-//         var result = data.getUint8(offset++) & 0xF;
-//         if (isTyped)
-//         {
-//             var classId = data.getGuid(offset);
-//             offset += 16;
-//             var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
-//             reply.arrayType = template?.definedType;
-//             var previous = null;
-//             if (result == RecordComparisonResult.Empty)
-//             {
-//                 reply.seal();
-//                 return reply;
-//             }
-//             else if (result == RecordComparisonResult.Null)
-//             {
-//                 previous = new AsyncReply(null);
-//             }
-//             else if (result == RecordComparisonResult.Record
-//                     || result == RecordComparisonResult.RecordSameType)
-//             {
-//                 var cs = data.getUint32(offset);
-//                 var recordLength = cs;
-//                 offset += 4;
-//                 previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
-//                 offset += recordLength;
-//             }
-//             reply.add(previous);
-//             while (offset < end)
-//             {
-//                 result = data.getUint8(offset++);
-//                 if (result == RecordComparisonResult.Null)
-//                     previous = new AsyncReply(null);
-//                 else if (result == RecordComparisonResult.Record
-//                     || result == RecordComparisonResult.RecordSameType)
-//                 {
-//                     let cs = data.getUint32(offset);
-//                     offset += 4;
-//                     previous = Codec.parseRecord(data, offset, cs, connection, classId);
-//                     offset += cs;
-//                 }
-//                 else if (result == RecordComparisonResult.Same)
-//                 {
-//                     // do nothing
-//                 }
-//                 reply.add(previous);
-//             }
-//         }
-//         else
-//         {
-//             let previous = null;
-//             let classId = null;
-//             if (result == RecordComparisonResult.Empty)
-//             {
-//                 reply.seal();
-//                 return reply;
-//             }
-//             else if (result == RecordComparisonResult.Null)
-//                 previous = new AsyncReply(null);
-//             else if (result == RecordComparisonResult.Record)
-//             {
-//                 let cs = data.getUint32(offset);
-//                 let recordLength = cs - 16;
-//                 offset += 4;
-//                 classId = data.getGuid(offset);
-//                 offset += 16;
-//                 previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
-//                 offset += recordLength;
-//             }
-//             reply.add(previous);
-//             while (offset < end)
-//             {
-//                 result = data.getUint8(offset++);
-//                 if (result == RecordComparisonResult.Null)
-//                     previous = new AsyncReply(null);
-//                 else if (result == RecordComparisonResult.Record)
-//                 {
-//                     let cs = data.getUint32(offset);
-//                     let recordLength = cs - 16;
-//                     offset += 4;
-//                     classId = data.getGuid(offset);
-//                     offset += 16;
-//                     previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
-//                     offset += recordLength;
-//                 }
-//                 else if (result == RecordComparisonResult.RecordSameType)
-//                 {
-//                     let cs = data.getUint32(offset);
-//                     offset += 4;
-//                     previous = this.parseRecord(data, offset, cs, connection, classId);
-//                     offset += cs;
-//                 }
-//                 else if (result == RecordComparisonResult.Same)
-//                 {
-//                     // do nothing
-//                 }
-//                 reply.add(previous);
-//             }
-//         }
-//         reply.seal();
-//         return reply;
-//         // var reply = new AsyncBag();
-//         // if (length == 0)
-//         // {
-//         //     reply.seal();
-//         //     return reply;
-//         // }
-//         // var end = offset + length;
-//         // var result = data.getUint8(offset++);
-//         // var previous = null;
-//         // var classId = null;
-//         // if (result == RecordComparisonResult.Null)
-//         //     previous = new AsyncReply(null);
-//         // else if (result == RecordComparisonResult.Record)
-//         // {
-//         //     var cs = data.getUint32(offset);
-//         //     var recordLength = cs - 16;
-//         //     offset += 4;
-//         //     classId = data.getGuid(offset);
-//         //     offset += 16;
-//         //     previous = Codec.parseRecord(data, offset, recordLength, connection, classId);
-//         //     offset += recordLength;
-//         // }
-//         // reply.Add(previous);
-//         // while (offset < end)
-//         // {
-//         //     result = data.getUint8(offset++);
-//         //     if (result == RecordComparisonResult.Null)
-//         //         previous = new AsyncReply(null);
-//         //     else if (result == RecordComparisonResult.Record)
-//         //     {
-//         //         var cs = data.getUint32(offset);
-//         //         var recordLength = cs - 16;
-//         //         offset += 4;
-//         //         classId = data.getGuid(offset);
-//         //         offset += 16;
-//         //         previous = Codec.parseRecord(data, offset, recordLength, connection, classId); 
-//         //         offset += recordLength;
-//         //     }
-//         //     else if (result == RecordComparisonResult.RecordSameType)
-//         //     {
-//         //         var cs = data.getUint32(offset);
-//         //         offset += 4;
-//         //         previous = Codec.parseRecord(data, offset, cs, connection, classId);
-//         //         offset += cs;
-//         //     }
-//         //     else if (result == RecordComparisonResult.Same)
-//         //     {
-//         //         // do nothing
-//         //     }
-//         //     reply.add(previous);
-//         // }
-//         // reply.seal();
-//         // return reply;
-//     }
-//     static parseRecord(data, offset, length, connection, classId = null)
-//     {
-//         var reply = new AsyncReply();
-//         if (classId == null)
-//         {
-//             classId = data.getGuid(offset);
-//             offset += 16;
-//             length -= 16;
-//         }
-//         var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
-//         if (template != null)
-//         {
-//             Codec.parseVarArray(data, offset, length, connection).then(ar =>
-//             {
-//                 if (template.definedType != null)
-//                 {
-//                     let record = new template.definedType();
-//                     for (let i = 0; i < template.properties.length; i++)
-//                         record[template.properties[i].name] = ar[i];
-//                     reply.trigger(record);
-//                 }
-//                 else
-//                 {
-//                     let record = new Record();
-//                     for (let i = 0; i < template.properties.length; i++)
-//                         record[template.properties[i].name] = ar[i];
-//                     reply.trigger(record);
-//                 }
-//             });
-//         }
-//         else
-//         {
-//             connection.getTemplate(classId).then(tmp => {
-//                 Codec.parseVarArray(data, offset, length, connection).then(ar =>
-//                 {
-//                     var record = new Record();
-//                     for (var i = 0; i < tmp.properties.length; i++)
-//                         record[tmp.properties[i].name] = ar[i];
-//                     reply.trigger(record);
-//                 });
-//             }).error(x=>reply.triggerError(x));
-//         }
-//         return reply;
-//     }
-//     static composeRecord(record, connection, includeClassId = true, prependLength = false)
-//     {
-//         var rt = new BinaryList();
-//         var template = Warehouse.getTemplateByType(record.constructor);
-//         if (includeClassId)
-//             rt.addGuid(template.classId);
-//         for(var i = 0; i < template.properties.length; i++)
-//         {
-//             var value = record[template.properties[i].name];
-//             rt.addUint8Array(Codec.compose(value, connection));
-//         }
-//         if (prependLength)
-//             rt.insertInt32(0, rt.length);
-//         return rt.toArray();
-//     }
-//     static composeRecordArray(records, connection, prependLength = false)
-//     {
-//         if (records == null ) //|| records?.length == 0)
-//             return prependLength ? new DC(4) : new DC(0);
-//         var rt = new BinaryList();
-//         //var comparsion = Codec.compareRecords(null, records[0]);
-//         var comparsion = records.length == 0 ? RecordComparisonResult.Empty : Codec.compareRecords(null, records[0]);
-//         rt.addUint8(comparsion);
-//         if (comparsion == RecordComparisonResult.Record)
-//             rt.addUint8Array(Codec.composeRecord(records[0], connection, true, true));
-//         for (var i = 1; i < records.length; i++)
-//         {
-//             comparsion = Codec.compareRecords(records[i - 1], records[i]);
-//             rt.addUint8(comparsion);
-//             if (comparsion == RecordComparisonResult.Record)
-//                 rt.addUint8Array(Codec.composeRecord(records[i], connection, true, true));
-//             else if (comparsion == RecordComparisonResult.RecordSameType)
-//                 rt.addUint8Array(Codec.composeRecord(records[i], connection, false, true));
-//         }
-//         if (prependLength)
-//             rt.insertInt32(0, rt.length);
-//         return rt.toArray();
-//     }
-//     static compareStructure(previous, next, connection) {
-//         if (next == null)
-//             return StructureComparisonResult.Null;
-//         if (previous == null)
-//             return StructureComparisonResult.Structure;
-//         if (next == previous)
-//             return StructureComparisonResult.Same;
-//         if (previous.length != next.length)
-//             return StructureComparisonResult.Structure;
-//         var previousKeys = previous.getKeys();
-//         var nextKeys = next.getKeys();
-//         for (let i = 0; i < previousKeys.length; i++)
-//             if (previousKeys[i] != nextKeys[i])
-//                 return StructureComparisonResult.Structure;
-//         var previousTypes = Codec.getStructureDateTypes(previous, connection);
-//         var nextTypes = Codec.getStructureDateTypes(next, connection);
-//         for (let i = 0; i < previousTypes.length; i++)
-//             if (previousTypes[i] != nextTypes[i])
-//                 return StructureComparisonResult.StructureSameKeys;
-//         return StructureComparisonResult.StructureSameTypes;
-//     }
-//     static getStructureDateTypes(structure, connection) {
-//         var keys = structure.getKeys();
-//         var types = [];
-//         for (var i = 0; i < keys.length; i++)
-//             types.push(Codec.getDataType(structure[keys[i]], connection));
-//         return types;
-//     }
-// static isLocalResource(resource, connection) {
-//     if (resource instanceof DistributedResource)
-//         if (resource._p.connection == connection)
-//             return true;
-//     return false;
-// }
-//     static composeResource(resource, connection) {
-//         if (Codec.isLocalResource(resource, connection))
-//             return BL().addUint32(resource.id);
-//         else {
-//             return BL().addUint8Array(resource.instance.template.classId.value).addUint32(resource.instance.id);
-//         }
-//     }
-//     static compareResource(previous, next, connection) {
-//         if (next == null)
-//             return ResourceComparisonResult.Null;
-//         else if (next == previous)
-//             return ResourceComparisonResult.Same;
-//         else if (Codec.isLocalResource(next, connection))
-//             return ResourceComparisonResult.Local;
-//         else
-//             return ResourceComparisonResult.Distributed;
-//     }
-//  static composeResourceArray(resources, connection, prependLength = false) {
-//     if (resources == null)// || resources.length == 0)// || !(resources instanceof ResourceArray))
-//         return prependLength ? new DC(4) : new DC(0);
-//     var rt = new BinaryList();
-//     var comparsion = resources.length == 0 ? ResourceComparisonResult.Empty : Codec.compareResource(null, resources[0], connection);
-//     rt.addUint8(comparsion);
-//     if (comparsion == ResourceComparisonResult.Local)
-//         rt.addUint32(resources[0]._p.instanceId);
-//     else if (comparsion == ResourceComparisonResult.Distributed)
-//         rt.addUint32(resources[0].instance.id);
-//     for (var i = 1; i < resources.length; i++)
-//     {
-//         comparsion = Codec.compareResource(resources[i - 1], resources[i], connection);
-//         rt.addUint8(comparsion);
-//         if (comparsion == ResourceComparisonResult.Local)
-//             rt.addUint32(resources[i]._p.instanceId);
-//         else if (comparsion == ResourceComparisonResult.Distributed)
-//             rt.addUint32(resources[i].instance.id);
-//     }
-//     if (prependLength)
-//         rt.addUint32(rt.length, 0);
-//     return rt.toArray();
-//  }
-// static getDataType(value, connection) {
-//         switch (typeof value) {
-//             case "number":
-//                 // float or ?
-//                 if (Math.floor(value) == value) {
-//                     if (value > 0) {
-//                         // larger than byte ?
-//                         if (value > 0xFF) {
-//                             // larger than short ?
-//                             if (value > 0xFFFF) {
-//                                 // larger than int ?
-//                                 if (value > 0xFFFFFFFF) {
-//                                     return DataType.UInt64;
-//                                 }
-//                                 else {
-//                                     return DataType.UInt32;
-//                                 }
-//                             }
-//                             else {
-//                                 return DataType.UInt16;
-//                             }
-//                         }
-//                         else {
-//                             return DataType.UInt8;
-//                         }
-//                     }
-//                     else {
-//                         if (value < -128) {
-//                             if (value < -32768) {
-//                                 if (value < -2147483648) {
-//                                     return DataType.Int64;
-//                                 }
-//                                 else {
-//                                     return DataType.Int32;
-//                                 }
-//                             }
-//                             else {
-//                                 return DataType.Int16;
-//                             }
-//                         }
-//                         else {
-//                             return DataType.Int8;
-//                         }
-//                     }
-//                 }
-//                 else {
-//                     // float or double
-//                     return DataType.Float64;
-//                 }
-//             case "string":
-//                 return DataType.String;
-//             case "boolean":
-//                 return DataType.Bool;
-//             case "object":
-//                 if (value instanceof Array) {
-//                     return DataType.VarArray;
-//                 }
-//                 else if (value instanceof IResource) {
-//                     return Codec.isLocalResource(value, connection) ? DataType.Resource : DataType.DistributedResource;
-//                 }
-//                 else if (value instanceof Date) {
-//                     return DataType.DateTime;
-//                 }
-//                 else if (value instanceof Uint8Array
-//                     || value instanceof ArrayBuffer) {
-//                     return DataType.UInt8Array;
-//                 }
-//                 else if (value instanceof Uint16Array)
-//                     return DataType.UInt16Array;
-//                 else if (value instanceof Uint32Array)
-//                     return DataType.UInt32Array;
-//                 else if (value instanceof Int16Array)
-//                     return DataType.Int16Array;
-//                 else if (value instanceof Int32Array)
-//                     return DataType.Int32Array;
-//                 else if (value instanceof Float32Array)
-//                     return DataType.Float32Array;
-//                 else if (value instanceof Float64Array)
-//                     return DataType.Float64Array;
-//                 else if (value instanceof Number) {
-//                     // JS numbers are always 64-bit float
-//                     return DataType.Float64;
-//                 }
-//                 else if (value instanceof Structure) {
-//                     return DataType.Structure;
-//                 }
-//                 else if (value instanceof IRecord){
-//                     return DataType.Record;
-//                 }
-//                 else {
-//                     return DataType.Void
-//                 }
-//             default:
-//                 return DataType.Void;
-//         }
-//     }
-//             /// <summary>
-//         /// Parse an array of structures
-//         /// </summary>
-//         /// <param name="data">Bytes array</param>
-//         /// <param name="offset">Zero-indexed offset</param>
-//         /// <param name="length">Number of bytes to parse</param>
-//         /// <param name="connection">DistributedConnection is required in case a structure in the array holds items at the other end</param>
-//         /// <returns>Array of structures</returns>
-//         static parseStructureArray(data, offset, length, connection)
-//         {
-//             var reply = new AsyncBag();
-//             if (length == 0)
-//             {
-//                 reply.seal();
-//                 return reply;
-//             }
-//             var end = offset + length;
-//             var result = data[offset++];
-//             var previous = null;
-//             //var previousKeys = [];
-//             //var previousTypes = [];
-//             var metadata = {keys: null, types: null};
-//             if (result == StructureComparisonResult.Null)
-//                 previous = new AsyncReply(null);
-//             else if (result == StructureComparisonResult.Structure)
-//             {
-//                 var cs = data.getUint32(offset);
-//                 offset += 4;          
-//                 previous = Codec.parseStructure(data, offset, cs, connection, metadata);
-//                 offset += cs;
-//             }
-//             reply.add(previous);
-//             while (offset < end)
-//             {
-//                 result = data[offset++];
-//                 if (result == StructureComparisonResult.Null)
-//                     previous = new AsyncReply(null);
-//                 else if (result == StructureComparisonResult.Structure)
-//                 {
-//                     let cs = data.getUint32(offset);
-//                     offset += 4;
-//                     previous = Codec.parseStructure(data, offset, cs, connection, metadata);
-//                     offset += cs;
-//                 }
-//                 else if (result == StructureComparisonResult.StructureSameKeys)
-//                 {
-//                     let cs = data.getUint32(offset);
-//                     offset += 4;
-//                     previous = Codec.parseStructure(data, offset, cs, connection, metadata, metadata.keys);
-//                     offset += cs;
-//                 }
-//                 else if (result == StructureComparisonResult.StructureSameTypes)
-//                 {
-//                     let cs = data.getUint32(offset);
-//                     offset += 4;
-//                     previous = Codec.parseStructure(data, offset, cs, connection, metadata, metadata.keys, metadata.types);
-//                     offset += cs;
-//                 }
-//                 reply.add(previous);
-//             }
-//             reply.seal();
-//             return reply;
-//         }
-// }
 var CodecComposeResults = //final int transmissionTypeIdentifier;
 //final DC data;
 function CodecComposeResults(transmissionTypeIdentifier, data) {
@@ -2701,7 +1685,7 @@ _defineProperty(Codec, "typedParsers", [_DataDeserializer["default"].recordParse
 
 _defineProperty(Codec, "composers", (_defineProperty2 = {}, _defineProperty(_defineProperty2, Boolean, _DataSerializer["default"].boolComposer), _defineProperty(_defineProperty2, _NotModified["default"], _DataSerializer["default"].notModifiedComposer), _defineProperty(_defineProperty2, _ExtendedTypes.Char8, _DataSerializer["default"].char8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Char16, _DataSerializer["default"].char16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int64, _DataSerializer["default"].int64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt64, _DataSerializer["default"].uInt64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int32, _DataSerializer["default"].int32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt32, _DataSerializer["default"].uInt32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int16, _DataSerializer["default"].int16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt16, _DataSerializer["default"].uInt16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int8, _DataSerializer["default"].int8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt8, _DataSerializer["default"].uInt8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float32, _DataSerializer["default"].float32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float64, _DataSerializer["default"].float64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float128, _DataSerializer["default"].float128Composer), _defineProperty(_defineProperty2, Number, _DataSerializer["default"].numberComposer), _defineProperty(_defineProperty2, Date, _DataSerializer["default"].dateTimeComposer), _defineProperty(_defineProperty2, _DC.DC, _DataSerializer["default"].rawDataComposer), _defineProperty(_defineProperty2, Uint8Array, _DataSerializer["default"].rawDataComposer), _defineProperty(_defineProperty2, String, _DataSerializer["default"].stringComposer), _defineProperty(_defineProperty2, Array, _DataSerializer["default"].listComposer), _defineProperty(_defineProperty2, _ResourceArray["default"], _DataSerializer["default"].resourceListComposer), _defineProperty(_defineProperty2, _RecordArray["default"], _DataSerializer["default"].recordListComposer), _defineProperty(_defineProperty2, Map, _DataSerializer["default"].mapComposer), _defineProperty(_defineProperty2, _PropertyValueArray["default"], _DataSerializer["default"].propertyValueArrayComposer), _defineProperty2));
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Net/IIP/DistributedPropertyContext.js":43,"../Net/IIP/DistributedResource.js":44,"../Resource/IResource.js":70,"../Resource/Template/TemplateType.js":82,"../Resource/Warehouse.js":84,"./BinaryList.js":13,"./DC.js":15,"./DataDeserializer.js":16,"./DataSerializer.js":17,"./DataType.js":18,"./ExtendedTypes.js":19,"./IEnum.js":21,"./IRecord.js":22,"./KeyList.js":23,"./NotModified.js":24,"./PropertyValue.js":26,"./PropertyValueArray.js":27,"./Record.js":28,"./RecordArray.js":29,"./RecordComparisonResult.js":30,"./ResourceArray.js":32,"./ResourceArrayType.js":33,"./ResourceComparisonResult.js":34,"./Structure.js":35,"./StructureArray.js":36,"./StructureComparisonResult.js":37,"./TransmissionType.js":38,"./Tuple.js":39,"./TypedList.js":40,"./TypedMap.js":41}],15:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Net/IIP/DistributedPropertyContext.js":37,"../Net/IIP/DistributedResource.js":38,"../Resource/IResource.js":64,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./BinaryList.js":13,"./DC.js":15,"./DataDeserializer.js":16,"./DataSerializer.js":17,"./ExtendedTypes.js":18,"./IEnum.js":20,"./IRecord.js":21,"./KeyList.js":22,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RecordArray.js":28,"./ResourceArray.js":30,"./ResourceArrayType.js":31,"./TransmissionType.js":32,"./Tuple.js":33,"./TypedList.js":34,"./TypedMap.js":35}],15:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3479,7 +2463,7 @@ function BL() {
 
 ;
 
-},{"./BinaryList.js":13,"./Guid.js":20}],16:[function(require,module,exports){
+},{"./BinaryList.js":13,"./Guid.js":19}],16:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4009,7 +2993,7 @@ var DataDeserializer = /*#__PURE__*/function () {
 
 exports["default"] = DataDeserializer;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Net/IIP/DistributedConnection.js":42,"../Resource/Template/TemplateType.js":82,"../Resource/Warehouse.js":84,"./Codec.js":14,"./DC.js":15,"./IEnum.js":21,"./NotModified.js":24,"./PropertyValue.js":26,"./PropertyValueArray.js":27,"./Record.js":28,"./RepresentationType.js":31,"./Tuple.js":39,"./TypedMap.js":41}],17:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Net/IIP/DistributedConnection.js":36,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./Codec.js":14,"./DC.js":15,"./IEnum.js":20,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RepresentationType.js":29,"./Tuple.js":33,"./TypedMap.js":35}],17:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -4433,128 +3417,7 @@ var DataSerializer = /*#__PURE__*/function () {
 
 exports["default"] = DataSerializer;
 
-},{"../Resource/Warehouse.js":84,"./BinaryList.js":13,"./Codec.js":14,"./DC.js":15,"./RepresentationType.js":31,"./TransmissionType.js":38,"./Tuple.js":39}],18:[function(require,module,exports){
-/*
-* Copyright (c) 2017 Ahmed Kh. Zamil
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
-
-/**
- * Created by Ahmed Zamil on 25/07/2017.
- */
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-var _default = {
-  Void: 0x0,
-  //Variant,
-  Bool: 1,
-  Int8: 2,
-  UInt8: 3,
-  Char: 4,
-  Int16: 5,
-  UInt16: 6,
-  Int32: 7,
-  UInt32: 8,
-  Int64: 9,
-  UInt64: 10,
-  Float32: 11,
-  Float64: 12,
-  Decimal: 13,
-  DateTime: 14,
-  Resource: 15,
-  DistributedResource: 16,
-  ResourceLink: 17,
-  String: 18,
-  Structure: 19,
-  Record: 20,
-  //Stream,
-  //Array = 0x80,
-  VarArray: 0x80,
-  BoolArray: 0x81,
-  Int8Array: 0x82,
-  UInt8Array: 0x83,
-  CharArray: 0x84,
-  Int16Array: 0x85,
-  UInt16Array: 0x86,
-  Int32Array: 0x87,
-  UInt32Array: 0x88,
-  Int64Array: 0x89,
-  UInt64Array: 0x8A,
-  Float32Array: 0x8B,
-  Float64Array: 0x8C,
-  DecimalArray: 0x8D,
-  DateTimeArray: 0x8E,
-  ResourceArray: 0x8F,
-  DistributedResourceArray: 0x90,
-  ResourceLinkArray: 0x91,
-  StringArray: 0x92,
-  StructureArray: 0x93,
-  RecordArray: 0x94,
-  NotModified: 0x7f,
-  Unspecified: 0xff,
-  isArray: function isArray(type) {
-    return (type & 0x80) == 0x80 && type != this.NotModified;
-  },
-  sizeOf: function sizeOf(type) {
-    switch (type) {
-      case this.Void:
-      case this.NotModified:
-        return 0;
-
-      case this.Bool:
-      case this.Int8:
-      case this.UInt8:
-        return 1;
-
-      case this.Char:
-      case this.Int16:
-      case this.UInt16:
-        return 2;
-
-      case this.Int32:
-      case this.UInt32:
-      case this.Float32:
-      case this.Resource:
-        return 4;
-
-      case this.Int64:
-      case this.UInt64:
-      case this.Float64:
-      case this.DateTime:
-        return 8;
-
-      case this.DistributedResource:
-        return 4;
-
-      default:
-        return -1;
-    }
-  }
-};
-exports["default"] = _default;
-
-},{}],19:[function(require,module,exports){
+},{"../Resource/Warehouse.js":77,"./BinaryList.js":13,"./Codec.js":14,"./DC.js":15,"./RepresentationType.js":29,"./TransmissionType.js":32,"./Tuple.js":33}],18:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -4855,7 +3718,7 @@ var Char8 = /*#__PURE__*/function (_String2) {
 
 exports.Char8 = Char8;
 
-},{}],20:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4905,7 +3768,7 @@ var Guid = /*#__PURE__*/function () {
 
 exports["default"] = Guid;
 
-},{"./DC.js":15}],21:[function(require,module,exports){
+},{"./DC.js":15}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4948,7 +3811,7 @@ var IEnum = /*#__PURE__*/function () {
 
 exports["default"] = IEnum;
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4978,7 +3841,7 @@ var IRecord = /*#__PURE__*/function () {
 
 exports["default"] = IRecord;
 
-},{}],23:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -5174,7 +4037,7 @@ var KeyList = /*#__PURE__*/function () {
 
 exports["default"] = KeyList;
 
-},{"../Core/IDestructible.js":8}],24:[function(require,module,exports){
+},{"../Core/IDestructible.js":8}],23:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -5215,7 +4078,7 @@ var NotModified = function NotModified() {
 
 exports["default"] = NotModified;
 
-},{}],25:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5234,7 +4097,7 @@ var ParseResult = function ParseResult(size, value) {
 
 exports["default"] = ParseResult;
 
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -5279,7 +4142,7 @@ var PropertyValue = function PropertyValue(value, age, date) {
 
 exports["default"] = PropertyValue;
 
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -5327,7 +4190,7 @@ var PropertyValueArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = PropertyValueArray;
 
-},{}],28:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -5373,7 +4236,7 @@ var Record = /*#__PURE__*/function (_IRecord) {
 
 exports["default"] = Record;
 
-},{"./IRecord.js":22}],29:[function(require,module,exports){
+},{"./IRecord.js":21}],28:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -5465,24 +4328,7 @@ var RecordArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = RecordArray;
 
-},{"./IRecord.js":22}],30:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-var _default = // const ResourceComparisonResult =
-{
-  Null: 0,
-  Record: 1,
-  RecordSameType: 2,
-  Same: 3,
-  Empty: 4
-};
-exports["default"] = _default;
-
-},{}],31:[function(require,module,exports){
+},{"./IRecord.js":21}],29:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5697,7 +4543,7 @@ var RepresentationType = /*#__PURE__*/function () {
 
 exports.RepresentationType = exports["default"] = RepresentationType;
 
-},{"../Resource/IResource.js":70,"../Resource/Template/TemplateType.js":82,"../Resource/Warehouse.js":84,"./BinaryList.js":13,"./DC.js":15,"./ExtendedTypes.js":19,"./IRecord.js":22}],32:[function(require,module,exports){
+},{"../Resource/IResource.js":64,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./BinaryList.js":13,"./DC.js":15,"./ExtendedTypes.js":18,"./IRecord.js":21}],30:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -5789,7 +4635,7 @@ var ResourceArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = ResourceArray;
 
-},{"../Resource/IResource.js":70}],33:[function(require,module,exports){
+},{"../Resource/IResource.js":64}],31:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5803,225 +4649,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],34:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-var _default = // const ResourceComparisonResult =
-{
-  Null: 0,
-  Distributed: 1,
-  Local: 2,
-  Same: 3,
-  Empty: 4
-};
-exports["default"] = _default;
-
-},{}],35:[function(require,module,exports){
-/*
-* Copyright (c) 2017 Ahmed Kh. Zamil
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
-
-/**
- * Created by Ahmed Zamil on 26/08/2017.
- */
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Structure = /*#__PURE__*/function () {
-  function Structure(data) {
-    _classCallCheck(this, Structure);
-
-    if (data instanceof Object) for (var i in data) {
-      this[i] = data[i];
-    }
-  }
-
-  _createClass(Structure, [{
-    key: "toArray",
-    value: function toArray() {
-      return this.toPairs();
-    }
-  }, {
-    key: "toPairs",
-    value: function toPairs() {
-      var rt = [];
-
-      for (var i in this) {
-        if (!(this[i] instanceof Function)) rt.push({
-          key: i,
-          value: this[i]
-        });
-      }
-
-      return rt;
-    }
-  }, {
-    key: "getKeys",
-    value: function getKeys() {
-      var rt = [];
-
-      for (var i in this) {
-        if (!(this[i] instanceof Function)) rt.push(i);
-      }
-
-      return rt;
-    }
-  }, {
-    key: "toObject",
-    value: function toObject() {
-      var rt = {};
-
-      for (var i in this) {
-        if (!(this[i] instanceof Function)) rt[i] = this[i];
-      }
-
-      return rt;
-    }
-  }]);
-
-  return Structure;
-}();
-
-exports["default"] = Structure;
-
-},{}],36:[function(require,module,exports){
-/*
-* Copyright (c) 2017 Ahmed Kh. Zamil
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
-
-/**
- * Created by Ahmed Zamil on 06/09/2017.
- */
-"use strict";
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-var StructureArray = /*#__PURE__*/function (_Array) {
-  _inherits(StructureArray, _Array);
-
-  var _super = _createSuper(StructureArray);
-
-  function StructureArray() {
-    _classCallCheck(this, StructureArray);
-
-    return _super.apply(this, arguments);
-  }
-
-  _createClass(StructureArray, [{
-    key: "push",
-    value: function push(value) {
-      if (value instanceof Structure) _get(_getPrototypeOf(StructureArray.prototype), "push", this).call(this, value);else return;
-    }
-  }]);
-
-  return StructureArray;
-}( /*#__PURE__*/_wrapNativeSuper(Array));
-
-exports["default"] = StructureArray;
-
-},{}],37:[function(require,module,exports){
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-var _default = //const StructureComparisonResult =
-{
-  Null: 0,
-  Structure: 1,
-  StructureSameKeys: 2,
-  StructureSameTypes: 3,
-  Same: 4
-};
-exports["default"] = _default;
-
-},{}],38:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -6246,7 +4874,7 @@ var TransmissionType = /*#__PURE__*/function () {
 
 exports.TransmissionType = exports["default"] = TransmissionType;
 
-},{"./DC.js":15}],39:[function(require,module,exports){
+},{"./DC.js":15}],33:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -6345,7 +4973,7 @@ exports["default"] = Tuple;
 
 _defineProperty(Tuple, "cache", {});
 
-},{}],40:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -6357,9 +4985,15 @@ exports["default"] = void 0;
 
 var _IResource = _interopRequireDefault(require("../Resource/IResource.js"));
 
+var _IRecord = _interopRequireDefault(require("./IRecord.js"));
+
+var _Record = _interopRequireDefault(require("./Record.js"));
+
 var _PropertyValue = _interopRequireDefault(require("./PropertyValue.js"));
 
 var _PropertyValueArray = _interopRequireDefault(require("./PropertyValueArray.js"));
+
+var _RecordArray = _interopRequireDefault(require("./RecordArray.js"));
 
 var _ResourceArray = _interopRequireDefault(require("./ResourceArray.js"));
 
@@ -6452,9 +5086,9 @@ var TypedList = /*#__PURE__*/function (_Array) {
 
 exports["default"] = TypedList;
 
-_defineProperty(TypedList, "cache", (_defineProperty2 = {}, _defineProperty(_defineProperty2, _IResource["default"], _ResourceArray["default"]), _defineProperty(_defineProperty2, _PropertyValue["default"], _PropertyValueArray["default"]), _defineProperty2));
+_defineProperty(TypedList, "cache", (_defineProperty2 = {}, _defineProperty(_defineProperty2, _IResource["default"], _ResourceArray["default"]), _defineProperty(_defineProperty2, _PropertyValue["default"], _PropertyValueArray["default"]), _defineProperty(_defineProperty2, _IRecord["default"], _RecordArray["default"]), _defineProperty(_defineProperty2, _Record["default"], _RecordArray["default"]), _defineProperty2));
 
-},{"../Resource/IResource.js":70,"./PropertyValue.js":26,"./PropertyValueArray.js":27,"./ResourceArray.js":32}],41:[function(require,module,exports){
+},{"../Resource/IResource.js":64,"./IRecord.js":21,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RecordArray.js":28,"./ResourceArray.js":30}],35:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -6562,7 +5196,7 @@ exports["default"] = TypedMap;
 
 _defineProperty(TypedMap, "cache", {});
 
-},{}],42:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8973,7 +7607,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncBag.js":2,"../../Core/AsyncException.js":3,"../../Core/AsyncQueue.js":4,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Core/ProgressType.js":10,"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/KeyList.js":23,"../../Data/PropertyValue.js":26,"../../Data/PropertyValueArray.js":27,"../../Data/TransmissionType.js":38,"../../Resource/IResource.js":70,"../../Resource/IStore.js":71,"../../Resource/Template/TemplateType.js":82,"../../Resource/Template/TypeTemplate.js":83,"../../Resource/Warehouse.js":84,"../../Security/Authority/Authentication.js":85,"../../Security/Authority/AuthenticationMethod.js":86,"../../Security/Authority/AuthenticationType.js":87,"../../Security/Authority/ClientAuthentication.js":88,"../../Security/Authority/HostAuthentication.js":89,"../../Security/Authority/Session.js":90,"../../Security/Integrity/SHA256.js":91,"../../Security/Permissions/ActionType.js":93,"../../Security/Permissions/Ruling.js":95,"../Packets//IIPPacketReport.js":61,"../Packets/IIPAuthPacket.js":54,"../Packets/IIPAuthPacketAction.js":55,"../Packets/IIPAuthPacketCommand.js":56,"../Packets/IIPPacket.js":57,"../Packets/IIPPacketAction.js":58,"../Packets/IIPPacketCommand.js":59,"../Packets/IIPPacketEvent.js":60,"../SendList.js":62,"../Sockets/SocketState.js":64,"../Sockets/WSocket.js":65,"./DistributedPropertyContext.js":43,"./DistributedResource.js":44,"./DistributedResourceQueueItem.js":45,"./DistributedResourceQueueItemType.js":46}],43:[function(require,module,exports){
+},{"../../Core/AsyncBag.js":2,"../../Core/AsyncException.js":3,"../../Core/AsyncQueue.js":4,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Core/ProgressType.js":10,"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/KeyList.js":22,"../../Data/PropertyValue.js":25,"../../Data/PropertyValueArray.js":26,"../../Data/TransmissionType.js":32,"../../Resource/IResource.js":64,"../../Resource/IStore.js":65,"../../Resource/Template/TemplateType.js":75,"../../Resource/Template/TypeTemplate.js":76,"../../Resource/Warehouse.js":77,"../../Security/Authority/Authentication.js":78,"../../Security/Authority/AuthenticationMethod.js":79,"../../Security/Authority/AuthenticationType.js":80,"../../Security/Authority/ClientAuthentication.js":81,"../../Security/Authority/HostAuthentication.js":82,"../../Security/Authority/Session.js":83,"../../Security/Integrity/SHA256.js":84,"../../Security/Permissions/ActionType.js":86,"../../Security/Permissions/Ruling.js":88,"../Packets//IIPPacketReport.js":55,"../Packets/IIPAuthPacket.js":48,"../Packets/IIPAuthPacketAction.js":49,"../Packets/IIPAuthPacketCommand.js":50,"../Packets/IIPPacket.js":51,"../Packets/IIPPacketAction.js":52,"../Packets/IIPPacketCommand.js":53,"../Packets/IIPPacketEvent.js":54,"../SendList.js":56,"../Sockets/SocketState.js":58,"../Sockets/WSocket.js":59,"./DistributedPropertyContext.js":37,"./DistributedResource.js":38,"./DistributedResourceQueueItem.js":39,"./DistributedResourceQueueItemType.js":40}],37:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -9021,7 +7655,7 @@ var DistributedPropertyContext = function DistributedPropertyContext(p1, p2) {
 
 exports["default"] = DistributedPropertyContext;
 
-},{}],44:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9318,7 +7952,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedResource;
 
-},{"../../Core//ExceptionCode.js":7,"../../Core/AsyncException.js":3,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Data/Codec.js":14,"../../Data/ExtendedTypes.js":19,"../../Data/PropertyValue.js":26,"../../Data/PropertyValueArray.js":27,"../../Data/TypedMap.js":41,"../../Resource/IResource.js":70,"../../Resource/Template/EventTemplate.js":76,"../Packets//IIPPacketAction.js":58}],45:[function(require,module,exports){
+},{"../../Core//ExceptionCode.js":7,"../../Core/AsyncException.js":3,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Data/Codec.js":14,"../../Data/ExtendedTypes.js":18,"../../Data/PropertyValue.js":25,"../../Data/PropertyValueArray.js":26,"../../Data/TypedMap.js":35,"../../Resource/IResource.js":64,"../../Resource/Template/EventTemplate.js":70,"../Packets//IIPPacketAction.js":52}],39:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9364,7 +7998,7 @@ var DistributedResourceQueueItem = function DistributedResourceQueueItem(resourc
 
 exports["default"] = DistributedResourceQueueItem;
 
-},{}],46:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9377,7 +8011,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],47:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -9415,20 +8049,6 @@ exports["default"] = void 0;
 var _IResource2 = _interopRequireDefault(require("../../Resource/IResource.js"));
 
 var _AsyncReply = _interopRequireDefault(require("../../Core/AsyncReply.js"));
-
-var _Codec = _interopRequireDefault(require("../../Data/Codec.js"));
-
-var _Structure = _interopRequireDefault(require("../../Data/Structure.js"));
-
-var _IIPPacketAction = _interopRequireDefault(require("../Packets//IIPPacketAction.js"));
-
-var _EventTemplate = _interopRequireDefault(require("../../Resource/Template/EventTemplate.js"));
-
-var _AsyncException = _interopRequireDefault(require("../../Core/AsyncException.js"));
-
-var _ExceptionCode = _interopRequireDefault(require("../../Core//ExceptionCode.js"));
-
-var _ErrorType = _interopRequireDefault(require("../../Core/ErrorType.js"));
 
 var _DistributedConnection = _interopRequireDefault(require("./DistributedConnection.js"));
 
@@ -9517,7 +8137,7 @@ var DistributedServer = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedServer;
 
-},{"../../Core//ExceptionCode.js":7,"../../Core/AsyncException.js":3,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Data/Codec.js":14,"../../Data/Structure.js":35,"../../Resource/IResource.js":70,"../../Resource/Template/EventTemplate.js":76,"../Packets//IIPPacketAction.js":58,"./DistributedConnection.js":42}],48:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":5,"../../Resource/IResource.js":64,"./DistributedConnection.js":36}],42:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -9575,7 +8195,7 @@ var EntryPoint = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = EntryPoint;
 
-},{"../../Resource/IResource.js":70}],49:[function(require,module,exports){
+},{"../../Resource/IResource.js":64}],43:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -9636,7 +8256,7 @@ var INetworkReceiver = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = INetworkReceiver;
 
-},{"../Core/IDestructible.js":8}],50:[function(require,module,exports){
+},{"../Core/IDestructible.js":8}],44:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9749,7 +8369,7 @@ var NetworkBuffer = /*#__PURE__*/function () {
 
 exports["default"] = NetworkBuffer;
 
-},{"../Data/DC.js":15}],51:[function(require,module,exports){
+},{"../Data/DC.js":15}],45:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -9795,7 +8415,7 @@ var NetowrkConnection = /*#__PURE__*/function (_INetworkReceiver) {
 
 exports["default"] = NetowrkConnection;
 
-},{"./INetworkReceiver.js":49}],52:[function(require,module,exports){
+},{"./INetworkReceiver.js":43}],46:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9811,7 +8431,7 @@ var NetworkServer = function NetworkServer() {
 
 exports["default"] = NetworkServer;
 
-},{}],53:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9827,7 +8447,7 @@ var NetworkSession = function NetworkSession() {
 
 exports["default"] = NetworkSession;
 
-},{}],54:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10017,7 +8637,7 @@ var IIPAuthPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPAuthPacket;
 
-},{"../../Security/Authority/AuthenticationMethod.js":86,"./IIPAuthPacketAction.js":55,"./IIPAuthPacketCommand.js":56}],55:[function(require,module,exports){
+},{"../../Security/Authority/AuthenticationMethod.js":79,"./IIPAuthPacketAction.js":49,"./IIPAuthPacketCommand.js":50}],49:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10034,7 +8654,7 @@ var _default = // const IIPAuthPacketAction =
 };
 exports["default"] = _default;
 
-},{}],56:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10050,7 +8670,7 @@ var _default = //const IIPAuthPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],57:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -10090,8 +8710,6 @@ var _IIPPacketCommand = _interopRequireDefault(require("./IIPPacketCommand.js"))
 var _IIPPacketEvent = _interopRequireDefault(require("./IIPPacketEvent.js"));
 
 var _IIPPacketReport = _interopRequireDefault(require("./IIPPacketReport.js"));
-
-var _DataType = _interopRequireDefault(require("../../Data/DataType.js"));
 
 var _TransmissionType = _interopRequireDefault(require("../../Data/TransmissionType.js"));
 
@@ -10424,7 +9042,7 @@ var IIPPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPPacket;
 
-},{"../../Data/DataType.js":18,"../../Data/TransmissionType.js":38,"./IIPPacketAction.js":58,"./IIPPacketCommand.js":59,"./IIPPacketEvent.js":60,"./IIPPacketReport.js":61}],58:[function(require,module,exports){
+},{"../../Data/TransmissionType.js":32,"./IIPPacketAction.js":52,"./IIPPacketCommand.js":53,"./IIPPacketEvent.js":54,"./IIPPacketReport.js":55}],52:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10467,7 +9085,7 @@ var _default = // const IIPPacketAction =
 };
 exports["default"] = _default;
 
-},{}],59:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10483,7 +9101,7 @@ var _default = // IIPPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],60:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10506,7 +9124,7 @@ var IIPPacketEvent = {
 var _default = IIPPacketEvent;
 exports["default"] = _default;
 
-},{}],61:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10522,7 +9140,7 @@ var IIPPacketReport = {
 var _default = IIPPacketReport;
 exports["default"] = _default;
 
-},{}],62:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10610,7 +9228,7 @@ var SendList = /*#__PURE__*/function (_BinaryList) {
 
 exports["default"] = SendList;
 
-},{"../Data/BinaryList.js":13}],63:[function(require,module,exports){
+},{"../Data/BinaryList.js":13}],57:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -10707,7 +9325,7 @@ var ISocket = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = ISocket;
 
-},{"../../Core/IDestructible.js":8,"./SocketState.js":64}],64:[function(require,module,exports){
+},{"../../Core/IDestructible.js":8,"./SocketState.js":58}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10723,7 +9341,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],65:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -10986,7 +9604,7 @@ exports["default"] = WSocket;
 
 _defineProperty(WSocket, "webSocket", null);
 
-},{"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../NetworkBuffer.js":50,"./ISocket.js":63,"./SocketState.js":64,"ws":1}],66:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../NetworkBuffer.js":44,"./ISocket.js":57,"./SocketState.js":58,"ws":1}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11047,7 +9665,7 @@ exports["default"] = ResourceProxy;
 
 _defineProperty(ResourceProxy, "cache", {});
 
-},{"../Resource/Warehouse.js":84}],67:[function(require,module,exports){
+},{"../Resource/Warehouse.js":77}],61:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -11092,7 +9710,7 @@ var CustomResourceEvent = function CustomResourceEvent(issuer, receivers, value)
 
 exports["default"] = CustomResourceEvent;
 
-},{}],68:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11137,7 +9755,7 @@ var EventOccurredInfo = /*#__PURE__*/function () {
 
 exports["default"] = EventOccurredInfo;
 
-},{"../Security/Authority/Session.js":90,"./IResource.js":70,"./Template/EventTemplate.js":76}],69:[function(require,module,exports){
+},{"../Security/Authority/Session.js":83,"./IResource.js":64,"./Template/EventTemplate.js":70}],63:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -11225,7 +9843,7 @@ var FactoryEntry = /*#__PURE__*/function () {
 
 exports["default"] = FactoryEntry;
 
-},{}],70:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11339,7 +9957,7 @@ var IResource = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = IResource;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IDestructible.js":8}],71:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IDestructible.js":8}],65:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11437,7 +10055,7 @@ var IStore = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = IStore;
 
-},{"./IResource.js":70}],72:[function(require,module,exports){
+},{"./IResource.js":64}],66:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11479,8 +10097,6 @@ var _IPermissionsManager = _interopRequireDefault(require("../Security/Permissio
 var _AutoList = _interopRequireDefault(require("../Data/AutoList.js"));
 
 var _KeyList = _interopRequireDefault(require("../Data/KeyList.js"));
-
-var _Structure = _interopRequireDefault(require("../Data/Structure.js"));
 
 var _PropertyValue = _interopRequireDefault(require("../Data/PropertyValue.js"));
 
@@ -11752,7 +10368,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
     key: "getAttributes",
     value: function getAttributes() {
       var attributes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-      var st = new _Structure["default"]();
+      var st = new (_TypedMap["default"].of(String, Object))();
 
       if (attributes == null) {
         attributes = this.attributes.keys.slice(0);
@@ -11761,7 +10377,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
       for (var i = 0; i < attributes.length; i++) {
         var attr = attributes[i];
-        if (attr == "name") st["name"] = this.name;else if (attr == "managers") {
+        if (attr == "name") st.set("name", this.name);else if (attr == "managers") {
           var mngrs = new (_TypedList["default"].of(_TypedMap["default"].of(String, Object)))();
 
           for (var j = 0; j < this.managers.length; j++) {
@@ -11772,8 +10388,8 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
             mngrs.push(sm);
           }
 
-          st["managers"] = mngrs;
-        } else st[attr] = this.attributes.item(attr);
+          st.set("managers", mngrs);
+        } else st.set(attr, this.attributes.item(attr));
       }
 
       return st;
@@ -11814,7 +10430,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = Instance;
 
-},{"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/KeyList.js":23,"../Data/PropertyValue.js":26,"../Data/PropertyValueArray.js":27,"../Data/Structure.js":35,"../Data/TypedList.js":40,"../Data/TypedMap.js":41,"../Security/Permissions/IPermissionsManager.js":94,"../Security/Permissions/Ruling.js":95,"./CustomResourceEvent.js":67,"./EventOccurredInfo.js":68,"./PropertyModificationInfo.js":73,"./Warehouse.js":84}],73:[function(require,module,exports){
+},{"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/KeyList.js":22,"../Data/PropertyValue.js":25,"../Data/PropertyValueArray.js":26,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Security/Permissions/IPermissionsManager.js":87,"../Security/Permissions/Ruling.js":88,"./CustomResourceEvent.js":61,"./EventOccurredInfo.js":62,"./PropertyModificationInfo.js":67,"./Warehouse.js":77}],67:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11859,7 +10475,7 @@ var PropertyModificationInfo = /*#__PURE__*/function () {
 
 exports["default"] = PropertyModificationInfo;
 
-},{"./IResource.js":70,"./Template/PropertyTemplate.js":80}],74:[function(require,module,exports){
+},{"./IResource.js":64,"./Template/PropertyTemplate.js":74}],68:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11917,7 +10533,7 @@ var ArgumentTemplate = /*#__PURE__*/function () {
 
 exports["default"] = ArgumentTemplate;
 
-},{"../../Data/DC.js":15,"../../Data/ParseResult.js":25,"../../Data/RepresentationType.js":31}],75:[function(require,module,exports){
+},{"../../Data/DC.js":15,"../../Data/ParseResult.js":24,"../../Data/RepresentationType.js":29}],69:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -12003,7 +10619,7 @@ var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = ConstantTemplate;
 
-},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"./MemberTemplate.js":78}],76:[function(require,module,exports){
+},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"./MemberTemplate.js":72}],70:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -12113,7 +10729,7 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = EventTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":78}],77:[function(require,module,exports){
+},{"../../Data/DC.js":15,"./MemberTemplate.js":72}],71:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -12224,7 +10840,7 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = FunctionTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":78}],78:[function(require,module,exports){
+},{"../../Data/DC.js":15,"./MemberTemplate.js":72}],72:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -12294,7 +10910,7 @@ var MemberTemplate = /*#__PURE__*/function () {
 
 exports["default"] = MemberTemplate;
 
-},{"../../Data/DC.js":15}],79:[function(require,module,exports){
+},{"../../Data/DC.js":15}],73:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12308,7 +10924,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],80:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -12401,126 +11017,7 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = PropertyTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":78}],81:[function(require,module,exports){
-/*
-* Copyright (c) 2017 Ahmed Kh. Zamil
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.
-*/
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _DC = require("../../Data/DC.js");
-
-var _DataType = _interopRequireDefault(require("../../Data/DataType.js"));
-
-var _Structure = _interopRequireDefault(require("../../Data/Structure.js"));
-
-var _IResource = _interopRequireDefault(require("../IResource.js"));
-
-var _TypeTemplate = _interopRequireDefault(require("./TypeTemplate.js"));
-
-var _IRecord = _interopRequireDefault(require("../../Data/IRecord.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-var TemplateDataType = /*#__PURE__*/function () {
-  function TemplateDataType(type, guid) {
-    _classCallCheck(this, TemplateDataType);
-
-    this.type = type;
-    this.typeGuid = guid;
-  }
-
-  _createClass(TemplateDataType, [{
-    key: "typeTemplate",
-    get: function get() {
-      return this.typeGuid == null ? null : Warehouse.getTemplateByType(this.typeGuid);
-    } //@TODO: implement this
-
-  }, {
-    key: "compose",
-    value: function compose() {
-      if (this.type == _DataType["default"].Resource || this.type == _DataType["default"].ResourceArray || this.type == _DataType["default"].Record || this.type == _DataType["default"].RecordArray) {
-        return (0, _DC.BL)().addUint8(this.type).addUint8Array(this.typeGuid).toDC();
-      } else return _DC.DC.from([this.type]);
-    }
-  }], [{
-    key: "fromType",
-    value: function fromType(type) {
-      var _type, _type2;
-
-      var isArray = type instanceof Array;
-      if (isArray) type = type[0];
-      var dataType = 0;
-      var typeGuid = null;
-      if (!isNaN(type)) dataType = type;else if (type == _Structure["default"]) dataType = _DataType["default"].Structure;else if (typeof type == "string") {
-        var tIndex = this.typesDefinitions.indexOf(type);
-        dataType = tIndex > -1 ? tIndex : 0;
-      } else if (((_type = type) === null || _type === void 0 ? void 0 : _type.prototype) instanceof _IResource["default"]) {
-        dataType = _DataType["default"].Resource;
-        typeGuid = _TypeTemplate["default"].getTypeGuid(type);
-      } else if (((_type2 = type) === null || _type2 === void 0 ? void 0 : _type2.prototype) instanceof _IRecord["default"]) {
-        dataType = _DataType["default"].Record;
-        typeGuid = _TypeTemplate["default"].getTypeGuid(type);
-      }
-      if (isArray) dataType |= _DataType["default"].VarArray;
-      return new TemplateDataType(_DataType["default"].StructureArray);
-    }
-  }, {
-    key: "parse",
-    value: function parse(data, offset) {
-      var type = data.getUint8(offset++);
-
-      if (type == _DataType["default"].Resource || type == _DataType["default"].ResourceArray || type == _DataType["default"].Record || type == _DataType["default"].RecordArray) {
-        var guid = data.getGuid(offset);
-        return {
-          size: 17,
-          value: new TemplateDataType(type, guid)
-        };
-      } else return {
-        size: 1,
-        value: new TemplateDataType(type)
-      };
-    }
-  }]);
-
-  return TemplateDataType;
-}();
-
-exports["default"] = TemplateDataType;
-
-_defineProperty(TemplateDataType, "typesDefinitions", ["var", "bool", "sbyte", "byte", "char", "short", "ushort", "int", "uint", "long", "ulong", "float", "double", "decimal", "date", "resource", "DistributedResource", "ResourceLink", "string", "structure"]);
-
-},{"../../Data/DC.js":15,"../../Data/DataType.js":18,"../../Data/IRecord.js":22,"../../Data/Structure.js":35,"../IResource.js":70,"./TypeTemplate.js":83}],82:[function(require,module,exports){
+},{"../../Data/DC.js":15,"./MemberTemplate.js":72}],75:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12536,7 +11033,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],83:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13126,7 +11623,7 @@ var TypeTemplate = /*#__PURE__*/function () {
 
 exports["default"] = TypeTemplate;
 
-},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/IEnum.js":21,"../../Data/IRecord.js":22,"../../Data/RepresentationType.js":31,"../../Net/IIP/DistributedConnection.js":42,"../../Net/IIP/DistributedResource.js":44,"../../Security/Integrity/SHA256.js":91,"../IResource.js":70,"../Warehouse.js":84,"./ArgumentTemplate.js":74,"./ConstantTemplate.js":75,"./EventTemplate.js":76,"./FunctionTemplate.js":77,"./PropertyTemplate.js":80,"./TemplateType.js":82}],84:[function(require,module,exports){
+},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/IEnum.js":20,"../../Data/IRecord.js":21,"../../Data/RepresentationType.js":29,"../../Net/IIP/DistributedConnection.js":36,"../../Net/IIP/DistributedResource.js":38,"../../Security/Integrity/SHA256.js":84,"../IResource.js":64,"../Warehouse.js":77,"./ArgumentTemplate.js":68,"./ConstantTemplate.js":69,"./EventTemplate.js":70,"./FunctionTemplate.js":71,"./PropertyTemplate.js":74,"./TemplateType.js":75}],77:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13761,7 +12258,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/ExtendedTypes.js":19,"../Data/IRecord.js":22,"../Data/KeyList.js":23,"../Data/Record.js":28,"../Data/RepresentationType.js":31,"../Data/TypedList.js":40,"../Data/TypedMap.js":41,"../Net/IIP/DistributedConnection.js":42,"../Net/IIP/DistributedResource.js":44,"../Proxy/ResourceProxy.js":66,"../Resource/Instance.js":72,"../Resource/Template/TypeTemplate.js":83,"../Stores/IndexedDBStore.js":96,"../Stores/MemoryStore.js":97,"./FactoryEntry.js":69,"./IResource.js":70,"./IStore.js":71,"./Template/TemplateType.js":82}],85:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/ExtendedTypes.js":18,"../Data/IRecord.js":21,"../Data/KeyList.js":22,"../Data/Record.js":27,"../Data/RepresentationType.js":29,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Net/IIP/DistributedConnection.js":36,"../Net/IIP/DistributedResource.js":38,"../Proxy/ResourceProxy.js":60,"../Resource/Instance.js":66,"../Resource/Template/TypeTemplate.js":76,"../Stores/IndexedDBStore.js":89,"../Stores/MemoryStore.js":90,"./FactoryEntry.js":63,"./IResource.js":64,"./IStore.js":65,"./Template/TemplateType.js":75}],78:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13824,7 +12321,7 @@ var Authentication = /*#__PURE__*/function () {
 
 exports["default"] = Authentication;
 
-},{}],86:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13839,7 +12336,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],87:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13855,7 +12352,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],88:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -13903,7 +12400,7 @@ var ClientAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = ClientAuthentication;
 
-},{"./Authentication.js":85,"./AuthenticationType.js":87}],89:[function(require,module,exports){
+},{"./Authentication.js":78,"./AuthenticationType.js":80}],82:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -13951,7 +12448,7 @@ var HostAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = HostAuthentication;
 
-},{"./Authentication.js":85,"./AuthenticationType.js":87}],90:[function(require,module,exports){
+},{"./Authentication.js":78,"./AuthenticationType.js":80}],83:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13998,7 +12495,7 @@ var Session = function Session(localAuthentication, remoteAuthentication) {
 
 exports["default"] = Session;
 
-},{}],91:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14134,7 +12631,7 @@ var SHA256 = /*#__PURE__*/function () {
 
 exports["default"] = SHA256;
 
-},{"../../Data/DC.js":15}],92:[function(require,module,exports){
+},{"../../Data/DC.js":15}],85:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -14217,7 +12714,7 @@ var IMembership = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = IMembership;
 
-},{"../../Core/AsyncReply.js":5,"../../Resource/IResource.js":70}],93:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":5,"../../Resource/IResource.js":64}],86:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14269,7 +12766,7 @@ var _default = // ActionType =
 };
 exports["default"] = _default;
 
-},{}],94:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14337,7 +12834,7 @@ var IPermissionsManager = /*#__PURE__*/function () {
 
 exports["default"] = IPermissionsManager;
 
-},{}],95:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14377,7 +12874,7 @@ var _default = //Ruling =
 };
 exports["default"] = _default;
 
-},{}],96:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -14418,11 +12915,7 @@ var _IStore2 = _interopRequireDefault(require("../Resource/IStore.js"));
 
 var _AsyncReply = _interopRequireDefault(require("../Core/AsyncReply.js"));
 
-var _Codec = _interopRequireDefault(require("../Data/Codec.js"));
-
 var _Warehouse = _interopRequireDefault(require("../Resource/Warehouse.js"));
-
-var _DataType = _interopRequireDefault(require("../Data/DataType.js"));
 
 var _AsyncBag = _interopRequireDefault(require("../Core/AsyncBag.js"));
 
@@ -14430,7 +12923,27 @@ var _ErrorType = _interopRequireDefault(require("../Core/ErrorType.js"));
 
 var _ExceptionCode = _interopRequireDefault(require("../Core/ExceptionCode.js"));
 
+var _RepresentationType = require("../Data/RepresentationType.js");
+
+var _TypedMap = _interopRequireDefault(require("../Data/TypedMap.js"));
+
+var _ResourceProxy = _interopRequireDefault(require("../Proxy/ResourceProxy.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -14471,34 +12984,32 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
   _createClass(IndexedDBStore, [{
     key: "compose",
     value: function compose(value) {
-      var type = _Codec["default"].getDataType(value, null);
+      var type = _RepresentationType.RepresentationType.fromType(value);
 
-      switch (type) {
-        case _DataType["default"].Void:
+      switch (type.identifier) {
+        case _RepresentationType.RepresentationTypeIdentifier.Void:
           // nothing to do;
           return null;
 
-        case _DataType["default"].String:
+        case _RepresentationType.RepresentationTypeIdentifier.String:
           return value;
 
-        case _DataType["default"].Resource:
-        case _DataType["default"].DistributedResource:
+        case _RepresentationType.RepresentationTypeIdentifier.Resource:
+        case _RepresentationType.RepresentationTypeIdentifier.DistributedResource:
           return {
             "type": 0,
             "link": value.instance.link
           };
 
-        case _DataType["default"].Structure:
-          return this.composeStructure(value);
+        case _RepresentationType.RepresentationTypeIdentifier.Map:
+          return this.composeMap(value);
 
-        case _DataType["default"].VarArray:
-          return this.composeVarArray(value);
-
-        case _DataType["default"].ResourceArray:
-          return this.composeResourceArray(value);
-
-        case _DataType["default"].StructureArray:
-          return this.composeStructureArray(value);
+        case _RepresentationType.RepresentationTypeIdentifier.List:
+          return this.composeList(value);
+        //  case RepresentationTypeIdentifier.List:
+        //      return this.composeResourceArray(value);
+        //case RepresentationTypeIdentifier.Typed:
+        //    return this.composeStructureArray(value);
 
         default:
           return value;
@@ -14524,8 +13035,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
         else if (value.type == 1) {
             var bag = new _AsyncBag["default"]();
             var rt = new _AsyncReply["default"]();
-
-            var _s = new Structure();
+            var s = new (_TypedMap["default"].of(String, Object))();
 
             for (var _i = 0; _i < value.values.length; _i++) {
               bag.add(this.parse(value.values[_i].value));
@@ -14534,10 +13044,10 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
             bag.seal();
             bag.then(function (x) {
               for (var _i2 = 0; _i2 < x.length; _i2++) {
-                _s[value.values[_i2].name] = x[_i2];
+                s.set(value.values[_i2].name, x[_i2]);
               }
 
-              rt.trigger(_s);
+              rt.trigger(s);
             });
             return rt;
           } else return new _AsyncReply["default"](null);
@@ -14582,7 +13092,9 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
 
         var type = self.classes.get(doc.className);
-        var proxyType = ResourceProxy.getProxy(type);
+
+        var proxyType = _ResourceProxy["default"].getProxy(type);
+
         var resource = new proxyType();
         self.resources.set(doc.id, resource);
         resource._id = doc.id;
@@ -14598,8 +13110,8 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
             var bag = new _AsyncBag["default"]();
 
-            for (var i = 0; i < doc.values.length; i++) {
-              var v = doc.values[i];
+            for (var _i3 = 0; _i3 < doc.values.length; _i3++) {
+              var v = doc.values[_i3];
               bag.add(self.parse(v.value)); //var x = await this.parse(v.value);
 
               resource.instance.loadProperty(v.name, v.age, v.modification, x);
@@ -14737,16 +13249,35 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
     key: "getRecord",
     value: function getRecord(resource, fromDate, toDate) {}
   }, {
-    key: "composeStructure",
-    value: function composeStructure(value) {
+    key: "composeMap",
+    value: function composeMap(value) {
+      var values = {};
+
+      var _iterator = _createForOfIteratorHelper(value),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var _step$value = _slicedToArray(_step.value, 2),
+              k = _step$value[0],
+              v = _step$value[1];
+
+          values[[k]] = v;
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
       return {
         type: 1,
-        values: value.toObject()
+        values: values
       };
     }
   }, {
-    key: "composeVarArray",
-    value: function composeVarArray(array) {
+    key: "composeList",
+    value: function composeList(array) {
       var rt = [];
 
       for (var i = 0; i < array.length; i++) {
@@ -14754,33 +13285,23 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
       }
 
       return rt;
-    }
-  }, {
-    key: "composeStructureArray",
-    value: function composeStructureArray(structures) {
-      var rt = [];
-      if (structures == null || structures.length == 0) return rt;
+    } //  composeStructureArray(structures)
+    //  {
+    //     var rt = [];
+    //     if (structures == null || structures.length == 0)
+    //          return rt;
+    //     for(var i = 0; i < structures.length; i++)
+    //         rt.push(this.composeStructure(structures[s]));
+    //      return rt;
+    //  }
+    //  composeResourceArray(array)
+    //  {
+    //      var rt = [];
+    //      for (var i = 0; i < array.length; i++)
+    //          rt.push({ "type": 0 , "link": array[i].instance.link });
+    //      return rt;
+    //  }
 
-      for (var i = 0; i < structures.length; i++) {
-        rt.push(this.composeStructure(structures[s]));
-      }
-
-      return rt;
-    }
-  }, {
-    key: "composeResourceArray",
-    value: function composeResourceArray(array) {
-      var rt = [];
-
-      for (var i = 0; i < array.length; i++) {
-        rt.push({
-          "type": 0,
-          "link": array[i].instance.link
-        });
-      }
-
-      return rt;
-    }
   }]);
 
   return IndexedDBStore;
@@ -14788,7 +13309,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = IndexedDBStore;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/Codec.js":14,"../Data/DataType.js":18,"../Resource/IResource.js":70,"../Resource/IStore.js":71,"../Resource/Warehouse.js":84}],97:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/RepresentationType.js":29,"../Data/TypedMap.js":35,"../Proxy/ResourceProxy.js":60,"../Resource/IResource.js":64,"../Resource/IStore.js":65,"../Resource/Warehouse.js":77}],90:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14903,7 +13424,7 @@ var MemoryStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = MemoryStore;
 
-},{"../Core/AsyncReply.js":5,"../Resource/IStore.js":71}],98:[function(require,module,exports){
+},{"../Core/AsyncReply.js":5,"../Resource/IStore.js":65}],91:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -14912,7 +13433,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _Structure = _interopRequireDefault(require("./Data/Structure.js"));
+var _TypedMap = _interopRequireDefault(require("./Data/TypedMap.js"));
+
+var _TypedList = _interopRequireDefault(require("./Data/TypedList.js"));
 
 var _DistributedResource = _interopRequireDefault(require("./Net/IIP/DistributedResource.js"));
 
@@ -14966,8 +13489,6 @@ var _Codec = _interopRequireDefault(require("./Data/Codec.js"));
 
 var _DC = _interopRequireDefault(require("./Data/DC.js"));
 
-var _DataType = _interopRequireDefault(require("./Data/DataType.js"));
-
 var _Guid = _interopRequireDefault(require("./Data/Guid.js"));
 
 var _IRecord = _interopRequireDefault(require("./Data/IRecord.js"));
@@ -14980,17 +13501,9 @@ var _PropertyValue = _interopRequireDefault(require("./Data/PropertyValue.js"));
 
 var _Record = _interopRequireDefault(require("./Data/Record.js"));
 
-var _ResourceComparisonResult = _interopRequireDefault(require("./Data/ResourceComparisonResult.js"));
-
 var _ResourceArrayType = _interopRequireDefault(require("./Data/ResourceArrayType.js"));
 
 var _ResourceArray = _interopRequireDefault(require("./Data/ResourceArray.js"));
-
-var _RecordComparisonResult = _interopRequireDefault(require("./Data/RecordComparisonResult.js"));
-
-var _StructureComparisonResult = _interopRequireDefault(require("./Data/StructureComparisonResult.js"));
-
-var _StructureArray = _interopRequireDefault(require("./Data/StructureArray.js"));
 
 var _INetworkReceiver = _interopRequireDefault(require("./Net/INetworkReceiver.js"));
 
@@ -15042,11 +13555,13 @@ var _MemberType = _interopRequireDefault(require("./Resource/Template/MemberType
 
 var _PropertyTemplate = _interopRequireDefault(require("./Resource/Template/PropertyTemplate.js"));
 
-var _TemplateDataType = _interopRequireDefault(require("./Resource/Template/TemplateDataType.js"));
-
 var _TemplateType = _interopRequireDefault(require("./Resource/Template/TemplateType.js"));
 
 var _TypeTemplate = _interopRequireDefault(require("./Resource/Template/TypeTemplate.js"));
+
+var _RepresentationType = require("./Data/RepresentationType.js");
+
+var _TransmissionType = require("./Data/TransmissionType.js");
 
 var _Authentication = _interopRequireDefault(require("./Security/Authority/Authentication.js"));
 
@@ -15070,6 +13585,8 @@ var _IPermissionsManager = _interopRequireDefault(require("./Security/Permission
 
 var _Ruling = _interopRequireDefault(require("./Security/Permissions/Ruling.js"));
 
+var _ExtendedTypes = require("./Data/ExtendedTypes.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var namespace = {
@@ -15089,20 +13606,34 @@ var namespace = {
     BinaryList: _BinaryList["default"],
     Codec: _Codec["default"],
     DC: _DC["default"],
-    DataType: _DataType["default"],
+    TypedList: _TypedList["default"],
+    TypedMap: _TypedMap["default"],
     Guid: _Guid["default"],
     IRecord: _IRecord["default"],
     KeyList: _KeyList["default"],
     NotModified: _NotModified["default"],
     PropertyValue: _PropertyValue["default"],
     Record: _Record["default"],
-    RecordComparisonResult: _RecordComparisonResult["default"],
     ResourceArray: _ResourceArray["default"],
-    ResourceArrayType: _ResourceArrayType["default"],
-    ResourceComparisonResult: _ResourceComparisonResult["default"],
-    Structure: _Structure["default"],
-    StructureArray: _StructureArray["default"],
-    StructureComparisonResult: _StructureComparisonResult["default"]
+    RepresentationType: _RepresentationType.RepresentationType,
+    RepresentationTypeIdentifier: _RepresentationType.RepresentationTypeIdentifier,
+    TransmissionType: _TransmissionType.TransmissionType,
+    TransmissionTypeIdentifier: _TransmissionType.TransmissionTypeIdentifier,
+    Int8: _ExtendedTypes.Int8,
+    UInt8: _ExtendedTypes.UInt8,
+    Int16: _ExtendedTypes.Int16,
+    UInt16: _ExtendedTypes.UInt16,
+    Int32: _ExtendedTypes.Int32,
+    UInt32: _ExtendedTypes.UInt32,
+    Int64: _ExtendedTypes.Int64,
+    UInt64: _ExtendedTypes.UInt64,
+    Int128: _ExtendedTypes.Int128,
+    UInt128: _ExtendedTypes.UInt128,
+    Float32: _ExtendedTypes.Float32,
+    Float64: _ExtendedTypes.Float64,
+    Float128: _ExtendedTypes.Float128,
+    Char16: _ExtendedTypes.Char16,
+    Char8: _ExtendedTypes.Char8
   },
   Net: {
     INetworkReceiver: _INetworkReceiver["default"],
@@ -15152,7 +13683,7 @@ var namespace = {
       MemberTemplate: _MemberTemplate["default"],
       MemberType: _MemberType["default"],
       PropertyTemplate: _PropertyTemplate["default"],
-      TemplateDataType: _TemplateDataType["default"],
+      TemplateDataType: TemplateDataType,
       TemplateType: _TemplateType["default"],
       TypeTemplate: _TypeTemplate["default"]
     }
@@ -15186,7 +13717,8 @@ var namespace = {
 
 if (typeof window !== 'undefined') {
   window.wh = _Warehouse["default"];
-  window.Structure = _Structure["default"];
+  window.TypedMap = _TypedMap["default"];
+  window.TypedList = _TypedList["default"];
   window.DistributedResource = _DistributedResource["default"];
   window.MemoryStore = _MemoryStore["default"];
   window.IndexedDBStore = _IndexedDBStore["default"];
@@ -15196,7 +13728,8 @@ if (typeof window !== 'undefined') {
   window.Esiur = namespace;
 } else if (typeof global !== 'undefined') {
   global.wh = _Warehouse["default"];
-  global.Structure = _Structure["default"];
+  global.TypedMap = _TypedMap["default"];
+  global.TypedList = _TypedList["default"];
   global.DistributedResource = _DistributedResource["default"];
   global.MemoryStore = _MemoryStore["default"];
   global.IndexedDBStore = _IndexedDBStore["default"];
@@ -15209,4 +13742,4 @@ var _default = _Warehouse["default"];
 exports["default"] = _default;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Core/AsyncException.js":3,"./Core/AsyncQueue.js":4,"./Core/AsyncReply.js":5,"./Core/ErrorType.js":6,"./Core/ExceptionCode.js":7,"./Core/IDestructible.js":8,"./Core/IEventHandler.js":9,"./Core/ProgressType.js":10,"./Data/AutoList.js":11,"./Data/AutoMap.js":12,"./Data/BinaryList.js":13,"./Data/Codec.js":14,"./Data/DC.js":15,"./Data/DataType.js":18,"./Data/Guid.js":20,"./Data/IRecord.js":22,"./Data/KeyList.js":23,"./Data/NotModified.js":24,"./Data/PropertyValue.js":26,"./Data/Record.js":28,"./Data/RecordComparisonResult.js":30,"./Data/ResourceArray.js":32,"./Data/ResourceArrayType.js":33,"./Data/ResourceComparisonResult.js":34,"./Data/Structure.js":35,"./Data/StructureArray.js":36,"./Data/StructureComparisonResult.js":37,"./Net/IIP/DistributedConnection.js":42,"./Net/IIP/DistributedPropertyContext.js":43,"./Net/IIP/DistributedResource.js":44,"./Net/IIP/DistributedResourceQueueItem.js":45,"./Net/IIP/DistributedResourceQueueItemType.js":46,"./Net/IIP/DistributedServer.js":47,"./Net/IIP/EntryPoint.js":48,"./Net/INetworkReceiver.js":49,"./Net/NetworkBuffer.js":50,"./Net/NetworkConnections.js":51,"./Net/NetworkServer.js":52,"./Net/NetworkSession.js":53,"./Net/Packets/IIPAuthPacket.js":54,"./Net/Packets/IIPAuthPacketAction.js":55,"./Net/Packets/IIPAuthPacketCommand.js":56,"./Net/Packets/IIPPacket.js":57,"./Net/Packets/IIPPacketAction.js":58,"./Net/Packets/IIPPacketCommand.js":59,"./Net/Packets/IIPPacketEvent.js":60,"./Net/Packets/IIPPacketReport.js":61,"./Net/SendList.js":62,"./Net/Sockets/ISocket.js":63,"./Net/Sockets/SocketState.js":64,"./Net/Sockets/WSocket.js":65,"./Proxy/ResourceProxy.js":66,"./Resource/CustomResourceEvent.js":67,"./Resource/IResource.js":70,"./Resource/IStore.js":71,"./Resource/Instance.js":72,"./Resource/Template/ArgumentTemplate.js":74,"./Resource/Template/EventTemplate.js":76,"./Resource/Template/FunctionTemplate.js":77,"./Resource/Template/MemberTemplate.js":78,"./Resource/Template/MemberType.js":79,"./Resource/Template/PropertyTemplate.js":80,"./Resource/Template/TemplateDataType.js":81,"./Resource/Template/TemplateType.js":82,"./Resource/Template/TypeTemplate.js":83,"./Resource/Warehouse.js":84,"./Security/Authority/Authentication.js":85,"./Security/Authority/AuthenticationMethod.js":86,"./Security/Authority/AuthenticationType.js":87,"./Security/Authority/ClientAuthentication.js":88,"./Security/Authority/HostAuthentication.js":89,"./Security/Authority/Session.js":90,"./Security/Integrity/SHA256.js":91,"./Security/Membership/IMembership.js":92,"./Security/Permissions/ActionType.js":93,"./Security/Permissions/IPermissionsManager.js":94,"./Security/Permissions/Ruling.js":95,"./Stores/IndexedDBStore.js":96,"./Stores/MemoryStore.js":97}]},{},[98]);
+},{"./Core/AsyncException.js":3,"./Core/AsyncQueue.js":4,"./Core/AsyncReply.js":5,"./Core/ErrorType.js":6,"./Core/ExceptionCode.js":7,"./Core/IDestructible.js":8,"./Core/IEventHandler.js":9,"./Core/ProgressType.js":10,"./Data/AutoList.js":11,"./Data/AutoMap.js":12,"./Data/BinaryList.js":13,"./Data/Codec.js":14,"./Data/DC.js":15,"./Data/ExtendedTypes.js":18,"./Data/Guid.js":19,"./Data/IRecord.js":21,"./Data/KeyList.js":22,"./Data/NotModified.js":23,"./Data/PropertyValue.js":25,"./Data/Record.js":27,"./Data/RepresentationType.js":29,"./Data/ResourceArray.js":30,"./Data/ResourceArrayType.js":31,"./Data/TransmissionType.js":32,"./Data/TypedList.js":34,"./Data/TypedMap.js":35,"./Net/IIP/DistributedConnection.js":36,"./Net/IIP/DistributedPropertyContext.js":37,"./Net/IIP/DistributedResource.js":38,"./Net/IIP/DistributedResourceQueueItem.js":39,"./Net/IIP/DistributedResourceQueueItemType.js":40,"./Net/IIP/DistributedServer.js":41,"./Net/IIP/EntryPoint.js":42,"./Net/INetworkReceiver.js":43,"./Net/NetworkBuffer.js":44,"./Net/NetworkConnections.js":45,"./Net/NetworkServer.js":46,"./Net/NetworkSession.js":47,"./Net/Packets/IIPAuthPacket.js":48,"./Net/Packets/IIPAuthPacketAction.js":49,"./Net/Packets/IIPAuthPacketCommand.js":50,"./Net/Packets/IIPPacket.js":51,"./Net/Packets/IIPPacketAction.js":52,"./Net/Packets/IIPPacketCommand.js":53,"./Net/Packets/IIPPacketEvent.js":54,"./Net/Packets/IIPPacketReport.js":55,"./Net/SendList.js":56,"./Net/Sockets/ISocket.js":57,"./Net/Sockets/SocketState.js":58,"./Net/Sockets/WSocket.js":59,"./Proxy/ResourceProxy.js":60,"./Resource/CustomResourceEvent.js":61,"./Resource/IResource.js":64,"./Resource/IStore.js":65,"./Resource/Instance.js":66,"./Resource/Template/ArgumentTemplate.js":68,"./Resource/Template/EventTemplate.js":70,"./Resource/Template/FunctionTemplate.js":71,"./Resource/Template/MemberTemplate.js":72,"./Resource/Template/MemberType.js":73,"./Resource/Template/PropertyTemplate.js":74,"./Resource/Template/TemplateType.js":75,"./Resource/Template/TypeTemplate.js":76,"./Resource/Warehouse.js":77,"./Security/Authority/Authentication.js":78,"./Security/Authority/AuthenticationMethod.js":79,"./Security/Authority/AuthenticationType.js":80,"./Security/Authority/ClientAuthentication.js":81,"./Security/Authority/HostAuthentication.js":82,"./Security/Authority/Session.js":83,"./Security/Integrity/SHA256.js":84,"./Security/Membership/IMembership.js":85,"./Security/Permissions/ActionType.js":86,"./Security/Permissions/IPermissionsManager.js":87,"./Security/Permissions/Ruling.js":88,"./Stores/IndexedDBStore.js":89,"./Stores/MemoryStore.js":90}]},{},[91]);

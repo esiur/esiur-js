@@ -1,6 +1,9 @@
 import IResource from "../Resource/IResource.js";
+import IRecord from "./IRecord.js";
+import Record from "./Record.js";
 import PropertyValue from "./PropertyValue.js";
 import PropertyValueArray from "./PropertyValueArray.js";
+import RecordArray from "./RecordArray.js";
 import ResourceArray from "./ResourceArray.js";
 
 export default class TypedList extends Array
@@ -14,7 +17,9 @@ export default class TypedList extends Array
     // }
 
     static cache = { [IResource] : ResourceArray,
-                     [PropertyValue] : PropertyValueArray
+                     [PropertyValue] : PropertyValueArray,
+                     [IRecord] : RecordArray,
+                     [Record] : RecordArray
                    };
 
     static getType(typedList){
