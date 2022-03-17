@@ -163,21 +163,17 @@ export default class DataDeserializer {
     var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
 
     if (template != null) {
-      listParser(data, offset, length, connection).then((ar) => {
+      DataDeserializer.listParser(data, offset, length, connection).then((ar) => {
         let record;
 
         if (template.definedType != null) {
           record = Warehouse.createInstance(template.definedType);
         } else {
-          record = Record();
+          record = new Record();
         }
 
-        var kv = new Map();
-
         for (var i = 0; i < template.properties.length; i++)
-          kv[template.properties[i].name] = ar[i];
-
-        record.deserialize(kv);
+          record[template.properties[i].name] = ar[i]; 
 
         reply.trigger(record);
       });

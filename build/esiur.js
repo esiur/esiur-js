@@ -2682,22 +2682,19 @@ var DataDeserializer = /*#__PURE__*/function () {
       var template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Record);
 
       if (template != null) {
-        listParser(data, offset, length, connection).then(function (ar) {
+        DataDeserializer.listParser(data, offset, length, connection).then(function (ar) {
           var record;
 
           if (template.definedType != null) {
             record = _Warehouse["default"].createInstance(template.definedType);
           } else {
-            record = (0, _Record["default"])();
+            record = new _Record["default"]();
           }
-
-          var kv = new Map();
 
           for (var i = 0; i < template.properties.length; i++) {
-            kv[template.properties[i].name] = ar[i];
+            record[template.properties[i].name] = ar[i];
           }
 
-          record.deserialize(kv);
           reply.trigger(record);
         });
       } else {
@@ -13683,7 +13680,6 @@ var namespace = {
       MemberTemplate: _MemberTemplate["default"],
       MemberType: _MemberType["default"],
       PropertyTemplate: _PropertyTemplate["default"],
-      TemplateDataType: TemplateDataType,
       TemplateType: _TemplateType["default"],
       TypeTemplate: _TypeTemplate["default"]
     }
