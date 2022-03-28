@@ -13,6 +13,7 @@ import TypedMap from './TypedMap.js';
 import PropertyValueArray from './PropertyValueArray.js';
 import PropertyValue from './PropertyValue.js';
 import Record from './Record.js';
+import { UInt64, Int64 } from '../Data/ExtendedTypes.js';
 
 export class PropertyValueParserResults {
   //final int size;
@@ -114,12 +115,12 @@ export default class DataDeserializer {
 
   static int64Parser(
       data, offset, length,  connection) {
-        return new AsyncReply(data.getInt64(offset));
+        return new AsyncReply(new Int64(data.getInt64(offset)));
   }
 
   static uInt64Parser(
       data, offset, length,  connection) {
-        return new AsyncReply(data.getUint64(offset));
+        return new AsyncReply(new UInt64(data.getUint64(offset)));
   }
 
   static dateTimeParser(
@@ -222,10 +223,10 @@ export default class DataDeserializer {
         enumVal.index = index;
         enumVal.name = template.constants[index].name;
         enumVal.value = template.constants[index].value;
-        return new AsyncReply.ready(enumVal);
+        return new AsyncReply(enumVal);
       } else {
-        return AsyncReply.ready(IEnum(index, template.constants[index].value,
-            template.constants[index].name));
+        return new AsyncReply(new IEnum(index, template.constants[index].value,
+            template.constants[index].name, template));
       }
     } else {
       var reply = new AsyncReply();
@@ -242,7 +243,7 @@ export default class DataDeserializer {
             reply.trigger(enumVal);
           } else {
             reply.trigger(new IEnum(
-                index, tmp.constants[index].value, tmp.constants[index].name));
+                index, tmp.constants[index].value, tmp.constants[index].name, tmp));
           }
         } else
           reply.triggerError(new Error("Template not found for enum"));

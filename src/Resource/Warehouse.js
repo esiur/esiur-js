@@ -317,6 +317,9 @@ export class WH extends IEventHandler
 
     getTemplateByType(type)
     {
+        if (type == null)
+            return null;
+
         var templateType = TemplateType.Unspecified;
 
         if (type.prototype instanceof DistributedResource)
@@ -595,8 +598,8 @@ export class WH extends IEventHandler
           ...this._getTypeEntries(UInt64, new RepresentationType(RepresentationTypeIdentifier.UInt64, false)),
           ...this._getTypeEntries(Float32, new RepresentationType(RepresentationTypeIdentifier.Float32, false)),
           ...this._getTypeEntries(Float64, new RepresentationType(RepresentationTypeIdentifier.Float64, false)),
-          ...this._getTypeEntries(String, new RepresentationType(RepresentationTypeIdentifier.Int8, String)),
-          ...this._getTypeEntries(Date, new RepresentationType(RepresentationTypeIdentifier.Int8, Date)),
+          ...this._getTypeEntries(String, new RepresentationType(RepresentationTypeIdentifier.String, String)),
+          ...this._getTypeEntries(Date, new RepresentationType(RepresentationTypeIdentifier.DateTime, Date)),
           ...this._getTypeEntries(Record, new RepresentationType(RepresentationTypeIdentifier.Record, false)),
           ...this._getTypeEntries(IResource, new RepresentationType(RepresentationTypeIdentifier.Resource, false)),
           ...this._getTypeEntries(Array, new RepresentationType(RepresentationTypeIdentifier.List, false)),

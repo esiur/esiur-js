@@ -322,7 +322,7 @@ export default class Codec {
   static isLocalResource( resource, connection) {
     if (connection == null) return false;
     if (resource instanceof DistributedResource) {
-      if (resource.connection == connection) return true;
+      if (resource._p.connection == connection) return true;
     }
     return false;
   }

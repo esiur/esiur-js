@@ -2,15 +2,16 @@
 
 export default class IEnum {
 
-   IEnum(index, value, name){
+  constructor(index, value, name, template){
     this.index = index;
     this.value = value;
     this.name = name;
+    this.template = template;
   } 
 
-  get template () {
-      //return new TemplateDescriber("IEnum");
-  }
+  // get template () {
+  //     //return new TemplateDescriber("IEnum");
+  // }
   
   toString() {
     return `${this.name}<${this.value}>`;

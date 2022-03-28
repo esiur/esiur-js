@@ -129,7 +129,7 @@ export default class DataSerializer {
       return new DataSerializerComposeResults(
           TransmissionTypeIdentifier.Null, new DC(0));
 
-    var template = Warehouse.getTemplateByType(value.runtimeType);
+    var template = Warehouse.getTemplateByType(value.runtimeType) ?? value.template;
 
     if (template == null)
       return new DataSerializerComposeResults(
@@ -322,7 +322,7 @@ export default class DataSerializer {
     var rt = new DC(4);
 
     if (Codec.isLocalResource(resource, connection)) {
-      rt.setUint32(0, resource.id ?? 0);
+      rt.setUint32(0, resource._p.instanceId ?? 0);
       return new DataSerializerComposeResults(
           TransmissionTypeIdentifier.ResourceLocal, rt);
     } else {

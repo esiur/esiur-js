@@ -126,11 +126,12 @@ export default class DistributedResource extends IResource
                       && arguments[0].constructor.name == "Object")
                   {
                       
+                      let argsObj = arguments[0];
                       // named args
                       for (let i = 0; i < ft.args.length; i++){
                             let arg = ft.args[i];
-                            if (arguments[arg.name] != undefined) {
-                                argsMap.set(new UInt8(arg.index), arguments[arg.name]);
+                            if (argsObj[arg.name] != undefined) {
+                                argsMap.set(new UInt8(arg.index), argsObj[arg.name]);
                             }
                         }
 

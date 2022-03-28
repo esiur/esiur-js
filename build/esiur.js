@@ -1663,7 +1663,7 @@ var Codec = /*#__PURE__*/function () {
       if (connection == null) return false;
 
       if (resource instanceof _DistributedResource["default"]) {
-        if (resource.connection == connection) return true;
+        if (resource._p.connection == connection) return true;
       }
 
       return false;
@@ -2501,6 +2501,8 @@ var _PropertyValue = _interopRequireDefault(require("./PropertyValue.js"));
 
 var _Record = _interopRequireDefault(require("./Record.js"));
 
+var _ExtendedTypes = require("../Data/ExtendedTypes.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
@@ -2633,12 +2635,12 @@ var DataDeserializer = /*#__PURE__*/function () {
   }, {
     key: "int64Parser",
     value: function int64Parser(data, offset, length, connection) {
-      return new _AsyncReply["default"](data.getInt64(offset));
+      return new _AsyncReply["default"](new _ExtendedTypes.Int64(data.getInt64(offset)));
     }
   }, {
     key: "uInt64Parser",
     value: function uInt64Parser(data, offset, length, connection) {
-      return new _AsyncReply["default"](data.getUint64(offset));
+      return new _AsyncReply["default"](new _ExtendedTypes.UInt64(data.getUint64(offset)));
     }
   }, {
     key: "dateTimeParser",
@@ -2741,7 +2743,7 @@ var DataDeserializer = /*#__PURE__*/function () {
           enumVal.value = template.constants[index].value;
           return new _AsyncReply["default"].ready(enumVal);
         } else {
-          return _AsyncReply["default"].ready((0, _IEnum["default"])(index, template.constants[index].value, template.constants[index].name));
+          return _AsyncReply["default"].ready((0, _IEnum["default"])(index, template.constants[index].value, template.constants[index].name, template));
         }
       } else {
         var reply = new _AsyncReply["default"]();
@@ -2756,7 +2758,7 @@ var DataDeserializer = /*#__PURE__*/function () {
               enumVal.value = tmp.constants[index].value;
               reply.trigger(enumVal);
             } else {
-              reply.trigger(new _IEnum["default"](index, tmp.constants[index].value, tmp.constants[index].name));
+              reply.trigger(new _IEnum["default"](index, tmp.constants[index].value, tmp.constants[index].name, tmp));
             }
           } else reply.triggerError(new Error("Template not found for enum"));
         }).error(function (x) {
@@ -2990,7 +2992,7 @@ var DataDeserializer = /*#__PURE__*/function () {
 
 exports["default"] = DataDeserializer;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Net/IIP/DistributedConnection.js":36,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./Codec.js":14,"./DC.js":15,"./IEnum.js":20,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RepresentationType.js":29,"./Tuple.js":33,"./TypedMap.js":35}],17:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Data/ExtendedTypes.js":18,"../Net/IIP/DistributedConnection.js":36,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./Codec.js":14,"./DC.js":15,"./IEnum.js":20,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RepresentationType.js":29,"./Tuple.js":33,"./TypedMap.js":35}],17:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -3155,10 +3157,10 @@ var DataSerializer = /*#__PURE__*/function () {
   }, {
     key: "enumComposer",
     value: function enumComposer(value, connection) {
+      var _Warehouse$getTemplat;
+
       if (value == null) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
-
-      var template = _Warehouse["default"].getTemplateByType(value.runtimeType);
-
+      var template = (_Warehouse$getTemplat = _Warehouse["default"].getTemplateByType(value.runtimeType)) !== null && _Warehouse$getTemplat !== void 0 ? _Warehouse$getTemplat : value.template;
       if (template == null) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
       var cts = template.constants.where(function (x) {
         return x.value == value;
@@ -3318,9 +3320,9 @@ var DataSerializer = /*#__PURE__*/function () {
       var rt = new _DC["default"](4);
 
       if (_Codec["default"].isLocalResource(resource, connection)) {
-        var _resource$id;
+        var _resource$_p$id;
 
-        rt.setUint32(0, (_resource$id = resource.id) !== null && _resource$id !== void 0 ? _resource$id : 0);
+        rt.setUint32(0, (_resource$_p$id = resource._p.id) !== null && _resource$_p$id !== void 0 ? _resource$_p$id : 0);
         return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.ResourceLocal, rt);
       } else {
         var _resource$instance$id, _resource$instance;
@@ -3787,15 +3789,15 @@ var IEnum = /*#__PURE__*/function () {
 
   _createClass(IEnum, [{
     key: "IEnum",
-    value: function IEnum(index, value, name) {
+    value: function IEnum(index, value, name, template) {
       this.index = index;
       this.value = value;
       this.name = name;
-    }
-  }, {
-    key: "template",
-    get: function get() {//return new TemplateDescriber("IEnum");
-    }
+      this.template = template;
+    } // get template () {
+    //     //return new TemplateDescriber("IEnum");
+    // }
+
   }, {
     key: "toString",
     value: function toString() {
@@ -7813,12 +7815,13 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
             var argsMap = new (_TypedMap["default"].of(_ExtendedTypes.UInt8, Object))();
 
             if (arguments.length == 1 && arguments[0] instanceof Object && arguments[0].constructor.name == "Object") {
-              // named args
+              var argsObj = arguments[0]; // named args
+
               for (var _i = 0; _i < ft.args.length; _i++) {
                 var arg = ft.args[_i];
 
-                if (arguments[arg.name] != undefined) {
-                  argsMap.set(new _ExtendedTypes.UInt8(arg.index), arguments[arg.name]);
+                if (argsObj[arg.name] != undefined) {
+                  argsMap.set(new _ExtendedTypes.UInt8(arg.index), argsObj[arg.name]);
                 }
               }
 
@@ -11983,6 +11986,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "getTemplateByType",
     value: function getTemplateByType(type) {
+      if (type == null) return null;
       var templateType = _TemplateType["default"].Unspecified;
       if (type.prototype instanceof _DistributedResource["default"]) templateType = _TemplateType["default"].Wrapper;
       if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else return null;
@@ -12217,7 +12221,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "_getBuiltInTypes",
     value: function _getBuiltInTypes() {
-      var entries = [].concat(_toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int8, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int8, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt8, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt8, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int16, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int16, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt16, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt16, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int64, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt64, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Float32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Float32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Float64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Float64, false))), _toConsumableArray(this._getTypeEntries(String, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int8, String))), _toConsumableArray(this._getTypeEntries(Date, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int8, Date))), _toConsumableArray(this._getTypeEntries(_Record["default"], new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Record, false))), _toConsumableArray(this._getTypeEntries(_IResource["default"], new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Resource, false))), _toConsumableArray(this._getTypeEntries(Array, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.List, false))), _toConsumableArray(this._getTypeEntries(Map, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Map, false))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(String, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.String, false), _RepresentationType.RepresentationType.Dynamic]))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(_ExtendedTypes.UInt8, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt8, false), _RepresentationType.RepresentationType.Dynamic]))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(_ExtendedTypes.Int32, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int32, false), _RepresentationType.RepresentationType.Dynamic]))));
+      var entries = [].concat(_toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int8, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int8, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt8, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt8, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int16, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int16, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt16, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt16, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int64, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt64, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Float32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Float32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Float64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Float64, false))), _toConsumableArray(this._getTypeEntries(String, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.String, String))), _toConsumableArray(this._getTypeEntries(Date, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.DateTime, Date))), _toConsumableArray(this._getTypeEntries(_Record["default"], new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Record, false))), _toConsumableArray(this._getTypeEntries(_IResource["default"], new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Resource, false))), _toConsumableArray(this._getTypeEntries(Array, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.List, false))), _toConsumableArray(this._getTypeEntries(Map, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Map, false))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(String, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.String, false), _RepresentationType.RepresentationType.Dynamic]))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(_ExtendedTypes.UInt8, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt8, false), _RepresentationType.RepresentationType.Dynamic]))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(_ExtendedTypes.Int32, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int32, false), _RepresentationType.RepresentationType.Dynamic]))));
       var rt = {};
 
       var _iterator2 = _createForOfIteratorHelper(entries),
