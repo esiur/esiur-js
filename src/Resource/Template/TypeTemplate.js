@@ -545,7 +545,7 @@ export default class TypeTemplate {
         
                 offset += dt.size;
         
-                let parsed = Codec.parse(data, offset, null);
+                let parsed = Codec.parse(data, offset, null, null);
         
                 offset += parsed.size;
         

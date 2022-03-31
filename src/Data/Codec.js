@@ -147,7 +147,7 @@ export default class Codec {
   /// <returns>Value</returns>
   static parse(
        data,  offset, connection,
-       dataType = null) {
+       requestSequence, dataType = null) {
 
     let len = 0;
 
@@ -164,18 +164,18 @@ export default class Codec {
         return new CodecParseResults(
             len,
             Codec.fixedParsers[dataType.exponent][dataType.index](
-                data, dataType.offset, dataType.contentLength, connection));
+                data, dataType.offset, dataType.contentLength, connection, requestSequence));
       } else if (dataType.classType == TransmissionTypeClass.Dynamic) {
         return new CodecParseResults(
             len,
             Codec.dynamicParsers[dataType.index](
-                data, dataType.offset, dataType.contentLength, connection));
+                data, dataType.offset, dataType.contentLength, connection, requestSequence));
       } else //if (tt.Class == TransmissionTypeClass.Typed)
       {
         return new CodecParseResults(
             len,
             Codec.typedParsers[dataType.index](
-                data, dataType.offset, dataType.contentLength, connection));
+                data, dataType.offset, dataType.contentLength, connection, requestSequence));
       }
     }
 

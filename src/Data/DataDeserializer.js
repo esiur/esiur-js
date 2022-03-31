@@ -14,6 +14,9 @@ import PropertyValueArray from './PropertyValueArray.js';
 import PropertyValue from './PropertyValue.js';
 import Record from './Record.js';
 import { UInt64, Int64 } from '../Data/ExtendedTypes.js';
+import AsyncException from '../Core/AsyncException.js';
+import ExceptionCode from '../Core/ExceptionCode.js';
+import ErrorType from '../Core/ErrorType.js';
 
 export class PropertyValueParserResults {
   //final int size;
@@ -26,135 +29,135 @@ export class PropertyValueParserResults {
 }
 
 export default class DataDeserializer {
-  static nullParser(data, offset,  length,  connection) {
+  static nullParser(data, offset,  length,  connection, requestSequence) {
     return new AsyncReply(null);
   }
 
   static booleanTrueParser(
-      data, offset, length, connection) {
+      data, offset, length, connection, requestSequence) {
         return new AsyncReply(true);
   }
 
   static booleanFalseParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(false);
   }
 
   static notModifiedParser(
-      data,  offset,  length,  connection) {
+      data,  offset,  length,  connection, requestSequence) {
         return new AsyncReply(NotModified());
   }
 
   static byteParser(
-       data,  offset,  length,  connection) {
+       data,  offset,  length,  connection, requestSequence) {
         return new AsyncReply(data[offset]);
   }
 
   static sByteParser(
-       data, offset, length,  connection) {
+       data, offset, length,  connection, requestSequence) {
         return new AsyncReply(
         data[offset] > 127 ? data[offset] - 256 : data[offset]);
   }
 
   static char16Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(data.getChar(offset));
   }
 
   static char8Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(String.fromCharCode(data[offset]));
   }
 
   static int16Parser(
-      data, offset, length, connection) {
+      data, offset, length, connection, requestSequence) {
         return new AsyncReply(data.getInt16(offset));
   }
 
   static  uInt16Parser(
-      data, offset,  length, connection) {
+      data, offset,  length, connection, requestSequence) {
         return new AsyncReply(data.getUint16(offset));
   }
 
   static int32Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(data.getInt32(offset));
   }
 
   static  uInt32Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(data.getUint32(offset));
   }
 
   static float32Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(data.getFloat32(offset));
   }
 
   static float64Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(data.getFloat64(offset));
   }
 
   static float128Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
     // @TODO
     return new AsyncReply(data.getFloat64(offset));
   }
 
   static int128Parser(
-      data, offset,  length,  connection) {
+      data, offset,  length,  connection, requestSequence) {
     // @TODO
     return new AsyncReply(data.getInt64(offset));
   }
 
   static uInt128Parser(
-       data,  offset,  length,  connection) {
+       data,  offset,  length,  connection, requestSequence) {
         return new AsyncReply(data.getUint64(offset));
   }
 
   static int64Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(new Int64(data.getInt64(offset)));
   }
 
   static uInt64Parser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(new UInt64(data.getUint64(offset)));
   }
 
   static dateTimeParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(data.getDateTime(offset));
   }
 
   static resourceParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
     if (connection != null) {
-      var id = data.getUint32(offset);
+      var id = data.getUint32(offset, requestSequence);
       return connection.fetch(id);
     }
     throw Error("Can't parse resource with no connection");
   }
 
   static localResourceParser(
-       data, offset, length,  connection) {
+       data, offset, length,  connection, requestSequence) {
     var id = data.getUint32(offset);
     return Warehouse.getById(id);
   }
 
   static rawDataParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(data.clip(offset, length));
   }
 
   static  stringParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
         return new AsyncReply(data.getString(offset, length));
   }
 
   static recordParser(
-      data, offset, length, connection) {
+      data, offset, length, connection, requestSequence) {
     var reply = new AsyncReply();
 
     var classId = data.getGuid(offset);
@@ -163,8 +166,8 @@ export default class DataDeserializer {
 
     var template = Warehouse.getTemplateByClassId(classId, TemplateType.Record);
 
-    if (template != null) {
-      DataDeserializer.listParser(data, offset, length, connection).then((ar) => {
+    var initRecord = (template) => {
+        DataDeserializer.listParser(data, offset, length, connection, requestSequence).then((ar) => {
         let record;
 
         if (template.definedType != null) {
@@ -178,27 +181,25 @@ export default class DataDeserializer {
 
         reply.trigger(record);
       });
+    };
+
+    if (template != null) {
+      initRecord(template);
     } else {
       if (connection == null)
         throw Error("Can't parse record with no connection");
 
       connection.getTemplate(classId).then((tmp) => {
         if (tmp == null)
-          reply.triggerError(new Error("Couldn't fetch record template."));
-
-        DataDeserializer.listParser(data, offset, length, connection).then((ar) => {
-
-          var record = new Record();
-
-          //var kv = new Map();
-
-          for (var i = 0; i < tmp.properties.length; i++)
-            record[tmp.properties[i].name] = ar[i];
-
-          //record.deserialize(kv);
-
-          reply.trigger(record);
-        });
+        {
+            reply.triggerError(new AsyncException(
+              ErrorType.Management,
+              ExceptionCode.TemplateNotFound.index,
+              "Template not found for record."));
+        } else {
+          initRecord(tmp);
+        }
+     
       }).error((x) => reply.triggerError(x));
     }
 
@@ -206,11 +207,11 @@ export default class DataDeserializer {
   }
 
   static constantParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
     throw Error("NotImplementedException");
   }
 
-  static enumParser(data, offset, length,  connection) {
+  static enumParser(data, offset, length,  connection, requestSequence) {
     var classId = data.getGuid(offset);
     offset += 16;
     var index = data[offset++];
@@ -254,11 +255,11 @@ export default class DataDeserializer {
   }
 
   static recordListParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
     var rt = new AsyncBag();
 
     while (length > 0) {
-      var parsed = Codec.parse(data, offset, connection);
+      var parsed = Codec.parse(data, offset, connection, requestSequence);
 
       rt.add(parsed.reply);
 
@@ -274,11 +275,11 @@ export default class DataDeserializer {
   }
 
   static resourceListParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
     var rt = new AsyncBag();
 
     while (length > 0) {
-      var parsed = Codec.parse(data, offset, connection);
+      var parsed = Codec.parse(data, offset, connection, requestSequence);
 
       rt.add(parsed.reply);
 
@@ -294,11 +295,11 @@ export default class DataDeserializer {
   }
 
   static listParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
     var rt = new AsyncBag();
 
     while (length > 0) {
-      var parsed = Codec.parse(data, offset, connection);
+      var parsed = Codec.parse(data, offset, connection, requestSequence);
 
       rt.add(parsed.reply);
 
@@ -314,7 +315,7 @@ export default class DataDeserializer {
   }
 
   static typedMapParser(
-      data, offset, length, connection) {
+      data, offset, length, connection, requestSequence) {
     // get key type
     var keyRep = RepresentationType.parse(data, offset);
     offset += keyRep.size;
@@ -332,7 +333,7 @@ export default class DataDeserializer {
     var results = new AsyncBag();
 
     while (length > 0) {
-      var parsed = Codec.parse(data, offset, connection);
+      var parsed = Codec.parse(data, offset, connection, requestSequence);
 
       results.add(parsed.reply);
 
@@ -356,7 +357,7 @@ export default class DataDeserializer {
   }
 
   static tupleParser(
-      data, offset, length,  connection) {
+      data, offset, length,  connection, requestSequence) {
 
         
     var results = new AsyncBag();
@@ -368,7 +369,7 @@ export default class DataDeserializer {
     var types = [];
 
     for (var i = 0; i < tupleSize; i++) {
-      var rep = RepresentationType.parse(data, offset);
+      var rep = RepresentationType.parse(data, offset, requestSequence);
       if (rep.type != null) 
         types.push(rep.type.getRuntimeType() ?? Object);
       offset += rep.size;
@@ -376,7 +377,7 @@ export default class DataDeserializer {
     }
 
     while (length > 0) {
-      var parsed = Codec.parse(data, offset, connection);
+      var parsed = Codec.parse(data, offset, connection, requestSequence);
 
       results.add(parsed.reply);
 
@@ -397,7 +398,7 @@ export default class DataDeserializer {
   }
 
   static typedListParser(
-      data, offset, length, connection) {
+      data, offset, length, connection, requestSequence) {
     var rt = new AsyncBag();
 
     // get the type
@@ -411,7 +412,7 @@ export default class DataDeserializer {
     rt.arrayType = runtimeType;
 
     while (length > 0) {
-      var parsed = Codec.parse(data, offset, connection);
+      var parsed = Codec.parse(data, offset, connection, requestSequence);
 
       rt.add(parsed.reply);
 
@@ -430,11 +431,11 @@ export default class DataDeserializer {
       data,
       offset,
       length,
-      connection) //, bool ageIncluded = true)
+      connection, requestSequence) //, bool ageIncluded = true)
   {
     var rt = new AsyncBag();
 
-    DataDeserializer.listParser(data, offset, length, connection).then((x) => {
+    DataDeserializer.listParser(data, offset, length, connection, requestSequence).then((x) => {
       var pvs = new PropertyValueArray();
 
       for (var i = 0; i < x.length; i += 3)
@@ -447,7 +448,7 @@ export default class DataDeserializer {
   }
 
   static propertyValueParser(data, offset,
-      connection) //, bool ageIncluded = true)
+      connection, requestSequence) //, bool ageIncluded = true)
   {
     let reply = new AsyncReply();
 
@@ -457,7 +458,7 @@ export default class DataDeserializer {
     let date = data.getDateTime(offset);
     offset += 8;
 
-    let parsed = Codec.parse(data, offset, connection);
+    let parsed = Codec.parse(data, offset, connection, requestSequence);
 
     parsed.reply.then((value) => {
       reply.trigger(new PropertyValue(value, age, date));
@@ -468,7 +469,7 @@ export default class DataDeserializer {
 
   static 
       historyParser(data, offset, length, resource,
-           connection) {
+           connection, requestSequence) {
     throw new Error("Not implemented");
     // @TODO
     // var list = new KeyList<PropertyTemplate, List<PropertyValue>>();

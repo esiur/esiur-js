@@ -7,7 +7,7 @@ export default class PropertyModificationInfo {
     return this.propertyTemplate.name;
   } 
 
-  PropertyModificationInfo(
+  constructor(
       resource, propertyTemplate, value, age) {
         this.resource = resource;
         this.propertyTemplate = propertyTemplate;

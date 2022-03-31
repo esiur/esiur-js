@@ -47,7 +47,9 @@ import { Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64, Float32, Floa
 import Record from '../Data/Record.js';
 import TypedMap from '../Data/TypedMap.js';
 import {RepresentationType, RepresentationTypeIdentifier} from '../Data/RepresentationType.js';
-import FactoryEntry from './FactoryEntry.js'; './FactoryEntry.js';
+import FactoryEntry from './FactoryEntry.js';
+import IEnum from '../Data/IEnum.js';
+ 
 export class WH extends IEventHandler
 {
     constructor()
@@ -328,6 +330,8 @@ export class WH extends IEventHandler
             templateType = TemplateType.Resource;
         else if (type.prototype instanceof IRecord)
             templateType = TemplateType.Record;
+        else if (type.prototype instanceof IEnum)
+            templateType = TemplateType.Enum;
         else
             return null;
 

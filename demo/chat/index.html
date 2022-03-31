@@ -46,7 +46,7 @@
                 users.append(el);
 
                 if (!silent)
-                    appendMessage({usr, msg: "joined the room", date: new Date()});
+                    appendMessage(new Map([['usr', usr], ['msg', "joined the room"], ['date', new Date()]]));
             }
 
             function removeUser(usr){
@@ -57,7 +57,7 @@
                             break;
                         }
 
-                appendMessage({usr, msg: "left the room", date: new Date()});
+                appendMessage(new Map([['usr', usr], ['msg', "left the room"], ['date', new Date()]]));
             }
 
             function updateTitle()

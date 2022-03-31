@@ -949,7 +949,7 @@ export default class DistributedConnection extends IStore {
 
                     for (var i = 0; i < this.resources.keys.length; i++) {
                         var index = this.resources.keys[i];
-                        bag.add(this.fetch(index));
+                        bag.add(this.fetch(index, null));
                     }
 
                     bag.seal();
@@ -1367,7 +1367,7 @@ export default class DistributedConnection extends IStore {
 
             this.requests.remove(callbackId);
 
-            Codec.parse(data, 0, this, dataType).reply.then(function (rt) {
+            Codec.parse(data, 0, this, null, dataType).reply.then(function (rt) {
                 req.trigger(rt);
             });
         }
@@ -1391,7 +1391,7 @@ export default class DistributedConnection extends IStore {
     IIPReportChunk(callbackId, dataType, data) {
         var req = this.requests.item(callbackId);
         if (req != null) {
-            Codec.parse(data, 0, this, dataType).reply.then(function (x) {
+            Codec.parse(data, 0, this, null, dataType).reply.then(function (x) {
                 req.triggerChunk(x);
             });
         }
@@ -1413,7 +1413,7 @@ export default class DistributedConnection extends IStore {
 
         let self = this;
 
-        this.fetch(resourceId).then(function (r) {
+        this.fetch(resourceId, null).then(function (r) {
 
             let pt = r.instance.template.getPropertyTemplateByIndex(index);
 
@@ -1424,7 +1424,7 @@ export default class DistributedConnection extends IStore {
             let item = new AsyncReply();
             self.queue.add(item);
 
-            Codec.parse(data, 0, self, dataType).reply.then(function (args) {
+            Codec.parse(data, 0, self, null, dataType).reply.then(function (args) {
                 item.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Propery, args, index));
             }).error(function (ex) {
                 self.queue.remove(item);
@@ -1437,7 +1437,7 @@ export default class DistributedConnection extends IStore {
     IIPEventEventOccurred(resourceId, index, dataType, data) {
         var self = this;
 
-        this.fetch(resourceId).then(function (r) {
+        this.fetch(resourceId, null).then(function (r) {
             let et = r.instance.template.getEventTemplateByIndex(index);
 
             if (et == null)
@@ -1448,7 +1448,7 @@ export default class DistributedConnection extends IStore {
             self.queue.add(item);
 
            // Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
-            Codec.parse(data, 0, self, dataType).reply.then(function (args) {
+            Codec.parse(data, 0, self, null, dataType).reply.then(function (args) {
                 item.trigger(new DistributedResourceQueueItem(r, DistributedResourceQueueItemType.Event, args, index));
 
             }).error(function (ex) {
@@ -1461,8 +1461,8 @@ export default class DistributedConnection extends IStore {
     IIPEventChildAdded(resourceId, childId) {
         var self = this;
 
-        this.fetch(resourceId).then(function (parent) {
-            self.fetch(childId).then(function (child) {
+        this.fetch(resourceId, null).then(function (parent) {
+            self.fetch(childId, null).then(function (child) {
                 parent.instance.children.add(child);
             });
         });
@@ -1471,15 +1471,15 @@ export default class DistributedConnection extends IStore {
     IIPEventChildRemoved(resourceId, childId) {
         var self = this;
 
-        this.fetch(resourceId).then(function (parent) {
-            self.fetch(childId).then(function (child) {
+        this.fetch(resourceId, null).then(function (parent) {
+            self.fetch(childId, null).then(function (child) {
                 parent.instance.children.remove(child);
             });
         });
     }
 
     IIPEventRenamed(resourceId, name) {
-        this.fetch(resourceId).then(function (resource) {
+        this.fetch(resourceId, null).then(function (resource) {
             resource.instance.attributes.set("name",  name);
         });
     }
@@ -1488,7 +1488,7 @@ export default class DistributedConnection extends IStore {
     IIPEventAttributesUpdated(resourceId, attributes) {
         var self = this;
 
-        this.fetch(resourceId).then(function (resource) {
+        this.fetch(resourceId, null).then(function (resource) {
             var attrs = attributes.getStringArray(0, attributes.length);
 
             self.getAttributes(resource, attrs).then(function (s) {
@@ -1691,14 +1691,14 @@ export default class DistributedConnection extends IStore {
                     return;
                 }
 
-                DataDeserializer.listParser(content, offset, cl, self).then(function (parameters) {
+                DataDeserializer.listParser(content, offset, cl, self, null).then(function (parameters) {
                     offset += cl;
                     cl = content.getUint32(offset);
-                    DataDeserializer.typedMapParser(content, offset, cl, self).then(function (attributes) {
+                    DataDeserializer.typedMapParser(content, offset, cl, self, null).then(function (attributes) {
                         offset += cl;
                         cl = content.length - offset;
 
-                        DataDeserializer.typedMapParser(content, offset, cl, self).then(function (values) {
+                        DataDeserializer.typedMapParser(content, offset, cl, self, null).then(function (values) {
 
 
                             var resource = new (Function.prototype.bind.apply(type, values));
@@ -1849,7 +1849,7 @@ export default class DistributedConnection extends IStore {
                 return;
             }
 
-            Codec.parse(data, 0, self, dataType).reply.then(function (args) {
+            Codec.parse(data, 0, self, null, dataType).reply.then(function (args) {
                 if (r instanceof DistributedResource) {
                     var rt = r._invoke(index, args);
                     if (rt != null) {
@@ -2121,7 +2121,7 @@ export default class DistributedConnection extends IStore {
 
                 var pt = r.instance.template.getPropertyTemplateByIndex(index);
                 if (pt != null) {
-                    Codec.parse(data, 0, self, dataType).reply.then(function (value) {
+                    Codec.parse(data, 0, self, null, dataType).reply.then(function (value) {
                         if (r instanceof DistributedResource) {
                             // propagation
                             r._set(index, value).then(function (x) {
@@ -2225,7 +2225,7 @@ export default class DistributedConnection extends IStore {
         this.sendRequest(IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
             var rid = args[0];
 
-            self.fetch(rid).then(function (r) {
+            self.fetch(rid, null).then(function (r) {
                 reply.trigger(r);
             });
         });
@@ -2248,7 +2248,7 @@ export default class DistributedConnection extends IStore {
                 let dataType = ar[0];
                 let data = ar[1];
       
-                Codec.parse(data, 0, self, dataType).reply.then((resources) => {
+                Codec.parse(data, 0, self, null, dataType).reply.then((resources) => {
                     reply.trigger((resources))
                 }
                 ).error((ex) => reply.triggerError(ex));
@@ -2377,15 +2377,13 @@ export default class DistributedConnection extends IStore {
     }
 
     // Get a resource from the other end
-    fetch(id) {
+    fetch(id, requestSequence) {
 
         let resource = this.resources.item(id);
         let request = this.resourceRequests.item(id);
 
         if (request != null) {
-
-            if (resource != null)
-                // dig for dead locks            // or not
+            if (resource != null && (requestSequence?.contains(id) ?? false))
                 return new AsyncReply(resource);
             else
                 return request;
@@ -2398,6 +2396,9 @@ export default class DistributedConnection extends IStore {
 
         this.resourceRequests.set(id, reply);
 
+        var newSequence =
+           requestSequence != null ? [...requestSequence, id] : [id];
+
         var self = this;
 
         this.sendRequest(IIPPacketAction.AttachResource)
@@ -2405,11 +2406,19 @@ export default class DistributedConnection extends IStore {
             .done()
             .then(function (rt) {
 
+                if (rt == null) {
+                    reply.triggerError(new AsyncException(ErrorType.Management,
+                        ExceptionCode.ResourceNotFound, "Null response"));
+                    return;
+                }
+          
                 var dr;
+                let classId = rt[0];
+                let template = null;
 
                 if (resource == null)
                 {
-                    var template = Warehouse.getTemplateByClassId(rt[0], TemplateType.Wrapper);
+                    template = Warehouse.getTemplateByClassId(classId, TemplateType.Wrapper);
                     if (template?.definedType != null)
                         dr = new template.getDependencies(self, id, rt[1], rt[2]);
                     else
@@ -2423,61 +2432,52 @@ export default class DistributedConnection extends IStore {
                 let transmissionType = rt[3] ;
                 let content = rt[4] ;
       
-                self.getTemplate(rt[0]).then(function (tmp) {
+                let initResource = (ok) => {
+                    Codec.parse(content, 0, self, newSequence, transmissionType)
+                    .reply
+                    .then((ar) => {
+                        var pvs = new PropertyValueArray();
 
-                    // ClassId, ResourceAge, ResourceLink, Content
-                    if (resource == null)
-                    {
-                        let wp =  Warehouse.put(id.toString(), dr, self, null, tmp).then(function(ok){
-
-                            
-                            Codec.parse(content, 0, self, transmissionType)
-                            .reply
-                            .then((ar) => {
-                          var pvs = new PropertyValueArray();
-    
-                          for (var i = 0; i < ar.length; i += 3)
+                        for (var i = 0; i < ar.length; i += 3)
                             pvs.push(new PropertyValue(
                                 ar[i + 2], ar[i], ar[i + 1]));
-    
-                          dr._attach(pvs);
-    
-                          self.resourceRequests.remove(id);
-                          reply.trigger(dr);
-                        })
-                          .error((ex) => reply.triggerError(ex));
-                            
-                            
-                        });
-                        
-                        wp.error(function(ex){
-                            reply.triggerError(ex);
-                        });
-                    }
-                    else
-                    {
-                        Codec.parse(content, 0, self, transmissionType)
-                        .reply
-                        .then((ar) => {
-                      //print("attached");
-                      if (results != null) {
-                        var pvs = new PropertyValueArray();
-    
-                        for (var i = 0; i < ar.length; i += 3)
-                          pvs.push(new PropertyValue(
-                              ar[i + 2], ar[i], ar[i + 1]));
-    
-                        dr._attach(pvs);
-                      }
-    
-                      self.resourceRequests.remove(id);
-                      reply.trigger(dr);
-                     }).error(function(ex) { reply.triggerError(ex)});
 
-                    }
-                }).error(function(ex){
-                    reply.triggerError(ex);
-                });
+                        dr._attach(pvs);
+
+                        self.resourceRequests.remove(id);
+                        reply.trigger(dr);
+                    })
+                    .error((ex) => reply.triggerError(ex));        
+                };
+
+                if (template == null)
+                {
+                    self.getTemplate(rt[0]).then(function (tmp) {
+                        // ClassId, ResourceAge, ResourceLink, Content
+                        if (resource == null) {
+                            Warehouse.put(id.toString(), dr, self, null, tmp).then(function(ok){
+                                initResource(ok);
+                            }).error(function(ex){
+                                reply.triggerError(ex);
+                            });
+                        }
+                        else
+                        {
+                            initResource(ok);
+                        }
+                    }).error(function(ex){
+                        reply.triggerError(ex);
+                    });
+                } else {
+                    if (resource == null) {
+                        Warehouse.put(id.toString(), dr, this, null, template)
+                          .then(initResource)
+                          .error((ex) => reply.triggerError(ex));
+                      } else {
+                        initResource(resource);
+                      }        
+                }
+
             }).error(function(ex){
                 reply.triggerError(ex);
             });
@@ -2500,7 +2500,7 @@ export default class DistributedConnection extends IStore {
                 .addDateTime(fromDate).addDateTime(toDate)
                 .done()
                 .then(function (rt) {
-                    Codec.parseHistory(rt[0], 0, rt[0].length, resource, self).then(function (history) {
+                    Codec.historyParser(rt[0], 0, rt[0].length, resource, self, null).then(function (history) {
                         reply.trigger(history);
                     });
                 });
@@ -2721,7 +2721,8 @@ export default class DistributedConnection extends IStore {
                 return;
             }
 
-            DataDeserializer.typedListParser(attributes, 0, attributes.length, this).then(function (attrs) {
+            DataDeserializer.typedListParser(attributes, 0, attributes.length, this, null)
+                .then(function (attrs) {
                 if (r.instance.setAttributes(attrs, clearAttributes))
                     self.sendReply(clearAttributes ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes,
                         callback)
@@ -2751,7 +2752,7 @@ export default class DistributedConnection extends IStore {
             let dataType = ar[0];
             let data = ar[1];
 
-            Codec.parse(data, 0, self, dataType).reply.then((resources) => {
+            Codec.parse(data, 0, self, null, dataType).reply.then((resources) => {
                 rt.trigger(resources);
             })
             .error((ex) => rt.triggerError(ex));
@@ -2775,7 +2776,7 @@ export default class DistributedConnection extends IStore {
 
                 let dataType = ar[0] ;
                 let data = ar[1];
-                Codec.parse(data, 0, self, dataType).reply.then((resources) => {
+                Codec.parse(data, 0, self, null, dataType).reply.then((resources) => {
                   rt.trigger(resources);
                 })
                   .error((ex) => rt.triggerError(ex));
@@ -2846,7 +2847,7 @@ export default class DistributedConnection extends IStore {
                     let dataType = ar[0];
                     let data = ar[1];
         
-                    Codec.parse(data, 0, self, dataType).reply.then((st) => {
+                    Codec.parse(data, 0, self, null, dataType).reply.then((st) => {
                       resource.instance?.setAttributes(st);
                       rt.trigger(st);
                     })
@@ -2867,7 +2868,7 @@ export default class DistributedConnection extends IStore {
                     let dataType = ar[0] ;
                     let data = ar[1] ;
         
-                    Codec.parse(data, 0, self, dataType).reply
+                    Codec.parse(data, 0, self, null, dataType).reply
                       .then((st) => {
                         resource.instance?.setAttributes(st);
         
