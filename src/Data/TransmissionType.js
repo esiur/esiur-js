@@ -173,7 +173,7 @@ export default class TransmissionType {
       let cl = (1 << (exp - 1));
 
       if (ends - offset < cl)
-        return new TransmissionTypeParseResults(ends - offset - cl, null);
+        return new TransmissionTypeParseResults(cl - (ends - offset), null);
 
       return new TransmissionTypeParseResults(
           1 + cl, new TransmissionType(h, cls, h & 0x7, offset, cl, exp));
@@ -181,11 +181,14 @@ export default class TransmissionType {
       let cll = (h >> 3) & 0x7;
 
       if (ends - offset < cll)
-        return new TransmissionTypeParseResults(ends - offset - cll, null);
+        return new TransmissionTypeParseResults(cll - (ends - offset), null);
 
       let cl = 0;
 
       for (var i = 0; i < cll; i++) cl = cl << 8 | data[offset++];
+
+      if (ends - offset < cl)
+        return new TransmissionTypeParseResults(cl - (ends - offset), null);
 
       return new TransmissionTypeParseResults(
           1 + cl + cll, new TransmissionType((h & 0xC7), cls, h & 0x7, offset, cl));

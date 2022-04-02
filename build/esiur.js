@@ -1532,8 +1532,8 @@ var Codec = /*#__PURE__*/function () {
     /// <param name="connection">DistributedConnection is required in case a structure in the array holds items at the other end.</param>
     /// <param name="dataType">DataType, in case the data is not prepended with DataType</param>
     /// <returns>Value</returns>
-    function parse(data, offset, connection) {
-      var dataType = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    function parse(data, offset, connection, requestSequence) {
+      var dataType = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
       var len = 0;
 
       if (dataType == null) {
@@ -1548,12 +1548,12 @@ var Codec = /*#__PURE__*/function () {
 
       if (dataType != null) {
         if (dataType.classType == _TransmissionType.TransmissionTypeClass.Fixed) {
-          return new CodecParseResults(len, Codec.fixedParsers[dataType.exponent][dataType.index](data, dataType.offset, dataType.contentLength, connection));
+          return new CodecParseResults(len, Codec.fixedParsers[dataType.exponent][dataType.index](data, dataType.offset, dataType.contentLength, connection, requestSequence));
         } else if (dataType.classType == _TransmissionType.TransmissionTypeClass.Dynamic) {
-          return new CodecParseResults(len, Codec.dynamicParsers[dataType.index](data, dataType.offset, dataType.contentLength, connection));
+          return new CodecParseResults(len, Codec.dynamicParsers[dataType.index](data, dataType.offset, dataType.contentLength, connection, requestSequence));
         } else //if (tt.Class == TransmissionTypeClass.Typed)
           {
-            return new CodecParseResults(len, Codec.typedParsers[dataType.index](data, dataType.offset, dataType.contentLength, connection));
+            return new CodecParseResults(len, Codec.typedParsers[dataType.index](data, dataType.offset, dataType.contentLength, connection, requestSequence));
           }
       }
 
@@ -2503,6 +2503,12 @@ var _Record = _interopRequireDefault(require("./Record.js"));
 
 var _ExtendedTypes = require("../Data/ExtendedTypes.js");
 
+var _AsyncException = _interopRequireDefault(require("../Core/AsyncException.js"));
+
+var _ExceptionCode = _interopRequireDefault(require("../Core/ExceptionCode.js"));
+
+var _ErrorType = _interopRequireDefault(require("../Core/ErrorType.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
@@ -2547,111 +2553,111 @@ var DataDeserializer = /*#__PURE__*/function () {
 
   _createClass(DataDeserializer, null, [{
     key: "nullParser",
-    value: function nullParser(data, offset, length, connection) {
+    value: function nullParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](null);
     }
   }, {
     key: "booleanTrueParser",
-    value: function booleanTrueParser(data, offset, length, connection) {
+    value: function booleanTrueParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](true);
     }
   }, {
     key: "booleanFalseParser",
-    value: function booleanFalseParser(data, offset, length, connection) {
+    value: function booleanFalseParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](false);
     }
   }, {
     key: "notModifiedParser",
-    value: function notModifiedParser(data, offset, length, connection) {
+    value: function notModifiedParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"]((0, _NotModified["default"])());
     }
   }, {
     key: "byteParser",
-    value: function byteParser(data, offset, length, connection) {
+    value: function byteParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data[offset]);
     }
   }, {
     key: "sByteParser",
-    value: function sByteParser(data, offset, length, connection) {
+    value: function sByteParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data[offset] > 127 ? data[offset] - 256 : data[offset]);
     }
   }, {
     key: "char16Parser",
-    value: function char16Parser(data, offset, length, connection) {
+    value: function char16Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getChar(offset));
     }
   }, {
     key: "char8Parser",
-    value: function char8Parser(data, offset, length, connection) {
+    value: function char8Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](String.fromCharCode(data[offset]));
     }
   }, {
     key: "int16Parser",
-    value: function int16Parser(data, offset, length, connection) {
+    value: function int16Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getInt16(offset));
     }
   }, {
     key: "uInt16Parser",
-    value: function uInt16Parser(data, offset, length, connection) {
+    value: function uInt16Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getUint16(offset));
     }
   }, {
     key: "int32Parser",
-    value: function int32Parser(data, offset, length, connection) {
+    value: function int32Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getInt32(offset));
     }
   }, {
     key: "uInt32Parser",
-    value: function uInt32Parser(data, offset, length, connection) {
+    value: function uInt32Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getUint32(offset));
     }
   }, {
     key: "float32Parser",
-    value: function float32Parser(data, offset, length, connection) {
+    value: function float32Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getFloat32(offset));
     }
   }, {
     key: "float64Parser",
-    value: function float64Parser(data, offset, length, connection) {
+    value: function float64Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getFloat64(offset));
     }
   }, {
     key: "float128Parser",
-    value: function float128Parser(data, offset, length, connection) {
+    value: function float128Parser(data, offset, length, connection, requestSequence) {
       // @TODO
       return new _AsyncReply["default"](data.getFloat64(offset));
     }
   }, {
     key: "int128Parser",
-    value: function int128Parser(data, offset, length, connection) {
+    value: function int128Parser(data, offset, length, connection, requestSequence) {
       // @TODO
       return new _AsyncReply["default"](data.getInt64(offset));
     }
   }, {
     key: "uInt128Parser",
-    value: function uInt128Parser(data, offset, length, connection) {
+    value: function uInt128Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getUint64(offset));
     }
   }, {
     key: "int64Parser",
-    value: function int64Parser(data, offset, length, connection) {
+    value: function int64Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](new _ExtendedTypes.Int64(data.getInt64(offset)));
     }
   }, {
     key: "uInt64Parser",
-    value: function uInt64Parser(data, offset, length, connection) {
+    value: function uInt64Parser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](new _ExtendedTypes.UInt64(data.getUint64(offset)));
     }
   }, {
     key: "dateTimeParser",
-    value: function dateTimeParser(data, offset, length, connection) {
+    value: function dateTimeParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getDateTime(offset));
     }
   }, {
     key: "resourceParser",
-    value: function resourceParser(data, offset, length, connection) {
+    value: function resourceParser(data, offset, length, connection, requestSequence) {
       if (connection != null) {
-        var id = data.getUint32(offset);
+        var id = data.getUint32(offset, requestSequence);
         return connection.fetch(id);
       }
 
@@ -2659,23 +2665,23 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "localResourceParser",
-    value: function localResourceParser(data, offset, length, connection) {
+    value: function localResourceParser(data, offset, length, connection, requestSequence) {
       var id = data.getUint32(offset);
       return _Warehouse["default"].getById(id);
     }
   }, {
     key: "rawDataParser",
-    value: function rawDataParser(data, offset, length, connection) {
+    value: function rawDataParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.clip(offset, length));
     }
   }, {
     key: "stringParser",
-    value: function stringParser(data, offset, length, connection) {
+    value: function stringParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](data.getString(offset, length));
     }
   }, {
     key: "recordParser",
-    value: function recordParser(data, offset, length, connection) {
+    value: function recordParser(data, offset, length, connection, requestSequence) {
       var reply = new _AsyncReply["default"]();
       var classId = data.getGuid(offset);
       offset += 16;
@@ -2683,8 +2689,8 @@ var DataDeserializer = /*#__PURE__*/function () {
 
       var template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Record);
 
-      if (template != null) {
-        DataDeserializer.listParser(data, offset, length, connection).then(function (ar) {
+      var initRecord = function initRecord(template) {
+        DataDeserializer.listParser(data, offset, length, connection, requestSequence).then(function (ar) {
           var record;
 
           if (template.definedType != null) {
@@ -2699,20 +2705,18 @@ var DataDeserializer = /*#__PURE__*/function () {
 
           reply.trigger(record);
         });
+      };
+
+      if (template != null) {
+        initRecord(template);
       } else {
         if (connection == null) throw Error("Can't parse record with no connection");
         connection.getTemplate(classId).then(function (tmp) {
-          if (tmp == null) reply.triggerError(new Error("Couldn't fetch record template."));
-          DataDeserializer.listParser(data, offset, length, connection).then(function (ar) {
-            var record = new _Record["default"](); //var kv = new Map();
-
-            for (var i = 0; i < tmp.properties.length; i++) {
-              record[tmp.properties[i].name] = ar[i];
-            } //record.deserialize(kv);
-
-
-            reply.trigger(record);
-          });
+          if (tmp == null) {
+            reply.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, _ExceptionCode["default"].TemplateNotFound.index, "Template not found for record."));
+          } else {
+            initRecord(tmp);
+          }
         }).error(function (x) {
           return reply.triggerError(x);
         });
@@ -2722,12 +2726,12 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "constantParser",
-    value: function constantParser(data, offset, length, connection) {
+    value: function constantParser(data, offset, length, connection, requestSequence) {
       throw Error("NotImplementedException");
     }
   }, {
     key: "enumParser",
-    value: function enumParser(data, offset, length, connection) {
+    value: function enumParser(data, offset, length, connection, requestSequence) {
       var classId = data.getGuid(offset);
       offset += 16;
       var index = data[offset++];
@@ -2741,9 +2745,9 @@ var DataDeserializer = /*#__PURE__*/function () {
           enumVal.index = index;
           enumVal.name = template.constants[index].name;
           enumVal.value = template.constants[index].value;
-          return new _AsyncReply["default"].ready(enumVal);
+          return new _AsyncReply["default"](enumVal);
         } else {
-          return _AsyncReply["default"].ready((0, _IEnum["default"])(index, template.constants[index].value, template.constants[index].name, template));
+          return new _AsyncReply["default"](new _IEnum["default"](index, template.constants[index].value, template.constants[index].name, template));
         }
       } else {
         var reply = new _AsyncReply["default"]();
@@ -2769,11 +2773,11 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "recordListParser",
-    value: function recordListParser(data, offset, length, connection) {
+    value: function recordListParser(data, offset, length, connection, requestSequence) {
       var rt = new _AsyncBag["default"]();
 
       while (length > 0) {
-        var parsed = _Codec["default"].parse(data, offset, connection);
+        var parsed = _Codec["default"].parse(data, offset, connection, requestSequence);
 
         rt.add(parsed.reply);
 
@@ -2788,11 +2792,11 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "resourceListParser",
-    value: function resourceListParser(data, offset, length, connection) {
+    value: function resourceListParser(data, offset, length, connection, requestSequence) {
       var rt = new _AsyncBag["default"]();
 
       while (length > 0) {
-        var parsed = _Codec["default"].parse(data, offset, connection);
+        var parsed = _Codec["default"].parse(data, offset, connection, requestSequence);
 
         rt.add(parsed.reply);
 
@@ -2807,11 +2811,11 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "listParser",
-    value: function listParser(data, offset, length, connection) {
+    value: function listParser(data, offset, length, connection, requestSequence) {
       var rt = new _AsyncBag["default"]();
 
       while (length > 0) {
-        var parsed = _Codec["default"].parse(data, offset, connection);
+        var parsed = _Codec["default"].parse(data, offset, connection, requestSequence);
 
         rt.add(parsed.reply);
 
@@ -2826,7 +2830,7 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "typedMapParser",
-    value: function typedMapParser(data, offset, length, connection) {
+    value: function typedMapParser(data, offset, length, connection, requestSequence) {
       // get key type
       var keyRep = _RepresentationType["default"].parse(data, offset);
 
@@ -2842,7 +2846,7 @@ var DataDeserializer = /*#__PURE__*/function () {
       var results = new _AsyncBag["default"]();
 
       while (length > 0) {
-        var parsed = _Codec["default"].parse(data, offset, connection);
+        var parsed = _Codec["default"].parse(data, offset, connection, requestSequence);
 
         results.add(parsed.reply);
 
@@ -2864,7 +2868,7 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "tupleParser",
-    value: function tupleParser(data, offset, length, connection) {
+    value: function tupleParser(data, offset, length, connection, requestSequence) {
       var results = new _AsyncBag["default"]();
       var rt = new _AsyncReply["default"]();
       var tupleSize = data[offset++];
@@ -2874,7 +2878,7 @@ var DataDeserializer = /*#__PURE__*/function () {
       for (var i = 0; i < tupleSize; i++) {
         var _rep$type$getRuntimeT;
 
-        var rep = _RepresentationType["default"].parse(data, offset);
+        var rep = _RepresentationType["default"].parse(data, offset, requestSequence);
 
         if (rep.type != null) types.push((_rep$type$getRuntimeT = rep.type.getRuntimeType()) !== null && _rep$type$getRuntimeT !== void 0 ? _rep$type$getRuntimeT : Object);
         offset += rep.size;
@@ -2882,7 +2886,7 @@ var DataDeserializer = /*#__PURE__*/function () {
       }
 
       while (length > 0) {
-        var parsed = _Codec["default"].parse(data, offset, connection);
+        var parsed = _Codec["default"].parse(data, offset, connection, requestSequence);
 
         results.add(parsed.reply);
 
@@ -2900,7 +2904,7 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "typedListParser",
-    value: function typedListParser(data, offset, length, connection) {
+    value: function typedListParser(data, offset, length, connection, requestSequence) {
       var rt = new _AsyncBag["default"](); // get the type
 
       var rep = _RepresentationType["default"].parse(data, offset);
@@ -2911,7 +2915,7 @@ var DataDeserializer = /*#__PURE__*/function () {
       rt.arrayType = runtimeType;
 
       while (length > 0) {
-        var parsed = _Codec["default"].parse(data, offset, connection);
+        var parsed = _Codec["default"].parse(data, offset, connection, requestSequence);
 
         rt.add(parsed.reply);
 
@@ -2926,10 +2930,10 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "PropertyValueArrayParser",
-    value: function PropertyValueArrayParser(data, offset, length, connection) //, bool ageIncluded = true)
+    value: function PropertyValueArrayParser(data, offset, length, connection, requestSequence) //, bool ageIncluded = true)
     {
       var rt = new _AsyncBag["default"]();
-      DataDeserializer.listParser(data, offset, length, connection).then(function (x) {
+      DataDeserializer.listParser(data, offset, length, connection, requestSequence).then(function (x) {
         var pvs = new _PropertyValueArray["default"]();
 
         for (var i = 0; i < x.length; i += 3) {
@@ -2942,7 +2946,7 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "propertyValueParser",
-    value: function propertyValueParser(data, offset, connection) //, bool ageIncluded = true)
+    value: function propertyValueParser(data, offset, connection, requestSequence) //, bool ageIncluded = true)
     {
       var reply = new _AsyncReply["default"]();
       var age = data.getUint64(offset);
@@ -2950,7 +2954,7 @@ var DataDeserializer = /*#__PURE__*/function () {
       var date = data.getDateTime(offset);
       offset += 8;
 
-      var parsed = _Codec["default"].parse(data, offset, connection);
+      var parsed = _Codec["default"].parse(data, offset, connection, requestSequence);
 
       parsed.reply.then(function (value) {
         reply.trigger(new _PropertyValue["default"](value, age, date));
@@ -2959,7 +2963,7 @@ var DataDeserializer = /*#__PURE__*/function () {
     }
   }, {
     key: "historyParser",
-    value: function historyParser(data, offset, length, resource, connection) {
+    value: function historyParser(data, offset, length, resource, connection, requestSequence) {
       throw new Error("Not implemented"); // @TODO
       // var list = new KeyList<PropertyTemplate, List<PropertyValue>>();
       // var reply = new AsyncReply<KeyList<PropertyTemplate, List<PropertyValue[]>>>();
@@ -2992,7 +2996,7 @@ var DataDeserializer = /*#__PURE__*/function () {
 
 exports["default"] = DataDeserializer;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Data/ExtendedTypes.js":18,"../Net/IIP/DistributedConnection.js":36,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./Codec.js":14,"./DC.js":15,"./IEnum.js":20,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RepresentationType.js":29,"./Tuple.js":33,"./TypedMap.js":35}],17:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncException.js":3,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/ExtendedTypes.js":18,"../Net/IIP/DistributedConnection.js":36,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./Codec.js":14,"./DC.js":15,"./IEnum.js":20,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RepresentationType.js":29,"./Tuple.js":33,"./TypedMap.js":35}],17:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -3320,9 +3324,9 @@ var DataSerializer = /*#__PURE__*/function () {
       var rt = new _DC["default"](4);
 
       if (_Codec["default"].isLocalResource(resource, connection)) {
-        var _resource$_p$id;
+        var _resource$_p$instance;
 
-        rt.setUint32(0, (_resource$_p$id = resource._p.id) !== null && _resource$_p$id !== void 0 ? _resource$_p$id : 0);
+        rt.setUint32(0, (_resource$_p$instance = resource._p.instanceId) !== null && _resource$_p$instance !== void 0 ? _resource$_p$instance : 0);
         return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.ResourceLocal, rt);
       } else {
         var _resource$instance$id, _resource$instance;
@@ -3783,22 +3787,19 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 //import TemplateDescriber from '../Resource/Template/TemplateDescriber.js';
 var IEnum = /*#__PURE__*/function () {
-  function IEnum() {
+  function IEnum(index, value, name, template) {
     _classCallCheck(this, IEnum);
-  }
+
+    this.index = index;
+    this.value = value;
+    this.name = name;
+    this.template = template;
+  } // get template () {
+  //     //return new TemplateDescriber("IEnum");
+  // }
+
 
   _createClass(IEnum, [{
-    key: "IEnum",
-    value: function IEnum(index, value, name, template) {
-      this.index = index;
-      this.value = value;
-      this.name = name;
-      this.template = template;
-    } // get template () {
-    //     //return new TemplateDescriber("IEnum");
-    // }
-
-  }, {
     key: "toString",
     value: function toString() {
       return "".concat(this.name, "<").concat(this.value, ">");
@@ -4382,7 +4383,7 @@ var RepresentationTypeIdentifier = {
   Record: 0x15,
   List: 0x16,
   Map: 0x17,
-  Enum: 0x18,
+  Enum: 0x44,
   TypedResource: 0x45,
   // Followed by UUID
   TypedRecord: 0x46,
@@ -5315,6 +5316,14 @@ var _PropertyValue = _interopRequireDefault(require("../../Data/PropertyValue.js
 var _PropertyValueArray = _interopRequireDefault(require("../../Data/PropertyValueArray.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -6406,7 +6415,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       if (req != null) {
         this.requests.remove(callbackId);
 
-        _Codec["default"].parse(data, 0, this, dataType).reply.then(function (rt) {
+        _Codec["default"].parse(data, 0, this, null, dataType).reply.then(function (rt) {
           req.trigger(rt);
         });
       }
@@ -6433,7 +6442,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var req = this.requests.item(callbackId);
 
       if (req != null) {
-        _Codec["default"].parse(data, 0, this, dataType).reply.then(function (x) {
+        _Codec["default"].parse(data, 0, this, null, dataType).reply.then(function (x) {
           req.triggerChunk(x);
         });
       }
@@ -6454,7 +6463,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     key: "IIPEventPropertyUpdated",
     value: function IIPEventPropertyUpdated(resourceId, index, dataType, data) {
       var self = this;
-      this.fetch(resourceId).then(function (r) {
+      this.fetch(resourceId, null).then(function (r) {
         var pt = r.instance.template.getPropertyTemplateByIndex(index);
         if (pt == null) return; // ft found, fi not found, this should never happen
         // push to the queue to gaurantee serialization
@@ -6462,7 +6471,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         var item = new _AsyncReply["default"]();
         self.queue.add(item);
 
-        _Codec["default"].parse(data, 0, self, dataType).reply.then(function (args) {
+        _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (args) {
           item.trigger(new _DistributedResourceQueueItem["default"](r, _DistributedResourceQueueItemType["default"].Propery, args, index));
         }).error(function (ex) {
           self.queue.remove(item);
@@ -6474,7 +6483,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     key: "IIPEventEventOccurred",
     value: function IIPEventEventOccurred(resourceId, index, dataType, data) {
       var self = this;
-      this.fetch(resourceId).then(function (r) {
+      this.fetch(resourceId, null).then(function (r) {
         var et = r.instance.template.getEventTemplateByIndex(index);
         if (et == null) return; // ft found, fi not found, this should never happen
         // push to the queue to guarantee serialization
@@ -6482,7 +6491,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         var item = new _AsyncReply["default"]();
         self.queue.add(item); // Codec.parseVarArray(content, 0, content.length, self).then(function (args) {
 
-        _Codec["default"].parse(data, 0, self, dataType).reply.then(function (args) {
+        _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (args) {
           item.trigger(new _DistributedResourceQueueItem["default"](r, _DistributedResourceQueueItemType["default"].Event, args, index));
         }).error(function (ex) {
           self.queue.remove(item);
@@ -6494,8 +6503,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     key: "IIPEventChildAdded",
     value: function IIPEventChildAdded(resourceId, childId) {
       var self = this;
-      this.fetch(resourceId).then(function (parent) {
-        self.fetch(childId).then(function (child) {
+      this.fetch(resourceId, null).then(function (parent) {
+        self.fetch(childId, null).then(function (child) {
           parent.instance.children.add(child);
         });
       });
@@ -6504,8 +6513,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     key: "IIPEventChildRemoved",
     value: function IIPEventChildRemoved(resourceId, childId) {
       var self = this;
-      this.fetch(resourceId).then(function (parent) {
-        self.fetch(childId).then(function (child) {
+      this.fetch(resourceId, null).then(function (parent) {
+        self.fetch(childId, null).then(function (child) {
           parent.instance.children.remove(child);
         });
       });
@@ -6513,7 +6522,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "IIPEventRenamed",
     value: function IIPEventRenamed(resourceId, name) {
-      this.fetch(resourceId).then(function (resource) {
+      this.fetch(resourceId, null).then(function (resource) {
         resource.instance.attributes.set("name", name);
       });
     }
@@ -6521,7 +6530,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     key: "IIPEventAttributesUpdated",
     value: function IIPEventAttributesUpdated(resourceId, attributes) {
       var self = this;
-      this.fetch(resourceId).then(function (resource) {
+      this.fetch(resourceId, null).then(function (resource) {
         var attrs = attributes.getStringArray(0, attributes.length);
         self.getAttributes(resource, attrs).then(function (s) {
           resource.instance.setAttributes(s);
@@ -6678,13 +6687,13 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
             return;
           }
 
-          DataDeserializer.listParser(content, offset, cl, self).then(function (parameters) {
+          DataDeserializer.listParser(content, offset, cl, self, null).then(function (parameters) {
             offset += cl;
             cl = content.getUint32(offset);
-            DataDeserializer.typedMapParser(content, offset, cl, self).then(function (attributes) {
+            DataDeserializer.typedMapParser(content, offset, cl, self, null).then(function (attributes) {
               offset += cl;
               cl = content.length - offset;
-              DataDeserializer.typedMapParser(content, offset, cl, self).then(function (values) {
+              DataDeserializer.typedMapParser(content, offset, cl, self, null).then(function (values) {
                 var resource = new (Function.prototype.bind.apply(type, values))();
 
                 _Warehouse["default"].put(name, resource, store, parent).then(function (ok) {
@@ -6809,7 +6818,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           return;
         }
 
-        _Codec["default"].parse(data, 0, self, dataType).reply.then(function (args) {
+        _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (args) {
           if (r instanceof _DistributedResource["default"]) {
             var rt = r._invoke(index, args);
 
@@ -7039,7 +7048,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           var pt = r.instance.template.getPropertyTemplateByIndex(index);
 
           if (pt != null) {
-            _Codec["default"].parse(data, 0, self, dataType).reply.then(function (value) {
+            _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (value) {
               if (r instanceof _DistributedResource["default"]) {
                 // propagation
                 r._set(index, value).then(function (x) {
@@ -7122,7 +7131,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       pkt.addUint32(pkt.length, 8);
       this.sendRequest(_IIPPacketAction["default"].CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
         var rid = args[0];
-        self.fetch(rid).then(function (r) {
+        self.fetch(rid, null).then(function (r) {
           reply.trigger(r);
         });
       });
@@ -7140,7 +7149,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         var dataType = ar[0];
         var data = ar[1];
 
-        _Codec["default"].parse(data, 0, self, dataType).reply.then(function (resources) {
+        _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (resources) {
           reply.trigger(resources);
         }).error(function (ex) {
           return reply.triggerError(ex);
@@ -7236,77 +7245,84 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
   }, {
     key: "fetch",
-    value: function fetch(id) {
+    value: function fetch(id, requestSequence) {
       var resource = this.resources.item(id);
       var request = this.resourceRequests.item(id);
 
       if (request != null) {
-        if (resource != null) // dig for dead locks            // or not
-          return new _AsyncReply["default"](resource);else return request;
+        var _requestSequence$cont;
+
+        if (resource != null && ((_requestSequence$cont = requestSequence === null || requestSequence === void 0 ? void 0 : requestSequence.contains(id)) !== null && _requestSequence$cont !== void 0 ? _requestSequence$cont : false)) return new _AsyncReply["default"](resource);else return request;
       } else if (resource != null && !resource._p.suspended) {
         return new _AsyncReply["default"](resource);
       }
 
       var reply = new _AsyncReply["default"]();
       this.resourceRequests.set(id, reply);
+      var newSequence = requestSequence != null ? [].concat(_toConsumableArray(requestSequence), [id]) : [id];
       var self = this;
       this.sendRequest(_IIPPacketAction["default"].AttachResource).addUint32(id).done().then(function (rt) {
+        if (rt == null) {
+          reply.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, _ExceptionCode["default"].ResourceNotFound, "Null response"));
+          return;
+        }
+
         var dr;
+        var classId = rt[0];
+        var template = null;
 
         if (resource == null) {
-          var template = _Warehouse["default"].getTemplateByClassId(rt[0], _TemplateType["default"].Wrapper);
+          var _template;
 
-          if ((template === null || template === void 0 ? void 0 : template.definedType) != null) dr = new template.getDependencies(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
+          template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Wrapper);
+          if (((_template = template) === null || _template === void 0 ? void 0 : _template.definedType) != null) dr = new template.getDependencies(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
         } else dr = resource; //let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
 
 
         var transmissionType = rt[3];
         var content = rt[4];
-        self.getTemplate(rt[0]).then(function (tmp) {
-          // ClassId, ResourceAge, ResourceLink, Content
-          if (resource == null) {
-            var wp = _Warehouse["default"].put(id.toString(), dr, self, null, tmp).then(function (ok) {
-              _Codec["default"].parse(content, 0, self, transmissionType).reply.then(function (ar) {
-                var pvs = new _PropertyValueArray["default"]();
 
-                for (var i = 0; i < ar.length; i += 3) {
-                  pvs.push(new _PropertyValue["default"](ar[i + 2], ar[i], ar[i + 1]));
-                }
+        var initResource = function initResource(ok) {
+          _Codec["default"].parse(content, 0, self, newSequence, transmissionType).reply.then(function (ar) {
+            var pvs = new _PropertyValueArray["default"]();
 
-                dr._attach(pvs);
+            for (var i = 0; i < ar.length; i += 3) {
+              pvs.push(new _PropertyValue["default"](ar[i + 2], ar[i], ar[i + 1]));
+            }
 
-                self.resourceRequests.remove(id);
-                reply.trigger(dr);
+            dr._attach(pvs);
+
+            self.resourceRequests.remove(id);
+            reply.trigger(dr);
+          }).error(function (ex) {
+            return reply.triggerError(ex);
+          });
+        };
+
+        if (template == null) {
+          self.getTemplate(rt[0]).then(function (tmp) {
+            // ClassId, ResourceAge, ResourceLink, Content
+            if (resource == null) {
+              _Warehouse["default"].put(id.toString(), dr, self, null, tmp).then(function (ok) {
+                initResource(ok);
               }).error(function (ex) {
-                return reply.triggerError(ex);
+                reply.triggerError(ex);
               });
-            });
-
-            wp.error(function (ex) {
-              reply.triggerError(ex);
+            } else {
+              initResource(ok);
+            }
+          }).error(function (ex) {
+            reply.triggerError(ex);
+          });
+        } else {
+          if (resource == null) {
+            _Warehouse["default"].put(id.toString(), dr, this, null, template).then(initResource).error(function (ex) {
+              return reply.triggerError(ex);
             });
           } else {
-            _Codec["default"].parse(content, 0, self, transmissionType).reply.then(function (ar) {
-              //print("attached");
-              if (results != null) {
-                var pvs = new _PropertyValueArray["default"]();
-
-                for (var i = 0; i < ar.length; i += 3) {
-                  pvs.push(new _PropertyValue["default"](ar[i + 2], ar[i], ar[i + 1]));
-                }
-
-                dr._attach(pvs);
-              }
-
-              self.resourceRequests.remove(id);
-              reply.trigger(dr);
-            }).error(function (ex) {
-              reply.triggerError(ex);
-            });
+            initResource(resource);
           }
-        }).error(function (ex) {
-          reply.triggerError(ex);
-        });
+        }
       }).error(function (ex) {
         reply.triggerError(ex);
       });
@@ -7320,7 +7336,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         var reply = new _AsyncReply["default"]();
         var self = this;
         this.sendRequest(_IIPPacketAction["default"].ResourceHistory).addUint32(resource._p.instanceId).addDateTime(fromDate).addDateTime(toDate).done().then(function (rt) {
-          _Codec["default"].parseHistory(rt[0], 0, rt[0].length, resource, self).then(function (history) {
+          _Codec["default"].historyParser(rt[0], 0, rt[0].length, resource, self, null).then(function (history) {
             reply.trigger(history);
           });
         });
@@ -7477,7 +7493,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           return;
         }
 
-        DataDeserializer.typedListParser(attributes, 0, attributes.length, this).then(function (attrs) {
+        DataDeserializer.typedListParser(attributes, 0, attributes.length, this, null).then(function (attrs) {
           if (r.instance.setAttributes(attrs, clearAttributes)) self.sendReply(clearAttributes ? _IIPPacketAction["default"].ClearAllAttributes : _IIPPacketAction["default"].ClearAttributes, callback).done();else self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeFailed);
         });
       });
@@ -7492,7 +7508,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         var dataType = ar[0];
         var data = ar[1];
 
-        _Codec["default"].parse(data, 0, self, dataType).reply.then(function (resources) {
+        _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (resources) {
           rt.trigger(resources);
         }).error(function (ex) {
           return rt.triggerError(ex);
@@ -7510,7 +7526,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         var dataType = ar[0];
         var data = ar[1];
 
-        _Codec["default"].parse(data, 0, self, dataType).reply.then(function (resources) {
+        _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (resources) {
           rt.trigger(resources);
         }).error(function (ex) {
           return rt.triggerError(ex);
@@ -7565,7 +7581,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           var dataType = ar[0];
           var data = ar[1];
 
-          _Codec["default"].parse(data, 0, self, dataType).reply.then(function (st) {
+          _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (st) {
             var _resource$instance;
 
             (_resource$instance = resource.instance) === null || _resource$instance === void 0 ? void 0 : _resource$instance.setAttributes(st);
@@ -7583,7 +7599,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           var dataType = ar[0];
           var data = ar[1];
 
-          _Codec["default"].parse(data, 0, self, dataType).reply.then(function (st) {
+          _Codec["default"].parse(data, 0, self, null, dataType).reply.then(function (st) {
             var _resource$instance2;
 
             (_resource$instance2 = resource.instance) === null || _resource$instance2 === void 0 ? void 0 : _resource$instance2.setAttributes(st);
@@ -10451,22 +10467,19 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 var PropertyModificationInfo = /*#__PURE__*/function () {
-  function PropertyModificationInfo() {
+  function PropertyModificationInfo(resource, propertyTemplate, value, age) {
     _classCallCheck(this, PropertyModificationInfo);
+
+    this.resource = resource;
+    this.propertyTemplate = propertyTemplate;
+    this.value = value;
+    this.age = age;
   }
 
   _createClass(PropertyModificationInfo, [{
     key: "name",
     get: function get() {
       return this.propertyTemplate.name;
-    }
-  }, {
-    key: "PropertyModificationInfo",
-    value: function PropertyModificationInfo(resource, propertyTemplate, value, age) {
-      this.resource = resource;
-      this.propertyTemplate = propertyTemplate;
-      this.value = value;
-      this.age = age;
     }
   }]);
 
@@ -11576,7 +11589,7 @@ var TypeTemplate = /*#__PURE__*/function () {
 
             offset += _dt3.size;
 
-            var parsed = _Codec["default"].parse(data, offset, null);
+            var parsed = _Codec["default"].parse(data, offset, null, null);
 
             offset += parsed.size;
 
@@ -11700,6 +11713,8 @@ var _RepresentationType = require("../Data/RepresentationType.js");
 
 var _FactoryEntry = _interopRequireDefault(require("./FactoryEntry.js"));
 
+var _IEnum = _interopRequireDefault(require("../Data/IEnum.js"));
+
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
@@ -11741,8 +11756,6 @@ function _assertThisInitialized(self) { if (self === void 0) { throw new Referen
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-'./FactoryEntry.js';
 
 var WH = /*#__PURE__*/function (_IEventHandler) {
   _inherits(WH, _IEventHandler);
@@ -11989,7 +12002,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
       if (type == null) return null;
       var templateType = _TemplateType["default"].Unspecified;
       if (type.prototype instanceof _DistributedResource["default"]) templateType = _TemplateType["default"].Wrapper;
-      if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else return null;
+      if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IEnum["default"]) templateType = _TemplateType["default"].Enum;else return null;
       if (type == _IResource["default"] || type == _IRecord["default"]) return null;
       if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false;
       var className = type.prototype.constructor.name;
@@ -12259,7 +12272,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/ExtendedTypes.js":18,"../Data/IRecord.js":21,"../Data/KeyList.js":22,"../Data/Record.js":27,"../Data/RepresentationType.js":29,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Net/IIP/DistributedConnection.js":36,"../Net/IIP/DistributedResource.js":38,"../Proxy/ResourceProxy.js":60,"../Resource/Instance.js":66,"../Resource/Template/TypeTemplate.js":76,"../Stores/IndexedDBStore.js":89,"../Stores/MemoryStore.js":90,"./FactoryEntry.js":63,"./IResource.js":64,"./IStore.js":65,"./Template/TemplateType.js":75}],78:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/ExtendedTypes.js":18,"../Data/IEnum.js":20,"../Data/IRecord.js":21,"../Data/KeyList.js":22,"../Data/Record.js":27,"../Data/RepresentationType.js":29,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Net/IIP/DistributedConnection.js":36,"../Net/IIP/DistributedResource.js":38,"../Proxy/ResourceProxy.js":60,"../Resource/Instance.js":66,"../Resource/Template/TypeTemplate.js":76,"../Stores/IndexedDBStore.js":89,"../Stores/MemoryStore.js":90,"./FactoryEntry.js":63,"./IResource.js":64,"./IStore.js":65,"./Template/TemplateType.js":75}],78:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
