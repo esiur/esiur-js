@@ -4853,17 +4853,18 @@ var TransmissionType = /*#__PURE__*/function () {
         var exp = (h & 0x38) >> 3;
         if (exp == 0) return new TransmissionTypeParseResults(1, new TransmissionType(h, cls, h & 0x7, 0, exp));
         var cl = 1 << exp - 1;
-        if (ends - offset < cl) return new TransmissionTypeParseResults(ends - offset - cl, null);
+        if (ends - offset < cl) return new TransmissionTypeParseResults(cl - (ends - offset), null);
         return new TransmissionTypeParseResults(1 + cl, new TransmissionType(h, cls, h & 0x7, offset, cl, exp));
       } else {
         var cll = h >> 3 & 0x7;
-        if (ends - offset < cll) return new TransmissionTypeParseResults(ends - offset - cll, null);
+        if (ends - offset < cll) return new TransmissionTypeParseResults(cll - (ends - offset), null);
         var _cl = 0;
 
         for (var i = 0; i < cll; i++) {
           _cl = _cl << 8 | data[offset++];
         }
 
+        if (ends - offset < _cl) return new TransmissionTypeParseResults(_cl - (ends - offset), null);
         return new TransmissionTypeParseResults(1 + _cl + cll, new TransmissionType(h & 0xC7, cls, h & 0x7, offset, _cl));
       }
     }
