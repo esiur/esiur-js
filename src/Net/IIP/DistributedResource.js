@@ -145,8 +145,8 @@ export default class DistributedResource extends IResource
                   }
               };
 
-              // get expansion
-              func.help = self.instance.template.functions[ft.index].expansion;
+              // get annotation
+              func.help = self.instance.template.functions[ft.index].annotation;
               return func;
             };
 

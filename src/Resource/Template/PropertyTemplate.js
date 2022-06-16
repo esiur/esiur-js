@@ -35,9 +35,9 @@ export default class PropertyTemplate extends MemberTemplate {
 
     if (this.inherited) pv |= 0x80;
 
-    if (this.writeExpansion != null && this.readExpansion != null) {
-      let rexp = DC.stringToBytes(this.readExpansion);
-      let wexp = DC.stringToBytes(this.writeExpansion);
+    if (this.writeAnnotation != null && this.readAnnotation != null) {
+      let rexp = DC.stringToBytes(this.readAnnotation);
+      let wexp = DC.stringToBytes(this.writeAnnotation);
       return (BL()
             .addUint8(0x38 | pv)
             .addUint8(name.length)
@@ -48,8 +48,8 @@ export default class PropertyTemplate extends MemberTemplate {
             .addInt32(rexp.length)
             .addDC(rexp))
           .toDC();
-    } else if (this.writeExpansion != null) {
-      let wexp = DC.stringToBytes(this.writeExpansion);
+    } else if (this.writeAnnotation != null) {
+      let wexp = DC.stringToBytes(this.writeAnnotation);
       return (BL()
             .addUint8(0x30 | pv)
             .addUint8(name.length)
@@ -58,8 +58,8 @@ export default class PropertyTemplate extends MemberTemplate {
             .addInt32(wexp.length)
             .addDC(wexp))
           .toDC();
-    } else if (this.readExpansion != null) {
-      let rexp = DC.stringToBytes(this.readExpansion);
+    } else if (this.readAnnotation != null) {
+      let rexp = DC.stringToBytes(this.readAnnotation);
       return (BL()
             .addUint8(0x28 | pv)
             .addUint8(name.length)
@@ -78,12 +78,12 @@ export default class PropertyTemplate extends MemberTemplate {
   }
 
   constructor(template, index, name,
-      inherited, valueType, readExpansion = null, writeExpansion = null, recordable = false)
+      inherited, valueType, readAnnotation = null, writeAnnotation = null, recordable = false)
       {
         super(template, index, name, inherited);
         this.valueType = valueType;
-        this.readExpansion = readExpansion;
-        this.writeExpansion  = writeExpansion;
+        this.readAnnotation = readAnnotation;
+        this.writeAnnotation  = writeAnnotation;
         this.recordable = recordable;
       }
 }

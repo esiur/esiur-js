@@ -344,13 +344,24 @@ export default class TypeTemplate {
             this.members.push(this.constants[i]);
 
         // bake it binarily
-        var b = BL();
+        let b = BL();
+        let hasClassAnnotation = template.annotation != null;
+
         var cls = DC.stringToBytes(this.className);
-        b.addUint8(this.templateType)
+        b.addUint8( (hasClassAnnotation ? 0x40 : 0 ) | this.templateType)
             .addUint8Array(this.classId.value)
             .addUint8(cls.length)
-            .addUint8Array(cls)
-            .addUint32(template.version)
+            .addUint8Array(cls);
+
+        if (hasClassAnnotation)
+        {
+            var classAnnotationBytes = DC.stringToBytes(template.annotation);
+            b.addUint16(classAnnotationBytes.length)
+             .addUint8Array(classAnnotationBytes);
+            this.annotation = template.annotation;
+        }
+
+        b.addUint32(template.version)
             .addUint16(this.members.length);
 
         for (let i = 0; i < this.functions.length; i++)
@@ -400,6 +411,7 @@ export default class TypeTemplate {
         od.content = data.clip(offset, contentLength);
 
         let hasParent = (data.getUint8(offset) & 0x80) > 0;
+        let hasClassAnnotation = (data.getUint8(offset) & 0x40) > 0;
 
         od.templateType = data.getUint8(offset++) & 0xF;
     
@@ -412,6 +424,13 @@ export default class TypeTemplate {
         if (hasParent) {
             od.parentId = data.getGuid(offset);
             offset += 16;
+        }
+
+        if (hasClassAnnotation) {
+            let len = data.getUint16(offset);
+            offset += 2;
+            od.annotation = data.getString(offset, len);
+            offset += len;
         }
 
         od.version = data.getInt32(offset);
@@ -432,8 +451,8 @@ export default class TypeTemplate {
       
             if (type == 0) // function
             {
-                let expansion = null;
-                let hasExpansion = ((data.getUint8(offset++) & 0x10) == 0x10);
+                let annotation = null;
+                let hasAnnotation = ((data.getUint8(offset++) & 0x10) == 0x10);
 
                 let len = data.getUint8(offset++);
                 let name = data.getString(offset, len);
@@ -457,25 +476,25 @@ export default class TypeTemplate {
                     offset += argSize;
                 }
 
-                if (hasExpansion) // expansion ?
+                if (hasAnnotation) // annotation ?
                 {
                     var cs = data.getUint32(offset);
                     offset += 4;
-                    expansion = data.getString(offset, cs);
+                    annotation = data.getString(offset, cs);
                     offset += cs;
                 }
 
                 let ft = new FunctionTemplate(od, functionIndex++, name, inherited,
-                    args, dt.type, expansion);
+                    args, dt.type, annotation);
         
                 od.functions.push(ft);
             }
             else if (type == 1)    // property
             {
 
-                let hasReadExpansion = ((data.getUint8(offset) & 0x8) == 0x8);
-                let hasWriteExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
-                let readExpansion, writeExpansion;
+                let hasReadAnnotation = ((data.getUint8(offset) & 0x8) == 0x8);
+                let hasWriteAnnotation = ((data.getUint8(offset) & 0x10) == 0x10);
+                let readAnnotation, writeAnnotation;
                 let recordable = ((data.getUint8(offset) & 1) == 1);
                 let permission = ((data.getUint8(offset++) >> 1) & 0x3);
                 let len = data.getUint8(offset++);
@@ -486,33 +505,33 @@ export default class TypeTemplate {
 
                 offset += dt.size;
 
-                if (hasReadExpansion) // expansion ?
+                if (hasReadAnnotation) // annotation ?
                 {
                     let cs = data.getUint32(offset);
                     offset += 4;
-                    readExpansion = data.getString(offset, cs);
+                    readAnnotation = data.getString(offset, cs);
                     offset += cs;
                 }
 
-                if (hasWriteExpansion) // expansion ?
+                if (hasWriteAnnotation) // annotation ?
                 {
                     let cs = data.getUint32(offset);
                     offset += 4;
-                    writeExpansion = data.getString(offset, cs);
+                    writeAnnotation = data.getString(offset, cs);
                     offset += cs;
                 }
 
-                let pt = new PropertyTemplate(od, propertyIndex++, name, inherited, dt.type, readExpansion, writeExpansion, recordable);
+                let pt = new PropertyTemplate(od, propertyIndex++, name, inherited, dt.type, readAnnotation, writeAnnotation, recordable);
 
                 od.properties.push(pt);
             }
             else if (type == 2) // Event
             {
-                let hasExpansion = ((data.getUint8(offset) & 0x10) == 0x10);
+                let hasAnnotation = ((data.getUint8(offset) & 0x10) == 0x10);
                 let listenable = ((data.getUint8(offset++) & 0x8) == 0x8);
                 let len = data.getUint8(offset++);
                 let name = data.getString(offset, len);
-                let expansion;
+                let annotation;
 
                 offset += len;
 
@@ -521,22 +540,22 @@ export default class TypeTemplate {
                 offset += dt.size;
 
                 
-                if (hasExpansion) // expansion ?
+                if (hasAnnotation) // annotation ?
                 {
                     let cs = data.getUint32(offset);
                     offset += 4;
-                    expansion = data.getString(offset, cs);
+                    annotation = data.getString(offset, cs);
                     offset += cs;
                 }
 
-                let et = new EventTemplate(od, eventIndex++, name, inherited, dt.type, expansion, listenable);
+                let et = new EventTemplate(od, eventIndex++, name, inherited, dt.type, annotation, listenable);
                 od.events.push(et);
 
             }
             else if (type == 3) // constant
             {
-                let expansion = null;
-                let hasExpansion = ((data[offset++] & 0x10) == 0x10);
+                let annotation = null;
+                let hasAnnotation = ((data[offset++] & 0x10) == 0x10);
         
                 let name = data.getString(offset + 1, data[offset]);
                 offset += data[offset] + 1;
@@ -549,16 +568,16 @@ export default class TypeTemplate {
         
                 offset += parsed.size;
         
-                if (hasExpansion) // expansion ?
+                if (hasAnnotation) // annotation ?
                 {
                   let cs = data.getUint32(offset);
                   offset += 4;
-                  expansion = data.getString(offset, cs);
+                  annotation = data.getString(offset, cs);
                   offset += cs;
                 }
         
                 let ct = new ConstantTemplate(this, constantIndex++, name, inherited,
-                    dt.type, parsed.reply.result, expansion);
+                    dt.type, parsed.reply.result, annotation);
         
                 od.constants.push(ct);
             }

@@ -124,6 +124,7 @@ export default class DistributedConnection extends IStore {
         this.requests = new KeyList();// {};
         //this.pathRequests = new KeyList();// {};
         this.templateRequests = new KeyList();
+        this.templateByNameRequests = new KeyList();
         this.resourceRequests = new KeyList();// {};
         this.callbackCounter = 0;
 
@@ -2255,6 +2256,36 @@ export default class DistributedConnection extends IStore {
              
             }).error(function (ex) {
                 reply.triggerError(ex);
+            });
+
+        return reply;
+    }
+
+    getTemplateByClassName(className) {
+
+        let template = this.templates.find((x)=>x.className == className);
+        if (template != null)
+            return new AsyncReply(template);
+            
+        else if (this.templateByNameRequests.contains(className))
+            return this.templateByNameRequests.item(className);
+
+        var reply = new AsyncReply();
+        this.templateByNameRequests.add(className, reply);
+
+        var self = this;
+
+        let classNameBytes = DC.stringToBytes(className);
+
+        this.sendRequest(IIPPacketAction.TemplateFromClassName)
+            .addUint8(classNameBytes.length)
+            .addUint8Array(classNameBytes)
+            .done()
+            .then(function (rt) {
+                self.templateByNameRequests.remove(className);
+                self.templates.add(rt[0].classId.valueOf(), rt[0]);
+                Warehouse.putTemplate(rt[0]);
+                reply.trigger(rt[0]);
             });
 
         return reply;

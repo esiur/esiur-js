@@ -41,8 +41,8 @@ export default class FunctionTemplate extends MemberTemplate {
 
     for (var i = 0; i < this.args.length; i++) bl.addDC(this.args[i].compose());
 
-    if (this.expansion != null) {
-      var exp = DC.stringToBytes(this.expansion);
+    if (this.annotation != null) {
+      var exp = DC.stringToBytes(this.annotation);
       bl
         .addInt32(exp.length)
         .addDC(exp);
@@ -53,11 +53,11 @@ export default class FunctionTemplate extends MemberTemplate {
     return bl.toDC();
   }
 
-  constructor(template, index, name, inherited, args, returnType, expansion = null){
+  constructor(template, index, name, inherited, args, returnType, annotation = null){
         super(template, index, name, inherited);
 
         this.args = args;
         this.returnType = returnType;
-        this.expansion = expansion;
+        this.annotation = annotation;
       }
 }

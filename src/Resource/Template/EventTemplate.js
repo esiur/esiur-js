@@ -39,8 +39,8 @@ export default class EventTemplate extends MemberTemplate {
 
     if (this.listenable) hdr |= 0x8;
 
-    if (this.expansion != null) {
-        let exp = DC.stringToBytes(this.expansion);
+    if (this.annotation != null) {
+        let exp = DC.stringToBytes(this.annotation);
         hdr |= 0x50;
       return (BL()
             .addUint8(hdr)
@@ -62,11 +62,11 @@ export default class EventTemplate extends MemberTemplate {
   }
 
   constructor(template, index, name, inherited, argumentType,
-      expansion = null, listenable = false)
+    annotation = null, listenable = false)
     { 
         super(template, index, name, inherited) ;
         this.argumentType = argumentType;
-        this.expansion = expansion;
+        this.annotation = annotation;
         this.listenable = listenable;
     }
 

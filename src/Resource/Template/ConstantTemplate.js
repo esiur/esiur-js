@@ -3,24 +3,21 @@ import MemberTemplate from './MemberTemplate.js';
 import Codec from '../../Data/Codec.js';
 
 export default class ConstantTemplate extends MemberTemplate {
-  //final dynamic value;
-  //final String? expansion;
-  //final RepresentationType valueType;
 
   constructor(template, index, name,
-      inherited, valueType, value, expansion){
+      inherited, valueType, value, annotation){
         super(template, index, name, inherited) ;
         this.valueType = valueType;
         this.value = value;
-        this.expansion = expansion;
+        this.annotation = annotation;
  }
 
   compose() {
     var name = super.compose();
     var hdr = this.inherited ? 0x80 : 0;
 
-    if (this.expansion != null) {
-      var exp = DC.stringToBytes(this.expansion);
+    if (this.annotation != null) {
+      var exp = DC.stringToBytes(this.annotation);
       hdr |= 0x70;
       return (BL()
             .addUint8(hdr)
