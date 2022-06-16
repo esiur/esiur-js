@@ -2263,10 +2263,10 @@ export default class DistributedConnection extends IStore {
 
     getTemplateByClassName(className) {
 
-        let template = this.templates.find((x)=>x.className == className);
-        if (template != null)
-            return new AsyncReply(template);
-            
+        let templates = this.templates.filter({ className: className });
+
+        if (templates.length > 0)
+            return new AsyncReply(templates[0]);
         else if (this.templateByNameRequests.contains(className))
             return this.templateByNameRequests.item(className);
 
