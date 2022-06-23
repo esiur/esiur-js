@@ -646,9 +646,13 @@ export default class DC extends Uint8Array
 
     setDateTime(offset, value, endian)
     {
-        // Unix Epoch
-        var ticks = 621355968000000000 + (value.getTime() * 10000);
-        this.setUint64(offset, ticks, endian);
+        if (!isNaN(value)){
+            // Unix Epoch
+            var ticks = 621355968000000000 + (value.getTime() * 10000);
+            this.setUint64(offset, ticks, endian);
+        } else {
+            this.setUint64(offset, 0, endian);
+        }
     }
 
     getDateTime(offset, endian)
