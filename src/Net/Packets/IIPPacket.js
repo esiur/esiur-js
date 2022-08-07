@@ -55,6 +55,10 @@ export default class IIPPacket
         this.originalOffset = 0;
         this.resourceName = "";
         this.dataType = null;
+        this.jitter = 0;
+        this.interval = 0;
+        this.procedure = "";
+        this.currentTime = null;
     }
 
     notEnough(offset, ends, needed)
@@ -62,7 +66,6 @@ export default class IIPPacket
         if (offset + needed > ends)
         {
             this.dataLengthNeeded = needed - (ends - offset);
-//            this.dataLengthNeeded = needed - (ends - this.originalOffset);
             return true;
         }
         else
@@ -425,7 +428,56 @@ export default class IIPPacket
                 //this.content = data.clip(offset, cl);
                 offset += cl;
             }
+            else if (this.action == IIPPacketAction.KeepAlive)
+            {
+                if (this.notEnough(offset, ends, 12))
+                    return -this.dataLengthNeeded;
 
+                this.currentTime = data.getDateTime(offset);
+                offset += 8;
+                this.interval = data.getUint32(offset);
+                offset += 4;
+            }
+            else if (this.action == IIPPacketAction.ProcedureCall)
+            {
+                if (this.notEnough(offset, ends, 2))
+                    return -this.dataLengthNeeded;
+
+                let cl = data.getUint16(offset);
+                offset += 2;
+
+                if (this.notEnough(offset, ends, cl))
+                    return -this.dataLengthNeeded;
+                
+                this.procedure = data.getString(offset, cl);
+                offset += cl;
+
+                if (this.notEnough(offset, ends, 1))
+                    return -this.dataLengthNeeded;
+
+                let parsed = TransmissionType.parse(data, offset, ends);
+
+                if (parsed.type == null) return -parsed.size;
+
+                offset += parsed.size;
+
+            } else if (this.action == IIPPacketAction.StaticCall)
+            {
+                if (this.notEnough(offset, ends, 18))
+                    return -this.dataLengthNeeded;
+
+                this.classId = data.getGuid(offset);
+                offset += 16;
+
+                this.methodIndex = data[offset++];
+
+
+                let parsed = TransmissionType.Pparse(data, offset, ends);
+
+                if (parsed.type == null) return -parsed.size;
+
+                offset += parsed.size;
+            }
         }
         else if (this.command == IIPPacketCommand.Reply)
         {
@@ -499,7 +551,9 @@ export default class IIPPacket
                 offset += parsed.size;
 
             }
-            else if (this.action == IIPPacketAction.InvokeFunction)
+            else if (this.action == IIPPacketAction.InvokeFunction 
+                    || this.action == IIPPacketAction.ProcedureCall 
+                    || this.action == IIPPacketAction.StaticCall )
             {
 
                 if (this.notEnough(offset, ends, 1))
@@ -518,6 +572,16 @@ export default class IIPPacket
                 || this.action == IIPPacketAction.Unlisten)
             {
                 // nothing to do
+            }
+            else if (this.action == IIPPacketAction.KeepAlive)
+            {
+                if (this.notEnough(offset, ends, 12))
+                    return -this.dataLengthNeeded;
+
+                this.currentTime = data.getDateTime(offset);
+                offset += 8;
+                this.jitter = data.GetUint32(offset);
+                offset += 4;
             }
         }
         else if (this.command == IIPPacketCommand.Report)

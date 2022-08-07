@@ -231,7 +231,18 @@ export default class DistributedResource extends IResource
         if (index >= this.instance.template.functions.length)
             throw new Error("Function index is incorrect");
 
-        return this._p.connection.sendInvoke(this._p.instanceId, index, args);
+
+        let ft = this.instance.template.getFunctionTemplateByIndex(index);
+
+        if (ft == null)
+            throw new Exception("Function template not found.");
+
+        if (ft.isStatic)
+            return this._p.connection.staticCall(this.instance.template.classId, index, args);
+        else
+            return this._p.connection.sendInvoke(this._p.instanceId, index, args);
+
+        //return this._p.connection.sendInvoke(this._p.instanceId, index, args);
     }
 
     _get(index)

@@ -46,18 +46,19 @@ export default class FunctionTemplate extends MemberTemplate {
       bl
         .addInt32(exp.length)
         .addDC(exp);
-      bl.insertUint8(0, this.inherited ? 0x90 : 0x10);
+      bl.insertUint8(0, (this.inherited ? 0x90 : 0x10)  | (this.isStatic ? 0x4 : 0));
     } else
-      bl.insertUint8(0, this.inherited ? 0x80 : 0x0);
+      bl.insertUint8(0, (this.inherited ? 0x80 : 0x0)  | (this.isStatic ? 0x4 : 0));
 
     return bl.toDC();
   }
 
-  constructor(template, index, name, inherited, args, returnType, annotation = null){
+  constructor(template, index, name, inherited, isStatic, args, returnType, annotation = null){
         super(template, index, name, inherited);
 
         this.args = args;
         this.returnType = returnType;
         this.annotation = annotation;
+        this.isStatic = isStatic;
       }
 }

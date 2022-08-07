@@ -85,6 +85,14 @@ export default class AsyncReply extends Promise
         this.chunk(callback);
     }
 
+    timeout(milliseconds, onTimeout){
+        let self = this;
+        setTimeout(() => {
+            if (!self.ready && self.exception == null)
+                onTimeout(); 
+        }, milliseconds);
+    }
+
     trigger(result)
     {
         if (this.ready)

@@ -452,6 +452,7 @@ export default class TypeTemplate {
             if (type == 0) // function
             {
                 let annotation = null;
+                let isStatic = ((data[offset] & 0x4) == 0x4);
                 let hasAnnotation = ((data.getUint8(offset++) & 0x10) == 0x10);
 
                 let len = data.getUint8(offset++);
@@ -484,7 +485,7 @@ export default class TypeTemplate {
                     offset += cs;
                 }
 
-                let ft = new FunctionTemplate(od, functionIndex++, name, inherited,
+                let ft = new FunctionTemplate(od, functionIndex++, name, inherited, isStatic,
                     args, dt.type, annotation);
         
                 od.functions.push(ft);

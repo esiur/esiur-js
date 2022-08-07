@@ -29,6 +29,7 @@
 import IResource from '../../Resource/IResource.js';
 import AsyncReply from '../../Core/AsyncReply.js';
 import DistributedConnection from './DistributedConnection.js';
+import KeyList from '../../Data/KeyList.js';
 
 export default class DistributedServer extends IResource
 {
@@ -56,6 +57,7 @@ export default class DistributedServer extends IResource
     {
         super();
         this.connections = [];
+        this.calls = new KeyList();
     }
 
     //@TODO: con.off("close", ...)
@@ -72,4 +74,10 @@ export default class DistributedServer extends IResource
         if (i > -1)
             this.connections.splice(i, 1);
     }
+
+    mapCall(call, handler)
+    {
+        this.calls.add(call, handler);
+    }
+
 }

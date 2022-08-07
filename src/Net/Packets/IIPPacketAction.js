@@ -33,5 +33,11 @@ export default  // const IIPPacketAction =
     ClearAllAttributes: 26,
     GetAttributes: 27,
     UpdateAttributes: 28,
-    ClearAttributes: 29
+    ClearAttributes: 29,
+
+    // Static
+    KeepAlive: 0x20,
+    ProcedureCall: 0x21,
+    StaticCall: 0x22
+
 };

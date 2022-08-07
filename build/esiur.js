@@ -614,8 +614,10 @@ var _default = //const ExceptionCode =
   NotAttached: 31,
   AlreadyListened: 32,
   AlreadyUnlistened: 33,
-  NotListenable: 34
+  NotListenable: 34,
+  ParseError: 35
 };
+
 exports["default"] = _default;
 
 },{}],8:[function(require,module,exports){
