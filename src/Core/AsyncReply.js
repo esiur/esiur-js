@@ -27,6 +27,8 @@
 "use strict";  
 
 import AsyncException from './AsyncException.js';
+import ExceptionCode from './ExceptionCode.js';
+import ErrorType from './ErrorType.js';
 
 export default class AsyncReply extends Promise
 {
@@ -88,16 +90,24 @@ export default class AsyncReply extends Promise
     timeout(milliseconds, onTimeout){
         let self = this;
         setTimeout(() => {
-            if (!self.ready && self.exception == null)
-                onTimeout(); 
+            if (!self.ready && self.exception == null){
+                
+                self.triggerError(ErrorType.Management, ExceptionCode.Timeout, "Execution timeout expired.");
+
+                if (onTimeout instanceof Function)
+                    onTimeout();
+            }
         }, milliseconds);
     }
 
     trigger(result)
     {
         if (this.ready)
-            return;
+            return this;
 
+        if (this.exception != null)
+            return this;
+        
         this.result = result;
         this.ready = true;
 

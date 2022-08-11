@@ -43,10 +43,14 @@ export default class DistributedResource extends IResource
 {
     destroy()
     {
-        this.destroyed = true;
+        this._p.destroyed = true;
         this._p.attached = false;
-        this._p.connection.sendDetachRequest(this._p.instanceId);
+        this._p.connection.detachResource(this._p.instanceId);
         this._emit("destroy", this);
+    }
+
+    get destroyed () {
+        return this._p.destroyed;
     }
 
     _suspend()
@@ -65,6 +69,7 @@ export default class DistributedResource extends IResource
         super();
 
         this._p = {
+            destroyed: false,
             suspended: false,
             attached: false,
             connection: connection,
@@ -119,6 +124,12 @@ export default class DistributedResource extends IResource
             {
               var func = function () {
 
+                if (self._p.destroyed)
+                    throw new Error("Trying to access a destroyed object.");
+    
+                if (self._p.suspended)
+                    throw new Error("Trying to access a suspended object.");
+                    
                 var argsMap = new (TypedMap.of(UInt8, Object));
 
                   if (   arguments.length == 1 
@@ -160,6 +171,12 @@ export default class DistributedResource extends IResource
             var makeSetter = function(index)
             {
                 return function (value) {
+                    if (self._p.destroyed)
+                        throw new Error("Trying to access a destroyed object.");
+    
+                    if (self._p.suspended)
+                        throw new Error("Trying to access a suspended object.");
+
                     self._set(index, value);
                 };
             };
@@ -222,14 +239,14 @@ export default class DistributedResource extends IResource
     }
 
     _invoke(index, args) {
-        if (this.destroyed)
-            throw new Error("Trying to access destroyed object");
+        if (this._p.destroyed)
+            throw new Error("Trying to access a destroyed object.");
 
         if (this._p.suspended)
-            throw new Error("Trying to access suspended object");
+            throw new Error("Trying to access a suspended object.");
 
         if (index >= this.instance.template.functions.length)
-            throw new Error("Function index is incorrect");
+            throw new Error("Function index is incorrect.");
 
 
         let ft = this.instance.template.getFunctionTemplateByIndex(index);
