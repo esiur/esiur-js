@@ -6421,7 +6421,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           if (r != null) {
             r._suspend();
 
-            this._suspendedResources.set(r._p.id, x);
+            this._suspendedResources.set(r._p.instanceId, x);
           }
         }
       } catch (err) {

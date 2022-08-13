@@ -1169,7 +1169,7 @@ export default class DistributedConnection extends IStore {
             let r = x.deref();
             if (r != null){
                 r._suspend();
-                this._suspendedResources.set(r._p.id, x);
+                this._suspendedResources.set(r._p.instanceId, x);
             }
         }
 
