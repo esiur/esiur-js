@@ -4,7 +4,8 @@ import ExceptionCode from "../../Core/ExceptionCode.js";
 import ISocket from "./ISocket.js";
 import SocketState from "./SocketState.js";
 import NetworkBuffer from "../NetworkBuffer.js";
-  
+import DC from '../../Data/DC.js';
+
 export default class WSocket extends ISocket
 {
     constructor(websocket){
@@ -51,6 +52,7 @@ export default class WSocket extends ISocket
         {
             try
             {
+                //console.log("TX", new DC(message));
                 this.ws.send(message);
             } catch {
                 this.state = SocketState.Closed;
@@ -172,6 +174,7 @@ export default class WSocket extends ISocket
                 
         try { 
             this.ws.send(message); 
+            //console.log("TX", message);
         } catch {
             this.state = SocketState.Closed;
         }

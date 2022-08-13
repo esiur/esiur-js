@@ -213,7 +213,7 @@ export default class DistributedResource extends IResource
       if (!et.listenable)
           return new AsyncReply().triggerError(new AsyncException(ErrorType.Management, ExceptionCode.NotListenable, ""));
   
-      return this._p.connection.sendListenRequest(this._p.instanceId, et.index);  
+      return this._p.connection._sendListenRequest(this._p.instanceId, et.index);  
     }
   
     unlisten(event)
@@ -226,7 +226,7 @@ export default class DistributedResource extends IResource
       if (!et.listenable)
           return  new AsyncReply().triggerError(new AsyncException(ErrorType.Management, ExceptionCode.NotListenable, ""));
   
-      return this._p.connection.sendUnlistenRequest(this._p.instanceId, et.index);
+      return this._p.connection._sendUnlistenRequest(this._p.instanceId, et.index);
     }
 
     _emitEventByIndex(index, args)
@@ -257,9 +257,8 @@ export default class DistributedResource extends IResource
         if (ft.isStatic)
             return this._p.connection.staticCall(this.instance.template.classId, index, args);
         else
-            return this._p.connection.sendInvoke(this._p.instanceId, index, args);
+            return this._p.connection._sendInvoke(this._p.instanceId, index, args);
 
-        //return this._p.connection.sendInvoke(this._p.instanceId, index, args);
     }
 
     _get(index)
@@ -301,7 +300,7 @@ export default class DistributedResource extends IResource
         var parameters = Codec.compose(value, this._p.connection);
         var self = this;
 
-        this._p.connection.sendRequest(IIPPacketAction.SetProperty)
+        this._p.connection._sendRequest(IIPPacketAction.SetProperty)
             .addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters)
             .done()
             .then(function(res)

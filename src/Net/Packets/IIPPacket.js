@@ -31,6 +31,7 @@ import IIPPacketCommand from "./IIPPacketCommand.js";
 import IIPPacketEvent from "./IIPPacketEvent.js";
 import IIPPacketReport from "./IIPPacketReport.js";
 import TransmissionType from '../../Data/TransmissionType.js';
+import ExceptionCode from "../../Core/ExceptionCode.js";
 
 export default class IIPPacket
 {
@@ -81,6 +82,7 @@ export default class IIPPacket
 
         this.command =  (data.getUint8(offset) >> 6);
 
+
         if (this.command == IIPPacketCommand.Event)
         {
             this.event =  (data.getUint8(offset++) & 0x3f);
@@ -104,7 +106,7 @@ export default class IIPPacket
         else
         {
             this.action = (data.getUint8(offset++) & 0x3f);
-
+        
             if (this.notEnough(offset, ends, 4))
                 return -this.dataLengthNeeded;
 
@@ -182,6 +184,9 @@ export default class IIPPacket
                 //this.content = data.clip(offset, cl);
 
                 offset += cl;
+            }
+            else {
+                throw new Error("Unknown event packet.");
             }
         }
         else if (this.command == IIPPacketCommand.Request)
@@ -478,6 +483,9 @@ export default class IIPPacket
 
                 offset += parsed.size;
             }
+            else {
+                throw new Error("Unknown request packet.");
+            }
         }
         else if (this.command == IIPPacketCommand.Reply)
         {
@@ -580,8 +588,11 @@ export default class IIPPacket
 
                 this.currentTime = data.getDateTime(offset);
                 offset += 8;
-                this.jitter = data.GetUint32(offset);
+                this.jitter = data.getUint32(offset);
                 offset += 4;
+            }
+            else {
+                throw new Error("Unknown reply packet.");
             }
         }
         else if (this.command == IIPPacketCommand.Report)
@@ -636,6 +647,9 @@ export default class IIPPacket
                 this.dataType = parsed.type;
                 offset += parsed.size;
           
+            }
+            else {
+                throw new Error("Unknown report packet.");
             }
         }
 

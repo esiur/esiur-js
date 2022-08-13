@@ -82,12 +82,19 @@ export default class Instance extends IEventHandler
 
     loadProperty(name, age, modificationDate, value)
     {
+        let r = self.resource.deref();
+
+        if (r == null) return;
+
+
         var pt = this.template.getPropertyTemplateByName(name);
 
         if (pt == null)
             return false;
 
-        this.resource[name] = value;
+    
+
+        r[name] = value;
 
         this.setAge(pt.index, age);
         this.setModificationDate(pt.index, modificationDate);
@@ -113,10 +120,15 @@ export default class Instance extends IEventHandler
 
     serialize()
     {
+        let r = this.resource.deref();
+
+        if (r == null) return;
+
+
         var props = new PropertyValueArray();
 
         for (var i = 0; i < this.template.properties.length; i++)
-            props.push(new PropertyValue(this.resource[this.template.properties[i].name], 
+            props.push(new PropertyValue(r[this.template.properties[i].name], 
                                          this.ages[this.template.properties[i].index], 
                                          this.modificationDates[this.template.properties[i].index]));
         
@@ -130,6 +142,11 @@ export default class Instance extends IEventHandler
 
     emitModification(pt, value)
     {
+        let resource = this.resource.deref();
+
+        if (resource == null) return;
+
+
         this.instanceAge++;
 
         var now = new Date();
@@ -138,18 +155,15 @@ export default class Instance extends IEventHandler
         this.modificationDates[pt.index] = now;
         
         if (pt.recordable)
-            this.store.record(this.resource, pt.name, value, this.ages[pt.index], now);
+            this.store.record(resource, pt.name, value, this.ages[pt.index], now);
         else
-            this.store.modify(this.resource, pt.name, value, this.ages[pt.index], now);
+            this.store.modify(resource, pt.name, value, this.ages[pt.index], now);
 
-        let pmInfo = new PropertyModificationInfo(this.resource, pt, value, this.instanceAge);
+        let pmInfo = new PropertyModificationInfo(resource, pt, value, this.instanceAge);
 
         super._emit("PropertyModified", pmInfo);
-        this.resource._emit(`:${pt.name}`, value);
-        //this.resource.emitProperty(pmInfo);
-    
-        //super._emit("ResourceModified", this.resource, pt.name, value);  
-        //this.resource._emit(":" + pt.name, value);
+        resource._emit(`:${pt.name}`, value);
+        
     }
 
     modified(propertyName = null)
@@ -167,17 +181,25 @@ export default class Instance extends IEventHandler
 
     _emitResourceEvent(issuer, receivers, eventTemplate, value)
     {
+        let resource = this.resource.deref();
+
+        if (resource == null) return;
+
         super._emit("EventOccurred",
-            new EventOccurredInfo(this.resource, eventTemplate, value, issuer, receivers));
-        //super._emit("ResourceEventOccurred", this.resource, issuer, receivers, name, args);
+            new EventOccurredInfo(resource, eventTemplate, value, issuer, receivers));
+        
     }
 
     getPropertyValue(name, resultObject)
     {
+        let resource = this.resource.deref();
+
+        if (resource == null) return;
+
         for (var i = 0; i < this.template.properties.length; i++)
             if (this.template.properties[i].name == name)
             {
-                resultObject.value = this.resource[name];
+                resultObject.value = resource[name];
                 return true;
             }
 
@@ -194,7 +216,7 @@ export default class Instance extends IEventHandler
         super();
 
         this.store = store;
-        this.resource = resource;
+        this.resource = new WeakRef(resource);
         this.id = id;
         this.name = name;
 
@@ -210,22 +232,27 @@ export default class Instance extends IEventHandler
         var self = this;
 
         this.children.on("add", function(value){
-            value.instance.parents.add(self.resource);
+            let r = self.resource.deref();
+            if (r != null)
+                value.instance.parents.add(r);
         });
 
         this.children.on("remove", function(value){
-            value.instance.parents.remove(self.resource);
+            let r = self.resource.deref();
+            if (r != null)
+
+            value.instance.parents.remove(r);
         });
 
 
-        this.resource.on("Destroy", function(sender){
+        resource.on("destroy", function(sender){
             self._emit("ResourceDestroyed", sender);
         });
 
         if (customTemplate != null)
             this.template = customTemplate;
         else
-            this.template = Warehouse.getTemplateByType(this.resource.constructor);
+            this.template = Warehouse.getTemplateByType(resource.constructor);
 
         // set ages
         this.ages = [];
@@ -239,7 +266,7 @@ export default class Instance extends IEventHandler
 
         // connect events
         for (let i = 0; i < this.template.events.length; i++)
-           this.resource.on(this.template.events[i].name, this._makeHandler(this.template.events[i]));
+           resource.on(this.template.events[i].name, this._makeHandler(this.template.events[i]));
         
     }
 
@@ -265,11 +292,15 @@ export default class Instance extends IEventHandler
     /// <returns>Ruling.</returns>
     applicable(session, action, member, inquirer)
     {
+        let resource = this.resource.deref();
+
+        if (resource == null) return;
+
         for (var i = 0; i < this.managers.length; i++)
         {
-            var r = this.managers.item(i).applicable(this.resource, session, action, member, inquirer);
-            if (r != Ruling.DontCare)
-                return r;
+            var ruling = this.managers.item(i).applicable(resource, session, action, member, inquirer);
+            if (ruling != Ruling.DontCare)
+                return ruling;
         }
         
         return Ruling.DontCare;
@@ -335,8 +366,8 @@ export default class Instance extends IEventHandler
     setAttributes(attributes, clearAttributes = false)
     {        
 
-    if (clearAttributes)
-        this.attributes.clear();
+        if (clearAttributes)
+            this.attributes.clear();
 
 
         for (var attr in attributes)
@@ -360,7 +391,10 @@ export default class Instance extends IEventHandler
 
                         if (manager instanceof IPermissionsManager)
                         {
-                            manager.initialize(settings, this.resource);
+                            let r = this.resource.deref();
+                            if (r == null) return;
+                    
+                            manager.initialize(settings, r);
                             this.managers.add(manager);
                         }
                         else
@@ -374,5 +408,18 @@ export default class Instance extends IEventHandler
             
 
         return true;
+    }
+
+    get link()
+    {
+        let resource = this.resource.deref();
+        if (resource == null)
+            return;
+
+        if (resource == this.store){
+            return this.name;
+        } else {
+            return this.store.link(resource);
+        }
     }
 }

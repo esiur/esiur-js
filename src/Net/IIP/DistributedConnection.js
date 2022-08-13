@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 Ahmed Kh. Zamil
+* Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -88,11 +88,11 @@ export default class DistributedConnection extends IStore {
         this.socket.sendAll(data.buffer);
     }
 
-    sendParams(doneReply) {
+    _sendParams(doneReply) {
         return new SendList(this, doneReply);
     }
 
-    generateNonce(length) {
+    _generateNonce(length) {
         var rt = new Uint8Array(length);
         for (var i = 0; i < length; i++)
             rt[i] = Math.random() * 255;
@@ -116,8 +116,8 @@ export default class DistributedConnection extends IStore {
         else
             this.session = new Session(new Authentication(AuthenticationType.Client), new Authentication(AuthenticationType.Host));
 
-        this.packet = new IIPPacket();
-        this.authPacket = new IIPAuthPacket();
+        this._packet = new IIPPacket();
+        this._authPacket = new IIPAuthPacket();
 
         //this.resources = new KeyList();//{};
 
@@ -147,11 +147,12 @@ export default class DistributedConnection extends IStore {
             }
         });
 
-        this._localNonce = this.generateNonce(32);
+        this._localNonce = this._generateNonce(32);
 
         this.jitter = 0;
         this.keepAliveTime = 10;
         this.keepAliveInterval = 30;
+        this.reconnectInterval = 5;
         this._invalidCredentials = false;
 
         this.autoReconnect = false;
@@ -162,13 +163,12 @@ export default class DistributedConnection extends IStore {
     _processPacket(msg, offset, ends, data) {
 
 
-        var authPacket = this.authPacket;
+        var authPacket = this._authPacket;
 
         if (this.ready) {
             var packet = new IIPPacket();
 
             var rt = packet.parse(msg, offset, ends);
-
 
             //console.log("Inc " , rt, offset, ends);
 
@@ -464,14 +464,14 @@ export default class DistributedConnection extends IStore {
                                         this.session.remoteAuthentication.username = authPacket.remoteUsername;
                                         this._remoteNonce = authPacket.remoteNonce;
                                         this.session.remoteAuthentication.domain = authPacket.domain;
-                                        this.sendParams()
+                                        this._sendParams()
                                                     .addUint8(0xa0)
                                                     .addUint8Array(this._localNonce)
                                                     .done();
                                     }
                                     else
                                     {
-                                        this.sendParams().addUint8(0xc0)
+                                        this._sendParams().addUint8(0xc0)
                                                         .addUint8(ExceptionCode.UserOrTokenNotFound)
                                                         .addUint16(14)
                                                         .addString("User not found")
@@ -485,7 +485,7 @@ export default class DistributedConnection extends IStore {
 
                                 var errMsg = DC.stringToBytes(ex.message);
 
-                                this.sendParams()
+                                this._sendParams()
                                     .addUint8(0xc0)
                                     .addUint8(ExceptionCode.GeneralFailure)
                                     .addUint16(errMsg.length)
@@ -507,7 +507,7 @@ export default class DistributedConnection extends IStore {
                                         this.session.remoteAuthentication.tokenIndex = authPacket.remoteTokenIndex;
                                         this._remoteNonce = authPacket.remoteNonce;
                                         this.session.remoteAuthentication.domain = authPacket.domain;
-                                        this.sendParams()
+                                        this._sendParams()
                                                     .addUint8(0xa0)
                                                     .addUint8Array(this._localNonce)
                                                     .done();
@@ -515,7 +515,7 @@ export default class DistributedConnection extends IStore {
                                     else
                                     {
                                         //Console.WriteLine("User not found");
-                                        this.sendParams()
+                                        this._sendParams()
                                                         .addUint8(0xc0)
                                                         .addUint8(ExceptionCode.UserOrTokenNotFound)
                                                         .addUint16(15)
@@ -530,7 +530,7 @@ export default class DistributedConnection extends IStore {
 
                                 var errMsg = DC.stringToBytes(ex.message);
 
-                                this.sendParams()
+                                this._sendParams()
                                         .addUint8(0xc0)
                                         .addUint8(ExceptionCode.GeneralFailure)
                                         .addUint16(errMsg.length)
@@ -550,13 +550,13 @@ export default class DistributedConnection extends IStore {
                                     this.session.remoteAuthentication.username = "g-" + Math.random().toString(36).substring(10);
                                     this.session.remoteAuthentication.domain = authPacket.domain;
                                     this.readyToEstablish = true;
-                                    this.sendParams()
+                                    this._sendParams()
                                                 .addUint8(0x80)
                                                 .done();
                                 }
                                 else
                                 {
-                                    this.sendParams()
+                                    this._sendParams()
                                                 .addUInt8(0xc0)
                                                 .addUint8(ExceptionCode.AccessDenied)
                                                 .addUint16(18)
@@ -568,7 +568,7 @@ export default class DistributedConnection extends IStore {
                             {
                                 var errMsg = DC.stringToBytes(ex.message);
 
-                                this.sendParams()
+                                this._sendParams()
                                         .addUInt8(0xc0)
                                         .addUint8(ExceptionCode.GeneralFailure)
                                         .addUint16(errMsg.length)
@@ -620,7 +620,7 @@ export default class DistributedConnection extends IStore {
                                                                     .addUint8Array(pw)
                                                                     .toArray());
                                             
-                                            this.sendParams()
+                                            this._sendParams()
                                                 .addUint8(0)
                                                 .addUint8Array(localHash)
                                                 .done();
@@ -630,7 +630,7 @@ export default class DistributedConnection extends IStore {
                                         else
                                         {
                                             
-                                            this.sendParams()
+                                            this._sendParams()
                                                             .addUint8(0xc0)
                                                             .addUint8(ExceptionCode.AccessDenied)
                                                             .addUint16(13)
@@ -646,7 +646,7 @@ export default class DistributedConnection extends IStore {
 
                                 var errMsg = DC.stringToBytes(ex.message);
 
-                                this.sendParams()
+                                this._sendParams()
                                     .addUint8(0xc0)
                                     .addUint8(ExceptionCode.GeneralFailure)
                                     .addUint16(errMsg.length)
@@ -658,9 +658,9 @@ export default class DistributedConnection extends IStore {
                         {
                             if (this.readyToEstablish)
                             {
-                                this.session.Id = this.generateNonce(32);
+                                this.session.Id = this._generateNonce(32);
                                 
-                                this.sendParams()
+                                this._sendParams()
                                                 .addUint8(0x28)
                                                 .addUint8Array(this.session.Id)
                                                 .done();
@@ -693,7 +693,7 @@ export default class DistributedConnection extends IStore {
                             }
                             else
                             {
-                                this.sendParams()
+                                this._sendParams()
                                     .addUint8(0xc0)
                                     .addUint8(ExceptionCode.GeneralFailure)
                                     .addUint16(9)
@@ -712,7 +712,7 @@ export default class DistributedConnection extends IStore {
                         if (authPacket.remoteMethod == AuthenticationMethod.None)
                         {
                             // send establish
-                            this.sendParams()
+                            this._sendParams()
                                         .addUint8(0x20)
                                         .addUint16(0)
                                         .done();
@@ -730,7 +730,7 @@ export default class DistributedConnection extends IStore {
                                                                 .addUint8Array(this._remoteNonce)
                                                                 .toArray());
 
-                            this.sendParams()
+                            this._sendParams()
                                 .addUint8(0)
                                 .addUint8Array(localHash)
                                 .done();
@@ -753,14 +753,14 @@ export default class DistributedConnection extends IStore {
                             {
                                 // send establish request
                                 //SendParams((byte)0x20, (ushort)0);
-                                this.sendParams()
+                                this._sendParams()
                                             .addUint8(0x20)
                                             .addUint16(0)
                                             .done();
                             }
                             else
                             {
-                                this.sendParams()
+                                this._sendParams()
                                             .addUint8(0xc0)
                                             .addUint8(ExceptionCode.ChallengeFailed)
                                             .addUint16(16)
@@ -795,7 +795,7 @@ export default class DistributedConnection extends IStore {
                             }
 
                             // start perodic keep alive timer
-                            this._keepAliveTimer = setTimeout(this._keepAliveTimerElapsed, this.keepAliveInterval);
+                            this._keepAliveTimer = setTimeout(() => this._keepAliveTimerElapsed(), this.keepAliveInterval * 1000);
                         }
                     }
                     else if (authPacket.command == IIPAuthPacketCommand.Error)
@@ -848,6 +848,9 @@ export default class DistributedConnection extends IStore {
     }
 
     async reconnect() {
+
+        console.log("Reconnecting...");
+
         try {
             if (!await this.connect()) 
                 return false;
@@ -855,9 +858,9 @@ export default class DistributedConnection extends IStore {
             try {
     
                 let toBeRestored = [];
-                for(var i = 0 ; i < this.suspendedResources.length; i++)
+                for(var i = 0 ; i < this._suspendedResources.length; i++)
                 {
-                    var r = this.suspendedResources.values[i].deref();
+                    var r = this._suspendedResources.values[i].deref();
                     if (r != null)
                         toBeRestored.push(r);
                 }
@@ -865,31 +868,34 @@ export default class DistributedConnection extends IStore {
                 for(let r of toBeRestored)
                 {
                     let link = DC.stringToBytes(r._p.link);
-                    console.log("Restoreing " + r._p.link);
+                    console.log("Restoring " + r._p.link);
 
                     try
                     {
-                        var ar = await this.sendRequest(IIPPacket.IIPPacketAction.QueryLink)
-                                            .addUint16(link.Length)
+                        var ar = await this._sendRequest(IIPPacketAction.QueryLink)
+                                            .addUint16(link.length)
                                             .addUint8Array(link)
                                             .done();
 
                         var dataType = ar[0];
                         var data = ar[1];
 
-                        if (dataType.identifier == TransmissionTypeIdentifier.ResourceList)
+                        if (dataType.identifier == TransmissionTypeIdentifier.ResourceList
+                        || dataType.identifier == TransmissionTypeIdentifier.List)
                         {
                             // parse them as int
                             var id = data.getUint32(8);
-                            if (id != r._p.id)
-                                r._p.id = id;
+                            if (id != r._p.instanceId)
+                                r._p.instanceId = id;
 
-                            this.neededResources.set(id, r);
-                            this.suspendedResources.remove(id);
+                            this._neededResources.set(id, r);
+                            this._suspendedResources.remove(id);
 
                             await this.fetch(id, null);
 
-                        }
+                            console.log("Restored " + id);
+
+                        } 
                     }
                     catch (ex)
                     {
@@ -915,22 +921,22 @@ export default class DistributedConnection extends IStore {
         return true;
     }
 
-    hold() {
-        this.holdSending = true;
-    }
+    // hold() {
+    //     this.holdSending = true;
+    // }
 
-    unhold() {
-        if (this.holdSending) {
-            this.holdSending = false;
+    // unhold() {
+    //     if (this.holdSending) {
+    //         this.holdSending = false;
 
-            var msg = this.sendBuffer.read();
+    //         var msg = this.sendBuffer.read();
 
-            if (msg == null || msg.length == 0)
-                return;
+    //         if (msg == null || msg.length == 0)
+    //             return;
 
-            this.socket.sendAll(msg);
-        }
-    }
+    //         this.socket.sendAll(msg);
+    //     }
+    // }
 
     trigger(trigger) {
 
@@ -947,15 +953,22 @@ export default class DistributedConnection extends IStore {
                 revivingTime = 120,
                 tokenIndex = 0,
                 token = null,
-                debug = false } = this.instance.attributes.toObject();
+                debug = false,
+                autoReconnect = false,
+                keepAliveInterval = 30,
+                keepAliveTime = 10,
+                reconnectInterval = 5} = this.instance.attributes.toObject();
 
 
             this.debug = debug;
             this.checkInterval = checkInterval * 1000; // check every 30 seconds
             this.connectionTimeout = connectionTimeout * 1000; // 10 minutes (4 pings failed)
             this.revivingTime = revivingTime * 1000; // 2 minutes
+            this.autoReconnect = autoReconnect;
+            this.reconnectInterval = reconnectInterval;
+            this.keepAliveInterval = keepAliveInterval;
+            this.keepAliveTime = keepAliveTime;
 
-            
             var host = this.instance.name.split(':');
             
             var address = host[0];
@@ -1037,7 +1050,7 @@ export default class DistributedConnection extends IStore {
                     console.log("Reconnecting socket...");
                     setTimeout(() => {
                         self._connectSocket(socket);
-                    }, 5000);
+                    }, self.reconnectInterval * 1000);
                 } else {
                     self._openReply?.triggerError(x);
                     self._openReply = null;
@@ -1052,7 +1065,7 @@ export default class DistributedConnection extends IStore {
         if (this.session.localAuthentication.method == AuthenticationMethod.Credentials) {
             var un = DC.stringToBytes(this.session.localAuthentication.username);
 
-            this.sendParams()
+            this._sendParams()
                 .addUint8(0x60)
                 .addUint8(dmn.length)
                 .addUint8Array(dmn)
@@ -1062,7 +1075,7 @@ export default class DistributedConnection extends IStore {
                 .done();
         } 
         else if (this.session.localAuthentication.method == AuthenticationMethod.Token) {                
-            this.sendParams()
+            this._sendParams()
                 .addUint8(0x70)
                 .addUint8(dmn.length)
                 .addUint8Array(dmn)
@@ -1072,7 +1085,7 @@ export default class DistributedConnection extends IStore {
         } 
         else if (this.session.localAuthentication.method == AuthenticationMethod.None) {
             
-            this.sendParams()
+            this._sendParams()
                 .addUint8(0x40)
                 .addUint8(dmn.length)
                 .addUint8Array(dmn)
@@ -1155,7 +1168,7 @@ export default class DistributedConnection extends IStore {
         {
             let r = x.deref();
             if (r != null){
-                r.susped();
+                r._suspend();
                 this._suspendedResources.set(r._p.id, x);
             }
         }
@@ -1171,7 +1184,8 @@ export default class DistributedConnection extends IStore {
                 this.server.membership.logout(this.session);
         }
         else if (this.autoReconnect && !this._invalidCredentials){
-            setTimeout(this.reconnect, 5000);
+            let self = this;
+            setTimeout(() => self.reconnect(), this.reconnectInterval * 1000);
         }
         else {
             this._suspendedResources.clear();
@@ -1235,8 +1249,8 @@ export default class DistributedConnection extends IStore {
 
 
     put(resource) {
-        if (codec.isLocalResource(resource, this))
-            this.neededResources.add(resource._p.id, resource);
+        if (Codec.isLocalResource(resource, this))
+            this._neededResources.add(resource._p.id, resource);
 
         return new AsyncReply(true);
     }
@@ -1246,15 +1260,15 @@ export default class DistributedConnection extends IStore {
     }
 
     // Protocol Implementation
-    sendRequest(action) {
+    _sendRequest(action) {
         var reply = new AsyncReply();
         this.callbackCounter++;
         this.requests.set(this.callbackCounter, reply);
-        return this.sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);
+        return this._sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);
     }
 
 
-    detachResource(instanceId){
+    async detachResource(instanceId){
         try
         {
             if (this._attachedResources.containsKey(instanceId))
@@ -1275,7 +1289,7 @@ export default class DistributedConnection extends IStore {
     {
         try
         {
-          return this.sendRequest(IIPPacketAction.DetachResource).addUint32(instanceId).done();
+          return this._sendRequest(IIPPacketAction.DetachResource).addUint32(instanceId).done();
         }
         catch(ex)
         {
@@ -1283,13 +1297,13 @@ export default class DistributedConnection extends IStore {
         }
     }
     
-    sendInvoke(instanceId, index, parameters) {
+    _sendInvoke(instanceId, index, parameters) {
         var reply = new AsyncReply();
 
         var pb = Codec.compose(parameters, this);
 
         let callbackId = ++this.callbackCounter;
-        this.sendParams()
+        this._sendParams()
             .addUint8(0x40 | IIPPacketAction.InvokeFunction)
             .addUint32(callbackId)
             .addUint32(instanceId)
@@ -1303,16 +1317,16 @@ export default class DistributedConnection extends IStore {
     }
 
 
-    sendError(type, callbackId, errorCode, errorMessage = "") {
+    _sendError(type, callbackId, errorCode, errorMessage = "") {
         var msg = DC.stringToBytes(errorMessage);
         if (type == ErrorType.Management)
-            this.sendParams()
+            this._sendParams()
                 .addUint8(0xC0 | IIPPacketReport.ManagementError)
                 .addUint32(callbackId)
                 .addUint16(errorCode)
                 .done();
         else if (type == ErrorType.Exception)
-            this.sendParams()
+            this._sendParams()
                 .addUint8(0xC0 | IIPPacketReport.ExecutionError)
                 .addUint32(callbackId)
                 .addUint16(errorCode)
@@ -1321,8 +1335,8 @@ export default class DistributedConnection extends IStore {
                 .done();
     }
 
-    sendProgress(callbackId, value, max) {
-        this.sendParams()
+    _sendProgress(callbackId, value, max) {
+        this._sendParams()
             .addUint8(0xC0 | IIPPacketReport.ProgressReport)
             .addUint32(callbackId)
             .addInt32(value)
@@ -1330,9 +1344,9 @@ export default class DistributedConnection extends IStore {
             .done();
     }
 
-    sendChunk(callbackId, chunk) {
+    _sendChunk(callbackId, chunk) {
         var c = Codec.compose(chunk, this);
-        this.sendParams()
+        this._sendParams()
             .addUint8(0xC0 | IIPPacketReport.ChunkStream)
             .addUint32(callbackId)
             .addUint8Array(c)
@@ -1432,7 +1446,7 @@ export default class DistributedConnection extends IStore {
 
 
     IIPEventEventOccurred(resourceId, index, dataType, data) {
-        var self = this;
+        let self = this;
 
         this.fetch(resourceId, null).then(function (r) {
             let et = r.instance.template.getEventTemplateByIndex(index);
@@ -1494,20 +1508,20 @@ export default class DistributedConnection extends IStore {
         });
     }
 
-    sendReply(action, callbackId) {
-        return this.sendParams().addUint8(0x80 | action).addUint32(callbackId);
+    _sendReply(action, callbackId) {
+        return this._sendParams().addUint8(0x80 | action).addUint32(callbackId);
     }
 
-    sendEvent(evt) {
-        return this.sendParams().addUint8(evt);
+    _sendEvent(evt) {
+        return this._sendParams().addUint8(evt);
     }
 
-    sendListenRequest(instanceId, index)
+    _sendListenRequest(instanceId, index)
     {
         var reply = new AsyncReply();
         let callbackId = ++this.callbackCounter;
 
-        this.sendParams()
+        this._sendParams()
             .addUint8(0x40 | IIPPacketAction.Listen)
             .addUint32(callbackId)
             .addUint32(instanceId)
@@ -1519,12 +1533,12 @@ export default class DistributedConnection extends IStore {
         return reply;
     }
 
-    sendUnlistenRequest(instanceId, index)
+    _sendUnlistenRequest(instanceId, index)
     {
         var reply = new AsyncReply();
         let callbackId = ++this.callbackCounter;
         
-        this.sendParams()
+        this._sendParams()
             .addUint8(0x40 | IIPPacketAction.Unlisten)
             .addUint32(callbackId)
             .addUint32(instanceId)
@@ -1538,16 +1552,15 @@ export default class DistributedConnection extends IStore {
 
     IIPRequestAttachResource(callback, resourceId) {
 
-        //var sl = this.sendParams();
+        //var sl = this._sendParams();
         var self = this;
-
 
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
 
 
                 if (r.instance.applicable(self.session, ActionType.Attach, null) == Ruling.Denied) {
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.AttachDenied);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.AttachDenied);
                     return;
                 }
 
@@ -1557,7 +1570,7 @@ export default class DistributedConnection extends IStore {
                 var link = DC.stringToBytes(r.instance.link);
 
                 if (r instanceof DistributedResource)
-                    self.sendReply(IIPPacketAction.AttachResource, callback)
+                    self._sendReply(IIPPacketAction.AttachResource, callback)
                         .addUint8Array(r.instance.template.classId.value)
                         .addUint64(r.instance.age)
                         .addUint16(link.length)
@@ -1565,7 +1578,7 @@ export default class DistributedConnection extends IStore {
                         .addUint8Array(Codec.compose(r._serialize(), self))
                         .done();
                 else
-                    self.sendReply(IIPPacketAction.AttachResource, callback)
+                    self._sendReply(IIPPacketAction.AttachResource, callback)
                         .addUint8Array(r.instance.template.classId.value)
                         .addUint64(r.instance.age)
                         .addUint16(link.length)
@@ -1578,7 +1591,7 @@ export default class DistributedConnection extends IStore {
             }
             else {
                 // reply failed
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -1612,14 +1625,14 @@ export default class DistributedConnection extends IStore {
                 self._subscribe(r);
                 
                 // reply ok
-                self.sendReply(IIPPacketAction.ReattachResource, callback)
+                self._sendReply(IIPPacketAction.ReattachResource, callback)
                     .addUint64(r.instance.age)
                     .addUint8Array(Codec.compose(r.instance.serialize(), self))
                     .done();
             }
             else {
                 // reply failed
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -1631,11 +1644,11 @@ export default class DistributedConnection extends IStore {
             if (r != null) {
                 self._unsubscribe(r);
                 // reply ok
-                self.sendReply(IIPPacketAction.DetachResource, callback).done();
+                self._sendReply(IIPPacketAction.DetachResource, callback).done();
             }
             else {
                 // reply failed
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -1644,18 +1657,18 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(storeId).then(function (store) {
             if (store == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.StoreNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.StoreNotFound);
                 return;
             }
 
             if (!(store instanceof IStore)) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceIsNotStore);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceIsNotStore);
                 return;
             }
 
             // check security
             if (store.instance.applicable(self.session, ActionType.CreateResource, null) != Ruling.Allowed) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.CreateDenied);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.CreateDenied);
                 return;
             }
 
@@ -1665,7 +1678,7 @@ export default class DistributedConnection extends IStore {
 
                 if (parent != null)
                     if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed) {
-                        self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                        self._sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
                         return;
                     }
 
@@ -1684,7 +1697,7 @@ export default class DistributedConnection extends IStore {
                 var type = window[className];
 
                 if (type == null) {
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.ClassNotFound);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.ClassNotFound);
                     return;
                 }
 
@@ -1701,12 +1714,12 @@ export default class DistributedConnection extends IStore {
                             var resource = new (Function.prototype.bind.apply(type, values));
 
                             Warehouse.put(name, resource, store, parent).then(function(ok){
-                                self.sendReply(IIPPacketAction.CreateResource, callback)
+                                self._sendReply(IIPPacketAction.CreateResource, callback)
                                 .addUint32(resource.Instance.Id)
                                 .done();
                             }).error(function(ex){
                                 // send some error
-                                self.sendError(ErrorType.Management, callback, ExceptionCode.AddToStoreFailed);
+                                self._sendError(ErrorType.Management, callback, ExceptionCode.AddToStoreFailed);
                             });
                         });
                     });
@@ -1719,19 +1732,19 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(resourceId).then(function (r) {
             if (r == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             if (r.instance.store.instance.applicable(session, ActionType.Delete, null) != Ruling.Allowed) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.DeleteDenied);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.DeleteDenied);
                 return;
             }
 
             if (Warehouse.remove(r))
-                self.sendReply(IIPPacketAction.DeleteResource, callback).done();
+                self._sendReply(IIPPacketAction.DeleteResource, callback).done();
             else
-                self.sendError(ErrorType.Management, callback, ExceptionCode.DeleteFailed);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.DeleteFailed);
         });
     }
 
@@ -1740,13 +1753,13 @@ export default class DistributedConnection extends IStore {
         var queryCallback = (r) =>
         {
             if (r == null)
-                this.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                this._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             else
             {
                 var list = r.filter(x => x.instance.applicable(this.session, ActionType.ViewTemplate, null) != Ruling.Denied);
 
                 if (list.length == 0)
-                    this.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    this._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 else
                 {
                     // get all templates related to this resource
@@ -1765,7 +1778,7 @@ export default class DistributedConnection extends IStore {
                     }
 
                     // send
-                    this.sendReply(IIPPacketAction.LinkTemplates, callback)
+                    this._sendReply(IIPPacketAction.LinkTemplates, callback)
                         .addDC(TransmissionType.compose(TransmissionTypeIdentifier.RawData, msg))
                         .done();
                 }
@@ -1784,13 +1797,13 @@ export default class DistributedConnection extends IStore {
 
         var t = Warehouse.getTemplateByClassName(className);
         if (t != null) {
-            self.sendReply(IIPPacketAction.TemplateFromClassName, callback)
+            self._sendReply(IIPPacketAction.TemplateFromClassName, callback)
                 .addUint32(t.content.length)
                 .addUint8Array(t.content)
                 .done();
         } else {
             // reply failed
-            self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+            self._sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
         }
     }
 
@@ -1799,13 +1812,13 @@ export default class DistributedConnection extends IStore {
         var t = Warehouse.getTemplateByClassId(classId);
 
         if (t != null)
-            self.sendReply(IIPPacketAction.TemplateFromClassId, callback)
+            self._sendReply(IIPPacketAction.TemplateFromClassId, callback)
                 .addDC(TransmissionType.compose(
                     TransmissionTypeIdentifier.RawData, t.content))
                 .done();
         else {
             // reply failed
-            self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+            self._sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
         }
     }
 
@@ -1815,13 +1828,13 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null)
-                self.sendReply(IIPPacketAction.TemplateFromResourceId, callback)
+                self._sendReply(IIPPacketAction.TemplateFromResourceId, callback)
                     .addDC(TransmissionType.compose(
                         TransmissionTypeIdentifier.RawData, r.instance.template.content))
                     .done();
             else {
                 // reply failed
-                self.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
             }
         });
     }
@@ -1831,7 +1844,7 @@ export default class DistributedConnection extends IStore {
 
         if (this.server == null)
         {
-            this.sendError(ErrorType.Management, callback, ExceptionCode.GeneralFailure);
+            this._sendError(ErrorType.Management, callback, ExceptionCode.GeneralFailure);
             return;
         }
 
@@ -1839,7 +1852,7 @@ export default class DistributedConnection extends IStore {
 
         if (call == null)
         {
-            this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+            this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
             return;
         }
 
@@ -1859,11 +1872,11 @@ export default class DistributedConnection extends IStore {
             //    return;
             //}
 
-            this.invokeFunction(call.method, callback, results, IIPPacketAction.ProcedureCall, call.target);
+            this._invokeFunction(call.method, callback, results, IIPPacketAction.ProcedureCall, call.target);
 
         }).error(x =>
         {
-            this.sendError(ErrorType.Management, callback, ExceptionCode.ParseError);
+            this._sendError(ErrorType.Management, callback, ExceptionCode.ParseError);
         });
     }
 
@@ -1873,7 +1886,7 @@ export default class DistributedConnection extends IStore {
 
         if (template == null)
         {
-            this.sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+            this._sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
             return;
         }
 
@@ -1882,7 +1895,7 @@ export default class DistributedConnection extends IStore {
         if (ft == null)
         {
             // no function at this index
-            this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+            this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
             return;
         }
 
@@ -1898,7 +1911,7 @@ export default class DistributedConnection extends IStore {
             if (fi == null)
             {
                 // ft found, fi not found, this should never happen
-                this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 return;
             }
 
@@ -1910,11 +1923,11 @@ export default class DistributedConnection extends IStore {
             //    return;
             //}
 
-            this.invokeFunction(fi, callback, results, IIPPacketAction.StaticCall, null);
+            this._invokeFunction(fi, callback, results, IIPPacketAction.StaticCall, null);
 
         }).error(x =>
         {
-            this.sendError(ErrorType.Management, callback, ExceptionCode.ParseError);
+            this._sendError(ErrorType.Management, callback, ExceptionCode.ParseError);
         });
     }
 
@@ -1926,7 +1939,7 @@ export default class DistributedConnection extends IStore {
         Warehouse.getById(resourceId).then(function (r) {
             
             if (r == null) {
-                this.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                this._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
             
@@ -1935,7 +1948,7 @@ export default class DistributedConnection extends IStore {
             if (ft == null)
             {
                 // no function at this index
-                this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 return;
             }
 
@@ -1944,14 +1957,14 @@ export default class DistributedConnection extends IStore {
                     var rt = r._invoke(index, args);
                     if (rt != null) {
                         rt.then(function (res) {
-                            self.sendReply(IIPPacketAction.InvokeFunction, callback)
+                            self._sendReply(IIPPacketAction.InvokeFunction, callback)
                                 .addUint8Array(Codec.compose(res, self))
                                 .done();
                         });
                     }
                     else {
                         // function not found on a distributed object
-                        this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                        this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                         return;
                     }
                 }
@@ -1961,76 +1974,81 @@ export default class DistributedConnection extends IStore {
 
                     if (!(fi instanceof Function)) {
                         // ft found, fi not found, this should never happen
-                        this.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                        this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                         return;
                     }
 
                     if (r.instance.applicable(self.session, ActionType.Execute, ft) == Ruling.Denied) {
-                        self.sendError(ErrorType.Management, callback, ExceptionCode.InvokeDenied);
+                        self._sendError(ErrorType.Management, callback, ExceptionCode.InvokeDenied);
                         return;
                     }
+
+                    self._invokeFunction(fi, callback, args, IIPPacketAction.InvokeFunction, r);
+
                 }
             });
         });
     }
 
-    invokeFunction(fi, callback, parameters, actionType, target = null)
+    _invokeFunction(fi, callback, parameters, actionType, target = null)
     {
+
+        let self = this;
         let indexedArgs = [];
 
-        for(let i = 0; i < ft.args.length; i++)
-            indexedArgs.push(parameters.get(i));
-        
+        for(let [k,v] of parameters.entries())
+            indexedArgs[k] = v;
+
         indexedArgs.push(self);
 
         let rt;
             
         try
         {
-            rt = fi.apply(r, indexedArgs);
+            rt = fi.apply(target, indexedArgs);
         }
         catch(ex)
         {
-            self.sendError(ErrorType.Exception, callback, 0, ex.toString());
+            this._sendError(ErrorType.Exception, callback, 0, ex.toString());
             return;
         }
 
         // Is iterator ?
         if (rt != null && rt[Symbol.iterator] instanceof Function) {
             for (let v of rt)
-                self.sendChunk(callback, v);
+            this._sendChunk(callback, v);
 
-            self.sendReply(actionType, callback)
+            this._sendReply(actionType, callback)
                 .addUint8(DataType.Void)
                 .done();
         }
         else if (rt instanceof AsyncReply) {
             rt.then(function (res) {
-                self.sendReply(actionType, callback)
+                self._sendReply(actionType, callback)
                     .addUint8Array(Codec.compose(res, self))
                     .done();
             }).error(ex => {
-                self.sendError(ErrorType.Exception, callback, ex.code, ex.message);
+                self._sendError(ErrorType.Exception, callback, ex.code, ex.message);
             }).progress((pt, pv, pm) =>
             {
-                self.sendProgress(callback, pv, pm);
+                self._sendProgress(callback, pv, pm);
             }).chunk(v =>
             {
-                self.sendChunk(callback, v);
+                self._sendChunk(callback, v);
             });
         }
         else if (rt instanceof Promise)
         {
             rt.then(function (res) {
-                self.sendReply(actionType, callback)
+                self._sendReply(actionType, callback)
                     .addUint8Array(Codec.compose(res, self))
                     .done();
             }).catch(ex => {
-                self.sendError(ErrorType.Exception, callback, 0, ex.toString());
+                self._sendError(ErrorType.Exception, callback, 0, ex.toString());
             });
         }
         else {
-            self.sendReply(actionType, callback)
+            self._sendReply(actionType, callback)
                 .addUint8Array(Codec.compose(rt, self))
                 .done();
         }
@@ -2045,13 +2063,13 @@ export default class DistributedConnection extends IStore {
     //             var pt = r.instance.template.getFunctionTemplateByIndex(index);
     //             if (pt != null) {
     //                 if (r instanceof DistributedResource) {
-    //                     self.sendReply(IIPPacketAction.GetProperty, callback)
+    //                     self._sendReply(IIPPacketAction.GetProperty, callback)
     //                         .addUint8Array(Codec.compose(r._get(pt.index), self))
     //                         .done();
     //                 }
     //                 else {
     //                     var pv = r[pt.name];
-    //                     self.sendReply(IIPPacketAction.GetProperty)
+    //                     self._sendReply(IIPPacketAction.GetProperty)
     //                         .addUint8Array(Codec.compose(pv, self))
     //                         .done();
     //                 }
@@ -2076,12 +2094,12 @@ export default class DistributedConnection extends IStore {
     //             if (pt != null) {
     //                 if (r.instance.getAge(index) > age) {
     //                     var pv = r[pt.name];
-    //                     self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+    //                     self._sendReply(IIPPacketAction.GetPropertyIfModified, callback)
     //                         .addUint8Array(Codec.compose(pv, self))
     //                         .done();
     //                 }
     //                 else {
-    //                     self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+    //                     self._sendReply(IIPPacketAction.GetPropertyIfModified, callback)
     //                         .addUint8(DataType.NotModified)
     //                         .done();
     //                 }
@@ -2112,38 +2130,38 @@ export default class DistributedConnection extends IStore {
                     {
                         r.listen(et).then(x =>
                        {
-                           self.sendReply(IIPPacketAction.Listen, callback).done();
-                       }).error(x => self.sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
+                           self._sendReply(IIPPacketAction.Listen, callback).done();
+                       }).error(x => self._sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
                     }
                     else
                     {
                         if (!self.subscriptions.has(r))
                         {
-                            self.sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
+                            self._sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
                             return;
                         }
 
                         if (self.subscriptions.get(r).includes(index))
                         {
-                            self.sendError(ErrorType.Management, callback, ExceptionCode.AlreadyListened);
+                            self._sendError(ErrorType.Management, callback, ExceptionCode.AlreadyListened);
                             return;
                         }
 
                         self.subscriptions.get(r).push(index);
 
-                        self.sendReply(IIPPacketAction.Listen, callback).done();
+                        self._sendReply(IIPPacketAction.Listen, callback).done();
                     }
                 }
                 else
                 {
                     // pt not found
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 }
             }
             else
             {
                 // resource not found
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -2164,20 +2182,20 @@ export default class DistributedConnection extends IStore {
                     {
                         r.unlisten(et).then(x =>
                         {
-                            self.sendReply(IIPPacketAction.Unlisten, callback).done();
-                        }).error(x => self.sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
+                            self._sendReply(IIPPacketAction.Unlisten, callback).done();
+                        }).error(x => self._sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
                     }
                     else
                     {
                         if (!self.subscriptions.has(r))
                         {
-                            self.sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
+                            self._sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
                             return;
                         }
 
                         if (!self.subscriptions.get(r).includes(index))
                         {
-                            self.sendError(ErrorType.Management, callback, ExceptionCode.AlreadyUnlistened);
+                            self._sendError(ErrorType.Management, callback, ExceptionCode.AlreadyUnlistened);
                             return;
                         }
 
@@ -2185,19 +2203,19 @@ export default class DistributedConnection extends IStore {
                         let i = ar.indexOf(index);
                         ar.splice(i, 1);
                         
-                        self.sendReply(IIPPacketAction.Unlisten, callback).done();             
+                        self._sendReply(IIPPacketAction.Unlisten, callback).done();             
                     }
                 }
                 else
                 {
                     // pt not found
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 }
             }
             else
             {
                 // resource not found
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -2216,16 +2234,16 @@ export default class DistributedConnection extends IStore {
                         if (r instanceof DistributedResource) {
                             // propagation
                             r._set(index, value).then(function (x) {
-                                self.sendReply(IIPPacketAction.SetProperty, callback)
+                                self._sendReply(IIPPacketAction.SetProperty, callback)
                                     .done();
                             }).error(function (x) {
-                                self.sendError(x.type, callback, x.code, x.message)
+                                self._sendError(x.type, callback, x.code, x.message)
                                     .done();
                             });
                         }
                         else {
                             if (r.instance.applicable(self.session, ActionType.SetProperty, pt) == Ruling.Denied) {
-                                self.sendError(AsyncReply.ErrorType.Exception, callback, ExceptionCode.SetPropertyDenied);
+                                self._sendError(AsyncReply.ErrorType.Exception, callback, ExceptionCode.SetPropertyDenied);
                                 return;
                             }
 
@@ -2234,10 +2252,10 @@ export default class DistributedConnection extends IStore {
                                     value = new DistributedPropertyContext(this, value);
 
                                 r[pt.name] = value;
-                                self.sendReply(IIPPacketAction.SetProperty, callback).done();
+                                self._sendReply(IIPPacketAction.SetProperty, callback).done();
                             }
                             catch (ex) {
-                                self.sendError(AsyncReply.ErrorType.Exception, callback, 0, ex.toString()).done();
+                                self._sendError(AsyncReply.ErrorType.Exception, callback, 0, ex.toString()).done();
                             }
                         }
 
@@ -2245,12 +2263,12 @@ export default class DistributedConnection extends IStore {
                 }
                 else {
                     // property not found
-                    self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
+                    self._sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
                 }
             }
             else {
                 // resource not found
-                self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
+                self._sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
             }
         });
     }
@@ -2261,7 +2279,7 @@ export default class DistributedConnection extends IStore {
             if (r != null) {
                 r.instance.store.getRecord(r, fromDate, toDate).then(function (results) {
                     var history = Codec.composeHistory(results, self, true);
-                    self.sendReply(IIPPacketAction.ResourceHistory, callback)
+                    self._sendReply(IIPPacketAction.ResourceHistory, callback)
                         .addUint8Array(history)
                         .done();
                 });
@@ -2275,15 +2293,15 @@ export default class DistributedConnection extends IStore {
         let queryCallback = function (resources) {
 
             if (resources == null)
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             else
             {
                 var list = resources.filter(function (r) { return r.instance.applicable(self.session, ActionType.Attach, null) != Ruling.Denied });
 
                 if (list.length == 0)
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 else
-                    self.sendReply(IIPPacketAction.QueryLink, callback)
+                    self._sendReply(IIPPacketAction.QueryLink, callback)
                         .addUint8Array(Codec.compose(list, self))
                         .done();
             }
@@ -2313,7 +2331,7 @@ export default class DistributedConnection extends IStore {
 
         pkt.addUint32(pkt.length, 8);
 
-        this.sendRequest(IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
+        this._sendRequest(IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
             var rid = args[0];
 
             self.fetch(rid, null).then(function (r) {
@@ -2330,7 +2348,7 @@ export default class DistributedConnection extends IStore {
 
         var sb = DC.stringToBytes(resourceLink);
 
-        this.sendRequest(IIPPacketAction.QueryLink)
+        this._sendRequest(IIPPacketAction.QueryLink)
             .addUint16(sb.length)
             .addUint8Array(sb)
             .done()
@@ -2367,7 +2385,7 @@ export default class DistributedConnection extends IStore {
 
         let classNameBytes = DC.stringToBytes(className);
 
-        this.sendRequest(IIPPacketAction.TemplateFromClassName)
+        this._sendRequest(IIPPacketAction.TemplateFromClassName)
             .addUint8(classNameBytes.length)
             .addUint8Array(classNameBytes)
             .done()
@@ -2392,7 +2410,7 @@ export default class DistributedConnection extends IStore {
 
         var self = this;
 
-        this.sendRequest(IIPPacketAction.TemplateFromClassId)
+        this._sendRequest(IIPPacketAction.TemplateFromClassId)
             .addUint8Array(classId.value)
             .done()
             .then(function (rt) {
@@ -2433,7 +2451,7 @@ export default class DistributedConnection extends IStore {
         var link = data.get
         var self = this;
 
-        this.sendRequest(IIPPacketAction.ResourceIdFromResourceLink)
+        this._sendRequest(IIPPacketAction.ResourceIdFromResourceLink)
                         .addUint16(.then(function (rt) {
             delete self.pathRequests[path];
 
@@ -2465,7 +2483,7 @@ export default class DistributedConnection extends IStore {
 
         var l = DC.stringToBytes(link);
 
-        this.sendRequest(IIPPacketAction.LinkTemplates)
+        this._sendRequest(IIPPacketAction.LinkTemplates)
         .addUint16(l.length)
         .addUint8Array(l)
         .done()
@@ -2504,7 +2522,7 @@ export default class DistributedConnection extends IStore {
         let resource = this._attachedResources.item(id)?.deref();
 
         if (resource != null)
-            return new AsyncReply<DistributedResource>(resource);
+            return new AsyncReply(resource);
 
         resource = this._neededResources.item(id);
 
@@ -2532,7 +2550,7 @@ export default class DistributedConnection extends IStore {
 
         var self = this;
 
-        this.sendRequest(IIPPacketAction.AttachResource)
+        this._sendRequest(IIPPacketAction.AttachResource)
             .addUint32(id)
             .done()
             .then(function (rt) {
@@ -2559,7 +2577,7 @@ export default class DistributedConnection extends IStore {
                     dr = resource;
                     template = resource.instance.template;
                 }
-                
+
                 //let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
 
                 let transmissionType = rt[3] ;
@@ -2579,7 +2597,7 @@ export default class DistributedConnection extends IStore {
                         self.resourceRequests.remove(id);
                         // move from needed to attached
                         self._neededResources.remove(id);
-                        self._attachedResources.set(id, new WeakRef(resource));
+                        self._attachedResources.set(id, new WeakRef(dr));
                         reply.trigger(dr);
                     })
                     .error((ex) => reply.triggerError(ex));        
@@ -2630,7 +2648,7 @@ export default class DistributedConnection extends IStore {
 
             var self = this;
 
-            this.sendRequest(IIPPacketAction.ResourceHistory)
+            this._sendRequest(IIPPacketAction.ResourceHistory)
                 .addUint32(resource._p.instanceId)
                 .addDateTime(fromDate).addDateTime(toDate)
                 .done()
@@ -2650,14 +2668,14 @@ export default class DistributedConnection extends IStore {
 
         this._unsubscribe(resource);
         // compose the packet
-        this.sendEvent(IIPPacketEvent.ResourceDestroyed)
+        this._sendEvent(IIPPacketEvent.ResourceDestroyed)
             .addUint32(resource.instance.id)
             .done();
     }
 
     #_instance_propertyModified = function(info) {
 
-        this.sendEvent(IIPPacketEvent.PropertyUpdated)
+        this._sendEvent(IIPPacketEvent.PropertyUpdated)
             .addUint32(info.resource.instance?.id)
             .addUint8(info.propertyTemplate.index)
             .addUint8Array(Codec.compose(info.value, this))
@@ -2688,7 +2706,7 @@ export default class DistributedConnection extends IStore {
 
 
         // compose the packet
-        this.sendEvent(IIPPacketEvent.EventOccurred)
+        this._sendEvent(IIPPacketEvent.EventOccurred)
             .addUint32(info.resource.instance.id)
             .addUint8(info.eventTemplate.index)
             .addUint8Array(Codec.compose(info.value, this))
@@ -2702,29 +2720,29 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(parentId).then(function (parent) {
             if (parent == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             Warehouse.getById(childId).then(function (child) {
                 if (child == null) {
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                     return;
                 }
 
                 if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed) {
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
                     return;
                 }
 
                 if (child.instance.applicable(self.session, ActionType.AddParent, null) != Ruling.Allowed) {
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
                     return;
                 }
 
                 parent.instance.children.add(child);
 
-                self.sendReply(IIPPacketAction.AddChild, callback)
+                self._sendReply(IIPPacketAction.AddChild, callback)
                     .done();
                 //child.Instance.Parents
             });
@@ -2737,29 +2755,29 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(parentId).then(function (parent) {
             if (parent == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             Warehouse.getById(childId).then(function (child) {
                 if (child == null) {
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                     return;
                 }
 
                 if (parent.instance.applicable(self.session, ActionType.RemoveChild, null) != Ruling.Allowed) {
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
                     return;
                 }
 
                 if (child.instance.applicable(self.session, ActionType.RemoveParent, null) != Ruling.Allowed) {
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
                     return;
                 }
 
                 parent.instance.children.remove(child);
 
-                self.sendReply(IIPPacketAction.RemoveChild, callback)
+                self._sendReply(IIPPacketAction.RemoveChild, callback)
                     .done();
                 //child.Instance.Parents
             });
@@ -2771,17 +2789,17 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(resourceId).then(function (resource) {
             if (resource == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             if (resource.instance.applicable(self.session, ActionType.Rename, null) != Ruling.Allowed) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.RenameDenied);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.RenameDenied);
                 return;
             }
 
             resource.instance.name = name;
-            self.sendReply(IIPPacketAction.RenameResource, callback)
+            self._sendReply(IIPPacketAction.RenameResource, callback)
                 .done();
         });
     }
@@ -2790,11 +2808,11 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(resourceId).then(function (resource) {
             if (resource == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
-            self.sendReply(IIPPacketAction.ResourceChildren, callback)
+            self._sendReply(IIPPacketAction.ResourceChildren, callback)
                 .addUint8Array(Codec.compose(resource.instance.children.toArray(), self))
                 .done();
 
@@ -2806,11 +2824,11 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (resource) {
             if (resource == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
-            self.sendReply(IIPPacketAction.ResourceParents, callback)
+            self._sendReply(IIPPacketAction.ResourceParents, callback)
                 .addUint8Array(Codec.compose(resource.instance.parents.toArray(), self))
                 .done();
         });
@@ -2819,12 +2837,12 @@ export default class DistributedConnection extends IStore {
     IIPRequestClearAttributes(callback, resourceId, attributes, all = false) {
         Warehouse.getById(resourceId).then(function (r) {
             if (r == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
                 return;
             }
 
@@ -2834,10 +2852,10 @@ export default class DistributedConnection extends IStore {
                 attrs = attributes.getStringArray(0, attributes.length);
 
             if (r.instance.removeAttributes(attrs))
-                self.sendReply(all ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes, callback)
+                self._sendReply(all ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes, callback)
                     .done();
             else
-                self.sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
+                self._sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
 
         });
     }
@@ -2847,23 +2865,23 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (r) {
             if (r == null) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed) {
-                self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
+                self._sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
                 return;
             }
 
             DataDeserializer.typedListParser(attributes, 0, attributes.length, this, null)
                 .then(function (attrs) {
                 if (r.instance.setAttributes(attrs, clearAttributes))
-                    self.sendReply(clearAttributes ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes,
+                    self._sendReply(clearAttributes ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes,
                         callback)
                         .done();
                 else
-                    self.sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
+                    self._sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
             });
 
         });
@@ -2879,7 +2897,7 @@ export default class DistributedConnection extends IStore {
         var rt = new AsyncReply();
         var self = this;
 
-        this.sendRequest(IIPPacketAction.ResourceChildren)
+        this._sendRequest(IIPPacketAction.ResourceChildren)
             .addUint32(resource._p.instanceId)
             .done()
             .then(function (ar) {
@@ -2904,7 +2922,7 @@ export default class DistributedConnection extends IStore {
         var rt = new AsyncReply();
         var self = this;
 
-        this.sendRequest(IIPPacketAction.ResourceParents)
+        this._sendRequest(IIPPacketAction.ResourceParents)
             .addUint32(resource._p.instanceId)
             .done()
             .then(function (ar) {
@@ -2928,7 +2946,7 @@ export default class DistributedConnection extends IStore {
         var rt = new AsyncReply();
 
         if (attributes == null)
-            this.sendRequest(IIPPacketAction.ClearAllAttributes)
+            this._sendRequest(IIPPacketAction.ClearAllAttributes)
                 .addUint32(resource._p.instanceId)
                 .done()
                 .then(function (ar) {
@@ -2936,7 +2954,7 @@ export default class DistributedConnection extends IStore {
                 }).error(function (ex) { rt.triggerError(ex); });
         else {
             var attrs = DC.stringArrayToBytes(attributes);
-            this.sendRequest(IIPPacketAction.ClearAttributes)
+            this._sendRequest(IIPPacketAction.ClearAttributes)
                 .addUint32(resource.instance.id)
                 .addUint32(attrs.length)
                 .addUint8Array(attrs)
@@ -2955,7 +2973,7 @@ export default class DistributedConnection extends IStore {
 
         var rt = new AsyncReply();
 
-        this.sendRequest(clearAttributes ? IIPPacketAction.UpdateAllAttributes : IIPPacketAction.UpdateAttributes)
+        this._sendRequest(clearAttributes ? IIPPacketAction.UpdateAllAttributes : IIPPacketAction.UpdateAttributes)
             .addUint32(resource._p.instanceId)
             .addUint8Array(Codec.compose(attributes, this))
             .done()
@@ -2974,7 +2992,7 @@ export default class DistributedConnection extends IStore {
             let self = this;
 
         if (attributes == null) {
-            this.sendRequest(IIPPacketAction.GetAllAttributes)
+            this._sendRequest(IIPPacketAction.GetAllAttributes)
                 .addUint32(resource._p.instanceId)
                 .done()
                 .then(function (ar) {
@@ -2992,7 +3010,7 @@ export default class DistributedConnection extends IStore {
         }
         else {
             let attrs = DC.stringArrayToBytes(attributes);
-            this.sendRequest(IIPPacketAction.GetAttributes)
+            this._sendRequest(IIPPacketAction.GetAttributes)
                 .addUint32(resource._p.instanceId)
                 .addUint32(attrs.length)
                 .addUint8Array(attrs)
@@ -3019,8 +3037,9 @@ export default class DistributedConnection extends IStore {
 
     _keepAliveTimerElapsed()
     {
-        if (!this.isConnected)
-            return;
+        // @TODO: port this
+        // if (!this.isConnected)
+        //     return;
       
         let self = this;
         let now = new Date();
@@ -3030,24 +3049,43 @@ export default class DistributedConnection extends IStore {
 
         this._lastKeepAliveSent = now;
 
-        this.sendRequest(IIPPacketAction.KeepAlive)
+        this._sendRequest(IIPPacketAction.KeepAlive)
                 .addDateTime(now)
                 .addUint32(interval)
                 .done()
                 .then(x =>
                 {
                     self.jitter = x[1];
-                    self._keepAliveTimer = setTimeout(_keepAliveTimerElapsed, self.keepAliveInterval);
-                    console.log("Keep Alive Received " + jitter);
+                    self._keepAliveTimer = setTimeout(() => self._keepAliveTimerElapsed(), self.keepAliveInterval * 1000);
+                    //console.log("Keep Alive Received " + self.jitter);
+                    
+                    // run GC
+                    let toBeRemoved =[];
+                    
+                    for(let i = 0; i < self._attachedResources.length; i++){
+                        let r = self._attachedResources.values[i].deref();
+
+                        if (r == null) {
+                            let id = self._attachedResources.keys[i];
+                            // send detach
+                            self._sendDetachRequest(id);
+                            toBeRemoved.push(id);
+                        }
+                    }
+
+                    if (toBeRemoved.length > 0)
+                        console.log("GC: " + toBeRemoved.length);
+                        
+                    for(let id of toBeRemoved)
+                        self._attachedResources.remove(id);
+
                 }).error((ex) =>
                 {
+                    console.log(ex);
                     self.close();
-                }).timeout(self.keepAliveTime * 1000, () =>
-                {
-                    self.close();
-                });
+                }).timeout(self.keepAliveTime * 1000);
 
-        console.log("Keep alive sent ");
+        //console.log("Keep alive sent ");
 
     }
 
@@ -3061,7 +3099,7 @@ export default class DistributedConnection extends IStore {
         this.requests.add(c, reply);
 
 
-        this.sendParams()
+        this._sendParams()
             .addUint8(0x40 | IIPPacket.IIPPacketAction.StaticCall)
             .addUint32(c)
             .addGuid(classId)
@@ -3115,10 +3153,10 @@ export default class DistributedConnection extends IStore {
             var diff = now - this._lastKeepAliveReceived;
             //Console.WriteLine("Diff " + diff + " " + interval);
 
-            jitter = Math.Abs(diff - interval);
+            jitter = Math.abs(diff - interval);
         }
 
-        this.sendParams()
+        this._sendParams()
             .addUint8(0x80 | IIPPacketAction.KeepAlive)
             .addUint32(callbackId)
             .addDateTime(now)

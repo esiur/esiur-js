@@ -400,6 +400,10 @@ exports["default"] = void 0;
 
 var _AsyncException = _interopRequireDefault(require("./AsyncException.js"));
 
+var _ExceptionCode = _interopRequireDefault(require("./ExceptionCode.js"));
+
+var _ErrorType = _interopRequireDefault(require("./ErrorType.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -511,9 +515,21 @@ var AsyncReply = /*#__PURE__*/function (_Promise) {
       this.chunk(callback);
     }
   }, {
+    key: "timeout",
+    value: function timeout(milliseconds, onTimeout) {
+      var self = this;
+      setTimeout(function () {
+        if (!self.ready && self.exception == null) {
+          self.triggerError(_ErrorType["default"].Management, _ExceptionCode["default"].Timeout, "Execution timeout expired.");
+          if (onTimeout instanceof Function) onTimeout();
+        }
+      }, milliseconds);
+    }
+  }, {
     key: "trigger",
     value: function trigger(result) {
-      if (this.ready) return;
+      if (this.ready) return this;
+      if (this.exception.raised) return this;
       this.result = result;
       this.ready = true;
 
@@ -558,7 +574,7 @@ var AsyncReply = /*#__PURE__*/function (_Promise) {
 
 exports["default"] = AsyncReply;
 
-},{"./AsyncException.js":3}],6:[function(require,module,exports){
+},{"./AsyncException.js":3,"./ErrorType.js":6,"./ExceptionCode.js":7}],6:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -615,9 +631,9 @@ var _default = //const ExceptionCode =
   AlreadyListened: 32,
   AlreadyUnlistened: 33,
   NotListenable: 34,
-  ParseError: 35
+  ParseError: 35,
+  Timeout: 36
 };
-
 exports["default"] = _default;
 
 },{}],8:[function(require,module,exports){
@@ -2165,9 +2181,13 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
   }, {
     key: "setDateTime",
     value: function setDateTime(offset, value, endian) {
-      // Unix Epoch
-      var ticks = 621355968000000000 + value.getTime() * 10000;
-      this.setUint64(offset, ticks, endian);
+      if (!isNaN(value)) {
+        // Unix Epoch
+        var ticks = 621355968000000000 + value.getTime() * 10000;
+        this.setUint64(offset, ticks, endian);
+      } else {
+        this.setUint64(offset, 0, endian);
+      }
     }
   }, {
     key: "getDateTime",
@@ -5201,7 +5221,7 @@ _defineProperty(TypedMap, "cache", {});
 
 },{}],36:[function(require,module,exports){
 /*
-* Copyright (c) 2017 Ahmed Kh. Zamil
+* Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -5328,11 +5348,23 @@ function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symb
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -5388,7 +5420,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         this._unsubscribe(resource); // compose the packet
 
 
-        this.sendEvent(_IIPPacketEvent["default"].ResourceDestroyed).addUint32(resource.instance.id).done();
+        this._sendEvent(_IIPPacketEvent["default"].ResourceDestroyed).addUint32(resource.instance.id).done();
       }
     });
 
@@ -5397,7 +5429,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       value: function value(info) {
         var _info$resource$instan;
 
-        this.sendEvent(_IIPPacketEvent["default"].PropertyUpdated).addUint32((_info$resource$instan = info.resource.instance) === null || _info$resource$instan === void 0 ? void 0 : _info$resource$instan.id).addUint8(info.propertyTemplate.index).addUint8Array(_Codec["default"].compose(info.value, this)).done();
+        this._sendEvent(_IIPPacketEvent["default"].PropertyUpdated).addUint32((_info$resource$instan = info.resource.instance) === null || _info$resource$instan === void 0 ? void 0 : _info$resource$instan.id).addUint8(info.propertyTemplate.index).addUint8Array(_Codec["default"].compose(info.value, this)).done();
       }
     });
 
@@ -5413,7 +5445,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         if (info.receivers instanceof Function) if (!info.receivers(this.sessions)) return;
         if (info.resource.instance.applicable(this.session, _ActionType["default"].ReceiveEvent, info.eventTemplate, info.issuer) == _Ruling["default"].Denied) return; // compose the packet
 
-        this.sendEvent(_IIPPacketEvent["default"].EventOccurred).addUint32(info.resource.instance.id).addUint8(info.eventTemplate.index).addUint8Array(_Codec["default"].compose(info.value, this)).done();
+        this._sendEvent(_IIPPacketEvent["default"].EventOccurred).addUint32(info.resource.instance.id).addUint8(info.eventTemplate.index).addUint8Array(_Codec["default"].compose(info.value, this)).done();
       }
     });
 
@@ -5428,15 +5460,17 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       _this.server = server;
     } else _this.session = new _Session["default"](new _Authentication["default"](_AuthenticationType["default"].Client), new _Authentication["default"](_AuthenticationType["default"].Host));
 
-    _this.packet = new _IIPPacket["default"]();
-    _this.authPacket = new _IIPAuthPacket["default"]();
-    _this.resources = new _KeyList["default"](); //{};
+    _this._packet = new _IIPPacket["default"]();
+    _this._authPacket = new _IIPAuthPacket["default"](); //this.resources = new KeyList();//{};
 
+    _this._neededResources = new _KeyList["default"]();
+    _this._attachedResources = new _KeyList["default"]();
+    _this._suspendedResources = new _KeyList["default"]();
     _this.templates = new _KeyList["default"]();
     _this.requests = new _KeyList["default"](); // {};
-    //this.pathRequests = new KeyList();// {};
 
     _this.templateRequests = new _KeyList["default"]();
+    _this.templateByNameRequests = new _KeyList["default"]();
     _this.resourceRequests = new _KeyList["default"](); // {};
 
     _this.callbackCounter = 0;
@@ -5451,7 +5485,13 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       }
     });
 
-    _this.localNonce = _this.generateNonce(32);
+    _this._localNonce = _this._generateNonce(32);
+    _this.jitter = 0;
+    _this.keepAliveTime = 10;
+    _this.keepAliveInterval = 30;
+    _this.reconnectInterval = 5;
+    _this._invalidCredentials = false;
+    _this.autoReconnect = false;
     return _this;
   }
 
@@ -5461,13 +5501,13 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       this.socket.sendAll(data.buffer);
     }
   }, {
-    key: "sendParams",
-    value: function sendParams(doneReply) {
+    key: "_sendParams",
+    value: function _sendParams(doneReply) {
       return new _SendList["default"](this, doneReply);
     }
   }, {
-    key: "generateNonce",
-    value: function generateNonce(length) {
+    key: "_generateNonce",
+    value: function _generateNonce(length) {
       var rt = new Uint8Array(length);
 
       for (var i = 0; i < length; i++) {
@@ -5481,7 +5521,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     value: function _processPacket(msg, offset, ends, data) {
       var _this2 = this;
 
-      var authPacket = this.authPacket;
+      var authPacket = this._authPacket;
 
       if (this.ready) {
         var packet = new _IIPPacket["default"]();
@@ -5645,6 +5685,18 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 case _IIPPacketAction["default"].ClearAttributes:
                   // this.IIPRequestClearAttributes(packet.callbackId, packet.resourceId, packet.content, false);
                   break;
+
+                case _IIPPacketAction["default"].KeepAlive:
+                  this.IIPRequestKeepAlive(packet.callbackId, packet.currentTime, packet.interval);
+                  break;
+
+                case _IIPPacketAction["default"].ProcedureCall:
+                  this.IIPRequestProcedureCall(packet.callbackId, packet.procedure, packet.dataType, msg);
+                  break;
+
+                case _IIPPacketAction["default"].StaticCall:
+                  this.IIPRequestStaticCall(packet.callbackId, packet.classId, packet.methodIndex, packet.dataType, msg);
+                  break;
               }
             } else if (packet.command == _IIPPacketCommand["default"].Reply) {
               switch (packet.action) {
@@ -5694,6 +5746,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                   break;
 
                 case _IIPPacketAction["default"].InvokeFunction:
+                case _IIPPacketAction["default"].StaticCall:
+                case _IIPPacketAction["default"].ProcedureCall:
                   this.IIPReplyInvoke(packet.callbackId, packet.dataType, msg);
                   break;
                 // case IIPPacketAction.GetProperty:
@@ -5720,6 +5774,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 case _IIPPacketAction["default"].ClearAllAttributes:
                 case _IIPPacketAction["default"].ClearAttributes:
                   this.IIPReply(packet.callbackId);
+                  break;
+
+                case _IIPPacketAction["default"].KeepAlive:
+                  this.IIPReply(packet.callbackId, packet.currentTime, packet.jitter);
                   break;
               }
             } else if (packet.command == _IIPPacketCommand["default"].Report) {
@@ -5763,12 +5821,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                   this.server.membership.userExists(authPacket.remoteUsername, authPacket.domain).then(function (x) {
                     if (x) {
                       _this2.session.remoteAuthentication.username = authPacket.remoteUsername;
-                      _this2.remoteNonce = authPacket.remoteNonce;
+                      _this2._remoteNonce = authPacket.remoteNonce;
                       _this2.session.remoteAuthentication.domain = authPacket.domain;
 
-                      _this2.sendParams().addUint8(0xa0).addUint8Array(_this2.localNonce).done();
+                      _this2._sendParams().addUint8(0xa0).addUint8Array(_this2._localNonce).done();
                     } else {
-                      _this2.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].UserOrTokenNotFound).addUint16(14).addString("User not found").done();
+                      _this2._sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].UserOrTokenNotFound).addUint16(14).addString("User not found").done();
                     }
                   });
                 } catch (ex) {
@@ -5776,7 +5834,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                   var errMsg = _DC.DC.stringToBytes(ex.message);
 
-                  this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
+                  this._sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
                 }
               } else if (authPacket.remoteMethod == _AuthenticationMethod["default"].Token && authPacket.localMethod == _AuthenticationMethod["default"].None) {
                 try {
@@ -5785,13 +5843,13 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                     if (x != null) {
                       _this2.session.remoteAuthentication.username = x;
                       _this2.session.remoteAuthentication.tokenIndex = authPacket.remoteTokenIndex;
-                      _this2.remoteNonce = authPacket.remoteNonce;
+                      _this2._remoteNonce = authPacket.remoteNonce;
                       _this2.session.remoteAuthentication.domain = authPacket.domain;
 
-                      _this2.sendParams().addUint8(0xa0).addUint8Array(_this2.localNonce).done();
+                      _this2._sendParams().addUint8(0xa0).addUint8Array(_this2._localNonce).done();
                     } else {
                       //Console.WriteLine("User not found");
-                      _this2.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].UserOrTokenNotFound).addUint16(15).addString("Token not found").done();
+                      _this2._sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].UserOrTokenNotFound).addUint16(15).addString("Token not found").done();
                     }
                   });
                 } catch (ex) {
@@ -5799,7 +5857,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                   var errMsg = _DC.DC.stringToBytes(ex.message);
 
-                  this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
+                  this._sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
                 }
               } else if (authPacket.remoteMethod == _AuthenticationMethod["default"].None && authPacket.localMethod == _AuthenticationMethod["default"].None) {
                 try {
@@ -5810,14 +5868,15 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                     this.session.remoteAuthentication.username = "g-" + Math.random().toString(36).substring(10);
                     this.session.remoteAuthentication.domain = authPacket.domain;
                     this.readyToEstablish = true;
-                    this.sendParams().addUint8(0x80).done();
+
+                    this._sendParams().addUint8(0x80).done();
                   } else {
-                    this.sendParams().addUInt8(0xc0).addUint8(_ExceptionCode["default"].AccessDenied).addUint16(18).addString("Guests not allowed").done();
+                    this._sendParams().addUInt8(0xc0).addUint8(_ExceptionCode["default"].AccessDenied).addUint16(18).addString("Guests not allowed").done();
                   }
                 } catch (ex) {
                   var errMsg = _DC.DC.stringToBytes(ex.message);
 
-                  this.sendParams().addUInt8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
+                  this._sendParams().addUInt8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
                 }
               }
             } else if (authPacket.command == _IIPAuthPacketCommand["default"].Action) {
@@ -5835,17 +5894,17 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                   reply.then(function (pw) {
                     if (pw != null) {
-                      var hash = _SHA["default"].compute((0, _DC.BL)().addUint8Array(pw).addUint8Array(_this2.remoteNonce).addUint8Array(_this2.localNonce).toArray());
+                      var hash = _SHA["default"].compute((0, _DC.BL)().addUint8Array(pw).addUint8Array(_this2._remoteNonce).addUint8Array(_this2._localNonce).toArray());
 
                       if (hash.sequenceEqual(remoteHash)) {
                         // send our hash
-                        var localHash = _SHA["default"].compute((0, _DC.BL)().addUint8Array(_this2.localNonce).addUint8Array(_this2.remoteNonce).addUint8Array(pw).toArray());
+                        var localHash = _SHA["default"].compute((0, _DC.BL)().addUint8Array(_this2._localNonce).addUint8Array(_this2._remoteNonce).addUint8Array(pw).toArray());
 
-                        _this2.sendParams().addUint8(0).addUint8Array(localHash).done();
+                        _this2._sendParams().addUint8(0).addUint8Array(localHash).done();
 
                         _this2.readyToEstablish = true;
                       } else {
-                        _this2.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].AccessDenied).addUint16(13).addString("Access Denied").done();
+                        _this2._sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].AccessDenied).addUint16(13).addString("Access Denied").done();
                       }
                     }
                   });
@@ -5854,40 +5913,45 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
                   var errMsg = _DC.DC.stringToBytes(ex.message);
 
-                  this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
+                  this._sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(errMsg.length).addUint8Array(errMsg).done();
                 }
               } else if (authPacket.action == _IIPAuthPacketAction["default"].NewConnection) {
                 if (this.readyToEstablish) {
-                  this.session.Id = this.generateNonce(32);
-                  this.sendParams().addUint8(0x28).addUint8Array(this.session.Id).done();
+                  this.session.Id = this._generateNonce(32);
+
+                  this._sendParams().addUint8(0x28).addUint8Array(this.session.Id).done();
 
                   if (this.instance == null) {
                     _Warehouse["default"].put(this.localUsername, this, null, this.server).then(function (x) {
-                      var _this2$openReply, _this2$server;
+                      var _this2$_openReply, _this2$server;
 
                       _this2.ready = true;
-                      (_this2$openReply = _this2.openReply) === null || _this2$openReply === void 0 ? void 0 : _this2$openReply.trigger(true);
+                      (_this2$_openReply = _this2._openReply) === null || _this2$_openReply === void 0 ? void 0 : _this2$_openReply.trigger(true);
+                      _this2._openReply = null;
 
                       _this2._emit("ready", _this2);
 
                       (_this2$server = _this2.server) === null || _this2$server === void 0 ? void 0 : _this2$server.membership.login(_this2.session);
                     }).error(function (x) {
-                      var _this2$openReply2;
+                      var _this2$_openReply2;
 
-                      (_this2$openReply2 = _this2.openReply) === null || _this2$openReply2 === void 0 ? void 0 : _this2$openReply2.triggerError(x);
+                      (_this2$_openReply2 = _this2._openReply) === null || _this2$_openReply2 === void 0 ? void 0 : _this2$_openReply2.triggerError(x);
+                      _this2._openReply = null;
                     });
                   } else {
-                    var _this$openReply, _this$server2;
+                    var _this$_openReply, _this$server2;
 
                     this.ready = true;
-                    (_this$openReply = this.openReply) === null || _this$openReply === void 0 ? void 0 : _this$openReply.trigger(true);
+                    (_this$_openReply = this._openReply) === null || _this$_openReply === void 0 ? void 0 : _this$_openReply.trigger(true);
+                    this._openReply = null;
 
                     this._emit("ready", this);
 
                     (_this$server2 = this.server) === null || _this$server2 === void 0 ? void 0 : _this$server2.membership.login(this.session);
                   }
                 } else {
-                  this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(9).addString("Not ready").done(); //     this.close();
+                  this._sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].GeneralFailure).addUint16(9).addString("Not ready").done(); //     this.close();
+
                 }
               }
             }
@@ -5895,172 +5959,78 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
             if (authPacket.command == _IIPAuthPacketCommand["default"].Acknowledge) {
               if (authPacket.remoteMethod == _AuthenticationMethod["default"].None) {
                 // send establish
-                this.sendParams().addUint8(0x20).addUint16(0).done();
+                this._sendParams().addUint8(0x20).addUint16(0).done();
               } else if (authPacket.remoteMethod == _AuthenticationMethod["default"].Credentials || authPacket.remoteMethod == _AuthenticationMethod["default"].Token) {
-                this.remoteNonce = authPacket.remoteNonce; // send our hash
+                this._remoteNonce = authPacket.remoteNonce; // send our hash
 
-                var localHash = _SHA["default"].compute((0, _DC.BL)().addUint8Array(this.localPasswordOrToken).addUint8Array(this.localNonce).addUint8Array(this.remoteNonce).toArray());
+                var localHash = _SHA["default"].compute((0, _DC.BL)().addUint8Array(this._localPasswordOrToken).addUint8Array(this._localNonce).addUint8Array(this._remoteNonce).toArray());
 
-                this.sendParams().addUint8(0).addUint8Array(localHash).done();
+                this._sendParams().addUint8(0).addUint8Array(localHash).done();
               }
             } else if (authPacket.command == _IIPAuthPacketCommand["default"].Action) {
               if (authPacket.action == _IIPAuthPacketAction["default"].AuthenticateHash) {
                 // check if the server knows my password
-                var remoteHash = _SHA["default"].compute((0, _DC.BL)().addUint8Array(this.remoteNonce).addUint8Array(this.localNonce).addUint8Array(this.localPasswordOrToken).toArray());
+                var remoteHash = _SHA["default"].compute((0, _DC.BL)().addUint8Array(this._remoteNonce).addUint8Array(this._localNonce).addUint8Array(this._localPasswordOrToken).toArray());
 
                 if (remoteHash.sequenceEqual(authPacket.hash)) {
                   // send establish request
                   //SendParams((byte)0x20, (ushort)0);
-                  this.sendParams().addUint8(0x20).addUint16(0).done();
+                  this._sendParams().addUint8(0x20).addUint16(0).done();
                 } else {
-                  this.sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].ChallengeFailed).addUint16(16).addString("Challenge Failed").done();
+                  this._sendParams().addUint8(0xc0).addUint8(_ExceptionCode["default"].ChallengeFailed).addUint16(16).addString("Challenge Failed").done();
                 }
               } else if (authPacket.action == _IIPAuthPacketAction["default"].ConnectionEstablished) {
-                var _this$openReply2;
-
                 this.session.id = authPacket.sessionId;
                 this.ready = true;
-                (_this$openReply2 = this.openReply) === null || _this$openReply2 === void 0 ? void 0 : _this$openReply2.trigger(true);
 
                 this._emit("ready", this); // put it in the warehouse
 
 
                 if (this.instance == null) {
                   _Warehouse["default"].put(this.localUsername, this, null, this.server).then(function (x) {
-                    var _this2$openReply3;
+                    var _this2$_openReply3;
 
-                    (_this2$openReply3 = _this2.openReply) === null || _this2$openReply3 === void 0 ? void 0 : _this2$openReply3.trigger(true);
+                    (_this2$_openReply3 = _this2._openReply) === null || _this2$_openReply3 === void 0 ? void 0 : _this2$_openReply3.trigger(true);
+                    _this2._openReply = null;
 
                     _this2._emit("ready", _this2);
                   }).error(function (x) {
-                    var _this2$openReply4;
+                    var _this2$_openReply4;
 
-                    return (_this2$openReply4 = _this2.openReply) === null || _this2$openReply4 === void 0 ? void 0 : _this2$openReply4.triggerError(x);
+                    (_this2$_openReply4 = _this2._openReply) === null || _this2$_openReply4 === void 0 ? void 0 : _this2$_openReply4.triggerError(x);
+                    _this2._openReply = null;
                   });
                 } else {
-                  var _this$openReply3;
+                  var _this$_openReply2;
 
-                  (_this$openReply3 = this.openReply) === null || _this$openReply3 === void 0 ? void 0 : _this$openReply3.trigger(true);
+                  (_this$_openReply2 = this._openReply) === null || _this$_openReply2 === void 0 ? void 0 : _this$_openReply2.trigger(true);
+                  this._openReply = null;
 
                   this._emit("ready", this);
-                }
+                } // start perodic keep alive timer
+
+
+                this._keepAliveTimer = setTimeout(function () {
+                  return _this2._keepAliveTimerElapsed();
+                }, this.keepAliveInterval * 1000);
               }
             } else if (authPacket.command == _IIPAuthPacketCommand["default"].Error) {
-              var _this$openReply4;
+              var _this$_openReply3;
 
-              (_this$openReply4 = this.openReply) === null || _this$openReply4 === void 0 ? void 0 : _this$openReply4.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, authPacket.errorCode, authPacket.errorMessage));
+              this._invalidCredentials = true;
+              (_this$_openReply3 = this._openReply) === null || _this$_openReply3 === void 0 ? void 0 : _this$_openReply3.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, authPacket.errorCode, authPacket.errorMessage));
+              this._openReply = null;
 
               this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
 
               this.close();
             }
-          } // if (this.session.localAuthentication.type == AuthenticationType.Host) {
-          //     if (authPacket.command == IIPAuthPacketCommand.Declare) {
-          //         if (authPacket.remoteMethod == AuthenticationMethod.Credentials
-          //             && authPacket.localMethod == AuthenticationMethod.None) {
-          //             console.log("Declare");
-          //             this.session.remoteAuthentication.username = authPacket.remoteUsername;
-          //             this.remoteNonce = authPacket.remoteNonce;
-          //             this.domain = authPacket.domain;
-          //             this.sendParams().addUint8(0xa0).addUint8Array(this.localNonce).done();
-          //         }
-          //     }
-          //     else if (authPacket.command == IIPAuthPacketCommand.Action) {
-          //         if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-          //             var remoteHash = authPacket.hash;
-          //             this.server.membership.getPassword(this.session.remoteAuthentication.username, this.domain).then(function (pw) {
-          //                 if (pw != null) {
-          //                     //var hash = new DC(sha256.arrayBuffer(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toArray()));
-          //                     var hash = SHA256.compute(BL().addString(pw).addUint8Array(remoteNonce).addUint8Array(this.localNonce).toDC());
-          //                     if (hash.sequenceEqual(remoteHash)) {
-          //                         // send our hash
-          //                         //var localHash = new DC(sha256.arrayBuffer((new BinaryList()).addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toArray()));
-          //                         var localHash = SHA256.compute(BL().addUint8Array(this.localNonce).addUint8Array(remoteNonce).addUint8Array(pw).toDC());
-          //                         this.sendParams().addUint8(0).addUint8Array(localHash).done();
-          //                         this.readyToEstablish = true;
-          //                     }
-          //                     else {
-          //                         // incorrect password
-          //                         this.sendParams().addUint8(0xc0)
-          //                             .addInt32(ExceptionCode.AccessDenied)
-          //                             .addUint16(13)
-          //                             .addString("Access Denied")
-          //                             .done();
-          //                     }
-          //                 }
-          //             });
-          //         }
-          //         else if (authPacket.action == IIPAuthPacketAction.NewConnection) {
-          //             if (readyToEstablish) {
-          //                 this.session.id = this.generateNonce(32);// new DC(32);
-          //                 //window.crypto.getRandomValues(this.session.id);
-          //                 this.sendParams().addUint8(0x28).addUint8Array(this.session.id).done();
-          //                 this.ready = true;
-          //                 this.openReply.trigger(this);
-          //                 this.openReply = null;
-          //                 //this._emit("ready", this);
-          //             }
-          //         }
-          //     }
-          // }
-          // else if (this.session.localAuthentication.type == AuthenticationType.Client) {
-          //     if (authPacket.command == IIPAuthPacketCommand.Acknowledge) {
-          //         this.remoteNonce = authPacket.remoteNonce;
-          //         // send our hash
-          //         var localHash = SHA256.compute(BL().addUint8Array(this.localPasswordOrToken)
-          //             .addUint8Array(this.localNonce)
-          //             .addUint8Array(this.remoteNonce).toDC());
-          //         this.sendParams().addUint8(0).addUint8Array(localHash).done();
-          //     }
-          //     else if (authPacket.command == IIPAuthPacketCommand.Action) {
-          //         if (authPacket.action == IIPAuthPacketAction.AuthenticateHash) {
-          //             var remoteHash = SHA256.compute(BL().addUint8Array(this.remoteNonce)
-          //                 .addUint8Array(this.localNonce)
-          //                 .addUint8Array(this.localPasswordOrToken).toDC());
-          //             if (remoteHash.sequenceEqual(authPacket.hash)) {
-          //                 // send establish request
-          //                 this.sendParams().addUint8(0x20).addUint16(0).done();
-          //             }
-          //             else {
-          //                 this.sendParams().addUint8(0xc0)
-          //                     .addUint32(ExceptionCode.ChallengeFailed)
-          //                     .addUint16(16)
-          //                     .addString("Challenge Failed")
-          //                     .done();
-          //             }
-          //         }
-          //         else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished) {
-          //             this.session.id = authPacket.sessionId;
-          //             this.ready = true;
-          //             this.openReply.trigger(this);
-          //             this.openReply = null;
-          //             //this._emit("ready", this);
-          //         }
-          //     }
-          //     else if (authPacket.command == IIPAuthPacketCommand.Error) {
-          //         this.openReply.triggerError(1, authPacket.errorCode, authPacket.errorMessage);
-          //         this.openReply = null;
-          //         //this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
-          //         this.close();
-          //     }
-          // }
-
+          }
         }
       }
 
-      return offset; //if (offset < ends)
-      //    this.processPacket(msg, offset, ends, data);
-    } // dataReceived(data) {
-    //     var msg = data.read();
-    //     var offset = 0;
-    //     var ends = msg.length;
-    //     var packet = this.packet;
-    //     //console.log("Data");
-    //     while (offset < ends) {
-    //         offset = this.processPacket(msg, offset, ends, data);
-    //     }
-    // }
-
+      return offset;
+    }
   }, {
     key: "_dataReceived",
     value: function _dataReceived(data) {
@@ -6090,22 +6060,146 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     }
   }, {
     key: "reconnect",
-    value: function reconnect() {}
-  }, {
-    key: "hold",
-    value: function hold() {
-      this.holdSending = true;
-    }
-  }, {
-    key: "unhold",
-    value: function unhold() {
-      if (this.holdSending) {
-        this.holdSending = false;
-        var msg = this.sendBuffer.read();
-        if (msg == null || msg.length == 0) return;
-        this.socket.sendAll(msg);
+    value: function () {
+      var _reconnect = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+        var toBeRestored, i, r, _i, _toBeRestored, _r, link, ar, dataType, data, id;
+
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                console.log("Reconnecting...");
+                _context.prev = 1;
+                _context.next = 4;
+                return this.connect();
+
+              case 4:
+                if (_context.sent) {
+                  _context.next = 6;
+                  break;
+                }
+
+                return _context.abrupt("return", false);
+
+              case 6:
+                _context.prev = 6;
+                toBeRestored = [];
+
+                for (i = 0; i < this._suspendedResources.length; i++) {
+                  r = this._suspendedResources.values[i].deref();
+                  if (r != null) toBeRestored.push(r);
+                }
+
+                _i = 0, _toBeRestored = toBeRestored;
+
+              case 10:
+                if (!(_i < _toBeRestored.length)) {
+                  _context.next = 39;
+                  break;
+                }
+
+                _r = _toBeRestored[_i];
+                link = _DC.DC.stringToBytes(_r._p.link);
+                console.log("Restoring " + _r._p.link);
+                _context.prev = 14;
+                _context.next = 17;
+                return this._sendRequest(_IIPPacketAction["default"].QueryLink).addUint16(link.length).addUint8Array(link).done();
+
+              case 17:
+                ar = _context.sent;
+                dataType = ar[0];
+                data = ar[1];
+
+                if (!(dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.ResourceList || dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.List)) {
+                  _context.next = 28;
+                  break;
+                }
+
+                // parse them as int
+                id = data.getUint32(8);
+                if (id != _r._p.instanceId) _r._p.instanceId = id;
+
+                this._neededResources.set(id, _r);
+
+                this._suspendedResources.remove(id);
+
+                _context.next = 27;
+                return this.fetch(id, null);
+
+              case 27:
+                console.log("Restored " + id);
+
+              case 28:
+                _context.next = 36;
+                break;
+
+              case 30:
+                _context.prev = 30;
+                _context.t0 = _context["catch"](14);
+
+                if (!(_context.t0.code == _ExceptionCode["default"].ResourceNotFound)) {
+                  _context.next = 35;
+                  break;
+                }
+
+                _context.next = 36;
+                break;
+
+              case 35:
+                return _context.abrupt("break", 39);
+
+              case 36:
+                _i++;
+                _context.next = 10;
+                break;
+
+              case 39:
+                _context.next = 44;
+                break;
+
+              case 41:
+                _context.prev = 41;
+                _context.t1 = _context["catch"](6);
+                console.log(_context.t1);
+
+              case 44:
+                _context.next = 49;
+                break;
+
+              case 46:
+                _context.prev = 46;
+                _context.t2 = _context["catch"](1);
+                return _context.abrupt("return", false);
+
+              case 49:
+                return _context.abrupt("return", true);
+
+              case 50:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this, [[1, 46], [6, 41], [14, 30]]);
+      }));
+
+      function reconnect() {
+        return _reconnect.apply(this, arguments);
       }
-    }
+
+      return reconnect;
+    }() // hold() {
+    //     this.holdSending = true;
+    // }
+    // unhold() {
+    //     if (this.holdSending) {
+    //         this.holdSending = false;
+    //         var msg = this.sendBuffer.read();
+    //         if (msg == null || msg.length == 0)
+    //             return;
+    //         this.socket.sendAll(msg);
+    //     }
+    // }
+
   }, {
     key: "trigger",
     value: function trigger(_trigger) {
@@ -6132,7 +6226,15 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
             _this$instance$attrib10 = _this$instance$attrib.token,
             token = _this$instance$attrib10 === void 0 ? null : _this$instance$attrib10,
             _this$instance$attrib11 = _this$instance$attrib.debug,
-            debug = _this$instance$attrib11 === void 0 ? false : _this$instance$attrib11;
+            debug = _this$instance$attrib11 === void 0 ? false : _this$instance$attrib11,
+            _this$instance$attrib12 = _this$instance$attrib.autoReconnect,
+            autoReconnect = _this$instance$attrib12 === void 0 ? false : _this$instance$attrib12,
+            _this$instance$attrib13 = _this$instance$attrib.keepAliveInterval,
+            keepAliveInterval = _this$instance$attrib13 === void 0 ? 30 : _this$instance$attrib13,
+            _this$instance$attrib14 = _this$instance$attrib.keepAliveTime,
+            keepAliveTime = _this$instance$attrib14 === void 0 ? 10 : _this$instance$attrib14,
+            _this$instance$attrib15 = _this$instance$attrib.reconnectInterval,
+            reconnectInterval = _this$instance$attrib15 === void 0 ? 5 : _this$instance$attrib15;
 
         this.debug = debug;
         this.checkInterval = checkInterval * 1000; // check every 30 seconds
@@ -6141,6 +6243,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
         this.revivingTime = revivingTime * 1000; // 2 minutes
 
+        this.autoReconnect = autoReconnect;
+        this.reconnectInterval = reconnectInterval;
+        this.keepAliveInterval = keepAliveInterval;
+        this.keepAliveTime = keepAliveTime;
         var host = this.instance.name.split(':');
         var address = host[0];
         var port = host.length > 1 ? parseInt(host[1]) : 10518;
@@ -6171,8 +6277,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var passwordOrToken = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
       var domain = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
       var secure = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : false;
-      if (this.openReply != null) throw new _AsyncException["default"](_ErrorType["default"].Exception, 0, "Connection in progress");
-      this.openReply = new _AsyncReply["default"]();
+      if (this._openReply != null) throw new _AsyncException["default"](_ErrorType["default"].Exception, 0, "Connection in progress");
+      this._openReply = new _AsyncReply["default"]();
 
       if (hostname != null) {
         this.session = new _Session["default"](new _ClientAuthentication["default"](), new _HostAuthentication["default"]());
@@ -6180,7 +6286,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         this.session.localAuthentication.tokenIndex = tokenIndex;
         this.session.localAuthentication.domain = domain;
         this.session.localAuthentication.username = username;
-        this.localPasswordOrToken = passwordOrToken;
+        this._localPasswordOrToken = passwordOrToken;
+        this._invalidCredentials = false;
       }
 
       if (this.session == null) throw new _AsyncException["default"](_ErrorType["default"].Exception, 0, "Session not initialized");
@@ -6189,31 +6296,30 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       if (port > 0) this._port = port;
       if (hostname != null) this._hostname = hostname;
       if (secure != null) this._secure = secure;
+
+      this._connectSocket(socket);
+
+      return this._openReply;
+    }
+  }, {
+    key: "_connectSocket",
+    value: function _connectSocket(socket) {
       var self = this;
       socket.connect(this._hostname, this._port, this._secure).then(function (x) {
         self.assign(socket);
       }).error(function (x) {
-        var _self$openReply;
+        if (self.autoReconnect) {
+          console.log("Reconnecting socket...");
+          setTimeout(function () {
+            self._connectSocket(socket);
+          }, self.reconnectInterval * 1000);
+        } else {
+          var _self$_openReply;
 
-        (_self$openReply = self.openReply) === null || _self$openReply === void 0 ? void 0 : _self$openReply.triggerError(x);
-        self.openReply = null;
+          (_self$_openReply = self._openReply) === null || _self$_openReply === void 0 ? void 0 : _self$_openReply.triggerError(x);
+          self._openReply = null;
+        }
       });
-      return this.openReply; // //connect(secure, method, hostname, port, username, tokenIndex, passwordOrToken, domain) {
-      //     this.openReply = new AsyncReply();
-      //     if (secure !== undefined) {
-      //         this.session.localAuthentication.method = method;
-      //         this.session.localAuthentication.tokenIndex = tokenIndex;
-      //         this.session.localAuthentication.domain = domain;
-      //         this.session.localAuthentication.username = username;
-      //         this.localPasswordOrToken = passwordOrToken;
-      //         //this.url = `ws${secure ? 's' : ''}://${this.instance.name}`;
-      //         this.url = `ws${secure ? 's' : ''}://${hostname}:${port}`;
-      //         let socket = new WebSocket(this.url, "iip");
-      //         socket.binaryType = "arraybuffer";
-      //         socket.connection = this;
-      //         this.assign(socket);
-      //         return this.openReply;
-      //     }
     }
   }, {
     key: "_declare",
@@ -6224,11 +6330,11 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       if (this.session.localAuthentication.method == _AuthenticationMethod["default"].Credentials) {
         var un = _DC.DC.stringToBytes(this.session.localAuthentication.username);
 
-        this.sendParams().addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(this.localNonce).addUint8(un.length).addUint8Array(un).done();
+        this._sendParams().addUint8(0x60).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(this._localNonce).addUint8(un.length).addUint8Array(un).done();
       } else if (this.session.localAuthentication.method == _AuthenticationMethod["default"].Token) {
-        this.sendParams().addUint8(0x70).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(this.localNonce).addUint64(this.session.localAuthentication.tokenIndex).done();
+        this._sendParams().addUint8(0x70).addUint8(dmn.length).addUint8Array(dmn).addUint8Array(this._localNonce).addUint64(this.session.localAuthentication.tokenIndex).done();
       } else if (this.session.localAuthentication.method == _AuthenticationMethod["default"].None) {
-        this.sendParams().addUint8(0x40).addUint8(dmn.length).addUint8Array(dmn).done();
+        this._sendParams().addUint8(0x40).addUint8(dmn.length).addUint8Array(dmn).done();
       }
     }
   }, {
@@ -6276,19 +6382,26 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "networkClose",
     value: function networkClose(socket) {
-      var _this$server3;
-
+      // clean up
+      this.ready = false;
       this.readyToEstablish = false;
+      clearTimeout(this._keepAliveTimer);
 
       try {
         this.requests.values.forEach(function (x) {
-          return x.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, 0, "Connection closed"));
+          try {
+            x.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, 0, "Connection closed"));
+          } catch (ex) {}
         });
         this.resourceRequests.values.forEach(function (x) {
-          return x.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, 0, "Connection closed"));
+          try {
+            x.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, 0, "Connection closed"));
+          } catch (ex) {}
         });
         this.templateRequests.values.forEach(function (x) {
-          return x.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, 0, "Connection closed"));
+          try {
+            x.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, 0, "Connection closed"));
+          } catch (ex) {}
         });
       } catch (ex) {// unhandled error
       }
@@ -6296,15 +6409,47 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       this.requests.clear();
       this.resourceRequests.clear();
       this.templateRequests.clear();
-      this.resources.values.forEach(function (x) {
-        return x._suspend();
-      });
 
-      this._unsubscribeAll();
+      var _iterator2 = _createForOfIteratorHelper(this._attachedResources.values),
+          _step2;
 
-      _Warehouse["default"].remove(this);
+      try {
+        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+          var x = _step2.value;
+          var r = x.deref();
 
-      if (this.ready) (_this$server3 = this.server) === null || _this$server3 === void 0 ? void 0 : _this$server3.membership.logout(this.session);
+          if (r != null) {
+            r._suspend();
+
+            this._suspendedResources.set(r._p.id, x);
+          }
+        }
+      } catch (err) {
+        _iterator2.e(err);
+      } finally {
+        _iterator2.f();
+      }
+
+      if (this.server != null) {
+        this._suspendedResources.clear();
+
+        this._unsubscribeAll();
+
+        _Warehouse["default"].remove(this);
+
+        if (this.ready) this.server.membership.logout(this.session);
+      } else if (this.autoReconnect && !this._invalidCredentials) {
+        var _self = this;
+
+        setTimeout(function () {
+          return _self.reconnect();
+        }, this.reconnectInterval * 1000);
+      } else {
+        this._suspendedResources.clear();
+      }
+
+      this._attachedResources.clear();
+
       this.ready = false;
 
       this._emit("close", this);
@@ -6344,7 +6489,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "put",
     value: function put(resource) {
-      this.resources.add(parseInt(resource.instance.name), resource);
+      if (_Codec["default"].isLocalResource(resource, this)) this._neededResources.add(resource._p.id, resource);
       return new _AsyncReply["default"](true);
     }
   }, {
@@ -6353,54 +6498,92 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     } // Protocol Implementation
 
   }, {
-    key: "sendRequest",
-    value: function sendRequest(action) {
+    key: "_sendRequest",
+    value: function _sendRequest(action) {
       var reply = new _AsyncReply["default"]();
       this.callbackCounter++;
       this.requests.set(this.callbackCounter, reply);
-      return this.sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);
+      return this._sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);
     }
   }, {
-    key: "sendDetachRequest",
-    value: function sendDetachRequest(instanceId) {
+    key: "detachResource",
+    value: function () {
+      var _detachResource = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(instanceId) {
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                _context2.prev = 0;
+                if (this._attachedResources.containsKey(instanceId)) this._attachedResources.remove(instanceId);
+                if (this._suspendedResources.containsKey(instanceId)) this._suspendedResources.remove(instanceId);
+                _context2.next = 5;
+                return this._sendDetachRequest(instanceId);
+
+              case 5:
+                _context2.next = 9;
+                break;
+
+              case 7:
+                _context2.prev = 7;
+                _context2.t0 = _context2["catch"](0);
+
+              case 9:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this, [[0, 7]]);
+      }));
+
+      function detachResource(_x) {
+        return _detachResource.apply(this, arguments);
+      }
+
+      return detachResource;
+    }()
+  }, {
+    key: "_sendDetachRequest",
+    value: function _sendDetachRequest(instanceId) {
       try {
-        return this.sendRequest(_IIPPacketAction["default"].DetachResource).addUint32(instanceId).done();
+        return this._sendRequest(_IIPPacketAction["default"].DetachResource).addUint32(instanceId).done();
       } catch (ex) {
         return null;
       }
     }
   }, {
-    key: "sendInvoke",
-    value: function sendInvoke(instanceId, index, parameters) {
+    key: "_sendInvoke",
+    value: function _sendInvoke(instanceId, index, parameters) {
       var reply = new _AsyncReply["default"]();
 
       var pb = _Codec["default"].compose(parameters, this);
 
       var callbackId = ++this.callbackCounter;
-      this.sendParams().addUint8(0x40 | _IIPPacketAction["default"].InvokeFunction).addUint32(callbackId).addUint32(instanceId).addUint8(index).addUint8Array(pb).done();
+
+      this._sendParams().addUint8(0x40 | _IIPPacketAction["default"].InvokeFunction).addUint32(callbackId).addUint32(instanceId).addUint8(index).addUint8Array(pb).done();
+
       this.requests.set(callbackId, reply);
       return reply;
     }
   }, {
-    key: "sendError",
-    value: function sendError(type, callbackId, errorCode) {
+    key: "_sendError",
+    value: function _sendError(type, callbackId, errorCode) {
       var errorMessage = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "";
 
       var msg = _DC.DC.stringToBytes(errorMessage);
 
-      if (type == _ErrorType["default"].Management) this.sendParams().addUint8(0xC0 | _IIPPacketReport["default"].ManagementError).addUint32(callbackId).addUint16(errorCode).done();else if (type == _ErrorType["default"].Exception) this.sendParams().addUint8(0xC0 | _IIPPacketReport["default"].ExecutionError).addUint32(callbackId).addUint16(errorCode).addUint16(msg.length).addUint8Array(msg).done();
+      if (type == _ErrorType["default"].Management) this._sendParams().addUint8(0xC0 | _IIPPacketReport["default"].ManagementError).addUint32(callbackId).addUint16(errorCode).done();else if (type == _ErrorType["default"].Exception) this._sendParams().addUint8(0xC0 | _IIPPacketReport["default"].ExecutionError).addUint32(callbackId).addUint16(errorCode).addUint16(msg.length).addUint8Array(msg).done();
     }
   }, {
-    key: "sendProgress",
-    value: function sendProgress(callbackId, value, max) {
-      this.sendParams().addUint8(0xC0 | _IIPPacketReport["default"].ProgressReport).addUint32(callbackId).addInt32(value).addInt32(max).done();
+    key: "_sendProgress",
+    value: function _sendProgress(callbackId, value, max) {
+      this._sendParams().addUint8(0xC0 | _IIPPacketReport["default"].ProgressReport).addUint32(callbackId).addInt32(value).addInt32(max).done();
     }
   }, {
-    key: "sendChunk",
-    value: function sendChunk(callbackId, chunk) {
+    key: "_sendChunk",
+    value: function _sendChunk(callbackId, chunk) {
       var c = _Codec["default"].compose(chunk, this);
 
-      this.sendParams().addUint8(0xC0 | _IIPPacketReport["default"].ChunkStream).addUint32(callbackId).addUint8Array(c).done();
+      this._sendParams().addUint8(0xC0 | _IIPPacketReport["default"].ChunkStream).addUint32(callbackId).addUint8Array(c).done();
     }
   }, {
     key: "IIPReply",
@@ -6456,10 +6639,15 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "IIPEventResourceDestroyed",
     value: function IIPEventResourceDestroyed(resourceId) {
-      if (this.resources.item(resourceId)) {
-        var r = this.resources.item(resourceId);
-        this.resources.remove(resourceId);
-        r.destroy();
+      if (this._attachedResources.contains(resourceId)) {
+        var r = this._attachedResources.get(resourceId).deref();
+
+        r === null || r === void 0 ? void 0 : r.destroy();
+
+        this._attachedResources.remove(resourceId);
+      } else if (this._neededResources.contains(resourceId)) {
+        // @TODO: handle this mess
+        this._neededResources.remove(resourceId);
       }
     }
   }, {
@@ -6541,43 +6729,48 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       });
     }
   }, {
-    key: "sendReply",
-    value: function sendReply(action, callbackId) {
-      return this.sendParams().addUint8(0x80 | action).addUint32(callbackId);
+    key: "_sendReply",
+    value: function _sendReply(action, callbackId) {
+      return this._sendParams().addUint8(0x80 | action).addUint32(callbackId);
     }
   }, {
-    key: "sendEvent",
-    value: function sendEvent(evt) {
-      return this.sendParams().addUint8(evt);
+    key: "_sendEvent",
+    value: function _sendEvent(evt) {
+      return this._sendParams().addUint8(evt);
     }
   }, {
-    key: "sendListenRequest",
-    value: function sendListenRequest(instanceId, index) {
+    key: "_sendListenRequest",
+    value: function _sendListenRequest(instanceId, index) {
       var reply = new _AsyncReply["default"]();
       var callbackId = ++this.callbackCounter;
-      this.sendParams().addUint8(0x40 | _IIPPacketAction["default"].Listen).addUint32(callbackId).addUint32(instanceId).addUint8(index).done();
+
+      this._sendParams().addUint8(0x40 | _IIPPacketAction["default"].Listen).addUint32(callbackId).addUint32(instanceId).addUint8(index).done();
+
       this.requests.set(callbackId, reply);
       return reply;
     }
   }, {
-    key: "sendUnlistenRequest",
-    value: function sendUnlistenRequest(instanceId, index) {
+    key: "_sendUnlistenRequest",
+    value: function _sendUnlistenRequest(instanceId, index) {
       var reply = new _AsyncReply["default"]();
       var callbackId = ++this.callbackCounter;
-      this.sendParams().addUint8(0x40 | _IIPPacketAction["default"].Unlisten).addUint32(callbackId).addUint32(instanceId).addUint8(index).done();
+
+      this._sendParams().addUint8(0x40 | _IIPPacketAction["default"].Unlisten).addUint32(callbackId).addUint32(instanceId).addUint8(index).done();
+
       this.requests.set(callbackId, reply);
       return reply;
     }
   }, {
     key: "IIPRequestAttachResource",
     value: function IIPRequestAttachResource(callback, resourceId) {
-      //var sl = this.sendParams();
+      //var sl = this._sendParams();
       var self = this;
 
       _Warehouse["default"].getById(resourceId).then(function (r) {
         if (r != null) {
           if (r.instance.applicable(self.session, _ActionType["default"].Attach, null) == _Ruling["default"].Denied) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AttachDenied);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AttachDenied);
+
             return;
           }
 
@@ -6586,12 +6779,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
           var link = _DC.DC.stringToBytes(r.instance.link);
 
-          if (r instanceof _DistributedResource["default"]) self.sendReply(_IIPPacketAction["default"].AttachResource, callback).addUint8Array(r.instance.template.classId.value).addUint64(r.instance.age).addUint16(link.length).addUint8Array(link).addUint8Array(_Codec["default"].compose(r._serialize(), self)).done();else self.sendReply(_IIPPacketAction["default"].AttachResource, callback).addUint8Array(r.instance.template.classId.value).addUint64(r.instance.age).addUint16(link.length).addUint8Array(link).addUint8Array(_Codec["default"].compose(r.instance.serialize(), self)).done();
+          if (r instanceof _DistributedResource["default"]) self._sendReply(_IIPPacketAction["default"].AttachResource, callback).addUint8Array(r.instance.template.classId.value).addUint64(r.instance.age).addUint16(link.length).addUint8Array(link).addUint8Array(_Codec["default"].compose(r._serialize(), self)).done();else self._sendReply(_IIPPacketAction["default"].AttachResource, callback).addUint8Array(r.instance.template.classId.value).addUint64(r.instance.age).addUint16(link.length).addUint8Array(link).addUint8Array(_Codec["default"].compose(r.instance.serialize(), self)).done();
 
           self._subscribe(r);
         } else {
           // reply failed
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
         }
       });
     }
@@ -6623,10 +6816,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           self._subscribe(r); // reply ok
 
 
-          self.sendReply(_IIPPacketAction["default"].ReattachResource, callback).addUint64(r.instance.age).addUint8Array(_Codec["default"].compose(r.instance.serialize(), self)).done();
+          self._sendReply(_IIPPacketAction["default"].ReattachResource, callback).addUint64(r.instance.age).addUint8Array(_Codec["default"].compose(r.instance.serialize(), self)).done();
         } else {
           // reply failed
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
         }
       });
     }
@@ -6640,10 +6833,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           self._unsubscribe(r); // reply ok
 
 
-          self.sendReply(_IIPPacketAction["default"].DetachResource, callback).done();
+          self._sendReply(_IIPPacketAction["default"].DetachResource, callback).done();
         } else {
           // reply failed
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
         }
       });
     }
@@ -6654,25 +6847,29 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(storeId).then(function (store) {
         if (store == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].StoreNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].StoreNotFound);
+
           return;
         }
 
         if (!(store instanceof _IStore2["default"])) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceIsNotStore);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceIsNotStore);
+
           return;
         } // check security
 
 
         if (store.instance.applicable(self.session, _ActionType["default"].CreateResource, null) != _Ruling["default"].Allowed) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].CreateDenied);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].CreateDenied);
+
           return;
         }
 
         _Warehouse["default"].getById(parentId).then(function (parent) {
           // check security
           if (parent != null) if (parent.instance.applicable(self.session, _ActionType["default"].AddChild, null) != _Ruling["default"].Allowed) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
+
             return;
           }
           var offset = 0;
@@ -6686,7 +6883,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           var type = window[className];
 
           if (type == null) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ClassNotFound);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ClassNotFound);
+
             return;
           }
 
@@ -6700,10 +6898,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 var resource = new (Function.prototype.bind.apply(type, values))();
 
                 _Warehouse["default"].put(name, resource, store, parent).then(function (ok) {
-                  self.sendReply(_IIPPacketAction["default"].CreateResource, callback).addUint32(resource.Instance.Id).done();
+                  self._sendReply(_IIPPacketAction["default"].CreateResource, callback).addUint32(resource.Instance.Id).done();
                 }).error(function (ex) {
                   // send some error
-                  self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddToStoreFailed);
+                  self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddToStoreFailed);
                 });
               });
             });
@@ -6718,30 +6916,32 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(resourceId).then(function (r) {
         if (r == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
         if (r.instance.store.instance.applicable(session, _ActionType["default"].Delete, null) != _Ruling["default"].Allowed) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].DeleteDenied);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].DeleteDenied);
+
           return;
         }
 
-        if (_Warehouse["default"].remove(r)) self.sendReply(_IIPPacketAction["default"].DeleteResource, callback).done();else self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].DeleteFailed);
+        if (_Warehouse["default"].remove(r)) self._sendReply(_IIPPacketAction["default"].DeleteResource, callback).done();else self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].DeleteFailed);
       });
     }
   }, {
     key: "IIPRequestLinkTemplates",
     value: function IIPRequestLinkTemplates(callback, resourceLink) {
       var _this3 = this,
-          _this$server4;
+          _this$server3;
 
       var queryCallback = function queryCallback(r) {
-        if (r == null) _this3.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else {
+        if (r == null) _this3._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else {
           var list = r.filter(function (x) {
             return x.instance.applicable(_this3.session, _ActionType["default"].ViewTemplate, null) != _Ruling["default"].Denied;
           });
-          if (list.length == 0) _this3.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else {
+          if (list.length == 0) _this3._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else {
             // get all templates related to this resource
             var msg = new BinaryList();
             var templates = [];
@@ -6757,12 +6957,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
             } // send
 
 
-            _this3.sendReply(_IIPPacketAction["default"].LinkTemplates, callback).addDC(_TransmissionType.TransmissionType.compose(_TransmissionType.TransmissionTypeIdentifier.RawData, msg)).done();
+            _this3._sendReply(_IIPPacketAction["default"].LinkTemplates, callback).addDC(_TransmissionType.TransmissionType.compose(_TransmissionType.TransmissionTypeIdentifier.RawData, msg)).done();
           }
         }
       };
 
-      if (((_this$server4 = this.server) === null || _this$server4 === void 0 ? void 0 : _this$server4.entryPoint) != null) this.server.entryPoint.query(resourceLink, this).then(queryCallback);else _Warehouse["default"].query(resourceLink).then(queryCallback);
+      if (((_this$server3 = this.server) === null || _this$server3 === void 0 ? void 0 : _this$server3.entryPoint) != null) this.server.entryPoint.query(resourceLink, this).then(queryCallback);else _Warehouse["default"].query(resourceLink).then(queryCallback);
     }
   }, {
     key: "IIPRequestTemplateFromClassName",
@@ -6772,10 +6972,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var t = _Warehouse["default"].getTemplateByClassName(className);
 
       if (t != null) {
-        self.sendReply(_IIPPacketAction["default"].TemplateFromClassName, callback).addUint32(t.content.length).addUint8Array(t.content).done();
+        self._sendReply(_IIPPacketAction["default"].TemplateFromClassName, callback).addUint32(t.content.length).addUint8Array(t.content).done();
       } else {
         // reply failed
-        self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
+        self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
       }
     }
   }, {
@@ -6785,9 +6985,9 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       var t = _Warehouse["default"].getTemplateByClassId(classId);
 
-      if (t != null) self.sendReply(_IIPPacketAction["default"].TemplateFromClassId, callback).addDC(_TransmissionType.TransmissionType.compose(_TransmissionType.TransmissionTypeIdentifier.RawData, t.content)).done();else {
+      if (t != null) self._sendReply(_IIPPacketAction["default"].TemplateFromClassId, callback).addDC(_TransmissionType.TransmissionType.compose(_TransmissionType.TransmissionTypeIdentifier.RawData, t.content)).done();else {
         // reply failed
-        self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
+        self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
       }
     }
   }, {
@@ -6796,10 +6996,96 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var self = this;
 
       _Warehouse["default"].getById(resourceId).then(function (r) {
-        if (r != null) self.sendReply(_IIPPacketAction["default"].TemplateFromResourceId, callback).addDC(_TransmissionType.TransmissionType.compose(_TransmissionType.TransmissionTypeIdentifier.RawData, r.instance.template.content)).done();else {
+        if (r != null) self._sendReply(_IIPPacketAction["default"].TemplateFromResourceId, callback).addDC(_TransmissionType.TransmissionType.compose(_TransmissionType.TransmissionTypeIdentifier.RawData, r.instance.template.content)).done();else {
           // reply failed
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
         }
+      });
+    }
+  }, {
+    key: "IIPRequestProcedureCall",
+    value: function IIPRequestProcedureCall(callback, procedureCall, transmissionType, content) {
+      var _this4 = this;
+
+      if (this.server == null) {
+        this._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].GeneralFailure);
+
+        return;
+      }
+
+      var call = this.server.calls.get(procedureCall);
+
+      if (call == null) {
+        this._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+
+        return;
+      }
+
+      var parsed = _Codec["default"].parse(content, 0, this, null, transmissionType);
+
+      parsed.Then(function (results) {
+        // un hold the socket to send data immediately
+        _this4.socket.unhold(); // @TODO: Make managers for procedure calls
+        //if (r.Instance.Applicable(session, ActionType.Execute, ft) == Ruling.Denied)
+        //{
+        //    SendError(ErrorType.Management, callback,
+        //        (ushort)ExceptionCode.InvokeDenied);
+        //    return;
+        //}
+
+
+        _this4._invokeFunction(call.method, callback, results, _IIPPacketAction["default"].ProcedureCall, call.target);
+      }).error(function (x) {
+        _this4._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ParseError);
+      });
+    }
+  }, {
+    key: "IIPRequestStaticCall",
+    value: function IIPRequestStaticCall(callback, classId, index, transmissionType, content) {
+      var _this5 = this;
+
+      var template = _Warehouse["default"].getTemplateByClassId(classId);
+
+      if (template == null) {
+        this._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].TemplateNotFound);
+
+        return;
+      }
+
+      var ft = template.getFunctionTemplateByIndex(index);
+
+      if (ft == null) {
+        // no function at this index
+        this._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+
+        return;
+      }
+
+      var parsed = _Codec["default"].parse(content, 0, this, null, transmissionType);
+
+      parsed.Then(function (results) {
+        // un hold the socket to send data immediately
+        _this5.socket.unhold();
+
+        var fi = ft.MethodInfo;
+
+        if (fi == null) {
+          // ft found, fi not found, this should never happen
+          _this5._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+
+          return;
+        } // @TODO: Make managers for static calls
+        //if (r.Instance.Applicable(session, ActionType.Execute, ft) == Ruling.Denied)
+        //{
+        //    SendError(ErrorType.Management, callback,
+        //        (ushort)ExceptionCode.InvokeDenied);
+        //    return;
+        //}
+
+
+        _this5._invokeFunction(fi, callback, results, _IIPPacketAction["default"].StaticCall, null);
+      }).error(function (x) {
+        _this5._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ParseError);
       });
     }
   }, {
@@ -6809,7 +7095,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(resourceId).then(function (r) {
         if (r == null) {
-          this.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          this._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
@@ -6817,7 +7104,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
         if (ft == null) {
           // no function at this index
-          this.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+          this._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+
           return;
         }
 
@@ -6827,11 +7115,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
             if (rt != null) {
               rt.then(function (res) {
-                self.sendReply(_IIPPacketAction["default"].InvokeFunction, callback).addUint8Array(_Codec["default"].compose(res, self)).done();
+                self._sendReply(_IIPPacketAction["default"].InvokeFunction, callback).addUint8Array(_Codec["default"].compose(res, self)).done();
               });
             } else {
               // function not found on a distributed object
-              this.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+              this._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+
               return;
             }
           } else {
@@ -6839,71 +7128,94 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
             if (!(fi instanceof Function)) {
               // ft found, fi not found, this should never happen
-              this.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+              this._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+
               return;
             }
 
             if (r.instance.applicable(self.session, _ActionType["default"].Execute, ft) == _Ruling["default"].Denied) {
-              self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].InvokeDenied);
+              self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].InvokeDenied);
+
               return;
             }
 
-            var indexedArgs = [];
-
-            for (var i = 0; i < ft.args.length; i++) {
-              indexedArgs.push(args.get(i));
-            }
-
-            indexedArgs.push(self);
-
-            var _rt;
-
-            try {
-              _rt = fi.apply(r, indexedArgs);
-            } catch (ex) {
-              self.sendError(_ErrorType["default"].Exception, callback, 0, ex.toString());
-              return;
-            } // Is iterator ?
-
-
-            if (_rt != null && _rt[Symbol.iterator] instanceof Function) {
-              var _iterator2 = _createForOfIteratorHelper(_rt),
-                  _step2;
-
-              try {
-                for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-                  var v = _step2.value;
-                  self.sendChunk(callback, v);
-                }
-              } catch (err) {
-                _iterator2.e(err);
-              } finally {
-                _iterator2.f();
-              }
-
-              self.sendReply(_IIPPacketAction["default"].InvokeFunction, callback).addUint8(DataType.Void).done();
-            } else if (_rt instanceof _AsyncReply["default"]) {
-              _rt.then(function (res) {
-                self.sendReply(_IIPPacketAction["default"].InvokeFunction, callback).addUint8Array(_Codec["default"].compose(res, self)).done();
-              }).error(function (ex) {
-                self.sendError(_ErrorType["default"].Exception, callback, ex.code, ex.message);
-              }).progress(function (pt, pv, pm) {
-                self.sendProgress(callback, pv, pm);
-              }).chunk(function (v) {
-                self.sendChunk(callback, v);
-              });
-            } else if (_rt instanceof Promise) {
-              _rt.then(function (res) {
-                self.sendReply(_IIPPacketAction["default"].InvokeFunction, callback).addUint8Array(_Codec["default"].compose(res, self)).done();
-              })["catch"](function (ex) {
-                self.sendError(_ErrorType["default"].Exception, callback, 0, ex.toString());
-              });
-            } else {
-              self.sendReply(_IIPPacketAction["default"].InvokeFunction, callback).addUint8Array(_Codec["default"].compose(_rt, self)).done();
-            }
+            self._invokeFunction(fi, callback, args, _IIPPacketAction["default"].InvokeFunction, r);
           }
         });
       });
+    }
+  }, {
+    key: "_invokeFunction",
+    value: function _invokeFunction(fi, callback, parameters, actionType) {
+      var target = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+      var self = this;
+      var indexedArgs = [];
+
+      var _iterator3 = _createForOfIteratorHelper(parameters.entries()),
+          _step3;
+
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var _step3$value = _slicedToArray(_step3.value, 2),
+              k = _step3$value[0],
+              _v = _step3$value[1];
+
+          indexedArgs[k] = _v;
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
+      }
+
+      indexedArgs.push(self);
+      var rt;
+
+      try {
+        rt = fi.apply(target, indexedArgs);
+      } catch (ex) {
+        this._sendError(_ErrorType["default"].Exception, callback, 0, ex.toString());
+
+        return;
+      } // Is iterator ?
+
+
+      if (rt != null && rt[Symbol.iterator] instanceof Function) {
+        var _iterator4 = _createForOfIteratorHelper(rt),
+            _step4;
+
+        try {
+          for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+            var v = _step4.value;
+
+            this._sendChunk(callback, v);
+          }
+        } catch (err) {
+          _iterator4.e(err);
+        } finally {
+          _iterator4.f();
+        }
+
+        this._sendReply(actionType, callback).addUint8(DataType.Void).done();
+      } else if (rt instanceof _AsyncReply["default"]) {
+        rt.then(function (res) {
+          self._sendReply(actionType, callback).addUint8Array(_Codec["default"].compose(res, self)).done();
+        }).error(function (ex) {
+          self._sendError(_ErrorType["default"].Exception, callback, ex.code, ex.message);
+        }).progress(function (pt, pv, pm) {
+          self._sendProgress(callback, pv, pm);
+        }).chunk(function (v) {
+          self._sendChunk(callback, v);
+        });
+      } else if (rt instanceof Promise) {
+        rt.then(function (res) {
+          self._sendReply(actionType, callback).addUint8Array(_Codec["default"].compose(res, self)).done();
+        })["catch"](function (ex) {
+          self._sendError(_ErrorType["default"].Exception, callback, 0, ex.toString());
+        });
+      } else {
+        self._sendReply(actionType, callback).addUint8Array(_Codec["default"].compose(rt, self)).done();
+      }
     } // IIPRequestGetProperty(callback, resourceId, index) {
     //     var self = this;
     //     Warehouse.getById(resourceId).then(function (r) {
@@ -6911,13 +7223,13 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     //             var pt = r.instance.template.getFunctionTemplateByIndex(index);
     //             if (pt != null) {
     //                 if (r instanceof DistributedResource) {
-    //                     self.sendReply(IIPPacketAction.GetProperty, callback)
+    //                     self._sendReply(IIPPacketAction.GetProperty, callback)
     //                         .addUint8Array(Codec.compose(r._get(pt.index), self))
     //                         .done();
     //                 }
     //                 else {
     //                     var pv = r[pt.name];
-    //                     self.sendReply(IIPPacketAction.GetProperty)
+    //                     self._sendReply(IIPPacketAction.GetProperty)
     //                         .addUint8Array(Codec.compose(pv, self))
     //                         .done();
     //                 }
@@ -6939,12 +7251,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     //             if (pt != null) {
     //                 if (r.instance.getAge(index) > age) {
     //                     var pv = r[pt.name];
-    //                     self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+    //                     self._sendReply(IIPPacketAction.GetPropertyIfModified, callback)
     //                         .addUint8Array(Codec.compose(pv, self))
     //                         .done();
     //                 }
     //                 else {
-    //                     self.sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+    //                     self._sendReply(IIPPacketAction.GetPropertyIfModified, callback)
     //                         .addUint8(DataType.NotModified)
     //                         .done();
     //                 }
@@ -6971,31 +7283,34 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           if (et != null) {
             if (r instanceof _DistributedResource["default"]) {
               r.listen(et).then(function (x) {
-                self.sendReply(_IIPPacketAction["default"].Listen, callback).done();
+                self._sendReply(_IIPPacketAction["default"].Listen, callback).done();
               }).error(function (x) {
-                return self.sendError(_ErrorType["default"].Exception, callback, _ExceptionCode["default"].GeneralFailure);
+                return self._sendError(_ErrorType["default"].Exception, callback, _ExceptionCode["default"].GeneralFailure);
               });
             } else {
               if (!self.subscriptions.has(r)) {
-                self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].NotAttached);
+                self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].NotAttached);
+
                 return;
               }
 
               if (self.subscriptions.get(r).includes(index)) {
-                self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AlreadyListened);
+                self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AlreadyListened);
+
                 return;
               }
 
               self.subscriptions.get(r).push(index);
-              self.sendReply(_IIPPacketAction["default"].Listen, callback).done();
+
+              self._sendReply(_IIPPacketAction["default"].Listen, callback).done();
             }
           } else {
             // pt not found
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
           }
         } else {
           // resource not found
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
         }
       });
     }
@@ -7011,33 +7326,36 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           if (et != null) {
             if (r instanceof _DistributedResource["default"]) {
               r.unlisten(et).then(function (x) {
-                self.sendReply(_IIPPacketAction["default"].Unlisten, callback).done();
+                self._sendReply(_IIPPacketAction["default"].Unlisten, callback).done();
               }).error(function (x) {
-                return self.sendError(_ErrorType["default"].Exception, callback, _ExceptionCode["default"].GeneralFailure);
+                return self._sendError(_ErrorType["default"].Exception, callback, _ExceptionCode["default"].GeneralFailure);
               });
             } else {
               if (!self.subscriptions.has(r)) {
-                self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].NotAttached);
+                self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].NotAttached);
+
                 return;
               }
 
               if (!self.subscriptions.get(r).includes(index)) {
-                self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AlreadyUnlistened);
+                self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AlreadyUnlistened);
+
                 return;
               }
 
               var ar = self.subscriptions.get(r);
               var i = ar.indexOf(index);
               ar.splice(i, 1);
-              self.sendReply(_IIPPacketAction["default"].Unlisten, callback).done();
+
+              self._sendReply(_IIPPacketAction["default"].Unlisten, callback).done();
             }
           } else {
             // pt not found
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].MethodNotFound);
           }
         } else {
           // resource not found
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
         }
       });
     }
@@ -7055,32 +7373,34 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
               if (r instanceof _DistributedResource["default"]) {
                 // propagation
                 r._set(index, value).then(function (x) {
-                  self.sendReply(_IIPPacketAction["default"].SetProperty, callback).done();
+                  self._sendReply(_IIPPacketAction["default"].SetProperty, callback).done();
                 }).error(function (x) {
-                  self.sendError(x.type, callback, x.code, x.message).done();
+                  self._sendError(x.type, callback, x.code, x.message).done();
                 });
               } else {
                 if (r.instance.applicable(self.session, _ActionType["default"].SetProperty, pt) == _Ruling["default"].Denied) {
-                  self.sendError(_AsyncReply["default"].ErrorType.Exception, callback, _ExceptionCode["default"].SetPropertyDenied);
+                  self._sendError(_AsyncReply["default"].ErrorType.Exception, callback, _ExceptionCode["default"].SetPropertyDenied);
+
                   return;
                 }
 
                 try {
                   if (r[pt.name] instanceof _DistributedPropertyContext["default"]) value = new _DistributedPropertyContext["default"](this, value);
                   r[pt.name] = value;
-                  self.sendReply(_IIPPacketAction["default"].SetProperty, callback).done();
+
+                  self._sendReply(_IIPPacketAction["default"].SetProperty, callback).done();
                 } catch (ex) {
-                  self.sendError(_AsyncReply["default"].ErrorType.Exception, callback, 0, ex.toString()).done();
+                  self._sendError(_AsyncReply["default"].ErrorType.Exception, callback, 0, ex.toString()).done();
                 }
               }
             });
           } else {
             // property not found
-            self.sendError(_AsyncReply["default"].ErrorType.Management, callback, _ExceptionCode["default"].PropertyNotFound).done();
+            self._sendError(_AsyncReply["default"].ErrorType.Management, callback, _ExceptionCode["default"].PropertyNotFound).done();
           }
         } else {
           // resource not found
-          self.sendError(_AsyncReply["default"].ErrorType.Management, callback, _ExceptionCode["default"].PropertyNotFound).done();
+          self._sendError(_AsyncReply["default"].ErrorType.Management, callback, _ExceptionCode["default"].PropertyNotFound).done();
         }
       });
     }
@@ -7094,7 +7414,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           r.instance.store.getRecord(r, fromDate, toDate).then(function (results) {
             var history = _Codec["default"].composeHistory(results, self, true);
 
-            self.sendReply(_IIPPacketAction["default"].ResourceHistory, callback).addUint8Array(history).done();
+            self._sendReply(_IIPPacketAction["default"].ResourceHistory, callback).addUint8Array(history).done();
           });
         }
       });
@@ -7102,23 +7422,23 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "IIPRequestQueryResources",
     value: function IIPRequestQueryResources(callback, resourceLink) {
-      var _this$server5;
+      var _this$server4;
 
       var self = this;
 
       var queryCallback = function queryCallback(resources) {
-        if (resources == null) self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else {
+        if (resources == null) self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else {
           var list = resources.filter(function (r) {
             return r.instance.applicable(self.session, _ActionType["default"].Attach, null) != _Ruling["default"].Denied;
           });
-          if (list.length == 0) self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else self.sendReply(_IIPPacketAction["default"].QueryLink, callback).addUint8Array(_Codec["default"].compose(list, self)).done();
+          if (list.length == 0) self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);else self._sendReply(_IIPPacketAction["default"].QueryLink, callback).addUint8Array(_Codec["default"].compose(list, self)).done();
         }
       };
 
-      if (((_this$server5 = this.server) === null || _this$server5 === void 0 ? void 0 : _this$server5.entryPoint) != null) {
-        var _this$server6;
+      if (((_this$server4 = this.server) === null || _this$server4 === void 0 ? void 0 : _this$server4.entryPoint) != null) {
+        var _this$server5;
 
-        (_this$server6 = this.server) === null || _this$server6 === void 0 ? void 0 : _this$server6.entryPoint.query(resourceLink, this).then(queryCallback);
+        (_this$server5 = this.server) === null || _this$server5 === void 0 ? void 0 : _this$server5.entryPoint.query(resourceLink, this).then(queryCallback);
       } else {
         _Warehouse["default"].query(resourceLink).then(queryCallback);
       }
@@ -7132,12 +7452,14 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       var pkt = (0, _DC.BL)().addUint32(store.instance.id).addUint32(parent.instance.id).addUint32(sb.length).addUint8Array(sb).addUint8Array(_Codec["default"].composeVarArray(parameters, this, true)).addUint8Array(_Codec["default"].composeStructure(attributes, this, true, true, true)).addUint8Array(_Codec["default"].composeStructure(values, this));
       pkt.addUint32(pkt.length, 8);
-      this.sendRequest(_IIPPacketAction["default"].CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
+
+      this._sendRequest(_IIPPacketAction["default"].CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
         var rid = args[0];
         self.fetch(rid, null).then(function (r) {
           reply.trigger(r);
         });
       });
+
       return reply;
     }
   }, {
@@ -7148,7 +7470,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       var sb = _DC.DC.stringToBytes(resourceLink);
 
-      this.sendRequest(_IIPPacketAction["default"].QueryLink).addUint16(sb.length).addUint8Array(sb).done().then(function (ar) {
+      this._sendRequest(_IIPPacketAction["default"].QueryLink).addUint16(sb.length).addUint8Array(sb).done().then(function (ar) {
         var dataType = ar[0];
         var data = ar[1];
 
@@ -7160,6 +7482,31 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       }).error(function (ex) {
         reply.triggerError(ex);
       });
+
+      return reply;
+    }
+  }, {
+    key: "getTemplateByClassName",
+    value: function getTemplateByClassName(className) {
+      var templates = this.templates.filter({
+        className: className
+      });
+      if (templates.length > 0) return new _AsyncReply["default"](templates[0]);else if (this.templateByNameRequests.contains(className)) return this.templateByNameRequests.item(className);
+      var reply = new _AsyncReply["default"]();
+      this.templateByNameRequests.add(className, reply);
+      var self = this;
+
+      var classNameBytes = _DC.DC.stringToBytes(className);
+
+      this._sendRequest(_IIPPacketAction["default"].TemplateFromClassName).addUint8(classNameBytes.length).addUint8Array(classNameBytes).done().then(function (rt) {
+        self.templateByNameRequests.remove(className);
+        self.templates.add(rt[0].classId.valueOf(), rt[0]);
+
+        _Warehouse["default"].putTemplate(rt[0]);
+
+        reply.trigger(rt[0]);
+      });
+
       return reply;
     }
   }, {
@@ -7169,7 +7516,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var reply = new _AsyncReply["default"]();
       this.templateRequests.add(classId.valueOf(), reply);
       var self = this;
-      this.sendRequest(_IIPPacketAction["default"].TemplateFromClassId).addUint8Array(classId.value).done().then(function (rt) {
+
+      this._sendRequest(_IIPPacketAction["default"].TemplateFromClassId).addUint8Array(classId.value).done().then(function (rt) {
         self.templateRequests.remove(classId);
         self.templates.add(rt[0].classId.valueOf(), rt[0]);
 
@@ -7177,6 +7525,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
         reply.trigger(rt[0]);
       });
+
       return reply;
     } // IStore interface
 
@@ -7200,7 +7549,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       bl.addUint16(bl.length, 0);
         var link = data.get
       var self = this;
-        this.sendRequest(IIPPacketAction.ResourceIdFromResourceLink)
+        this._sendRequest(IIPPacketAction.ResourceIdFromResourceLink)
                       .addUint16(.then(function (rt) {
           delete self.pathRequests[path];
             self.fetch(rt[1]).then(function (r) {
@@ -7209,16 +7558,15 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       });
           return reply;
       */
-    }
-  }, {
-    key: "retrieve",
-    value: function retrieve(iid) {
-      var r = this.resources.item(iid);
-      return new _AsyncReply["default"](r); //for (var r in this.resources)
-      //    if (this.resources[r].instance.id == iid)
-      //        return new AsyncReply(r);
-      //return new AsyncReply(null);
-    }
+    } // retrieve(iid) {
+    //     let r = this.resources.item(iid);
+    //     return new AsyncReply(r);
+    //     //for (var r in this.resources)
+    //     //    if (this.resources[r].instance.id == iid)
+    //     //        return new AsyncReply(r);
+    //     //return new AsyncReply(null);
+    // }
+
   }, {
     key: "getLinkTemplates",
     value: function getLinkTemplates(link) {
@@ -7226,7 +7574,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       var l = _DC.DC.stringToBytes(link);
 
-      this.sendRequest(_IIPPacketAction["default"].LinkTemplates).addUint16(l.length).addUint8Array(l).done().then(function (rt) {
+      this._sendRequest(_IIPPacketAction["default"].LinkTemplates).addUint16(l.length).addUint8Array(l).done().then(function (rt) {
         var templates = []; // parse templates
 
         var tt = rt[0];
@@ -7243,13 +7591,18 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       }).error(function (ex) {
         reply.triggerError(ex);
       });
+
       return reply;
     } // Get a resource from the other end
 
   }, {
     key: "fetch",
     value: function fetch(id, requestSequence) {
-      var resource = this.resources.item(id);
+      var _this$_attachedResour;
+
+      var resource = (_this$_attachedResour = this._attachedResources.item(id)) === null || _this$_attachedResour === void 0 ? void 0 : _this$_attachedResour.deref();
+      if (resource != null) return new _AsyncReply["default"](resource);
+      resource = this._neededResources.item(id);
       var request = this.resourceRequests.item(id);
 
       if (request != null) {
@@ -7257,6 +7610,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
         if (resource != null && ((_requestSequence$cont = requestSequence === null || requestSequence === void 0 ? void 0 : requestSequence.contains(id)) !== null && _requestSequence$cont !== void 0 ? _requestSequence$cont : false)) return new _AsyncReply["default"](resource);else return request;
       } else if (resource != null && !resource._p.suspended) {
+        // @REVIEW: this should never happen
+        console.log("DCON", LogType.Error, "Resource not moved to attached.");
         return new _AsyncReply["default"](resource);
       }
 
@@ -7264,7 +7619,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       this.resourceRequests.set(id, reply);
       var newSequence = requestSequence != null ? [].concat(_toConsumableArray(requestSequence), [id]) : [id];
       var self = this;
-      this.sendRequest(_IIPPacketAction["default"].AttachResource).addUint32(id).done().then(function (rt) {
+
+      this._sendRequest(_IIPPacketAction["default"].AttachResource).addUint32(id).done().then(function (rt) {
         if (rt == null) {
           reply.triggerError(new _AsyncException["default"](_ErrorType["default"].Management, _ExceptionCode["default"].ResourceNotFound, "Null response"));
           return;
@@ -7279,7 +7635,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
           template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Wrapper);
           if (((_template = template) === null || _template === void 0 ? void 0 : _template.definedType) != null) dr = new template.getDependencies(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
-        } else dr = resource; //let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
+        } else {
+          dr = resource;
+          template = resource.instance.template;
+        } //let dr = resource || new DistributedResource(self, id, rt[1], rt[2]);
 
 
         var transmissionType = rt[3];
@@ -7295,7 +7654,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
             dr._attach(pvs);
 
-            self.resourceRequests.remove(id);
+            self.resourceRequests.remove(id); // move from needed to attached
+
+            self._neededResources.remove(id);
+
+            self._attachedResources.set(id, new WeakRef(dr));
+
             reply.trigger(dr);
           }).error(function (ex) {
             return reply.triggerError(ex);
@@ -7329,6 +7693,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       }).error(function (ex) {
         reply.triggerError(ex);
       });
+
       return reply;
     }
   }, {
@@ -7338,11 +7703,13 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         if (resource._p.connection != this) return new _AsyncReply["default"](null);
         var reply = new _AsyncReply["default"]();
         var self = this;
-        this.sendRequest(_IIPPacketAction["default"].ResourceHistory).addUint32(resource._p.instanceId).addDateTime(fromDate).addDateTime(toDate).done().then(function (rt) {
+
+        this._sendRequest(_IIPPacketAction["default"].ResourceHistory).addUint32(resource._p.instanceId).addDateTime(fromDate).addDateTime(toDate).done().then(function (rt) {
           _Codec["default"].historyParser(rt[0], 0, rt[0].length, resource, self, null).then(function (history) {
             reply.trigger(history);
           });
         });
+
         return reply;
       } else return new _AsyncReply["default"](null);
     }
@@ -7353,28 +7720,34 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(parentId).then(function (parent) {
         if (parent == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
         _Warehouse["default"].getById(childId).then(function (child) {
           if (child == null) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
             return;
           }
 
           if (parent.instance.applicable(self.session, _ActionType["default"].AddChild, null) != _Ruling["default"].Allowed) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
+
             return;
           }
 
           if (child.instance.applicable(self.session, _ActionType["default"].AddParent, null) != _Ruling["default"].Allowed) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddParentDenied);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddParentDenied);
+
             return;
           }
 
           parent.instance.children.add(child);
-          self.sendReply(_IIPPacketAction["default"].AddChild, callback).done(); //child.Instance.Parents
+
+          self._sendReply(_IIPPacketAction["default"].AddChild, callback).done(); //child.Instance.Parents
+
         });
       });
     }
@@ -7385,28 +7758,34 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(parentId).then(function (parent) {
         if (parent == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
         _Warehouse["default"].getById(childId).then(function (child) {
           if (child == null) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
             return;
           }
 
           if (parent.instance.applicable(self.session, _ActionType["default"].RemoveChild, null) != _Ruling["default"].Allowed) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddChildDenied);
+
             return;
           }
 
           if (child.instance.applicable(self.session, _ActionType["default"].RemoveParent, null) != _Ruling["default"].Allowed) {
-            self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddParentDenied);
+            self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].AddParentDenied);
+
             return;
           }
 
           parent.instance.children.remove(child);
-          self.sendReply(_IIPPacketAction["default"].RemoveChild, callback).done(); //child.Instance.Parents
+
+          self._sendReply(_IIPPacketAction["default"].RemoveChild, callback).done(); //child.Instance.Parents
+
         });
       });
     }
@@ -7417,17 +7796,20 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(resourceId).then(function (resource) {
         if (resource == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
         if (resource.instance.applicable(self.session, _ActionType["default"].Rename, null) != _Ruling["default"].Allowed) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].RenameDenied);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].RenameDenied);
+
           return;
         }
 
         resource.instance.name = name;
-        self.sendReply(_IIPPacketAction["default"].RenameResource, callback).done();
+
+        self._sendReply(_IIPPacketAction["default"].RenameResource, callback).done();
       });
     }
   }, {
@@ -7437,11 +7819,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(resourceId).then(function (resource) {
         if (resource == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
-        self.sendReply(_IIPPacketAction["default"].ResourceChildren, callback).addUint8Array(_Codec["default"].compose(resource.instance.children.toArray(), self)).done();
+        self._sendReply(_IIPPacketAction["default"].ResourceChildren, callback).addUint8Array(_Codec["default"].compose(resource.instance.children.toArray(), self)).done();
       });
     }
   }, {
@@ -7451,11 +7834,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(resourceId).then(function (resource) {
         if (resource == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
-        self.sendReply(_IIPPacketAction["default"].ResourceParents, callback).addUint8Array(_Codec["default"].compose(resource.instance.parents.toArray(), self)).done();
+        self._sendReply(_IIPPacketAction["default"].ResourceParents, callback).addUint8Array(_Codec["default"].compose(resource.instance.parents.toArray(), self)).done();
       });
     }
   }, {
@@ -7465,18 +7849,20 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(resourceId).then(function (r) {
         if (r == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
         if (r.instance.store.instance.applicable(self.session, _ActionType["default"].UpdateAttributes, null) != _Ruling["default"].Allowed) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeDenied);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeDenied);
+
           return;
         }
 
         var attrs = [];
         if (!all) attrs = attributes.getStringArray(0, attributes.length);
-        if (r.instance.removeAttributes(attrs)) self.sendReply(all ? _IIPPacketAction["default"].ClearAllAttributes : _IIPPacketAction["default"].ClearAttributes, callback).done();else self.sendError(_AsyncReply["default"].ErrorType.Management, callback, _ExceptionCode["default"].UpdateAttributeFailed);
+        if (r.instance.removeAttributes(attrs)) self._sendReply(all ? _IIPPacketAction["default"].ClearAllAttributes : _IIPPacketAction["default"].ClearAttributes, callback).done();else self._sendError(_AsyncReply["default"].ErrorType.Management, callback, _ExceptionCode["default"].UpdateAttributeFailed);
       });
     }
   }, {
@@ -7487,17 +7873,19 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       _Warehouse["default"].getById(resourceId).then(function (r) {
         if (r == null) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].ResourceNotFound);
+
           return;
         }
 
         if (r.instance.store.instance.applicable(self.session, _ActionType["default"].UpdateAttributes, null) != _Ruling["default"].Allowed) {
-          self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeDenied);
+          self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeDenied);
+
           return;
         }
 
         DataDeserializer.typedListParser(attributes, 0, attributes.length, this, null).then(function (attrs) {
-          if (r.instance.setAttributes(attrs, clearAttributes)) self.sendReply(clearAttributes ? _IIPPacketAction["default"].ClearAllAttributes : _IIPPacketAction["default"].ClearAttributes, callback).done();else self.sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeFailed);
+          if (r.instance.setAttributes(attrs, clearAttributes)) self._sendReply(clearAttributes ? _IIPPacketAction["default"].ClearAllAttributes : _IIPPacketAction["default"].ClearAttributes, callback).done();else self._sendError(_ErrorType["default"].Management, callback, _ExceptionCode["default"].UpdateAttributeFailed);
         });
       });
     }
@@ -7507,7 +7895,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       if (resource._p.connection != this) return new _AsyncReply["default"](null);
       var rt = new _AsyncReply["default"]();
       var self = this;
-      this.sendRequest(_IIPPacketAction["default"].ResourceChildren).addUint32(resource._p.instanceId).done().then(function (ar) {
+
+      this._sendRequest(_IIPPacketAction["default"].ResourceChildren).addUint32(resource._p.instanceId).done().then(function (ar) {
         var dataType = ar[0];
         var data = ar[1];
 
@@ -7517,6 +7906,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           return rt.triggerError(ex);
         });
       });
+
       return rt;
     }
   }, {
@@ -7525,7 +7915,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       if (resource._p.connection != this) return new _AsyncReply["default"](null);
       var rt = new _AsyncReply["default"]();
       var self = this;
-      this.sendRequest(_IIPPacketAction["default"].ResourceParents).addUint32(resource._p.instanceId).done().then(function (ar) {
+
+      this._sendRequest(_IIPPacketAction["default"].ResourceParents).addUint32(resource._p.instanceId).done().then(function (ar) {
         var dataType = ar[0];
         var data = ar[1];
 
@@ -7535,6 +7926,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           return rt.triggerError(ex);
         });
       });
+
       return rt;
     }
   }, {
@@ -7543,14 +7935,14 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var attributes = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
       if (resource._p.connection != this) return new _AsyncReply["default"](null);
       var rt = new _AsyncReply["default"]();
-      if (attributes == null) this.sendRequest(_IIPPacketAction["default"].ClearAllAttributes).addUint32(resource._p.instanceId).done().then(function (ar) {
+      if (attributes == null) this._sendRequest(_IIPPacketAction["default"].ClearAllAttributes).addUint32(resource._p.instanceId).done().then(function (ar) {
         rt.trigger(true);
       }).error(function (ex) {
         rt.triggerError(ex);
       });else {
         var attrs = _DC.DC.stringArrayToBytes(attributes);
 
-        this.sendRequest(_IIPPacketAction["default"].ClearAttributes).addUint32(resource.instance.id).addUint32(attrs.length).addUint8Array(attrs).done().then(function (ar) {
+        this._sendRequest(_IIPPacketAction["default"].ClearAttributes).addUint32(resource.instance.id).addUint32(attrs.length).addUint8Array(attrs).done().then(function (ar) {
           rt.trigger(true);
         }).error(function (ex) {
           rt.triggerError(ex);
@@ -7564,11 +7956,13 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var clearAttributes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       if (resource._p.connection != this) return new _AsyncReply["default"](null);
       var rt = new _AsyncReply["default"]();
-      this.sendRequest(clearAttributes ? _IIPPacketAction["default"].UpdateAllAttributes : _IIPPacketAction["default"].UpdateAttributes).addUint32(resource._p.instanceId).addUint8Array(_Codec["default"].compose(attributes, this)).done().then(function () {
+
+      this._sendRequest(clearAttributes ? _IIPPacketAction["default"].UpdateAllAttributes : _IIPPacketAction["default"].UpdateAttributes).addUint32(resource._p.instanceId).addUint8Array(_Codec["default"].compose(attributes, this)).done().then(function () {
         rt.trigger(true);
       }).error(function (ex) {
         rt.triggerError(ex);
       });
+
       return rt;
     }
   }, {
@@ -7580,7 +7974,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var self = this;
 
       if (attributes == null) {
-        this.sendRequest(_IIPPacketAction["default"].GetAllAttributes).addUint32(resource._p.instanceId).done().then(function (ar) {
+        this._sendRequest(_IIPPacketAction["default"].GetAllAttributes).addUint32(resource._p.instanceId).done().then(function (ar) {
           var dataType = ar[0];
           var data = ar[1];
 
@@ -7598,7 +7992,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       } else {
         var attrs = _DC.DC.stringArrayToBytes(attributes);
 
-        this.sendRequest(_IIPPacketAction["default"].GetAttributes).addUint32(resource._p.instanceId).addUint32(attrs.length).addUint8Array(attrs).done().then(function (ar) {
+        this._sendRequest(_IIPPacketAction["default"].GetAttributes).addUint32(resource._p.instanceId).addUint32(attrs.length).addUint8Array(attrs).done().then(function (ar) {
           var dataType = ar[0];
           var data = ar[1];
 
@@ -7613,10 +8007,110 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         }).error(function (ex) {
           return rt.triggerError(ex);
         });
+
         ;
       }
 
       return rt;
+    }
+  }, {
+    key: "_keepAliveTimerElapsed",
+    value: function _keepAliveTimerElapsed() {
+      // @TODO: port this
+      // if (!this.isConnected)
+      //     return;
+      var self = this;
+      var now = new Date();
+      var interval = this._lastKeepAliveSent == null ? 0 : now - this._lastKeepAliveSent;
+      this._lastKeepAliveSent = now;
+
+      this._sendRequest(_IIPPacketAction["default"].KeepAlive).addDateTime(now).addUint32(interval).done().then(function (x) {
+        self.jitter = x[1];
+        self._keepAliveTimer = setTimeout(function () {
+          return self._keepAliveTimerElapsed();
+        }, self.keepAliveInterval * 1000); //console.log("Keep Alive Received " + self.jitter);
+        // run GC
+
+        var toBeRemoved = [];
+
+        for (var i = 0; i < self._attachedResources.length; i++) {
+          var r = self._attachedResources.values[i].deref();
+
+          if (r == null) {
+            var id = self._attachedResources.keys[i]; // send detach
+
+            self._sendDetachRequest(id);
+
+            toBeRemoved.push(id);
+          }
+        }
+
+        if (toBeRemoved.length > 0) console.log("GC: " + toBeRemoved.length);
+
+        for (var _i2 = 0, _toBeRemoved = toBeRemoved; _i2 < _toBeRemoved.length; _i2++) {
+          var _id = _toBeRemoved[_i2];
+
+          self._attachedResources.remove(_id);
+        }
+      }).error(function (ex) {
+        console.log(ex);
+        self.close();
+      }).timeout(self.keepAliveTime * 1000); //console.log("Keep alive sent ");
+
+    }
+  }, {
+    key: "staticCall",
+    value: function staticCall(classId, index, parameters) {
+      var pb = _Codec["default"].compose(parameters, this);
+
+      var reply = new _AsyncReply["default"]();
+      var c = this.callbackCounter++;
+      this.requests.add(c, reply);
+
+      this._sendParams().addUint8(0x40 | _IIPPacket["default"].IIPPacketAction.StaticCall).addUint32(c).addGuid(classId).addUint8(index).addUint8Array(pb).done();
+
+      return reply;
+    }
+  }, {
+    key: "call",
+    value: function call(procedureCall) {
+      var args = Map.from(UInt8, Object);
+
+      for (var i = 0; i < arguments.Length - 2; i++) {
+        args.add(i, arguments[i + 1]);
+      }
+
+      return this.callArgs(procedureCall, args);
+    }
+  }, {
+    key: "callArgs",
+    value: function callArgs(procedureCall, parameters) {
+      var pb = _Codec["default"].Compose(parameters, this);
+
+      var reply = new _AsyncReply["default"]();
+      var c = this.callbackCounter++;
+      this.requests.add(c, reply);
+
+      var callName = _DC.DC.stringToBytes(procedureCall);
+
+      sendParams().addUint8(0x40 | _IIPPacketAction["default"].ProcedureCall).addUint32(c).addUint16(callName.length).addUint8Array(callName).addUint8Array(pb).done();
+      return reply;
+    }
+  }, {
+    key: "IIPRequestKeepAlive",
+    value: function IIPRequestKeepAlive(callbackId, peerTime, interval) {
+      var jitter = 0;
+      var now = new Date();
+
+      if (this._lastKeepAliveReceived != null) {
+        var diff = now - this._lastKeepAliveReceived; //Console.WriteLine("Diff " + diff + " " + interval);
+
+        jitter = Math.abs(diff - interval);
+      }
+
+      this._sendParams().addUint8(0x80 | _IIPPacketAction["default"].KeepAlive).addUint32(callbackId).addDateTime(now).addUint32(jitter).done();
+
+      this._lastKeepAliveReceived = now;
     }
   }]);
 
@@ -7766,6 +8260,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
     _this = _super.call(this);
     _this._p = {
+      destroyed: false,
       suspended: false,
       attached: false,
       connection: connection,
@@ -7780,12 +8275,17 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
   _createClass(DistributedResource, [{
     key: "destroy",
     value: function destroy() {
-      this.destroyed = true;
+      this._p.destroyed = true;
       this._p.attached = false;
 
-      this._p.connection.sendDetachRequest(this._p.instanceId);
+      this._p.connection.detachResource(this._p.instanceId);
 
       this._emit("destroy", this);
+    }
+  }, {
+    key: "destroyed",
+    get: function get() {
+      return this._p.destroyed;
     }
   }, {
     key: "_suspend",
@@ -7831,6 +8331,8 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
         var makeFunc = function makeFunc(ft) {
           var func = function func() {
+            if (self._p.destroyed) throw new Error("Trying to access a destroyed object.");
+            if (self._p.suspended) throw new Error("Trying to access a suspended object.");
             var argsMap = new (_TypedMap["default"].of(_ExtendedTypes.UInt8, Object))();
 
             if (arguments.length == 1 && arguments[0] instanceof Object && arguments[0].constructor.name == "Object") {
@@ -7852,10 +8354,10 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
               return self._invoke(ft.index, argsMap);
             }
-          }; // get expansion
+          }; // get annotation
 
 
-          func.help = self.instance.template.functions[ft.index].expansion;
+          func.help = self.instance.template.functions[ft.index].annotation;
           return func;
         };
 
@@ -7867,6 +8369,9 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
         var makeSetter = function makeSetter(index) {
           return function (value) {
+            if (self._p.destroyed) throw new Error("Trying to access a destroyed object.");
+            if (self._p.suspended) throw new Error("Trying to access a suspended object.");
+
             self._set(index, value);
           };
         };
@@ -7895,7 +8400,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
       var et = event instanceof _EventTemplate["default"] ? event : this.instance.template.getEventTemplateByName(event);
       if (et == null) return new _AsyncReply["default"]().triggerError(new _AsyncException["default"](_ErrorType["default"].Management, _ExceptionCode["default"].MethodNotFound, ""));
       if (!et.listenable) return new _AsyncReply["default"]().triggerError(new _AsyncException["default"](_ErrorType["default"].Management, _ExceptionCode["default"].NotListenable, ""));
-      return this._p.connection.sendListenRequest(this._p.instanceId, et.index);
+      return this._p.connection._sendListenRequest(this._p.instanceId, et.index);
     }
   }, {
     key: "unlisten",
@@ -7903,7 +8408,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
       var et = event instanceof _EventTemplate["default"] ? event : this.instance.template.getEventTemplateByName(event);
       if (et == null) return new _AsyncReply["default"]().triggerError(new _AsyncException["default"](_ErrorType["default"].Management, _ExceptionCode["default"].MethodNotFound, ""));
       if (!et.listenable) return new _AsyncReply["default"]().triggerError(new _AsyncException["default"](_ErrorType["default"].Management, _ExceptionCode["default"].NotListenable, ""));
-      return this._p.connection.sendUnlistenRequest(this._p.instanceId, et.index);
+      return this._p.connection._sendUnlistenRequest(this._p.instanceId, et.index);
     }
   }, {
     key: "_emitEventByIndex",
@@ -7918,10 +8423,12 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
   }, {
     key: "_invoke",
     value: function _invoke(index, args) {
-      if (this.destroyed) throw new Error("Trying to access destroyed object");
-      if (this._p.suspended) throw new Error("Trying to access suspended object");
-      if (index >= this.instance.template.functions.length) throw new Error("Function index is incorrect");
-      return this._p.connection.sendInvoke(this._p.instanceId, index, args);
+      if (this._p.destroyed) throw new Error("Trying to access a destroyed object.");
+      if (this._p.suspended) throw new Error("Trying to access a suspended object.");
+      if (index >= this.instance.template.functions.length) throw new Error("Function index is incorrect.");
+      var ft = this.instance.template.getFunctionTemplateByIndex(index);
+      if (ft == null) throw new Exception("Function template not found.");
+      if (ft.isStatic) return this._p.connection.staticCall(this.instance.template.classId, index, args);else return this._p.connection._sendInvoke(this._p.instanceId, index, args);
     }
   }, {
     key: "_get",
@@ -7956,7 +8463,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
       var self = this;
 
-      this._p.connection.sendRequest(_IIPPacketAction["default"].SetProperty).addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters).done().then(function (res) {
+      this._p.connection._sendRequest(_IIPPacketAction["default"].SetProperty).addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters).done().then(function (res) {
         // not really needed, server will always send property modified, this only happens if the programmer forgot to emit in property setter
         self._p.properties[index] = value;
         reply.trigger(null);
@@ -8071,6 +8578,8 @@ var _AsyncReply = _interopRequireDefault(require("../../Core/AsyncReply.js"));
 
 var _DistributedConnection = _interopRequireDefault(require("./DistributedConnection.js"));
 
+var _KeyList = _interopRequireDefault(require("../../Data/KeyList.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -8105,6 +8614,7 @@ var DistributedServer = /*#__PURE__*/function (_IResource) {
 
     _this = _super.call(this);
     _this.connections = [];
+    _this.calls = new _KeyList["default"]();
     return _this;
   } //@TODO: con.off("close", ...)
 
@@ -8149,6 +8659,11 @@ var DistributedServer = /*#__PURE__*/function (_IResource) {
       var i = this.connections.indexOf(connection);
       if (i > -1) this.connections.splice(i, 1);
     }
+  }, {
+    key: "mapCall",
+    value: function mapCall(call, handler) {
+      this.calls.add(call, handler);
+    }
   }]);
 
   return DistributedServer;
@@ -8156,7 +8671,7 @@ var DistributedServer = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedServer;
 
-},{"../../Core/AsyncReply.js":5,"../../Resource/IResource.js":64,"./DistributedConnection.js":36}],42:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":5,"../../Data/KeyList.js":22,"../../Resource/IResource.js":64,"./DistributedConnection.js":36}],42:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -8732,6 +9247,8 @@ var _IIPPacketReport = _interopRequireDefault(require("./IIPPacketReport.js"));
 
 var _TransmissionType = _interopRequireDefault(require("../../Data/TransmissionType.js"));
 
+var _ExceptionCode = _interopRequireDefault(require("../../Core/ExceptionCode.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -8763,14 +9280,17 @@ var IIPPacket = /*#__PURE__*/function () {
     this.originalOffset = 0;
     this.resourceName = "";
     this.dataType = null;
+    this.jitter = 0;
+    this.interval = 0;
+    this.procedure = "";
+    this.currentTime = null;
   }
 
   _createClass(IIPPacket, [{
     key: "notEnough",
     value: function notEnough(offset, ends, needed) {
       if (offset + needed > ends) {
-        this.dataLengthNeeded = needed - (ends - offset); //            this.dataLengthNeeded = needed - (ends - this.originalOffset);
-
+        this.dataLengthNeeded = needed - (ends - offset);
         return true;
       } else return false;
     }
@@ -8835,6 +9355,8 @@ var IIPPacket = /*#__PURE__*/function () {
             //this.content = data.clip(offset, cl);
 
             offset += _cl;
+          } else {
+            throw new Error("Unknown event packet.");
           }
       } else if (this.command == _IIPPacketCommand["default"].Request) {
         if (this.action == _IIPPacketAction["default"].AttachResource) {
@@ -8972,6 +9494,39 @@ var IIPPacket = /*#__PURE__*/function () {
               //this.content = data.clip(offset, cl);
 
               offset += _cl6;
+            } else if (this.action == _IIPPacketAction["default"].KeepAlive) {
+              if (this.notEnough(offset, ends, 12)) return -this.dataLengthNeeded;
+              this.currentTime = data.getDateTime(offset);
+              offset += 8;
+              this.interval = data.getUint32(offset);
+              offset += 4;
+            } else if (this.action == _IIPPacketAction["default"].ProcedureCall) {
+              if (this.notEnough(offset, ends, 2)) return -this.dataLengthNeeded;
+
+              var _cl7 = data.getUint16(offset);
+
+              offset += 2;
+              if (this.notEnough(offset, ends, _cl7)) return -this.dataLengthNeeded;
+              this.procedure = data.getString(offset, _cl7);
+              offset += _cl7;
+              if (this.notEnough(offset, ends, 1)) return -this.dataLengthNeeded;
+
+              var _parsed3 = _TransmissionType["default"].parse(data, offset, ends);
+
+              if (_parsed3.type == null) return -_parsed3.size;
+              offset += _parsed3.size;
+            } else if (this.action == _IIPPacketAction["default"].StaticCall) {
+              if (this.notEnough(offset, ends, 18)) return -this.dataLengthNeeded;
+              this.classId = data.getGuid(offset);
+              offset += 16;
+              this.methodIndex = data[offset++];
+
+              var _parsed4 = _TransmissionType["default"].Pparse(data, offset, ends);
+
+              if (_parsed4.type == null) return -_parsed4.size;
+              offset += _parsed4.size;
+            } else {
+              throw new Error("Unknown request packet.");
             }
       } else if (this.command == _IIPPacketCommand["default"].Reply) {
         if (this.action == _IIPPacketAction["default"].AttachResource || this.action == _IIPPacketAction["default"].ReattachResource) {
@@ -8981,18 +9536,18 @@ var IIPPacket = /*#__PURE__*/function () {
           this.resourceAge = data.getUint64(offset);
           offset += 8;
 
-          var _cl7 = data.getUint16(offset);
+          var _cl8 = data.getUint16(offset);
 
           offset += 2;
-          if (this.notEnough(offset, ends, _cl7)) return -this.dataLengthNeeded;
-          this.resourceLink = data.getString(offset, _cl7);
-          offset += _cl7;
+          if (this.notEnough(offset, ends, _cl8)) return -this.dataLengthNeeded;
+          this.resourceLink = data.getString(offset, _cl8);
+          offset += _cl8;
 
-          var _parsed3 = _TransmissionType["default"].parse(data, offset, ends);
+          var _parsed5 = _TransmissionType["default"].parse(data, offset, ends);
 
-          if (_parsed3.type == null) return -_parsed3.size;
-          this.dataType = _parsed3.type;
-          offset += _parsed3.size;
+          if (_parsed5.type == null) return -_parsed5.size;
+          this.dataType = _parsed5.type;
+          offset += _parsed5.size;
         } else if (this.action == _IIPPacketAction["default"].DetachResource) {// nothing to do
         } else if (this.action == _IIPPacketAction["default"].CreateResource) {
           if (this.notEnough(offset, ends, 20)) return -this.dataLengthNeeded;
@@ -9003,20 +9558,28 @@ var IIPPacket = /*#__PURE__*/function () {
         || this.action == _IIPPacketAction["default"].GetAllAttributes || this.action == _IIPPacketAction["default"].GetAttributes) {
           if (this.notEnough(offset, ends, 1)) return -this.dataLengthNeeded;
 
-          var _parsed4 = _TransmissionType["default"].parse(data, offset, ends);
+          var _parsed6 = _TransmissionType["default"].parse(data, offset, ends);
 
-          if (_parsed4.type == null) return -_parsed4.size;
-          this.dataType = _parsed4.type;
-          offset += _parsed4.size;
-        } else if (this.action == _IIPPacketAction["default"].InvokeFunction) {
+          if (_parsed6.type == null) return -_parsed6.size;
+          this.dataType = _parsed6.type;
+          offset += _parsed6.size;
+        } else if (this.action == _IIPPacketAction["default"].InvokeFunction || this.action == _IIPPacketAction["default"].ProcedureCall || this.action == _IIPPacketAction["default"].StaticCall) {
           if (this.notEnough(offset, ends, 1)) return -this.dataLengthNeeded;
 
-          var _parsed5 = _TransmissionType["default"].parse(data, offset, ends);
+          var _parsed7 = _TransmissionType["default"].parse(data, offset, ends);
 
-          if (_parsed5.type == null) return -_parsed5.size;
-          this.dataType = _parsed5.type;
-          offset += _parsed5.size;
+          if (_parsed7.type == null) return -_parsed7.size;
+          this.dataType = _parsed7.type;
+          offset += _parsed7.size;
         } else if (this.action == _IIPPacketAction["default"].SetProperty || this.action == _IIPPacketAction["default"].Listen || this.action == _IIPPacketAction["default"].Unlisten) {// nothing to do
+        } else if (this.action == _IIPPacketAction["default"].KeepAlive) {
+          if (this.notEnough(offset, ends, 12)) return -this.dataLengthNeeded;
+          this.currentTime = data.getDateTime(offset);
+          offset += 8;
+          this.jitter = data.getUint32(offset);
+          offset += 4;
+        } else {
+          throw new Error("Unknown reply packet.");
         }
       } else if (this.command == _IIPPacketCommand["default"].Report) {
         if (this.report == _IIPPacketReport["default"].ManagementError) {
@@ -9029,12 +9592,12 @@ var IIPPacket = /*#__PURE__*/function () {
           offset += 2;
           if (this.notEnough(offset, ends, 2)) return -this.dataLengthNeeded;
 
-          var _cl8 = data.getUint16(offset);
+          var _cl9 = data.getUint16(offset);
 
           offset += 2;
-          if (this.notEnough(offset, ends, _cl8)) return -this.dataLengthNeeded;
-          this.errorMessage = data.getString(offset, _cl8);
-          offset += _cl8;
+          if (this.notEnough(offset, ends, _cl9)) return -this.dataLengthNeeded;
+          this.errorMessage = data.getString(offset, _cl9);
+          offset += _cl9;
         } else if (this.report == _IIPPacketReport["default"].ProgressReport) {
           if (this.notEnough(offset, ends, 8)) return -this.dataLengthNeeded;
           this.progressValue = data.getInt32(offset);
@@ -9044,11 +9607,13 @@ var IIPPacket = /*#__PURE__*/function () {
         } else if (this.report == _IIPPacketReport["default"].ChunkStream) {
           if (this.notEnough(offset, ends, 1)) return -this.dataLengthNeeded;
 
-          var _parsed6 = _TransmissionType["default"].parse(data, offset, ends);
+          var _parsed8 = _TransmissionType["default"].parse(data, offset, ends);
 
-          if (_parsed6.type == null) return -_parsed6.size;
-          this.dataType = _parsed6.type;
-          offset += _parsed6.size;
+          if (_parsed8.type == null) return -_parsed8.size;
+          this.dataType = _parsed8.type;
+          offset += _parsed8.size;
+        } else {
+          throw new Error("Unknown report packet.");
         }
       }
 
@@ -9061,7 +9626,7 @@ var IIPPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPPacket;
 
-},{"../../Data/TransmissionType.js":32,"./IIPPacketAction.js":52,"./IIPPacketCommand.js":53,"./IIPPacketEvent.js":54,"./IIPPacketReport.js":55}],52:[function(require,module,exports){
+},{"../../Core/ExceptionCode.js":7,"../../Data/TransmissionType.js":32,"./IIPPacketAction.js":52,"./IIPPacketCommand.js":53,"./IIPPacketEvent.js":54,"./IIPPacketReport.js":55}],52:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9100,7 +9665,11 @@ var _default = // const IIPPacketAction =
   ClearAllAttributes: 26,
   GetAttributes: 27,
   UpdateAttributes: 28,
-  ClearAttributes: 29
+  ClearAttributes: 29,
+  // Static
+  KeepAlive: 0x20,
+  ProcedureCall: 0x21,
+  StaticCall: 0x22
 };
 exports["default"] = _default;
 
@@ -9382,6 +9951,8 @@ var _SocketState = _interopRequireDefault(require("./SocketState.js"));
 
 var _NetworkBuffer = _interopRequireDefault(require("../NetworkBuffer.js"));
 
+var _DC = _interopRequireDefault(require("../../Data/DC.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -9463,6 +10034,7 @@ var WSocket = /*#__PURE__*/function (_ISocket) {
       // console.log("Out ", message.byteLength);
       if (this.held) this.sendNetworkBuffer.writeAll(message);else {
         try {
+          //console.log("TX", new DC(message));
           this.ws.send(message);
         } catch (_unused) {
           this.state = _SocketState["default"].Closed;
@@ -9559,7 +10131,7 @@ var WSocket = /*#__PURE__*/function (_ISocket) {
       if (message == null) return; //            totalSent += message.Length;
 
       try {
-        this.ws.send(message);
+        this.ws.send(message); //console.log("TX", message);
       } catch (_unused2) {
         this.state = _SocketState["default"].Closed;
       }
@@ -9623,7 +10195,7 @@ exports["default"] = WSocket;
 
 _defineProperty(WSocket, "webSocket", null);
 
-},{"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../NetworkBuffer.js":44,"./ISocket.js":57,"./SocketState.js":58,"ws":1}],60:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Data/DC.js":15,"../NetworkBuffer.js":44,"./ISocket.js":57,"./SocketState.js":58,"ws":1}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10176,7 +10748,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
     _this = _super.call(this);
     _this.store = store;
-    _this.resource = resource;
+    _this.resource = new WeakRef(resource);
     _this.id = id;
     _this.name = name;
     _this.instanceAge = age;
@@ -10189,18 +10761,19 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
     var self = _assertThisInitialized(_this);
 
     _this.children.on("add", function (value) {
-      value.instance.parents.add(self.resource);
+      var r = self.resource.deref();
+      if (r != null) value.instance.parents.add(r);
     });
 
     _this.children.on("remove", function (value) {
-      value.instance.parents.remove(self.resource);
+      var r = self.resource.deref();
+      if (r != null) value.instance.parents.remove(r);
     });
 
-    _this.resource.on("Destroy", function (sender) {
+    resource.on("destroy", function (sender) {
       self._emit("ResourceDestroyed", sender);
     });
-
-    if (customTemplate != null) _this.template = customTemplate;else _this.template = _Warehouse["default"].getTemplateByType(_this.resource.constructor); // set ages
+    if (customTemplate != null) _this.template = customTemplate;else _this.template = _Warehouse["default"].getTemplateByType(resource.constructor); // set ages
 
     _this.ages = [];
     _this.modificationDates = [];
@@ -10213,7 +10786,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
 
     for (var _i = 0; _i < _this.template.events.length; _i++) {
-      _this.resource.on(_this.template.events[_i].name, _this._makeHandler(_this.template.events[_i]));
+      resource.on(_this.template.events[_i].name, _this._makeHandler(_this.template.events[_i]));
     }
 
     return _this;
@@ -10248,9 +10821,11 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "loadProperty",
     value: function loadProperty(name, age, modificationDate, value) {
+      var r = self.resource.deref();
+      if (r == null) return;
       var pt = this.template.getPropertyTemplateByName(name);
       if (pt == null) return false;
-      this.resource[name] = value;
+      r[name] = value;
       this.setAge(pt.index, age);
       this.setModificationDate(pt.index, modificationDate);
       return true;
@@ -10272,10 +10847,12 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "serialize",
     value: function serialize() {
+      var r = this.resource.deref();
+      if (r == null) return;
       var props = new _PropertyValueArray["default"]();
 
       for (var i = 0; i < this.template.properties.length; i++) {
-        props.push(new _PropertyValue["default"](this.resource[this.template.properties[i].name], this.ages[this.template.properties[i].index], this.modificationDates[this.template.properties[i].index]));
+        props.push(new _PropertyValue["default"](r[this.template.properties[i].name], this.ages[this.template.properties[i].index], this.modificationDates[this.template.properties[i].index]));
       }
 
       return props;
@@ -10288,19 +10865,18 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "emitModification",
     value: function emitModification(pt, value) {
+      var resource = this.resource.deref();
+      if (resource == null) return;
       this.instanceAge++;
       var now = new Date();
       this.ages[pt.index] = this.instanceAge;
       this.modificationDates[pt.index] = now;
-      if (pt.recordable) this.store.record(this.resource, pt.name, value, this.ages[pt.index], now);else this.store.modify(this.resource, pt.name, value, this.ages[pt.index], now);
-      var pmInfo = new _PropertyModificationInfo["default"](this.resource, pt, value, this.instanceAge);
+      if (pt.recordable) this.store.record(resource, pt.name, value, this.ages[pt.index], now);else this.store.modify(resource, pt.name, value, this.ages[pt.index], now);
+      var pmInfo = new _PropertyModificationInfo["default"](resource, pt, value, this.instanceAge);
 
       _get(_getPrototypeOf(Instance.prototype), "_emit", this).call(this, "PropertyModified", pmInfo);
 
-      this.resource._emit(":".concat(pt.name), value); //this.resource.emitProperty(pmInfo);
-      //super._emit("ResourceModified", this.resource, pt.name, value);  
-      //this.resource._emit(":" + pt.name, value);
-
+      resource._emit(":".concat(pt.name), value);
     }
   }, {
     key: "modified",
@@ -10327,15 +10903,20 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "_emitResourceEvent",
     value: function _emitResourceEvent(issuer, receivers, eventTemplate, value) {
-      _get(_getPrototypeOf(Instance.prototype), "_emit", this).call(this, "EventOccurred", new _EventOccurredInfo["default"](this.resource, eventTemplate, value, issuer, receivers)); //super._emit("ResourceEventOccurred", this.resource, issuer, receivers, name, args);
+      var resource = this.resource.deref();
+      if (resource == null) return;
 
+      _get(_getPrototypeOf(Instance.prototype), "_emit", this).call(this, "EventOccurred", new _EventOccurredInfo["default"](resource, eventTemplate, value, issuer, receivers));
     }
   }, {
     key: "getPropertyValue",
     value: function getPropertyValue(name, resultObject) {
+      var resource = this.resource.deref();
+      if (resource == null) return;
+
       for (var i = 0; i < this.template.properties.length; i++) {
         if (this.template.properties[i].name == name) {
-          resultObject.value = this.resource[name];
+          resultObject.value = resource[name];
           return true;
         }
       }
@@ -10365,9 +10946,12 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "applicable",
     value: function applicable(session, action, member, inquirer) {
+      var resource = this.resource.deref();
+      if (resource == null) return;
+
       for (var i = 0; i < this.managers.length; i++) {
-        var r = this.managers.item(i).applicable(this.resource, session, action, member, inquirer);
-        if (r != _Ruling["default"].DontCare) return r;
+        var ruling = this.managers.item(i).applicable(resource, session, action, member, inquirer);
+        if (ruling != _Ruling["default"].DontCare) return ruling;
       }
 
       return _Ruling["default"].DontCare;
@@ -10431,7 +11015,9 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
             var manager = new (Function.prototype.bind.apply(type))();
 
             if (manager instanceof _IPermissionsManager["default"]) {
-              manager.initialize(settings, this.resource);
+              var r = this.resource.deref();
+              if (r == null) return;
+              manager.initialize(settings, r);
               this.managers.add(manager);
             } else return false;
           }
@@ -10441,6 +11027,18 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
       }
 
       return true;
+    }
+  }, {
+    key: "link",
+    get: function get() {
+      var resource = this.resource.deref();
+      if (resource == null) return;
+
+      if (resource == this.store) {
+        return this.name;
+      } else {
+        return this.store.link(resource);
+      }
     }
   }]);
 
@@ -10596,10 +11194,7 @@ var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
   var _super = _createSuper(ConstantTemplate);
 
-  //final dynamic value;
-  //final String? expansion;
-  //final RepresentationType valueType;
-  function ConstantTemplate(template, index, name, inherited, valueType, value, expansion) {
+  function ConstantTemplate(template, index, name, inherited, valueType, value, annotation) {
     var _this;
 
     _classCallCheck(this, ConstantTemplate);
@@ -10607,7 +11202,7 @@ var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
     _this = _super.call(this, template, index, name, inherited);
     _this.valueType = valueType;
     _this.value = value;
-    _this.expansion = expansion;
+    _this.annotation = annotation;
     return _this;
   }
 
@@ -10618,8 +11213,8 @@ var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
       var hdr = this.inherited ? 0x80 : 0;
 
-      if (this.expansion != null) {
-        var exp = _DC.DC.stringToBytes(this.expansion);
+      if (this.annotation != null) {
+        var exp = _DC.DC.stringToBytes(this.annotation);
 
         hdr |= 0x70;
         return (0, _DC.BL)().addUint8(hdr).addUint8(name.length).addDC(name).addDC(this.valueType.compose()).addDC(_Codec["default"].compose(this.value, null)).addInt32(exp.length).addDC(exp).toDC();
@@ -10708,14 +11303,14 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
   function EventTemplate(template, index, name, inherited, argumentType) {
     var _this;
 
-    var expansion = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
+    var annotation = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
     var listenable = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
 
     _classCallCheck(this, EventTemplate);
 
     _this = _super.call(this, template, index, name, inherited);
     _this.argumentType = argumentType;
-    _this.expansion = expansion;
+    _this.annotation = annotation;
     _this.listenable = listenable;
     return _this;
   }
@@ -10728,8 +11323,8 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
       var hdr = this.inherited ? 0x80 : 0;
       if (this.listenable) hdr |= 0x8;
 
-      if (this.expansion != null) {
-        var exp = _DC.DC.stringToBytes(this.expansion);
+      if (this.annotation != null) {
+        var exp = _DC.DC.stringToBytes(this.annotation);
 
         hdr |= 0x50;
         return (0, _DC.BL)().addUint8(hdr).addUint8(name.length).addDC(name).addDC(this.argumentType.compose()).addInt32(exp.length).addDC(exp).toDC();
@@ -10815,17 +11410,18 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
   var _super = _createSuper(FunctionTemplate);
 
-  function FunctionTemplate(template, index, name, inherited, args, returnType) {
+  function FunctionTemplate(template, index, name, inherited, isStatic, args, returnType) {
     var _this;
 
-    var expansion = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
+    var annotation = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
 
     _classCallCheck(this, FunctionTemplate);
 
     _this = _super.call(this, template, index, name, inherited);
     _this.args = args;
     _this.returnType = returnType;
-    _this.expansion = expansion;
+    _this.annotation = annotation;
+    _this.isStatic = isStatic;
     return _this;
   }
 
@@ -10840,12 +11436,12 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
         bl.addDC(this.args[i].compose());
       }
 
-      if (this.expansion != null) {
-        var exp = _DC.DC.stringToBytes(this.expansion);
+      if (this.annotation != null) {
+        var exp = _DC.DC.stringToBytes(this.annotation);
 
         bl.addInt32(exp.length).addDC(exp);
-        bl.insertUint8(0, this.inherited ? 0x90 : 0x10);
-      } else bl.insertUint8(0, this.inherited ? 0x80 : 0x0);
+        bl.insertUint8(0, (this.inherited ? 0x90 : 0x10) | (this.isStatic ? 0x4 : 0));
+      } else bl.insertUint8(0, (this.inherited ? 0x80 : 0x0) | (this.isStatic ? 0x4 : 0));
 
       return bl.toDC();
     }
@@ -10988,16 +11584,16 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
   function PropertyTemplate(template, index, name, inherited, valueType) {
     var _this;
 
-    var readExpansion = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
-    var writeExpansion = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
+    var readAnnotation = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
+    var writeAnnotation = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
     var recordable = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : false;
 
     _classCallCheck(this, PropertyTemplate);
 
     _this = _super.call(this, template, index, name, inherited);
     _this.valueType = valueType;
-    _this.readExpansion = readExpansion;
-    _this.writeExpansion = writeExpansion;
+    _this.readAnnotation = readAnnotation;
+    _this.writeAnnotation = writeAnnotation;
     _this.recordable = recordable;
     return _this;
   }
@@ -11010,18 +11606,18 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
       var pv = this.permission << 1 | (this.recordable ? 1 : 0);
       if (this.inherited) pv |= 0x80;
 
-      if (this.writeExpansion != null && this.readExpansion != null) {
-        var rexp = _DC.DC.stringToBytes(this.readExpansion);
+      if (this.writeAnnotation != null && this.readAnnotation != null) {
+        var rexp = _DC.DC.stringToBytes(this.readAnnotation);
 
-        var wexp = _DC.DC.stringToBytes(this.writeExpansion);
+        var wexp = _DC.DC.stringToBytes(this.writeAnnotation);
 
         return (0, _DC.BL)().addUint8(0x38 | pv).addUint8(name.length).addDC(name).addDC(this.valueType.compose()).addInt32(wexp.length).addDC(wexp).addInt32(rexp.length).addDC(rexp).toDC();
-      } else if (this.writeExpansion != null) {
-        var _wexp = _DC.DC.stringToBytes(this.writeExpansion);
+      } else if (this.writeAnnotation != null) {
+        var _wexp = _DC.DC.stringToBytes(this.writeAnnotation);
 
         return (0, _DC.BL)().addUint8(0x30 | pv).addUint8(name.length).addDC(name).addDC(this.valueType.compose()).addInt32(_wexp.length).addDC(_wexp).toDC();
-      } else if (this.readExpansion != null) {
-        var _rexp = _DC.DC.stringToBytes(this.readExpansion);
+      } else if (this.readAnnotation != null) {
+        var _rexp = _DC.DC.stringToBytes(this.readAnnotation);
 
         return (0, _DC.BL)().addUint8(0x28 | pv).addUint8(name.length).addDC(name).addDC(this.valueType.compose()).addInt32(_rexp.length).addDC(_rexp).toDC();
       } else return (0, _DC.BL)().addUint8(0x20 | pv).addUint8(name.length).addDC(name).addDC(this.valueType.compose()).toDC();
@@ -11182,7 +11778,8 @@ var TypeTemplate = /*#__PURE__*/function () {
           } // [name, {param1: type, param2: int}, returnType, "Description"]
 
 
-          var ft = new _FunctionTemplate["default"](this, _i3, fi[0], false, args, (_RepresentationType$f5 = _RepresentationType["default"].fromType(fi[2])) !== null && _RepresentationType$f5 !== void 0 ? _RepresentationType$f5 : _RepresentationType["default"].Void, fi[3]);
+          var isStatic = type[fi[0]] instanceof Function;
+          var ft = new _FunctionTemplate["default"](this, _i3, fi[0], false, isStatic, args, (_RepresentationType$f5 = _RepresentationType["default"].fromType(fi[2])) !== null && _RepresentationType$f5 !== void 0 ? _RepresentationType$f5 : _RepresentationType["default"].Void, fi[3]);
           ft.methodInfo = fi;
           this.functions.push(ft);
         }
@@ -11211,10 +11808,20 @@ var TypeTemplate = /*#__PURE__*/function () {
 
 
     var b = (0, _DC.BL)();
+    var hasClassAnnotation = template.annotation != null;
 
     var cls = _DC.DC.stringToBytes(this.className);
 
-    b.addUint8(this.templateType).addUint8Array(this.classId.value).addUint8(cls.length).addUint8Array(cls).addUint32(template.version).addUint16(this.members.length);
+    b.addUint8((hasClassAnnotation ? 0x40 : 0) | this.templateType).addUint8Array(this.classId.value).addUint8(cls.length).addUint8Array(cls);
+
+    if (hasClassAnnotation) {
+      var classAnnotationBytes = _DC.DC.stringToBytes(template.annotation);
+
+      b.addUint16(classAnnotationBytes.length).addUint8Array(classAnnotationBytes);
+      this.annotation = template.annotation;
+    }
+
+    b.addUint32(template.version).addUint16(this.members.length);
 
     for (var _i8 = 0; _i8 < this.functions.length; _i8++) {
       b.addUint8Array(this.functions[_i8].compose());
@@ -11451,6 +12058,7 @@ var TypeTemplate = /*#__PURE__*/function () {
       var od = new TypeTemplate();
       od.content = data.clip(offset, contentLength);
       var hasParent = (data.getUint8(offset) & 0x80) > 0;
+      var hasClassAnnotation = (data.getUint8(offset) & 0x40) > 0;
       od.templateType = data.getUint8(offset++) & 0xF;
       od.classId = data.getGuid(offset);
       offset += 16;
@@ -11460,6 +12068,13 @@ var TypeTemplate = /*#__PURE__*/function () {
       if (hasParent) {
         od.parentId = data.getGuid(offset);
         offset += 16;
+      }
+
+      if (hasClassAnnotation) {
+        var len = data.getUint16(offset);
+        offset += 2;
+        od.annotation = data.getString(offset, len);
+        offset += len;
       }
 
       od.version = data.getInt32(offset);
@@ -11477,11 +12092,14 @@ var TypeTemplate = /*#__PURE__*/function () {
 
         if (type == 0) // function
           {
-            var expansion = null;
-            var hasExpansion = (data.getUint8(offset++) & 0x10) == 0x10;
-            var len = data.getUint8(offset++);
-            var name = data.getString(offset, len);
-            offset += len; // return type
+            var annotation = null;
+            var isStatic = (data[offset] & 0x4) == 0x4;
+            var hasAnnotation = (data.getUint8(offset++) & 0x10) == 0x10;
+
+            var _len = data.getUint8(offset++);
+
+            var name = data.getString(offset, _len);
+            offset += _len; // return type
 
             var _dt = _RepresentationType["default"].parse(data, offset);
 
@@ -11500,89 +12118,89 @@ var TypeTemplate = /*#__PURE__*/function () {
               offset += argSize;
             }
 
-            if (hasExpansion) // expansion ?
+            if (hasAnnotation) // annotation ?
               {
                 var cs = data.getUint32(offset);
                 offset += 4;
-                expansion = data.getString(offset, cs);
+                annotation = data.getString(offset, cs);
                 offset += cs;
               }
 
-            var ft = new _FunctionTemplate["default"](od, functionIndex++, name, inherited, args, _dt.type, expansion);
+            var ft = new _FunctionTemplate["default"](od, functionIndex++, name, inherited, isStatic, args, _dt.type, annotation);
             od.functions.push(ft);
           } else if (type == 1) // property
           {
-            var hasReadExpansion = (data.getUint8(offset) & 0x8) == 0x8;
-            var hasWriteExpansion = (data.getUint8(offset) & 0x10) == 0x10;
-            var readExpansion = void 0,
-                writeExpansion = void 0;
+            var hasReadAnnotation = (data.getUint8(offset) & 0x8) == 0x8;
+            var hasWriteAnnotation = (data.getUint8(offset) & 0x10) == 0x10;
+            var readAnnotation = void 0,
+                writeAnnotation = void 0;
             var recordable = (data.getUint8(offset) & 1) == 1;
             var permission = data.getUint8(offset++) >> 1 & 0x3;
 
-            var _len = data.getUint8(offset++);
+            var _len2 = data.getUint8(offset++);
 
-            var _name = data.getString(offset, _len);
+            var _name = data.getString(offset, _len2);
 
-            offset += _len;
+            offset += _len2;
 
             var dt = _RepresentationType["default"].parse(data, offset);
 
             offset += dt.size;
 
-            if (hasReadExpansion) // expansion ?
+            if (hasReadAnnotation) // annotation ?
               {
                 var _cs = data.getUint32(offset);
 
                 offset += 4;
-                readExpansion = data.getString(offset, _cs);
+                readAnnotation = data.getString(offset, _cs);
                 offset += _cs;
               }
 
-            if (hasWriteExpansion) // expansion ?
+            if (hasWriteAnnotation) // annotation ?
               {
                 var _cs2 = data.getUint32(offset);
 
                 offset += 4;
-                writeExpansion = data.getString(offset, _cs2);
+                writeAnnotation = data.getString(offset, _cs2);
                 offset += _cs2;
               }
 
-            var pt = new _PropertyTemplate["default"](od, propertyIndex++, _name, inherited, dt.type, readExpansion, writeExpansion, recordable);
+            var pt = new _PropertyTemplate["default"](od, propertyIndex++, _name, inherited, dt.type, readAnnotation, writeAnnotation, recordable);
             od.properties.push(pt);
           } else if (type == 2) // Event
           {
-            var _hasExpansion = (data.getUint8(offset) & 0x10) == 0x10;
+            var _hasAnnotation = (data.getUint8(offset) & 0x10) == 0x10;
 
             var listenable = (data.getUint8(offset++) & 0x8) == 0x8;
 
-            var _len2 = data.getUint8(offset++);
+            var _len3 = data.getUint8(offset++);
 
-            var _name2 = data.getString(offset, _len2);
+            var _name2 = data.getString(offset, _len3);
 
-            var _expansion = void 0;
+            var _annotation = void 0;
 
-            offset += _len2;
+            offset += _len3;
 
             var _dt2 = _RepresentationType["default"].parse(data, offset);
 
             offset += _dt2.size;
 
-            if (_hasExpansion) // expansion ?
+            if (_hasAnnotation) // annotation ?
               {
                 var _cs3 = data.getUint32(offset);
 
                 offset += 4;
-                _expansion = data.getString(offset, _cs3);
+                _annotation = data.getString(offset, _cs3);
                 offset += _cs3;
               }
 
-            var et = new _EventTemplate["default"](od, eventIndex++, _name2, inherited, _dt2.type, _expansion, listenable);
+            var et = new _EventTemplate["default"](od, eventIndex++, _name2, inherited, _dt2.type, _annotation, listenable);
             od.events.push(et);
           } else if (type == 3) // constant
           {
-            var _expansion2 = null;
+            var _annotation2 = null;
 
-            var _hasExpansion2 = (data[offset++] & 0x10) == 0x10;
+            var _hasAnnotation2 = (data[offset++] & 0x10) == 0x10;
 
             var _name3 = data.getString(offset + 1, data[offset]);
 
@@ -11596,16 +12214,16 @@ var TypeTemplate = /*#__PURE__*/function () {
 
             offset += parsed.size;
 
-            if (_hasExpansion2) // expansion ?
+            if (_hasAnnotation2) // annotation ?
               {
                 var _cs4 = data.getUint32(offset);
 
                 offset += 4;
-                _expansion2 = data.getString(offset, _cs4);
+                _annotation2 = data.getString(offset, _cs4);
                 offset += _cs4;
               }
 
-            var ct = new _ConstantTemplate["default"](this, constantIndex++, _name3, inherited, _dt3.type, parsed.reply.result, _expansion2);
+            var ct = new _ConstantTemplate["default"](this, constantIndex++, _name3, inherited, _dt3.type, parsed.reply.result, _annotation2);
             od.constants.push(ct);
           }
       } // append signals
@@ -13367,6 +13985,12 @@ var _AsyncReply = _interopRequireDefault(require("../Core/AsyncReply.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -13415,13 +14039,32 @@ var MemoryStore = /*#__PURE__*/function (_IStore) {
     }
   }, {
     key: "get",
-    value: function get(resource) {
+    value: function get(path) {
+      if (path.startsWith("$")) {
+        var id = parseInt(path.substring(1));
+        return new _AsyncReply["default"](this.resources.get(id));
+      } else {
+        var _iterator = _createForOfIteratorHelper(this.resources.values()),
+            _step;
+
+        try {
+          for (_iterator.s(); !(_step = _iterator.n()).done;) {
+            var r = _step.value;
+            if (r.instance.name == path) return new _AsyncReply["default"](r);
+          }
+        } catch (err) {
+          _iterator.e(err);
+        } finally {
+          _iterator.f();
+        }
+      }
+
       return new _AsyncReply["default"](null);
     }
   }, {
     key: "link",
     value: function link(resource) {
-      if (resource.instance.store == this) return this.instance.name + "/" + resource.instance.id;
+      if (resource.instance.store == this) return this.instance.name + "/$" + resource.instance.id;
     }
   }, {
     key: "trigger",

@@ -13,6 +13,9 @@ import TypedMap from "../../src/Data/TypedMap.js";
 
 const require = createRequire(import.meta.url);
 
+
+
+
 const WebSocket = require('ws');
 const http = require("http");
 const fs = require("fs");
@@ -65,13 +68,14 @@ class MyChat extends IResource {
 }
 
 
-let x = TransmissionType.compose(TransmissionTypeIdentifier.List, new DC([1,2,3,4,5,6]));
-let tt = TransmissionType.parse(x, 0, x.length);
 
 let sys = await Warehouse.new(MemoryStore, "sys");
+
 let ms = await Warehouse.new(MyMembership, "ms");
 let chat  = await Warehouse.new(MyChat, "chat", sys);
+
 server = await Warehouse.new(DistributedServer, "dss", sys, null, null, {membership: ms, entryPoint: chat});
+
 
 wss.on('connection', function connection(ws) 
 {
@@ -96,6 +100,7 @@ http.createServer(function (req, res) {
     }
   });
 }).listen(8000);
+
 
 console.log(`HTTP Server running http://localhost:8000/demo/chat/index.html`);
 console.log(`IIP Server running iip://localhost:8001`);

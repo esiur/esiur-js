@@ -51,15 +51,30 @@ export default class MemoryStore extends IStore
             return new AsyncReply(null);
      }
 
-     get(resource)
+     get(path)
      {
-         return new AsyncReply(null);
+        if (path.startsWith("$"))
+        {
+            let id = parseInt(path.substring(1));
+            return new AsyncReply (this.resources.get(id));
+        }
+        else
+        {
+            for(let r of this.resources.values())
+            {
+                if (r.instance.name == path)
+                    return new AsyncReply(r);
+
+            }
+        }
+
+        return new AsyncReply(null);
      }
 
      link(resource)
      {
         if (resource.instance.store == this)
-            return this.instance.name + "/" + resource.instance.id;
+            return this.instance.name + "/$" + resource.instance.id;
      }
 
      trigger(trigger)

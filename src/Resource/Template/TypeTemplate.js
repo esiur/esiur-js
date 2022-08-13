@@ -318,7 +318,9 @@ export default class TypeTemplate {
                         ?? RepresentationType.Dynamic, fi[1][ai][2]?.optional, ai));
 
                 // [name, {param1: type, param2: int}, returnType, "Description"]
-                    var ft = new FunctionTemplate(this, i, fi[0], false, args,
+                    let isStatic = type[fi[0]] instanceof Function;
+
+                    var ft = new FunctionTemplate(this, i, fi[0], false, isStatic, args,
                          RepresentationType.fromType(fi[2]) ?? RepresentationType.Void,
                           fi[3]);
 

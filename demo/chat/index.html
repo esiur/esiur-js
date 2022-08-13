@@ -15,7 +15,7 @@
 
                 try {
                     status.innerHTML = "Connecting...";
-                    service = await wh.get("iip://localhost:8001/chat", {username, password: "1234"});
+                    service = await wh.get("iip://localhost:8001/chat", {username, password: "1234", autoReconnect: true});
                     login.style.display = "none";
                     service.on("message", appendMessage)
                            .on(":title", updateTitle)

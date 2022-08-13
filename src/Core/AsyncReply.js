@@ -105,7 +105,7 @@ export default class AsyncReply extends Promise
         if (this.ready)
             return this;
 
-        if (this.exception != null)
+        if (this.exception.raised)
             return this;
         
         this.result = result;
