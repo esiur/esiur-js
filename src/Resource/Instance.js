@@ -155,9 +155,9 @@ export default class Instance extends IEventHandler
         this.modificationDates[pt.index] = now;
         
         if (pt.recordable)
-            this.store.record(resource, pt.name, value, this.ages[pt.index], now);
+            this.store?.record(resource, pt.name, value, this.ages[pt.index], now);
         else
-            this.store.modify(resource, pt.name, value, this.ages[pt.index], now);
+            this.store?.modify(resource, pt.name, value, this.ages[pt.index], now);
 
         let pmInfo = new PropertyModificationInfo(resource, pt, value, this.instanceAge);
 

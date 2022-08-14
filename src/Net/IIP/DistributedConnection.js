@@ -80,6 +80,8 @@ import {TransmissionType, TransmissionTypeIdentifier} from '../../Data/Transmiss
 
 import PropertyValue from '../../Data/PropertyValue.js';
 import PropertyValueArray from '../../Data/PropertyValueArray.js';
+import { UInt8 } from '../../Data/ExtendedTypes.js';
+import ConnectionStatus from './ConnectionStatus.js';
 
 export default class DistributedConnection extends IStore {
 
@@ -671,8 +673,11 @@ export default class DistributedConnection extends IStore {
                                     {
     
                                         this.ready = true;
+                                        this.status = ConnectionStatus.Connected;
+
                                         this._openReply?.trigger(true);
                                         this._openReply = null;
+                                        
                                         this._emit("ready", this);
                                         this.server?.membership.login(this.session);
 
@@ -685,8 +690,11 @@ export default class DistributedConnection extends IStore {
                                 else
                                 {
                                     this.ready = true;
+                                    this.status = ConnectionStatus.Connected;
+
                                     this._openReply?.trigger(true);
                                     this._openReply = null;
+
                                     this._emit("ready", this);
                                     this.server?.membership.login(this.session);
                                 }
@@ -772,8 +780,9 @@ export default class DistributedConnection extends IStore {
                         {
                             this.session.id = authPacket.sessionId;
                             this.ready = true;
-                            this._emit("ready", this);
+                            this.status = ConnectionStatus.Connected;
 
+                            
                             // put it in the warehouse
                             if (this.instance == null)
                             {
@@ -1002,6 +1011,8 @@ export default class DistributedConnection extends IStore {
         if (this._openReply != null)
             throw new AsyncException(ErrorType.Exception, 0, "Connection in progress");
 
+        this.status = ConnectionStatus.Connecting;
+
         this._openReply = new AsyncReply();
 
         if (hostname != null)
@@ -1131,6 +1142,8 @@ export default class DistributedConnection extends IStore {
     {
         // clean up
         this.ready = false;
+        this.status = ConnectionStatus.Closed;
+
         this.readyToEstablish = false;
 
         clearTimeout(this._keepAliveTimer);
@@ -3166,4 +3179,11 @@ export default class DistributedConnection extends IStore {
         this._lastKeepAliveReceived = now;
     }
 
+
+    static get template() {
+        return {
+            namespace: "Esiur",
+            properties: [["status", UInt8]]
+        };
+    }
 }
