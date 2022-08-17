@@ -29,8 +29,6 @@ export default class ResourceProxy {
             }
         }
 
-        debugger;
-
         var func = new Function("b", `//# sourceURL=${classUrl} \r\n ${code}});`);
 
         var proxyType = func.call(type /* this */, type);

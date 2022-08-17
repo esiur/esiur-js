@@ -1703,7 +1703,7 @@ _defineProperty(Codec, "typedParsers", [_DataDeserializer["default"].recordParse
 
 _defineProperty(Codec, "composers", (_defineProperty2 = {}, _defineProperty(_defineProperty2, Boolean, _DataSerializer["default"].boolComposer), _defineProperty(_defineProperty2, _NotModified["default"], _DataSerializer["default"].notModifiedComposer), _defineProperty(_defineProperty2, _ExtendedTypes.Char8, _DataSerializer["default"].char8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Char16, _DataSerializer["default"].char16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int64, _DataSerializer["default"].int64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt64, _DataSerializer["default"].uInt64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int32, _DataSerializer["default"].int32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt32, _DataSerializer["default"].uInt32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int16, _DataSerializer["default"].int16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt16, _DataSerializer["default"].uInt16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int8, _DataSerializer["default"].int8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt8, _DataSerializer["default"].uInt8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float32, _DataSerializer["default"].float32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float64, _DataSerializer["default"].float64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float128, _DataSerializer["default"].float128Composer), _defineProperty(_defineProperty2, Number, _DataSerializer["default"].numberComposer), _defineProperty(_defineProperty2, Date, _DataSerializer["default"].dateTimeComposer), _defineProperty(_defineProperty2, _DC.DC, _DataSerializer["default"].rawDataComposer), _defineProperty(_defineProperty2, Uint8Array, _DataSerializer["default"].rawDataComposer), _defineProperty(_defineProperty2, String, _DataSerializer["default"].stringComposer), _defineProperty(_defineProperty2, Array, _DataSerializer["default"].listComposer), _defineProperty(_defineProperty2, _ResourceArray["default"], _DataSerializer["default"].resourceListComposer), _defineProperty(_defineProperty2, _RecordArray["default"], _DataSerializer["default"].recordListComposer), _defineProperty(_defineProperty2, Map, _DataSerializer["default"].mapComposer), _defineProperty(_defineProperty2, _PropertyValueArray["default"], _DataSerializer["default"].propertyValueArrayComposer), _defineProperty2));
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Net/IIP/DistributedPropertyContext.js":37,"../Net/IIP/DistributedResource.js":38,"../Resource/IResource.js":64,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./BinaryList.js":13,"./DC.js":15,"./DataDeserializer.js":16,"./DataSerializer.js":17,"./ExtendedTypes.js":18,"./IEnum.js":20,"./IRecord.js":21,"./KeyList.js":22,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RecordArray.js":28,"./ResourceArray.js":30,"./ResourceArrayType.js":31,"./TransmissionType.js":32,"./Tuple.js":33,"./TypedList.js":34,"./TypedMap.js":35}],15:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Net/IIP/DistributedPropertyContext.js":38,"../Net/IIP/DistributedResource.js":39,"../Resource/IResource.js":65,"../Resource/Template/TemplateType.js":76,"../Resource/Warehouse.js":78,"./BinaryList.js":13,"./DC.js":15,"./DataDeserializer.js":16,"./DataSerializer.js":17,"./ExtendedTypes.js":18,"./IEnum.js":20,"./IRecord.js":21,"./KeyList.js":22,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RecordArray.js":28,"./ResourceArray.js":30,"./ResourceArrayType.js":31,"./TransmissionType.js":32,"./Tuple.js":33,"./TypedList.js":34,"./TypedMap.js":35}],15:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3018,7 +3018,7 @@ var DataDeserializer = /*#__PURE__*/function () {
 
 exports["default"] = DataDeserializer;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncException.js":3,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/ExtendedTypes.js":18,"../Net/IIP/DistributedConnection.js":36,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./Codec.js":14,"./DC.js":15,"./IEnum.js":20,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RepresentationType.js":29,"./Tuple.js":33,"./TypedMap.js":35}],17:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncException.js":3,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/ExtendedTypes.js":18,"../Net/IIP/DistributedConnection.js":37,"../Resource/Template/TemplateType.js":76,"../Resource/Warehouse.js":78,"./Codec.js":14,"./DC.js":15,"./IEnum.js":20,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RepresentationType.js":29,"./Tuple.js":33,"./TypedMap.js":35}],17:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -3442,7 +3442,7 @@ var DataSerializer = /*#__PURE__*/function () {
 
 exports["default"] = DataSerializer;
 
-},{"../Resource/Warehouse.js":77,"./BinaryList.js":13,"./Codec.js":14,"./DC.js":15,"./RepresentationType.js":29,"./TransmissionType.js":32,"./Tuple.js":33}],18:[function(require,module,exports){
+},{"../Resource/Warehouse.js":78,"./BinaryList.js":13,"./Codec.js":14,"./DC.js":15,"./RepresentationType.js":29,"./TransmissionType.js":32,"./Tuple.js":33}],18:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -4565,7 +4565,7 @@ var RepresentationType = /*#__PURE__*/function () {
 
 exports.RepresentationType = exports["default"] = RepresentationType;
 
-},{"../Resource/IResource.js":64,"../Resource/Template/TemplateType.js":75,"../Resource/Warehouse.js":77,"./BinaryList.js":13,"./DC.js":15,"./ExtendedTypes.js":18,"./IRecord.js":21}],30:[function(require,module,exports){
+},{"../Resource/IResource.js":65,"../Resource/Template/TemplateType.js":76,"../Resource/Warehouse.js":78,"./BinaryList.js":13,"./DC.js":15,"./ExtendedTypes.js":18,"./IRecord.js":21}],30:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4657,7 +4657,7 @@ var ResourceArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = ResourceArray;
 
-},{"../Resource/IResource.js":64}],31:[function(require,module,exports){
+},{"../Resource/IResource.js":65}],31:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5111,7 +5111,7 @@ exports["default"] = TypedList;
 
 _defineProperty(TypedList, "cache", (_defineProperty2 = {}, _defineProperty(_defineProperty2, _IResource["default"], _ResourceArray["default"]), _defineProperty(_defineProperty2, _PropertyValue["default"], _PropertyValueArray["default"]), _defineProperty(_defineProperty2, _IRecord["default"], _RecordArray["default"]), _defineProperty(_defineProperty2, _Record["default"], _RecordArray["default"]), _defineProperty2));
 
-},{"../Resource/IResource.js":64,"./IRecord.js":21,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RecordArray.js":28,"./ResourceArray.js":30}],35:[function(require,module,exports){
+},{"../Resource/IResource.js":65,"./IRecord.js":21,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RecordArray.js":28,"./ResourceArray.js":30}],35:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -5220,6 +5220,20 @@ exports["default"] = TypedMap;
 _defineProperty(TypedMap, "cache", {});
 
 },{}],36:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+var _default = {
+  Closed: 0,
+  Connecting: 1,
+  Connected: 2
+};
+exports["default"] = _default;
+
+},{}],37:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -5337,6 +5351,10 @@ var _TransmissionType = require("../../Data/TransmissionType.js");
 var _PropertyValue = _interopRequireDefault(require("../../Data/PropertyValue.js"));
 
 var _PropertyValueArray = _interopRequireDefault(require("../../Data/PropertyValueArray.js"));
+
+var _ExtendedTypes = require("../../Data/ExtendedTypes.js");
+
+var _ConnectionStatus = _interopRequireDefault(require("./ConnectionStatus.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -5926,6 +5944,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                       var _this2$_openReply, _this2$server;
 
                       _this2.ready = true;
+                      _this2.status = _ConnectionStatus["default"].Connected;
                       (_this2$_openReply = _this2._openReply) === null || _this2$_openReply === void 0 ? void 0 : _this2$_openReply.trigger(true);
                       _this2._openReply = null;
 
@@ -5942,6 +5961,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                     var _this$_openReply, _this$server2;
 
                     this.ready = true;
+                    this.status = _ConnectionStatus["default"].Connected;
                     (_this$_openReply = this._openReply) === null || _this$_openReply === void 0 ? void 0 : _this$_openReply.trigger(true);
                     this._openReply = null;
 
@@ -5982,9 +6002,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
               } else if (authPacket.action == _IIPAuthPacketAction["default"].ConnectionEstablished) {
                 this.session.id = authPacket.sessionId;
                 this.ready = true;
-
-                this._emit("ready", this); // put it in the warehouse
-
+                this.status = _ConnectionStatus["default"].Connected; // put it in the warehouse
 
                 if (this.instance == null) {
                   _Warehouse["default"].put(this.localUsername, this, null, this.server).then(function (x) {
@@ -6278,6 +6296,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var domain = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
       var secure = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : false;
       if (this._openReply != null) throw new _AsyncException["default"](_ErrorType["default"].Exception, 0, "Connection in progress");
+      this.status = _ConnectionStatus["default"].Connecting;
       this._openReply = new _AsyncReply["default"]();
 
       if (hostname != null) {
@@ -6384,6 +6403,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     value: function networkClose(socket) {
       // clean up
       this.ready = false;
+      this.status = _ConnectionStatus["default"].Closed;
       this.readyToEstablish = false;
       clearTimeout(this._keepAliveTimer);
 
@@ -6449,8 +6469,6 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       }
 
       this._attachedResources.clear();
-
-      this.ready = false;
 
       this._emit("close", this);
     }
@@ -8074,7 +8092,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "call",
     value: function call(procedureCall) {
-      var args = Map.from(UInt8, Object);
+      var args = Map.from(_ExtendedTypes.UInt8, Object);
 
       for (var i = 0; i < arguments.Length - 2; i++) {
         args.add(i, arguments[i + 1]);
@@ -8112,6 +8130,14 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       this._lastKeepAliveReceived = now;
     }
+  }], [{
+    key: "template",
+    get: function get() {
+      return {
+        namespace: "Esiur",
+        properties: [["status", _ExtendedTypes.UInt8]]
+      };
+    }
   }]);
 
   return DistributedConnection;
@@ -8119,7 +8145,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncBag.js":2,"../../Core/AsyncException.js":3,"../../Core/AsyncQueue.js":4,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Core/ProgressType.js":10,"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/KeyList.js":22,"../../Data/PropertyValue.js":25,"../../Data/PropertyValueArray.js":26,"../../Data/TransmissionType.js":32,"../../Resource/IResource.js":64,"../../Resource/IStore.js":65,"../../Resource/Template/TemplateType.js":75,"../../Resource/Template/TypeTemplate.js":76,"../../Resource/Warehouse.js":77,"../../Security/Authority/Authentication.js":78,"../../Security/Authority/AuthenticationMethod.js":79,"../../Security/Authority/AuthenticationType.js":80,"../../Security/Authority/ClientAuthentication.js":81,"../../Security/Authority/HostAuthentication.js":82,"../../Security/Authority/Session.js":83,"../../Security/Integrity/SHA256.js":84,"../../Security/Permissions/ActionType.js":86,"../../Security/Permissions/Ruling.js":88,"../Packets//IIPPacketReport.js":55,"../Packets/IIPAuthPacket.js":48,"../Packets/IIPAuthPacketAction.js":49,"../Packets/IIPAuthPacketCommand.js":50,"../Packets/IIPPacket.js":51,"../Packets/IIPPacketAction.js":52,"../Packets/IIPPacketCommand.js":53,"../Packets/IIPPacketEvent.js":54,"../SendList.js":56,"../Sockets/SocketState.js":58,"../Sockets/WSocket.js":59,"./DistributedPropertyContext.js":37,"./DistributedResource.js":38,"./DistributedResourceQueueItem.js":39,"./DistributedResourceQueueItemType.js":40}],37:[function(require,module,exports){
+},{"../../Core/AsyncBag.js":2,"../../Core/AsyncException.js":3,"../../Core/AsyncQueue.js":4,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Core/ProgressType.js":10,"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/ExtendedTypes.js":18,"../../Data/KeyList.js":22,"../../Data/PropertyValue.js":25,"../../Data/PropertyValueArray.js":26,"../../Data/TransmissionType.js":32,"../../Resource/IResource.js":65,"../../Resource/IStore.js":66,"../../Resource/Template/TemplateType.js":76,"../../Resource/Template/TypeTemplate.js":77,"../../Resource/Warehouse.js":78,"../../Security/Authority/Authentication.js":79,"../../Security/Authority/AuthenticationMethod.js":80,"../../Security/Authority/AuthenticationType.js":81,"../../Security/Authority/ClientAuthentication.js":82,"../../Security/Authority/HostAuthentication.js":83,"../../Security/Authority/Session.js":84,"../../Security/Integrity/SHA256.js":85,"../../Security/Permissions/ActionType.js":87,"../../Security/Permissions/Ruling.js":89,"../Packets//IIPPacketReport.js":56,"../Packets/IIPAuthPacket.js":49,"../Packets/IIPAuthPacketAction.js":50,"../Packets/IIPAuthPacketCommand.js":51,"../Packets/IIPPacket.js":52,"../Packets/IIPPacketAction.js":53,"../Packets/IIPPacketCommand.js":54,"../Packets/IIPPacketEvent.js":55,"../SendList.js":57,"../Sockets/SocketState.js":59,"../Sockets/WSocket.js":60,"./ConnectionStatus.js":36,"./DistributedPropertyContext.js":38,"./DistributedResource.js":39,"./DistributedResourceQueueItem.js":40,"./DistributedResourceQueueItemType.js":41}],38:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -8167,7 +8193,7 @@ var DistributedPropertyContext = function DistributedPropertyContext(p1, p2) {
 
 exports["default"] = DistributedPropertyContext;
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8478,7 +8504,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedResource;
 
-},{"../../Core//ExceptionCode.js":7,"../../Core/AsyncException.js":3,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Data/Codec.js":14,"../../Data/ExtendedTypes.js":18,"../../Data/PropertyValue.js":25,"../../Data/PropertyValueArray.js":26,"../../Data/TypedMap.js":35,"../../Resource/IResource.js":64,"../../Resource/Template/EventTemplate.js":70,"../Packets//IIPPacketAction.js":52}],39:[function(require,module,exports){
+},{"../../Core//ExceptionCode.js":7,"../../Core/AsyncException.js":3,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Data/Codec.js":14,"../../Data/ExtendedTypes.js":18,"../../Data/PropertyValue.js":25,"../../Data/PropertyValueArray.js":26,"../../Data/TypedMap.js":35,"../../Resource/IResource.js":65,"../../Resource/Template/EventTemplate.js":71,"../Packets//IIPPacketAction.js":53}],40:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8524,7 +8550,7 @@ var DistributedResourceQueueItem = function DistributedResourceQueueItem(resourc
 
 exports["default"] = DistributedResourceQueueItem;
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8537,7 +8563,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],41:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -8671,7 +8697,7 @@ var DistributedServer = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedServer;
 
-},{"../../Core/AsyncReply.js":5,"../../Data/KeyList.js":22,"../../Resource/IResource.js":64,"./DistributedConnection.js":36}],42:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":5,"../../Data/KeyList.js":22,"../../Resource/IResource.js":65,"./DistributedConnection.js":37}],43:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -8729,7 +8755,7 @@ var EntryPoint = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = EntryPoint;
 
-},{"../../Resource/IResource.js":64}],43:[function(require,module,exports){
+},{"../../Resource/IResource.js":65}],44:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -8790,7 +8816,7 @@ var INetworkReceiver = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = INetworkReceiver;
 
-},{"../Core/IDestructible.js":8}],44:[function(require,module,exports){
+},{"../Core/IDestructible.js":8}],45:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8903,7 +8929,7 @@ var NetworkBuffer = /*#__PURE__*/function () {
 
 exports["default"] = NetworkBuffer;
 
-},{"../Data/DC.js":15}],45:[function(require,module,exports){
+},{"../Data/DC.js":15}],46:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -8949,7 +8975,7 @@ var NetowrkConnection = /*#__PURE__*/function (_INetworkReceiver) {
 
 exports["default"] = NetowrkConnection;
 
-},{"./INetworkReceiver.js":43}],46:[function(require,module,exports){
+},{"./INetworkReceiver.js":44}],47:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8965,7 +8991,7 @@ var NetworkServer = function NetworkServer() {
 
 exports["default"] = NetworkServer;
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8981,7 +9007,7 @@ var NetworkSession = function NetworkSession() {
 
 exports["default"] = NetworkSession;
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9171,7 +9197,7 @@ var IIPAuthPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPAuthPacket;
 
-},{"../../Security/Authority/AuthenticationMethod.js":79,"./IIPAuthPacketAction.js":49,"./IIPAuthPacketCommand.js":50}],49:[function(require,module,exports){
+},{"../../Security/Authority/AuthenticationMethod.js":80,"./IIPAuthPacketAction.js":50,"./IIPAuthPacketCommand.js":51}],50:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9188,7 +9214,7 @@ var _default = // const IIPAuthPacketAction =
 };
 exports["default"] = _default;
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9204,7 +9230,7 @@ var _default = //const IIPAuthPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -9626,7 +9652,7 @@ var IIPPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPPacket;
 
-},{"../../Core/ExceptionCode.js":7,"../../Data/TransmissionType.js":32,"./IIPPacketAction.js":52,"./IIPPacketCommand.js":53,"./IIPPacketEvent.js":54,"./IIPPacketReport.js":55}],52:[function(require,module,exports){
+},{"../../Core/ExceptionCode.js":7,"../../Data/TransmissionType.js":32,"./IIPPacketAction.js":53,"./IIPPacketCommand.js":54,"./IIPPacketEvent.js":55,"./IIPPacketReport.js":56}],53:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9673,7 +9699,7 @@ var _default = // const IIPPacketAction =
 };
 exports["default"] = _default;
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9689,7 +9715,7 @@ var _default = // IIPPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9712,7 +9738,7 @@ var IIPPacketEvent = {
 var _default = IIPPacketEvent;
 exports["default"] = _default;
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9728,7 +9754,7 @@ var IIPPacketReport = {
 var _default = IIPPacketReport;
 exports["default"] = _default;
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9816,7 +9842,7 @@ var SendList = /*#__PURE__*/function (_BinaryList) {
 
 exports["default"] = SendList;
 
-},{"../Data/BinaryList.js":13}],57:[function(require,module,exports){
+},{"../Data/BinaryList.js":13}],58:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -9913,7 +9939,7 @@ var ISocket = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = ISocket;
 
-},{"../../Core/IDestructible.js":8,"./SocketState.js":58}],58:[function(require,module,exports){
+},{"../../Core/IDestructible.js":8,"./SocketState.js":59}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9929,7 +9955,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -10195,7 +10221,7 @@ exports["default"] = WSocket;
 
 _defineProperty(WSocket, "webSocket", null);
 
-},{"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Data/DC.js":15,"../NetworkBuffer.js":44,"./ISocket.js":57,"./SocketState.js":58,"ws":1}],60:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Data/DC.js":15,"../NetworkBuffer.js":45,"./ISocket.js":58,"./SocketState.js":59,"ws":1}],61:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10226,21 +10252,27 @@ var ResourceProxy = /*#__PURE__*/function () {
       var template = _Warehouse["default"].getTemplateByType(type);
 
       var className = type.prototype.constructor.name;
+      var classUrl = "esiur://" + template.className.replace('.', '/');
+
+      if (template.namespace != null) {
+        className = template.namespace + "_" + className;
+      }
+
       if (ResourceProxy.cache[className]) return ResourceProxy.cache[className];
-      var code = "return (class E_".concat(className, " extends b { constructor() {super();} "); // generate class
+      var code = "return ( class E_".concat(className, " extends b { constructor() {super();} "); // generate class
 
       for (var i = 0; i < template.properties.length; i++) {
         var pt = template.properties[i];
         var desc = Object.getOwnPropertyDescriptor(type.prototype, pt.name);
 
         if (desc) {
-          code += "\r\n  set ".concat(pt.name, "(v) { \r\n if (this.instance) this.instance.emitModification(this.instance.template.properties[").concat(i, "], v); \r\n super.").concat(pt.name, " = v; } \r\n get ").concat(pt.name, "() { \r\n return super.").concat(pt.name, ";}");
+          code += "\r\n  set ".concat(pt.name, "(v) { \r\n super.").concat(pt.name, " = v; \r\n if (this.instance) this.instance.emitModification(this.instance.template.properties[").concat(i, "], v); } \r\n get ").concat(pt.name, "() { \r\n return super.").concat(pt.name, ";}");
         } else {
-          code += "\r\n  set ".concat(pt.name, "(v) { \r\n if (this.instance) this.instance.emitModification(this.instance.template.properties[").concat(i, "], v); \r\n this._").concat(pt.name, " = v; } \r\n get ").concat(pt.name, "() { \r\n return this._").concat(pt.name, ";}");
+          code += "\r\n  set ".concat(pt.name, "(v) { \r\n super._").concat(pt.name, " = v; \r\n if (this.instance) this.instance.emitModification(this.instance.template.properties[").concat(i, "], v); } \r\n get ").concat(pt.name, "() { \r\n return this._").concat(pt.name, ";}");
         }
       }
 
-      var func = new Function("b", code + "})");
+      var func = new Function("b", "//# sourceURL=".concat(classUrl, " \r\n ").concat(code, "});"));
       var proxyType = func.call(type
       /* this */
       , type);
@@ -10256,7 +10288,7 @@ exports["default"] = ResourceProxy;
 
 _defineProperty(ResourceProxy, "cache", {});
 
-},{"../Resource/Warehouse.js":77}],61:[function(require,module,exports){
+},{"../Resource/Warehouse.js":78}],62:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -10301,7 +10333,7 @@ var CustomResourceEvent = function CustomResourceEvent(issuer, receivers, value)
 
 exports["default"] = CustomResourceEvent;
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10346,7 +10378,7 @@ var EventOccurredInfo = /*#__PURE__*/function () {
 
 exports["default"] = EventOccurredInfo;
 
-},{"../Security/Authority/Session.js":83,"./IResource.js":64,"./Template/EventTemplate.js":70}],63:[function(require,module,exports){
+},{"../Security/Authority/Session.js":84,"./IResource.js":65,"./Template/EventTemplate.js":71}],64:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -10434,7 +10466,7 @@ var FactoryEntry = /*#__PURE__*/function () {
 
 exports["default"] = FactoryEntry;
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10548,7 +10580,7 @@ var IResource = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = IResource;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IDestructible.js":8}],65:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IDestructible.js":8}],66:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10646,7 +10678,7 @@ var IStore = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = IStore;
 
-},{"./IResource.js":64}],66:[function(require,module,exports){
+},{"./IResource.js":65}],67:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10865,13 +10897,15 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "emitModification",
     value: function emitModification(pt, value) {
+      var _this$store, _this$store2;
+
       var resource = this.resource.deref();
       if (resource == null) return;
       this.instanceAge++;
       var now = new Date();
       this.ages[pt.index] = this.instanceAge;
       this.modificationDates[pt.index] = now;
-      if (pt.recordable) this.store.record(resource, pt.name, value, this.ages[pt.index], now);else this.store.modify(resource, pt.name, value, this.ages[pt.index], now);
+      if (pt.recordable) (_this$store = this.store) === null || _this$store === void 0 ? void 0 : _this$store.record(resource, pt.name, value, this.ages[pt.index], now);else (_this$store2 = this.store) === null || _this$store2 === void 0 ? void 0 : _this$store2.modify(resource, pt.name, value, this.ages[pt.index], now);
       var pmInfo = new _PropertyModificationInfo["default"](resource, pt, value, this.instanceAge);
 
       _get(_getPrototypeOf(Instance.prototype), "_emit", this).call(this, "PropertyModified", pmInfo);
@@ -11047,7 +11081,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = Instance;
 
-},{"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/KeyList.js":22,"../Data/PropertyValue.js":25,"../Data/PropertyValueArray.js":26,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Security/Permissions/IPermissionsManager.js":87,"../Security/Permissions/Ruling.js":88,"./CustomResourceEvent.js":61,"./EventOccurredInfo.js":62,"./PropertyModificationInfo.js":67,"./Warehouse.js":77}],67:[function(require,module,exports){
+},{"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/KeyList.js":22,"../Data/PropertyValue.js":25,"../Data/PropertyValueArray.js":26,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Security/Permissions/IPermissionsManager.js":88,"../Security/Permissions/Ruling.js":89,"./CustomResourceEvent.js":62,"./EventOccurredInfo.js":63,"./PropertyModificationInfo.js":68,"./Warehouse.js":78}],68:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11089,7 +11123,7 @@ var PropertyModificationInfo = /*#__PURE__*/function () {
 
 exports["default"] = PropertyModificationInfo;
 
-},{"./IResource.js":64,"./Template/PropertyTemplate.js":74}],68:[function(require,module,exports){
+},{"./IResource.js":65,"./Template/PropertyTemplate.js":75}],69:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11147,7 +11181,7 @@ var ArgumentTemplate = /*#__PURE__*/function () {
 
 exports["default"] = ArgumentTemplate;
 
-},{"../../Data/DC.js":15,"../../Data/ParseResult.js":24,"../../Data/RepresentationType.js":29}],69:[function(require,module,exports){
+},{"../../Data/DC.js":15,"../../Data/ParseResult.js":24,"../../Data/RepresentationType.js":29}],70:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -11230,7 +11264,7 @@ var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = ConstantTemplate;
 
-},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"./MemberTemplate.js":72}],70:[function(require,module,exports){
+},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"./MemberTemplate.js":73}],71:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11340,7 +11374,7 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = EventTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":72}],71:[function(require,module,exports){
+},{"../../Data/DC.js":15,"./MemberTemplate.js":73}],72:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -11452,7 +11486,7 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = FunctionTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":72}],72:[function(require,module,exports){
+},{"../../Data/DC.js":15,"./MemberTemplate.js":73}],73:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11522,7 +11556,7 @@ var MemberTemplate = /*#__PURE__*/function () {
 
 exports["default"] = MemberTemplate;
 
-},{"../../Data/DC.js":15}],73:[function(require,module,exports){
+},{"../../Data/DC.js":15}],74:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11536,7 +11570,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -11629,7 +11663,7 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = PropertyTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":72}],75:[function(require,module,exports){
+},{"../../Data/DC.js":15,"./MemberTemplate.js":73}],76:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11645,7 +11679,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -12257,7 +12291,7 @@ var TypeTemplate = /*#__PURE__*/function () {
 
 exports["default"] = TypeTemplate;
 
-},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/IEnum.js":20,"../../Data/IRecord.js":21,"../../Data/RepresentationType.js":29,"../../Net/IIP/DistributedConnection.js":36,"../../Net/IIP/DistributedResource.js":38,"../../Security/Integrity/SHA256.js":84,"../IResource.js":64,"../Warehouse.js":77,"./ArgumentTemplate.js":68,"./ConstantTemplate.js":69,"./EventTemplate.js":70,"./FunctionTemplate.js":71,"./PropertyTemplate.js":74,"./TemplateType.js":75}],77:[function(require,module,exports){
+},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/IEnum.js":20,"../../Data/IRecord.js":21,"../../Data/RepresentationType.js":29,"../../Net/IIP/DistributedConnection.js":37,"../../Net/IIP/DistributedResource.js":39,"../../Security/Integrity/SHA256.js":85,"../IResource.js":65,"../Warehouse.js":78,"./ArgumentTemplate.js":69,"./ConstantTemplate.js":70,"./EventTemplate.js":71,"./FunctionTemplate.js":72,"./PropertyTemplate.js":75,"./TemplateType.js":76}],78:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -12893,7 +12927,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/ExtendedTypes.js":18,"../Data/IEnum.js":20,"../Data/IRecord.js":21,"../Data/KeyList.js":22,"../Data/Record.js":27,"../Data/RepresentationType.js":29,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Net/IIP/DistributedConnection.js":36,"../Net/IIP/DistributedResource.js":38,"../Proxy/ResourceProxy.js":60,"../Resource/Instance.js":66,"../Resource/Template/TypeTemplate.js":76,"../Stores/IndexedDBStore.js":89,"../Stores/MemoryStore.js":90,"./FactoryEntry.js":63,"./IResource.js":64,"./IStore.js":65,"./Template/TemplateType.js":75}],78:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/ExtendedTypes.js":18,"../Data/IEnum.js":20,"../Data/IRecord.js":21,"../Data/KeyList.js":22,"../Data/Record.js":27,"../Data/RepresentationType.js":29,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Net/IIP/DistributedConnection.js":37,"../Net/IIP/DistributedResource.js":39,"../Proxy/ResourceProxy.js":61,"../Resource/Instance.js":67,"../Resource/Template/TypeTemplate.js":77,"../Stores/IndexedDBStore.js":90,"../Stores/MemoryStore.js":91,"./FactoryEntry.js":64,"./IResource.js":65,"./IStore.js":66,"./Template/TemplateType.js":76}],79:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -12956,7 +12990,7 @@ var Authentication = /*#__PURE__*/function () {
 
 exports["default"] = Authentication;
 
-},{}],79:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12971,7 +13005,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12987,7 +13021,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -13035,7 +13069,7 @@ var ClientAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = ClientAuthentication;
 
-},{"./Authentication.js":78,"./AuthenticationType.js":80}],82:[function(require,module,exports){
+},{"./Authentication.js":79,"./AuthenticationType.js":81}],83:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -13083,7 +13117,7 @@ var HostAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = HostAuthentication;
 
-},{"./Authentication.js":78,"./AuthenticationType.js":80}],83:[function(require,module,exports){
+},{"./Authentication.js":79,"./AuthenticationType.js":81}],84:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13130,7 +13164,7 @@ var Session = function Session(localAuthentication, remoteAuthentication) {
 
 exports["default"] = Session;
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13266,7 +13300,7 @@ var SHA256 = /*#__PURE__*/function () {
 
 exports["default"] = SHA256;
 
-},{"../../Data/DC.js":15}],85:[function(require,module,exports){
+},{"../../Data/DC.js":15}],86:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -13349,7 +13383,7 @@ var IMembership = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = IMembership;
 
-},{"../../Core/AsyncReply.js":5,"../../Resource/IResource.js":64}],86:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":5,"../../Resource/IResource.js":65}],87:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13401,7 +13435,7 @@ var _default = // ActionType =
 };
 exports["default"] = _default;
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13469,7 +13503,7 @@ var IPermissionsManager = /*#__PURE__*/function () {
 
 exports["default"] = IPermissionsManager;
 
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13509,7 +13543,7 @@ var _default = //Ruling =
 };
 exports["default"] = _default;
 
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -13944,7 +13978,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = IndexedDBStore;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/RepresentationType.js":29,"../Data/TypedMap.js":35,"../Proxy/ResourceProxy.js":60,"../Resource/IResource.js":64,"../Resource/IStore.js":65,"../Resource/Warehouse.js":77}],90:[function(require,module,exports){
+},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/RepresentationType.js":29,"../Data/TypedMap.js":35,"../Proxy/ResourceProxy.js":61,"../Resource/IResource.js":65,"../Resource/IStore.js":66,"../Resource/Warehouse.js":78}],91:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14084,7 +14118,7 @@ var MemoryStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = MemoryStore;
 
-},{"../Core/AsyncReply.js":5,"../Resource/IStore.js":65}],91:[function(require,module,exports){
+},{"../Core/AsyncReply.js":5,"../Resource/IStore.js":66}],92:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -14401,4 +14435,4 @@ var _default = _Warehouse["default"];
 exports["default"] = _default;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Core/AsyncException.js":3,"./Core/AsyncQueue.js":4,"./Core/AsyncReply.js":5,"./Core/ErrorType.js":6,"./Core/ExceptionCode.js":7,"./Core/IDestructible.js":8,"./Core/IEventHandler.js":9,"./Core/ProgressType.js":10,"./Data/AutoList.js":11,"./Data/AutoMap.js":12,"./Data/BinaryList.js":13,"./Data/Codec.js":14,"./Data/DC.js":15,"./Data/ExtendedTypes.js":18,"./Data/Guid.js":19,"./Data/IRecord.js":21,"./Data/KeyList.js":22,"./Data/NotModified.js":23,"./Data/PropertyValue.js":25,"./Data/Record.js":27,"./Data/RepresentationType.js":29,"./Data/ResourceArray.js":30,"./Data/ResourceArrayType.js":31,"./Data/TransmissionType.js":32,"./Data/TypedList.js":34,"./Data/TypedMap.js":35,"./Net/IIP/DistributedConnection.js":36,"./Net/IIP/DistributedPropertyContext.js":37,"./Net/IIP/DistributedResource.js":38,"./Net/IIP/DistributedResourceQueueItem.js":39,"./Net/IIP/DistributedResourceQueueItemType.js":40,"./Net/IIP/DistributedServer.js":41,"./Net/IIP/EntryPoint.js":42,"./Net/INetworkReceiver.js":43,"./Net/NetworkBuffer.js":44,"./Net/NetworkConnections.js":45,"./Net/NetworkServer.js":46,"./Net/NetworkSession.js":47,"./Net/Packets/IIPAuthPacket.js":48,"./Net/Packets/IIPAuthPacketAction.js":49,"./Net/Packets/IIPAuthPacketCommand.js":50,"./Net/Packets/IIPPacket.js":51,"./Net/Packets/IIPPacketAction.js":52,"./Net/Packets/IIPPacketCommand.js":53,"./Net/Packets/IIPPacketEvent.js":54,"./Net/Packets/IIPPacketReport.js":55,"./Net/SendList.js":56,"./Net/Sockets/ISocket.js":57,"./Net/Sockets/SocketState.js":58,"./Net/Sockets/WSocket.js":59,"./Proxy/ResourceProxy.js":60,"./Resource/CustomResourceEvent.js":61,"./Resource/IResource.js":64,"./Resource/IStore.js":65,"./Resource/Instance.js":66,"./Resource/Template/ArgumentTemplate.js":68,"./Resource/Template/EventTemplate.js":70,"./Resource/Template/FunctionTemplate.js":71,"./Resource/Template/MemberTemplate.js":72,"./Resource/Template/MemberType.js":73,"./Resource/Template/PropertyTemplate.js":74,"./Resource/Template/TemplateType.js":75,"./Resource/Template/TypeTemplate.js":76,"./Resource/Warehouse.js":77,"./Security/Authority/Authentication.js":78,"./Security/Authority/AuthenticationMethod.js":79,"./Security/Authority/AuthenticationType.js":80,"./Security/Authority/ClientAuthentication.js":81,"./Security/Authority/HostAuthentication.js":82,"./Security/Authority/Session.js":83,"./Security/Integrity/SHA256.js":84,"./Security/Membership/IMembership.js":85,"./Security/Permissions/ActionType.js":86,"./Security/Permissions/IPermissionsManager.js":87,"./Security/Permissions/Ruling.js":88,"./Stores/IndexedDBStore.js":89,"./Stores/MemoryStore.js":90}]},{},[91]);
+},{"./Core/AsyncException.js":3,"./Core/AsyncQueue.js":4,"./Core/AsyncReply.js":5,"./Core/ErrorType.js":6,"./Core/ExceptionCode.js":7,"./Core/IDestructible.js":8,"./Core/IEventHandler.js":9,"./Core/ProgressType.js":10,"./Data/AutoList.js":11,"./Data/AutoMap.js":12,"./Data/BinaryList.js":13,"./Data/Codec.js":14,"./Data/DC.js":15,"./Data/ExtendedTypes.js":18,"./Data/Guid.js":19,"./Data/IRecord.js":21,"./Data/KeyList.js":22,"./Data/NotModified.js":23,"./Data/PropertyValue.js":25,"./Data/Record.js":27,"./Data/RepresentationType.js":29,"./Data/ResourceArray.js":30,"./Data/ResourceArrayType.js":31,"./Data/TransmissionType.js":32,"./Data/TypedList.js":34,"./Data/TypedMap.js":35,"./Net/IIP/DistributedConnection.js":37,"./Net/IIP/DistributedPropertyContext.js":38,"./Net/IIP/DistributedResource.js":39,"./Net/IIP/DistributedResourceQueueItem.js":40,"./Net/IIP/DistributedResourceQueueItemType.js":41,"./Net/IIP/DistributedServer.js":42,"./Net/IIP/EntryPoint.js":43,"./Net/INetworkReceiver.js":44,"./Net/NetworkBuffer.js":45,"./Net/NetworkConnections.js":46,"./Net/NetworkServer.js":47,"./Net/NetworkSession.js":48,"./Net/Packets/IIPAuthPacket.js":49,"./Net/Packets/IIPAuthPacketAction.js":50,"./Net/Packets/IIPAuthPacketCommand.js":51,"./Net/Packets/IIPPacket.js":52,"./Net/Packets/IIPPacketAction.js":53,"./Net/Packets/IIPPacketCommand.js":54,"./Net/Packets/IIPPacketEvent.js":55,"./Net/Packets/IIPPacketReport.js":56,"./Net/SendList.js":57,"./Net/Sockets/ISocket.js":58,"./Net/Sockets/SocketState.js":59,"./Net/Sockets/WSocket.js":60,"./Proxy/ResourceProxy.js":61,"./Resource/CustomResourceEvent.js":62,"./Resource/IResource.js":65,"./Resource/IStore.js":66,"./Resource/Instance.js":67,"./Resource/Template/ArgumentTemplate.js":69,"./Resource/Template/EventTemplate.js":71,"./Resource/Template/FunctionTemplate.js":72,"./Resource/Template/MemberTemplate.js":73,"./Resource/Template/MemberType.js":74,"./Resource/Template/PropertyTemplate.js":75,"./Resource/Template/TemplateType.js":76,"./Resource/Template/TypeTemplate.js":77,"./Resource/Warehouse.js":78,"./Security/Authority/Authentication.js":79,"./Security/Authority/AuthenticationMethod.js":80,"./Security/Authority/AuthenticationType.js":81,"./Security/Authority/ClientAuthentication.js":82,"./Security/Authority/HostAuthentication.js":83,"./Security/Authority/Session.js":84,"./Security/Integrity/SHA256.js":85,"./Security/Membership/IMembership.js":86,"./Security/Permissions/ActionType.js":87,"./Security/Permissions/IPermissionsManager.js":88,"./Security/Permissions/Ruling.js":89,"./Stores/IndexedDBStore.js":90,"./Stores/MemoryStore.js":91}]},{},[92]);
