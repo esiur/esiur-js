@@ -1205,8 +1205,7 @@ export default class DistributedConnection extends IStore {
         }
 
         this._attachedResources.clear();
-        this.ready = false;
-
+        
         this._emit("close", this);
     }
 
