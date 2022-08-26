@@ -1,6 +1,6 @@
 {
   "name": "esiur",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "Distributed Object Framework",
   "main": "esiur.js",
   "type": "module",
@@ -9,6 +9,9 @@
     "babel": "./node_modules/.bin/babel src -d build",
     "build": "browserify src/esiur.js -t babelify --outfile build/esiur.js",
     "prepublish": "browserify src/esiur.js -t babelify --outfile build/esiur.js"
+  },
+  "bin": {
+    "esiur": "./bin/esiur.cjs"
   },
   "repository": {
     "type": "git",

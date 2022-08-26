@@ -1262,7 +1262,7 @@ export default class DistributedConnection extends IStore {
 
     put(resource) {
         if (Codec.isLocalResource(resource, this))
-            this._neededResources.add(resource._p.id, resource);
+            this._neededResources.add(resource._p.instanceId, resource);
 
         return new AsyncReply(true);
     }
@@ -2541,7 +2541,7 @@ export default class DistributedConnection extends IStore {
         let request = this.resourceRequests.item(id);
 
         if (request != null) {
-            if (resource != null && (requestSequence?.contains(id) ?? false))
+            if (resource != null && (requestSequence?.includes(id) ?? false))
                 return new AsyncReply(resource);
             else
                 return request;

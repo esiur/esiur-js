@@ -2680,7 +2680,7 @@ var DataDeserializer = /*#__PURE__*/function () {
     value: function resourceParser(data, offset, length, connection, requestSequence) {
       if (connection != null) {
         var id = data.getUint32(offset, requestSequence);
-        return connection.fetch(id);
+        return connection.fetch(id, requestSequence);
       }
 
       throw Error("Can't parse resource with no connection");
@@ -6507,7 +6507,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "put",
     value: function put(resource) {
-      if (_Codec["default"].isLocalResource(resource, this)) this._neededResources.add(resource._p.id, resource);
+      if (_Codec["default"].isLocalResource(resource, this)) this._neededResources.add(resource._p.instanceId, resource);
       return new _AsyncReply["default"](true);
     }
   }, {
@@ -7624,9 +7624,9 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var request = this.resourceRequests.item(id);
 
       if (request != null) {
-        var _requestSequence$cont;
+        var _requestSequence$incl;
 
-        if (resource != null && ((_requestSequence$cont = requestSequence === null || requestSequence === void 0 ? void 0 : requestSequence.contains(id)) !== null && _requestSequence$cont !== void 0 ? _requestSequence$cont : false)) return new _AsyncReply["default"](resource);else return request;
+        if (resource != null && ((_requestSequence$incl = requestSequence === null || requestSequence === void 0 ? void 0 : requestSequence.includes(id)) !== null && _requestSequence$incl !== void 0 ? _requestSequence$incl : false)) return new _AsyncReply["default"](resource);else return request;
       } else if (resource != null && !resource._p.suspended) {
         // @REVIEW: this should never happen
         console.log("DCON", LogType.Error, "Resource not moved to attached.");
@@ -8254,6 +8254,10 @@ var _PropertyValue = _interopRequireDefault(require("../../Data/PropertyValue.js
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -8394,12 +8398,43 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
         };
 
         var makeSetter = function makeSetter(index) {
-          return function (value) {
-            if (self._p.destroyed) throw new Error("Trying to access a destroyed object.");
-            if (self._p.suspended) throw new Error("Trying to access a suspended object.");
+          return /*#__PURE__*/function () {
+            var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(value) {
+              return regeneratorRuntime.wrap(function _callee$(_context) {
+                while (1) {
+                  switch (_context.prev = _context.next) {
+                    case 0:
+                      if (!self._p.destroyed) {
+                        _context.next = 2;
+                        break;
+                      }
 
-            self._set(index, value);
-          };
+                      throw new Error("Trying to access a destroyed object.");
+
+                    case 2:
+                      if (!self._p.suspended) {
+                        _context.next = 4;
+                        break;
+                      }
+
+                      throw new Error("Trying to access a suspended object.");
+
+                    case 4:
+                      _context.next = 6;
+                      return self._set(index, value);
+
+                    case 6:
+                    case "end":
+                      return _context.stop();
+                  }
+                }
+              }, _callee);
+            }));
+
+            return function (_x) {
+              return _ref.apply(this, arguments);
+            };
+          }();
         };
 
         for (var _i3 = 0; _i3 < this.instance.template.functions.length; _i3++) {
@@ -8482,7 +8517,9 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
       }
 
       if (this._p.neglect) return;
-      if (index >= this._p.properties.length) return null;
+      if (index >= this._p.properties.length) return null; // Awaiting null is not a problem in JS
+
+      if (this._p.properties[index] == value) return null;
       var reply = new _AsyncReply["default"]();
 
       var parameters = _Codec["default"].compose(value, this._p.connection);

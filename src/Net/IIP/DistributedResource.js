@@ -170,14 +170,14 @@ export default class DistributedResource extends IResource
 
             var makeSetter = function(index)
             {
-                return function (value) {
+                return async function (value) {
                     if (self._p.destroyed)
                         throw new Error("Trying to access a destroyed object.");
     
                     if (self._p.suspended)
                         throw new Error("Trying to access a suspended object.");
 
-                    self._set(index, value);
+                    await self._set(index, value);
                 };
             };
 
@@ -293,6 +293,10 @@ export default class DistributedResource extends IResource
             return;
 
         if (index >= this._p.properties.length)
+            return null;
+
+        // Awaiting null is not a problem in JS
+        if (this._p.properties[index] == value)
             return null;
 
         var reply = new AsyncReply();

@@ -133,9 +133,10 @@ export default class DataDeserializer {
 
   static resourceParser(
       data, offset, length,  connection, requestSequence) {
+
     if (connection != null) {
       var id = data.getUint32(offset, requestSequence);
-      return connection.fetch(id);
+      return connection.fetch(id, requestSequence);
     }
     throw Error("Can't parse resource with no connection");
   }
