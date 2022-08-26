@@ -177,6 +177,9 @@ export default class DistributedResource extends IResource
                     if (self._p.suspended)
                         throw new Error("Trying to access a suspended object.");
 
+                    if (self._p.attached)
+                        return;
+
                     await self._set(index, value);
                 };
             };
