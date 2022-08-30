@@ -892,13 +892,17 @@ export default class DistributedConnection extends IStore {
                         if (dataType.identifier == TransmissionTypeIdentifier.ResourceList
                         || dataType.identifier == TransmissionTypeIdentifier.List)
                         {
+                            // remove from suspended.
+                            this._suspendedResources.remove(r._p.instanceId);
+
                             // parse them as int
                             var id = data.getUint32(8);
+
+                            // id changed ?
                             if (id != r._p.instanceId)
                                 r._p.instanceId = id;
 
                             this._neededResources.set(id, r);
-                            this._suspendedResources.remove(id);
 
                             await this.fetch(id, null);
 
