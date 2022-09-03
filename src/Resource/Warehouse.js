@@ -318,7 +318,7 @@ export class WH extends IEventHandler
 
         if (type.prototype instanceof DistributedResource)
             templateType = TemplateType.Wrapper;
-        if (type.prototype instanceof IResource)
+        else if (type.prototype instanceof IResource)
             templateType = TemplateType.Resource;
         else if (type.prototype instanceof IRecord)
             templateType = TemplateType.Record;

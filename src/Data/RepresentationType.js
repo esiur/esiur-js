@@ -132,7 +132,7 @@ export class RepresentationTypeParseResults {
 
 export default class RepresentationType {
 
-  static getRuntimeType() {
+  getRuntimeType() {
     let runtimeType = null;
 
     if (IdentifierToTypeMap[this.identifier] != undefined)

@@ -2586,7 +2586,7 @@ export default class DistributedConnection extends IStore {
                 {
                     template = Warehouse.getTemplateByClassId(classId, TemplateType.Wrapper);
                     if (template?.definedType != null)
-                        dr = new template.getDependencies(self, id, rt[1], rt[2]);
+                        dr = new template.definedType(self, id, rt[1], rt[2]);
                     else
                         dr = new DistributedResource(self, id, rt[1], rt[2]);
                 }
@@ -2640,7 +2640,7 @@ export default class DistributedConnection extends IStore {
                     });
                 } else {
                     if (resource == null) {
-                        Warehouse.put(id.toString(), dr, this, null, template)
+                        Warehouse.put(id.toString(), dr, self, null, template)
                           .then(initResource)
                           .error((ex) => reply.triggerError(ex));
                       } else {

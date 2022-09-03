@@ -244,7 +244,7 @@ export default class TypeTemplate {
         
         if (type.prototype instanceof DistributedResource)
             this.templateType = TemplateType.Wrapper;
-        if (type.prototype instanceof IRecord)
+        else if (type.prototype instanceof IRecord)
             this.templateType = TemplateType.Record;
         else if (type.prototype instanceof IResource)
             this.templateType = TemplateType.Resource;

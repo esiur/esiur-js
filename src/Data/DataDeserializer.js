@@ -172,7 +172,7 @@ export default class DataDeserializer {
         let record;
 
         if (template.definedType != null) {
-          record = Warehouse.createInstance(template.definedType);
+          record = new template.definedType();
         } else {
           record = new Record();
         }
@@ -221,7 +221,7 @@ export default class DataDeserializer {
 
     if (template != null) {
       if (template.definedType != null) {
-        var enumVal = Warehouse.createInstance(template.definedType);
+        var enumVal = new template.definedType();
         enumVal.index = index;
         enumVal.name = template.constants[index].name;
         enumVal.value = template.constants[index].value;
@@ -238,7 +238,7 @@ export default class DataDeserializer {
       connection.getTemplate(classId).then((tmp) => {
         if (tmp != null) {
           if (tmp.definedType != null) {
-            var enumVal = Warehouse.createInstance(tmp.definedType);
+            var enumVal = new tmp.definedType();
             enumVal.index = index;
             enumVal.name = tmp.constants[index].name;
             enumVal.value = tmp.constants[index].value;
