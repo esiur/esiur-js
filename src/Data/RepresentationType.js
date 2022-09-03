@@ -110,6 +110,7 @@ TypeToIdentifierMap[Array] = RepresentationTypeIdentifier.List;
 TypeToIdentifierMap[Map] = RepresentationTypeIdentifier.Map;
 TypeToIdentifierMap[RecordArray] = RepresentationTypeIdentifier.RecordArray;
 TypeToIdentifierMap[ResourceArray] = RepresentationTypeIdentifier.ResourceArray;
+TypeToIdentifierMap[Object] = RepresentationTypeIdentifier.Dynamic;
 
 const TupleIdentifierByLength = {
   2: RepresentationTypeIdentifier.Tuple2,
@@ -181,10 +182,10 @@ export default class RepresentationType {
     if (type == null)
       throw new Error("Type can't be null.");
 
-    let nullable = type.constructor.isNullable;
+    let nullable = type.isNullable;
 
     if (nullable)
-      type = type.constructor.type; // original type
+      type = type.underlyingType; // original type
 
     let identifier = TypeToIdentifierMap[type];
 
@@ -208,19 +209,18 @@ export default class RepresentationType {
 
     } else if (type.prototype instanceof TypedList) {
 
-      let elementType = RepresentationType.fromType(TypedList.getType(type));
+      let elementType = RepresentationType.fromType(type.elementType);
       return new RepresentationType(RepresentationTypeIdentifier.TypedList, null, null, [elementType]);
 
     } else if (type.prototype instanceof TypedMap) {
 
-      let subs = TypedMap.getTypes(type);
-      let keyType = RepresentationType.fromType(subs[0]);
-      let valueType = RepresentationType.fromType(subs[1]);
+      let keyType = RepresentationType.fromType(type.keyType);
+      let valueType = RepresentationType.fromType(type.valueType);
       return new RepresentationType(RepresentationTypeIdentifier.TypedMap, null, null, [keyType, valueType]);
 
     } else if (type.prototype instanceof Tuple) {
       
-      let subs = Tuple.gettypes(type).map(x=> RepresentationType.fromType(x));  
+      let subs = type.subTypes.map(x => RepresentationType.fromType(x));  
       return new RepresentationType(TupleIdentifierByLength[subs.length], nullable, null, subs);
     }
     

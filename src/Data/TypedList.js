@@ -23,7 +23,7 @@ export default class TypedList extends Array
                    };
 
     static getType(typedList){
-        return typedList.constructor.type;
+        return typedList.constructor.elementType;
     }
 
     static of(type){
@@ -32,7 +32,7 @@ export default class TypedList extends Array
 
         let c = class extends TypedList{}
         Object.defineProperty(c, "name", {value: type.name + "List"});
-        Object.defineProperty(c, "type", {value: type});
+        Object.defineProperty(c, "elementType", {value: type});
 
         TypedList.cache[type] = c;
         

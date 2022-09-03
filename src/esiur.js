@@ -90,13 +90,15 @@ import { Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, UInt64, Int128, UInt1
 import Tuple from './Data/Tuple.js';
 import Nullable from './Data/Nullable.js';
 import Void from './Data/Void.js';
+import IEnum from './Data/IEnum.js';
+import {TemplateDescriber, Prop, Func, Evt, Const, Arg} from './Resource/Template/TemplateDescriber.js';
 
 const namespace = {
     Core: { AsyncReply, AsyncException, AsyncQueue, ErrorType, ExceptionCode, IDestructible, IEventHandler, ProgressType},
     Data: {AutoList, AutoMap, BinaryList, Codec, DC, TypedList, TypedMap, Guid, IRecord, KeyList, NotModified, ResourceArrayType,
         PropertyValue, Record, ResourceArray, RepresentationType, RepresentationTypeIdentifier, TransmissionType, TransmissionTypeIdentifier,
         Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, UInt64, Int128, UInt128, Float32, Float64, Float128, Char16, Char8, Tuple, 
-        Nullable, Void
+        Nullable, Void, IEnum
     },
     Net: {INetworkReceiver, NetworkBuffer, NetworkConnections, NetworkServer, NetworkSession, SendList,        
             IIP: {DistributedConnection, DistributedPropertyContext, DistributedResource, DistributedResourceQueueItem, 
@@ -109,7 +111,8 @@ const namespace = {
     Resource: {CustomResourceEvent, Instance, IResource, IStore, Warehouse,
                 Template: {
                     ArgumentTemplate, EventTemplate, FunctionTemplate, MemberTemplate,
-                    MemberType, PropertyTemplate, TemplateType, TypeTemplate
+                    MemberType, PropertyTemplate, TemplateType, TypeTemplate,
+                    TemplateDescriber, Prop, Func, Evt, Const, Arg
                 }
               },
     Security: {
@@ -122,21 +125,19 @@ const namespace = {
         Permissions: {ActionType, IPermissionsManager, Ruling},
     },
     Stores: {IndexedDBStore, MemoryStore},
-    Generated: {},
-};
 
-namespace.define = function(type, className) {
-    let sc = className.split('.');
-    let target = namespace.Generated;
-
-    for(let i = 0; i < sc.length; i++) {
-        if (target[sc[i]] == undefined)
-            target[sc[i]] = {};
-        target = target[sc[i]];
+    define: function(target, type, className) {
+        let sc = className.split('.');
+    
+        for(let i = 0; i < sc.length; i++) {
+            if (target[sc[i]] == undefined)
+                target[sc[i]] = {};
+            target = target[sc[i]];
+        }
+    
+        target[sc[sc.length - 1]] = type;
     }
-
-    target[sc[sc.length - 1]] = type;
-}
+};
 
 
 if (typeof window !== 'undefined') 

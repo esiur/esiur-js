@@ -54,6 +54,10 @@ export default class DC extends Uint8Array
     }
 
 
+    static guidToBytes(value){
+        return value.value;
+    }
+    
     static boolToBytes(value)
     {
         var rt = new DC(1);

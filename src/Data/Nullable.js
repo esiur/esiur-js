@@ -3,12 +3,12 @@ export default class Nullable {
     static cache = { };
 
     static getType(nullableType){
-        return nullableType.constructor.type;
+        return nullableType.constructor.underlyingType;
     }
 
     static of(type){
 
-        if (type.constructor.isNullable)
+        if (type.isNullable)
             return type;
 
         if (Nullable.cache[type] != null)
@@ -16,7 +16,7 @@ export default class Nullable {
 
         let c = class extends type{}
         Object.defineProperty(c, "isNullable", {value: true});
-        Object.defineProperty(c, "type", {value: type});
+        Object.defineProperty(c, "underlyingType", {value: type});
 
         Nullable.cache[type] = c;
 

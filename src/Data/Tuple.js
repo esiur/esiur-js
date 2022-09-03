@@ -2,7 +2,7 @@ export default class Tuple extends Array {
     static cache = {};
 
     static getTypes(tuple){
-        return tuple.constructor.types;
+        return tuple.constructor.subTypes;
     }
 
     static of(){
@@ -17,7 +17,7 @@ export default class Tuple extends Array {
 
         let c = class extends Tuple{}
         Object.defineProperty(c, "name", {value: types.map(x => x.name).join('') + "Tuple"});
-        Object.defineProperty(c, "types", {value: types});
+        Object.defineProperty(c, "subTypes", {value: types});
 
         Tuple.cache[types] = c;
 
