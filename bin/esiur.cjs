@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-
-
 if (process.argv.length == 2) {
   console.log("Usage: <command> [arguments]");
   console.log("");
@@ -50,12 +48,19 @@ else if (cmd == "get-template")
   let url = args[0];
 
   console.log(`Getting ${url} ${username} ${password} ${dir}`);
+
+  let getTemplate = async () => {
+    let Esiur  = (await import('../src/esiur.js')).default;
+    await Esiur.Proxy.TemplateGenerator.getTemplate(url, dir, username, password, true);
+  }
+
+  getTemplate();
 }
 
 function getOption(args, option, abbreviation) {
   let index = args.indexOf(abbreviation);
   if (index == -1) index = args.indexOf(option);
   if (index > -1 && index + 1 < args.length) 
-    return args.slice(index, index + 1)[1];
+    return args.splice(index, 2)[1];
   return null;
 }

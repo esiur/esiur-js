@@ -129,7 +129,7 @@ export default class DataSerializer {
       return new DataSerializerComposeResults(
           TransmissionTypeIdentifier.Null, new DC(0));
 
-    var template = Warehouse.getTemplateByType(value.runtimeType) ?? value.template;
+    var template = Warehouse.getTemplateByType(value.constructor);
 
     if (template == null)
       return new DataSerializerComposeResults(
@@ -355,7 +355,7 @@ export default class DataSerializer {
     var rt = BinaryList();
     
 
-    var template = Warehouse.getTemplateByType(value.runtimeType);
+    var template = Warehouse.getTemplateByType(value.constructor);
 
     if (template == null)
       return new DataSerializerComposeResults(

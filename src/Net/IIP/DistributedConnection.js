@@ -82,6 +82,7 @@ import PropertyValue from '../../Data/PropertyValue.js';
 import PropertyValueArray from '../../Data/PropertyValueArray.js';
 import { UInt8 } from '../../Data/ExtendedTypes.js';
 import ConnectionStatus from './ConnectionStatus.js';
+import { Prop, TemplateDescriber } from '../../Resource/Template/TemplateDescriber.js';
 
 export default class DistributedConnection extends IStore {
 
@@ -3184,9 +3185,6 @@ export default class DistributedConnection extends IStore {
 
 
     static get template() {
-        return {
-            namespace: "Esiur",
-            properties: [["status", UInt8]]
-        };
+        return new TemplateDescriber("Esiur", [new Prop("status", UInt8)]);
     }
 }

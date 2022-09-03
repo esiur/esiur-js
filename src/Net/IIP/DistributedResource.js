@@ -171,15 +171,6 @@ export default class DistributedResource extends IResource
             var makeSetter = function(index)
             {
                 return async function (value) {
-                    if (self._p.destroyed)
-                        throw new Error("Trying to access a destroyed object.");
-    
-                    if (self._p.suspended)
-                        throw new Error("Trying to access a suspended object.");
-
-                    if (self._p.attached)
-                        return;
-
                     await self._set(index, value);
                 };
             };
@@ -286,11 +277,15 @@ export default class DistributedResource extends IResource
 
     _set(index, value)
     {
+        if (this._p.destroyed)
+            throw new Error("Trying to access a destroyed object.");
+
+        if (this._p.suspended)
+            throw new Error("Trying to access a suspended object.");
+
         if (!this._p.attached)
-        {
-            console.log("Resource not attached.");
-            return;
-        }
+            throw new Error("Resource not attached.");
+
 
         if (this._p.neglect)
             return;

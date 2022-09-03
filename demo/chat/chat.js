@@ -10,6 +10,8 @@ import DC from "../../src/Data/DC.js";
 import IResource from "../../src/Resource/IResource.js";
 import TransmissionType, { TransmissionTypeIdentifier } from "../../src/Data/TransmissionType.js";
 import TypedMap from "../../src/Data/TypedMap.js";
+import { Arg, Evt, Func, Prop, TemplateDescriber } from "../../src/Resource/Template/TemplateDescriber.js";
+import { Int32 } from "../../src/Data/ExtendedTypes.js";
 
 const require = createRequire(import.meta.url);
 
@@ -36,13 +38,21 @@ var server;
 class MyChat extends IResource {
     
    // void (string, string)->void
-    static get template() {
+    static get templateOld() {
         return {
             namespace: "Chat",
             properties: [["title", String], ["messages", Array], ["users", Array]],
             events: [["message", Map], ["voice", 0, {listenable: true }], ["login"], ["logout"]],
             functions: [[ "send", [["msg", String, {optional: true}] ]]]
         };
+    }
+
+    static get template() {
+      return new TemplateDescriber("Chat",[
+        new Prop("title", String), new Prop("messages", Array), new Prop("users", Array),
+        new Func("send", null, [new Arg("msg", String, true)]), 
+        new Evt("message", Map), new Evt("voice", Int32, true), new Evt("login"), new Evt("logout")]
+        );
     }
 
     constructor() {

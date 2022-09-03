@@ -72,7 +72,7 @@ export default class DC extends Uint8Array
         return new DC(list);
     }
     
-    static hexToBytes(value)
+    static fromHex(value)
     {
         // convert hex to Uint8Array
         var rt = new DC(value.length/2);
@@ -467,9 +467,13 @@ export default class DC extends Uint8Array
         return rt;
     }
 
-    getHex(offset, length)
+    toHex(offset, length)
     {
         var rt = "";
+        if (length == null)
+            length = this.byteLength;
+        if (offset == null)
+            offset = 0;
         for(var i = offset; i < offset + length; i++) {
             var h = this[i].toString(16);
             rt += h.length == 1 ? "0" + h : h;

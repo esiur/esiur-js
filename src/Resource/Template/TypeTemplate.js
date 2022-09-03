@@ -255,74 +255,73 @@ export default class TypeTemplate {
 
         this.definedType = type;
 
-        var template = type.template;
+        let describer = type.template;
 
         // set guid
-        this.className = template.namespace + "." + type.prototype.constructor.name;
-
-        this.classId = SHA256.compute(DC.stringToBytes(this.className)).getGuid(0);
+        this.className = describer.namespace + "." + (describer.className ?? type.prototype.constructor.name);
+        this.classId = describer.classId ?? SHA256.compute(DC.stringToBytes(this.className)).getGuid(0);
 
 
         if (addToWarehouse)
-            addToWarehouse.putTemplate(this);
+            Warehouse.putTemplate(this);
 
         //byte currentIndex = 0;
 
-        if (template.properties != null)
-            for (let i = 0; i < template.properties.length; i++) {
+        if (describer.properties != null)
+            for (let i = 0; i < describer.properties.length; i++) {
                 //[name, type, {read: comment, write: comment, recordable: }]
-                let pi = template.properties[i];
-                let pt = new PropertyTemplate(this, i, pi[0], false,
-                     RepresentationType.fromType(pi[1]) ?? RepresentationType.Void, 
-                     pi[2]?.read, pi[2]?.write, pi[2]?.recordable);
+                let pi = describer.properties[i];
+                let pt = new PropertyTemplate(this, i, pi.name, false,
+                     RepresentationType.fromType(pi.type) ?? RepresentationType.Void, 
+                     pi.readAnnotation, pi.writeAnnotation, pi.recordable);
                 pt.propertyInfo = pi;
                 this.properties.push(pt);
             }
 
         
-        if (template.constants != null)
-            for (let i = 0; i < template.constants.length; i++) {
-                let ci = template.constants[i];
-                let ct = new ConstantTemplate(this, i, ci[0], false,
-                     RepresentationType.fromType(ci[1]) ?? RepresentationType.Void, 
-                     ci.value, ci.help);
+        if (describer.constants != null)
+            for (let i = 0; i < describer.constants.length; i++) {
+                let ci = describer.constants[i];
+                let ct = new ConstantTemplate(this, i, ci.name, false,
+                     RepresentationType.fromType(ci.type) ?? RepresentationType.Void, 
+                     ci.value, ci.annotation);
                 ct.propertyInfo = ci;
                 this.constants.push(ct);
             }
 
         if (this.templateType == TemplateType.Resource)
         {
-            if (template.events != null)
+            if (describer.events != null)
             {
-                for (let i = 0; i < template.events.length; i++) {
+                for (let i = 0; i < describer.events.length; i++) {
 
                     // [name, type, {listenable: true/false, help: ""}]
-                    var ei = template.events[i];
-                    var et = new EventTemplate(this, i, ei[0], false,
-                         RepresentationType.fromType(ei[1]) ?? RepresentationType.Void, 
-                         ei[2]?.help, ei[2]?.listenable)
+                    var ei = describer.events[i];
+                    var et = new EventTemplate(this, i, ei.name, false,
+                         RepresentationType.fromType(ei.type) ?? RepresentationType.Void, 
+                         ei.annotation, ei.listenable)
                     et.eventInfo = ei;
                     this.events.push(et);
                 }
             }
 
-            if (template.functions != null)
+            if (describer.functions != null)
             {
-                for (let i = 0; i < template.functions.length; i++) {
+                for (let i = 0; i < describer.functions.length; i++) {
 
-                    var fi = template.functions[i];
+                    var fi = describer.functions[i];
 
                     let args = [];
-                    for(let ai = 0; ai < fi[1].length; ai++)
-                        args.push(new ArgumentTemplate(fi[1][ai][0], RepresentationType.fromType(fi[1][ai][1])
-                        ?? RepresentationType.Dynamic, fi[1][ai][2]?.optional, ai));
+                    for(let ai = 0; ai < fi.args.length; ai++)
+                        args.push(new ArgumentTemplate(fi.args[ai].name, RepresentationType.fromType(fi.args[ai].type)
+                        ?? RepresentationType.Dynamic, fi.args[ai].optional, ai));
 
                 // [name, {param1: type, param2: int}, returnType, "Description"]
-                    let isStatic = type[fi[0]] instanceof Function;
+                    let isStatic = type[fi.name] instanceof Function;
 
-                    var ft = new FunctionTemplate(this, i, fi[0], false, isStatic, args,
-                         RepresentationType.fromType(fi[2]) ?? RepresentationType.Void,
-                          fi[3]);
+                    var ft = new FunctionTemplate(this, i, fi.name, false, isStatic, args,
+                         RepresentationType.fromType(fi.returnType) ?? RepresentationType.Void,
+                          fi.annotation);
 
                     ft.methodInfo = fi;
 
@@ -347,7 +346,7 @@ export default class TypeTemplate {
 
         // bake it binarily
         let b = BL();
-        let hasClassAnnotation = template.annotation != null;
+        let hasClassAnnotation = describer.annotation != null;
 
         var cls = DC.stringToBytes(this.className);
         b.addUint8( (hasClassAnnotation ? 0x40 : 0 ) | this.templateType)
@@ -357,13 +356,13 @@ export default class TypeTemplate {
 
         if (hasClassAnnotation)
         {
-            var classAnnotationBytes = DC.stringToBytes(template.annotation);
+            var classAnnotationBytes = DC.stringToBytes(describer.annotation);
             b.addUint16(classAnnotationBytes.length)
              .addUint8Array(classAnnotationBytes);
-            this.annotation = template.annotation;
+            this.annotation = describer.annotation;
         }
 
-        b.addUint32(template.version)
+        b.addUint32(describer.version)
             .addUint16(this.members.length);
 
         for (let i = 0; i < this.functions.length; i++)

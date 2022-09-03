@@ -9,8 +9,17 @@ import DC from './DC.js';
 import Warehouse  from '../Resource/Warehouse.js';
 import {Int8, Int16, Int32, Int64, Int128, UInt8, UInt16, UInt32, UInt64, UInt128, Char8, Char16, Float32, Float64, Float128} from './ExtendedTypes.js';
 
+import Nullable from './Nullable.js';
+import IEnum from './IEnum.js';
+import TypedList from './TypedList.js';
+import TypedMap from './TypedMap.js';
+import RecordArray from './RecordArray.js';
+import ResourceArray from './ResourceArray.js';
+import Tuple from './Tuple.js';
+import Void from './Void.js';
+
 export const RepresentationTypeIdentifier = {
-     Void: 0x0,
+      Void: 0x0,
       Dynamic : 0x1,
       Bool : 0x2,
       UInt8 : 0x3,
@@ -47,31 +56,70 @@ export const RepresentationTypeIdentifier = {
       Tuple7 : 0x78
 }
 
-let RuntimeTypes = {};
+let IdentifierToTypeMap = {};
 
-RuntimeTypes[RepresentationTypeIdentifier.Void] = [Object, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Bool] = [Boolean, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Char] = [Char8, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Char16] = [Char16, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt8] = [UInt8, UInt8];
-RuntimeTypes[RepresentationTypeIdentifier.Int8] = [Int8, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Int16] = [Int16, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt16] = [UInt16, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Int32] = [Int32, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt32] = [UInt32, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Int64] = [Int64, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt64] = [UInt64, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Int128] = [Int128, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt128] = [UInt128, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Float32] = [Float32, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Float64] = [Float64, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Decimal] = [Float128, Object];
-RuntimeTypes[RepresentationTypeIdentifier.String] = [String, Object];
-RuntimeTypes[RepresentationTypeIdentifier.DateTime] = [Date, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Resource] = [IResource, IResource];
-RuntimeTypes[RepresentationTypeIdentifier.Record] = [IRecord, IRecord];
+IdentifierToTypeMap[RepresentationTypeIdentifier.Void] = Void;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Bool] = Boolean;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Char] = Char8;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Char16] = Char16;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt8] = UInt8;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int8] = Int8;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int16] = Int16;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt16] = UInt16;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int32] = Int32;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt32] = UInt32;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int64] = Int64;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt64] = UInt64;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int128] = Int128;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt128] = UInt128;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Float32] = Float32;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Float64] = Float64;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Decimal] = Float128;
+IdentifierToTypeMap[RepresentationTypeIdentifier.String] = String;
+IdentifierToTypeMap[RepresentationTypeIdentifier.DateTime] = Date;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Resource] = IResource;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Record] = IRecord;
+IdentifierToTypeMap[RepresentationTypeIdentifier.List] = Array;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Map] = Map;
+IdentifierToTypeMap[RepresentationTypeIdentifier.ResourceArray] = ResourceArray;
+IdentifierToTypeMap[RepresentationTypeIdentifier.RecordArray] = RecordArray;
 
- 
+const TypeToIdentifierMap = {};
+TypeToIdentifierMap[Void] = RepresentationTypeIdentifier.Void;
+TypeToIdentifierMap[Boolean] = RepresentationTypeIdentifier.Bool;
+TypeToIdentifierMap[Char8] = RepresentationTypeIdentifier.Char;
+TypeToIdentifierMap[Char16] = RepresentationTypeIdentifier.Char16;
+TypeToIdentifierMap[UInt8] = RepresentationTypeIdentifier.UInt8;
+TypeToIdentifierMap[Int8] = RepresentationTypeIdentifier.Int8;
+TypeToIdentifierMap[Int16] = RepresentationTypeIdentifier.Int16;
+TypeToIdentifierMap[UInt16] = RepresentationTypeIdentifier.UInt16;
+TypeToIdentifierMap[Int32] = RepresentationTypeIdentifier.Int32;
+TypeToIdentifierMap[UInt32] = RepresentationTypeIdentifier.UInt32;
+TypeToIdentifierMap[Int64] = RepresentationTypeIdentifier.Int64;
+TypeToIdentifierMap[UInt64] = RepresentationTypeIdentifier.UInt64;
+TypeToIdentifierMap[Int128] = RepresentationTypeIdentifier.Int128;
+TypeToIdentifierMap[UInt128] = RepresentationTypeIdentifier.UInt128;
+TypeToIdentifierMap[Float32] = RepresentationTypeIdentifier.Float32;
+TypeToIdentifierMap[Float64] = RepresentationTypeIdentifier.Float64;
+TypeToIdentifierMap[Float128] = RepresentationTypeIdentifier.Decimal;
+TypeToIdentifierMap[String] = RepresentationTypeIdentifier.String;
+TypeToIdentifierMap[Date] = RepresentationTypeIdentifier.DateTime;
+TypeToIdentifierMap[IResource] = RepresentationTypeIdentifier.Resource;
+TypeToIdentifierMap[IRecord] = RepresentationTypeIdentifier.Record;
+TypeToIdentifierMap[Array] = RepresentationTypeIdentifier.List;
+TypeToIdentifierMap[Map] = RepresentationTypeIdentifier.Map;
+TypeToIdentifierMap[RecordArray] = RepresentationTypeIdentifier.RecordArray;
+TypeToIdentifierMap[ResourceArray] = RepresentationTypeIdentifier.ResourceArray;
+
+const TupleIdentifierByLength = {
+  2: RepresentationTypeIdentifier.Tuple2,
+  3: RepresentationTypeIdentifier.Tuple3,
+  4: RepresentationTypeIdentifier.Tuple4,
+  5: RepresentationTypeIdentifier.Tuple5,
+  6: RepresentationTypeIdentifier.Tuple6,
+  7: RepresentationTypeIdentifier.Tuple7,
+}
+
 export class RepresentationTypeParseResults {
   //RepresentationType type;
   //int size;
@@ -82,23 +130,41 @@ export class RepresentationTypeParseResults {
 }
 
 export default class RepresentationType {
-//   static getTypeFromName(name) {
-//     const types = {
-//       "int": int,
-//       "bool": bool,
-//       "double": double,
-//       "String": String,
-//       "IResource": IResource,
-//       "IRecord": IRecord,
-//       "IEnum": IEnum,
-//       "DC": DC,
-//     };
 
-//     if (types[name] != null) {
-//       return types[name];
-//     } else
-//       return Object().runtimeType;
-//   }
+  static getRuntimeType() {
+    let runtimeType = null;
+
+    if (IdentifierToTypeMap[this.identifier] != undefined)
+      runtimeType = IdentifierToTypeMap[this.identifier]
+    if (this.identifier == RepresentationTypeIdentifier.TypedResource) {
+      runtimeType = Warehouse.getTemplateByClassId(this.guid)?.definedType;
+    } else if (this.identifier == RepresentationTypeIdentifier.TypedRecord) {
+      runtimeType = Warehouse.getTemplateByClassId(this.guid, TemplateType.Record)?.definedType;
+    } else if (this.identifier == RepresentationTypeIdentifier.Enum) {
+      runtimeType = Warehouse.getTemplateByClassId(this.guid, TemplateType.Enum)?.definedType;
+    }  else if (this.identifier == RepresentationTypeIdentifier.TypedList){
+      let elementType = this.subTypes[0].getRuntimeType();
+      runtimeType = TypedList.of(elementType);
+    } else if (this.identifier == RepresentationTypeIdentifier.TypedMap){
+      let keyType = this.subTypes[0].getRuntimeType();
+      let valueType = this.subTypes[1].getRuntimeType();
+      runtimeType = TypedMap.of(keyType, valueType);
+    } else if (this.identifier == RepresentationTypeIdentifier.Tuple2
+              || this.identifier == RepresentationTypeIdentifier.Tuple3
+              || this.identifier == RepresentationTypeIdentifier.Tuple4
+              || this.identifier == RepresentationTypeIdentifier.Tuple5
+              || this.identifier == RepresentationTypeIdentifier.Tuple6
+              || this.identifier == RepresentationTypeIdentifier.Tuple7) {
+
+        let subs = this.subTypes.map(x=>x.getRuntimeType());
+        runtimeType = Tuple.of(...subs);
+      }
+
+      if (this.nullable)
+        return Nullable.of(runtimeType);
+      else
+        return runtimeType;
+  }
 
   toNullable() {
     return new RepresentationType(this.identifier, true, this.guid, this.subTypes);
@@ -108,29 +174,60 @@ export default class RepresentationType {
 
   static get Dynamic() { return new RepresentationType(RepresentationTypeIdentifier.Dynamic, true, null, null);}
 
-  static fromType(type) {
-    return Warehouse.typesFactory[type]?.representationType;
-  }
-  
 
-  getRuntimeType() {
-    if (RuntimeTypes[this.identifier])
-      return this.nullable
-          ? RuntimeTypes[this.identifier][1]
-          : RuntimeTypes[this.identifier][0];
-    if (this.identifier == RepresentationTypeIdentifier.TypedRecord)
-      return Warehouse.getTemplateByClassId(this.guid, TemplateType.Record)
-          ?.definedType;
-    else if (this.identifier == RepresentationTypeIdentifier.TypedResource)
-      return Warehouse.getTemplateByClassId(this.guid, TemplateType.Unspecified)
-          ?.definedType;
-    else if (this.identifier == RepresentationTypeIdentifier.Enum)
-      return Warehouse.getTemplateByClassId(this.guid, TemplateType.Enum)
-          ?.definedType;
+  static fromType(type) {
+
+    
+    if (type == null)
+      throw new Error("Type can't be null.");
+
+    let nullable = type.constructor.isNullable;
+
+    if (nullable)
+      type = type.constructor.type; // original type
+
+    let identifier = TypeToIdentifierMap[type];
+
+    if (identifier != null)
+      return new RepresentationType(identifier, null);
+    
+    if (type.prototype instanceof IResource){
+
+      let template = Warehouse.getTemplateByType(type);
+      return new RepresentationType(RepresentationTypeIdentifier.TypedResource, nullable, template.classId);
+
+    } else if (type.prototype instanceof IRecord) {
+      
+      let template = Warehouse.getTemplateByType(type);
+      return new RepresentationType(RepresentationTypeIdentifier.TypedRecord, nullable, template.classId);
+      
+    } else if (type.prototype instanceof IEnum) {
+      
+      let template = Warehouse.getTemplateByType(type);
+      return new RepresentationType(RepresentationTypeIdentifier.Enum, nullable, template.classId);
+
+    } else if (type.prototype instanceof TypedList) {
+
+      let elementType = RepresentationType.fromType(TypedList.getType(type));
+      return new RepresentationType(RepresentationTypeIdentifier.TypedList, null, null, [elementType]);
+
+    } else if (type.prototype instanceof TypedMap) {
+
+      let subs = TypedMap.getTypes(type);
+      let keyType = RepresentationType.fromType(subs[0]);
+      let valueType = RepresentationType.fromType(subs[1]);
+      return new RepresentationType(RepresentationTypeIdentifier.TypedMap, null, null, [keyType, valueType]);
+
+    } else if (type.prototype instanceof Tuple) {
+      
+      let subs = Tuple.gettypes(type).map(x=> RepresentationType.fromType(x));  
+      return new RepresentationType(TupleIdentifierByLength[subs.length], nullable, null, subs);
+    }
+    
 
     return null;
   }
-
+  
  
   constructor(identifier, nullable, guid, subTypes) {
         this.identifier = identifier;

@@ -35,15 +35,15 @@ export default class Guid
 
     valueOf()
     {
-        return this.value.getHex(0, 16);
+        return this.value.toHex(0, 16);
     }
 
-    static fromString(data) {
-        this.value = DC.fromHex(data, '');
+    static parse(data) {
+        return new Guid(DC.fromHex(data, ''))
     }
 
     toString() {
-        return this.vlue.toHex('');
+        return this.value.toHex();
      }
     
     // [Symbol.toPrimitive](hint){

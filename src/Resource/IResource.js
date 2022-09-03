@@ -29,6 +29,7 @@
 import AsyncBag from '../Core/AsyncBag.js';
 import AsyncReply from '../Core/AsyncReply.js';
 import IDestructible from '../Core/IDestructible.js';
+import { TemplateDescriber } from './Template/TemplateDescriber.js';
 
 export const ResourceTrigger =
 {
@@ -59,11 +60,6 @@ export default class IResource extends IDestructible
 
     static get template()
     {
-        return {
-                namespace: "Esiur",
-                properties: [],
-                functions: [],
-                events: []
-            }
+        return new TemplateDescriber("Esiur", []);
     }
 }

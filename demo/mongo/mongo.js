@@ -10,13 +10,12 @@ import DC from "../../src/Data/DC.js";
 import IResource from "../../src/Resource/IResource.js";
 import Structure from "../../src/Data/Structure.js";
 import MongoDBStore from "../../src/Stores/MongoDBStore.js";
+import { Prop, TemplateDescriber } from "../../src/Resource/Template/TemplateDescriber.js";
 
 
 class User extends IResource {
     static get template() {
-        return {
-            properties: [{name: "username"}, {name: "password"}]
-        };
+        return new TemplateDescriber("Esiur", [new Prop("username", String), new Prop("password", String)]);
     }
 }
 
