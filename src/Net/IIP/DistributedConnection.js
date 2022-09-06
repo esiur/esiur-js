@@ -2584,8 +2584,8 @@ export default class DistributedConnection extends IStore {
 
                 if (resource == null)
                 {
-                    template = Warehouse.getTemplateByClassId(classId, TemplateType.Wrapper);
-                    if (template?.definedType != null)
+                    template = Warehouse.getTemplateByClassId(classId, TemplateType.Resource);
+                    if (template?.definedType != null && template?.isWrapper)
                         dr = new template.definedType(self, id, rt[1], rt[2]);
                     else
                         dr = new DistributedResource(self, id, rt[1], rt[2]);

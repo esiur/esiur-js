@@ -39,6 +39,7 @@ import TypedList from '../Data/TypedList.js';
 import EventOccurredInfo from './EventOccurredInfo.js';
 import PropertyModificationInfo from './PropertyModificationInfo.js';
 import PropertyValueArray from '../Data/PropertyValueArray.js';
+import DistributedResource from '../Net/IIP/DistributedResource.js';
 
 export default class Instance extends IEventHandler
 {
@@ -265,9 +266,10 @@ export default class Instance extends IEventHandler
         }
 
         // connect events
-        for (let i = 0; i < this.template.events.length; i++)
-           resource.on(this.template.events[i].name, this._makeHandler(this.template.events[i]));
-        
+        if (!(resource instanceof DistributedResource)) {
+            for (let i = 0; i < this.template.events.length; i++)
+                resource.on(this.template.events[i].name, this._makeHandler(this.template.events[i]));
+        }
     }
 
     _makeHandler(eventTemplate)

@@ -138,7 +138,7 @@ export default class RepresentationType {
     if (IdentifierToTypeMap[this.identifier] != undefined)
       runtimeType = IdentifierToTypeMap[this.identifier]
     if (this.identifier == RepresentationTypeIdentifier.TypedResource) {
-      runtimeType = Warehouse.getTemplateByClassId(this.guid)?.definedType;
+      runtimeType = Warehouse.getTemplateByClassId(this.guid, TemplateType.Resource)?.definedType;
     } else if (this.identifier == RepresentationTypeIdentifier.TypedRecord) {
       runtimeType = Warehouse.getTemplateByClassId(this.guid, TemplateType.Record)?.definedType;
     } else if (this.identifier == RepresentationTypeIdentifier.Enum) {

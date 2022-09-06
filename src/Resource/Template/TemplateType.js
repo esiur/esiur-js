@@ -1,8 +1,6 @@
 export default 
 {
-    Unspecified: 0,
-    Resource: 1,
-    Record: 2,
-    Wrapper: 3,
-    Enum: 4
+    Resource: 0,
+    Record: 1,
+    Enum: 2
 }

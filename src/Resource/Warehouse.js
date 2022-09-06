@@ -55,18 +55,16 @@ export class WH extends IEventHandler
         this.resourceCounter = 0;
         this.templates = new KeyList();
 
-        this.templates.add(TemplateType.Unspecified, new KeyList());
         this.templates.add(TemplateType.Resource, new KeyList());
         this.templates.add(TemplateType.Record, new KeyList());
-        this.templates.add(TemplateType.Wrapper, new KeyList());
         this.templates.add(TemplateType.Enum, new KeyList());
 
         this.protocols = new KeyList();
 
         this._register("connected");
         this._register("disconnected");
-        ///this._urlRegex = /^(?:([\S]*):\/\/([^\/]*)\/?)/;
-//        this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
+
+        
         this._urlRegex = /^(?:([^\s|:]*):\/\/([^/]*)\/?)/;
 
     }
@@ -306,6 +304,9 @@ export class WH extends IEventHandler
 
     putTemplate(template)
     {
+        if (this.templates.get(template.type).containsKey(template.classId))
+            throw new Error("Template with same class Id already exists.");
+  
         this.templates.get(template.type).add(template.classId, template);
     }
 
@@ -314,11 +315,9 @@ export class WH extends IEventHandler
         if (type == null)
             return null;
 
-        var templateType = TemplateType.Unspecified;
+        let templateType;
 
-        if (type.prototype instanceof DistributedResource)
-            templateType = TemplateType.Wrapper;
-        else if (type.prototype instanceof IResource)
+        if (type.prototype instanceof IResource)
             templateType = TemplateType.Resource;
         else if (type.prototype instanceof IRecord)
             templateType = TemplateType.Record;
@@ -355,44 +354,44 @@ export class WH extends IEventHandler
         return template;
     }
 
-    getTemplateByClassId(classId, templateType = TemplateType.Unspecified)
+    getTemplateByClassId(classId, templateType = null)
     {
-        if (templateType == TemplateType.Unspecified)
+        if (templateType == null)
         {
-            // look in resources
+            // look into resources
             var template = this.templates.get(TemplateType.Resource).get(classId);
             if (template != null)
                 return template;
             
-            // look in records
+            // look into records
             template = this.templates.get(TemplateType.Record).get(classId);
             if (template != null)
                 return template;
 
-            // look in wrappers
-            template = this.templates.get(TemplateType.Wrapper).get(classId);
+            // look into enums
+            template = this.templates.get(TemplateType.Enum).get(classId);
             return template;
         }
         else
             return this.templates.get(templateType).get(classId);
     }
 
-    getTemplateByClassName(className, templateType = TemplateType.Unspecified)
+    getTemplateByClassName(className, templateType = null)
     {
-        if (templateType == TemplateType.Unspecified)
+        if (templateType == null)
         {
-            // look in resources
+            // look into resources
             var template = this.templates.get(TemplateType.Resource).values.find(x => x.className == className);
             if (template != null)
                 return template;
 
-            // look in records
+            // look into records
             template = this.templates.get(TemplateType.Record).values.find(x => x.className == className);
             if (template != null)
                 return template;
 
-            // look in wrappers
-            template = this.templates.get(TemplateType.Wrapper).values.find(x => x.className == className);
+            // look into enums
+            template = this.templates.get(TemplateType.Enum).values.find(x => x.className == className);
             return template;
         }
         else

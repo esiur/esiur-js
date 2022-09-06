@@ -119,8 +119,7 @@ export default class TemplateGenerator {
             let className = templates
             .find((x) =>
                 x.classId.valueOf() == representationType.guid.valueOf() &&
-                (x.type == TemplateType.Resource ||
-                    x.type == TemplateType.Wrapper))
+                (x.type == TemplateType.Resource))
             .className;
             if (!dependencies?.includes(className)) dependencies?.push(className);
             name = this._translateClassName(className);
@@ -386,8 +385,7 @@ export default class TemplateGenerator {
       let parentClassName = templates
           .find((x) =>
               (x.classId.valueOf() == template.parentId.valueOf()) &&
-              (x.type == TemplateType.Resource ||
-                  x.type == TemplateType.Wrapper))
+              (x.type == TemplateType.Resource))
           .className;
       parentName = this._translateClassName(parentClassName);
       dependencies.push(parentClassName);

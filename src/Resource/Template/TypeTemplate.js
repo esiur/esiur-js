@@ -42,6 +42,13 @@ import Codec from '../../Data/Codec.js';
 
 export default class TypeTemplate {
 
+    isWrapper = false;
+    properties = [];
+    events = [];
+    functions = [];
+    members = [];
+    constants = [];
+
     getEventTemplateByName(eventName) {
         for (var i = 0; i < this.events.length; i++)
             if (this.events[i].name == eventName)
@@ -222,7 +229,8 @@ export default class TypeTemplate {
          };
 
          getDependenciesFunc(template, list);
-         return list;
+
+         return list.filter((value, index, self) => self.indexOf(value) === index);
      }
 
      get type() {
@@ -231,20 +239,12 @@ export default class TypeTemplate {
 
     constructor(type, addToWarehouse) {
 
-
-        this.properties = [];
-        this.events = [];
-        this.functions = [];
-        this.members = [];
-        this.constants = [];
-
-        
+     
         if (type === undefined)
             return;
         
-        if (type.prototype instanceof DistributedResource)
-            this.templateType = TemplateType.Wrapper;
-        else if (type.prototype instanceof IRecord)
+            
+        if (type.prototype instanceof IRecord)
             this.templateType = TemplateType.Record;
         else if (type.prototype instanceof IResource)
             this.templateType = TemplateType.Resource;
@@ -252,6 +252,8 @@ export default class TypeTemplate {
             this.templateType = TemplateType.Enum;
         else
             throw new Error("Type must implement IResource, IRecord, IEnum or a subtype of DistributedResource.");
+
+        this.isWrapper = (type.prototype instanceof DistributedResource);
 
         this.definedType = type;
 

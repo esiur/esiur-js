@@ -47,7 +47,7 @@ else if (cmd == "get-template")
 
   let url = args[0];
 
-  console.log(`Getting ${url} ${username} ${password} ${dir}`);
+//  console.log(`Getting template '${url}' username: '${username ?? ''}' password '${password ?? ''}' dir '${dir ?? ''}'`);
 
   let getTemplate = async () => {
     let Esiur  = (await import('../src/esiur.js')).default;

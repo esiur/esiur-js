@@ -1,4 +1,6 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+
+},{}],2:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -8,7 +10,7 @@ module.exports = function () {
   );
 };
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -128,7 +130,7 @@ var AsyncBag = /*#__PURE__*/function (_AsyncReply) {
 
 exports["default"] = AsyncBag;
 
-},{"./AsyncReply.js":5}],3:[function(require,module,exports){
+},{"./AsyncReply.js":6}],4:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -247,7 +249,7 @@ var AsyncException = /*#__PURE__*/function (_Error) {
 
 exports["default"] = AsyncException;
 
-},{"./ExceptionCode.js":7}],4:[function(require,module,exports){
+},{"./ExceptionCode.js":8}],5:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -363,7 +365,7 @@ var AsyncQueue = /*#__PURE__*/function (_AsyncReply) {
 
 exports["default"] = AsyncQueue;
 
-},{"./AsyncReply.js":5}],5:[function(require,module,exports){
+},{"./AsyncReply.js":6}],6:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -574,7 +576,7 @@ var AsyncReply = /*#__PURE__*/function (_Promise) {
 
 exports["default"] = AsyncReply;
 
-},{"./AsyncException.js":3,"./ErrorType.js":6,"./ExceptionCode.js":7}],6:[function(require,module,exports){
+},{"./AsyncException.js":4,"./ErrorType.js":7,"./ExceptionCode.js":8}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -587,7 +589,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -596,47 +598,48 @@ Object.defineProperty(exports, "__esModule", {
 exports["default"] = void 0;
 var _default = //const ExceptionCode = 
 {
-  HostNotReachable: 0,
-  AccessDenied: 1,
-  UserOrTokenNotFound: 2,
-  ChallengeFailed: 3,
-  ResourceNotFound: 4,
-  AttachDenied: 5,
-  InvalidMethod: 6,
-  InvokeDenied: 7,
-  CreateDenied: 8,
-  AddParentDenied: 9,
-  AddChildDenied: 10,
-  ViewAttributeDenied: 11,
-  UpdateAttributeDenied: 12,
-  StoreNotFound: 13,
-  ParentNotFound: 14,
-  ChildNotFound: 15,
-  ResourceIsNotStore: 16,
-  DeleteDenied: 17,
-  DeleteFailed: 18,
-  UpdateAttributeFailed: 19,
-  GetAttributesFailed: 20,
-  ClearAttributesFailed: 21,
-  TemplateNotFound: 22,
-  RenameDenied: 23,
-  ClassNotFound: 24,
-  MethodNotFound: 25,
-  PropertyNotFound: 26,
-  SetPropertyDenied: 27,
-  ReadOnlyProperty: 28,
-  GeneralFailure: 29,
-  AddToStoreFailed: 30,
-  NotAttached: 31,
-  AlreadyListened: 32,
-  AlreadyUnlistened: 33,
-  NotListenable: 34,
-  ParseError: 35,
-  Timeout: 36
+  RuntimeException: 0,
+  HostNotReachable: 1,
+  AccessDenied: 2,
+  UserOrTokenNotFound: 3,
+  ChallengeFailed: 4,
+  ResourceNotFound: 5,
+  AttachDenied: 6,
+  InvalidMethod: 7,
+  InvokeDenied: 8,
+  CreateDenied: 9,
+  AddParentDenied: 10,
+  AddChildDenied: 11,
+  ViewAttributeDenied: 12,
+  UpdateAttributeDenied: 13,
+  StoreNotFound: 14,
+  ParentNotFound: 15,
+  ChildNotFound: 16,
+  ResourceIsNotStore: 17,
+  DeleteDenied: 18,
+  DeleteFailed: 19,
+  UpdateAttributeFailed: 20,
+  GetAttributesFailed: 21,
+  ClearAttributesFailed: 22,
+  TemplateNotFound: 23,
+  RenameDenied: 24,
+  ClassNotFound: 25,
+  MethodNotFound: 26,
+  PropertyNotFound: 27,
+  SetPropertyDenied: 28,
+  ReadOnlyProperty: 29,
+  GeneralFailure: 30,
+  AddToStoreFailed: 31,
+  NotAttached: 32,
+  AlreadyListened: 33,
+  AlreadyUnlistened: 34,
+  NotListenable: 35,
+  ParseError: 36,
+  Timeout: 37
 };
 exports["default"] = _default;
 
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -718,7 +721,7 @@ var IDestructible = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = IDestructible;
 
-},{"./IEventHandler.js":9}],9:[function(require,module,exports){
+},{"./IEventHandler.js":10}],10:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -828,7 +831,7 @@ var IEventHandler = /*#__PURE__*/function () {
 
 exports["default"] = IEventHandler;
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -841,7 +844,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -996,7 +999,7 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = AutoList;
 
-},{"../Core/IDestructible.js":8,"../Core/IEventHandler.js":9}],12:[function(require,module,exports){
+},{"../Core/IDestructible.js":9,"../Core/IEventHandler.js":10}],13:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1117,7 +1120,7 @@ var AutoMap = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = AutoMap;
 
-},{"../Core/IDestructible.js":8,"../Core/IEventHandler.js":9}],13:[function(require,module,exports){
+},{"../Core/IDestructible.js":9,"../Core/IEventHandler.js":10}],14:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1414,7 +1417,7 @@ var BinaryList = /*#__PURE__*/function () {
 
 exports["default"] = BinaryList;
 
-},{"./DC.js":15}],14:[function(require,module,exports){
+},{"./DC.js":16}],15:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1703,7 +1706,7 @@ _defineProperty(Codec, "typedParsers", [_DataDeserializer["default"].recordParse
 
 _defineProperty(Codec, "composers", (_defineProperty2 = {}, _defineProperty(_defineProperty2, Boolean, _DataSerializer["default"].boolComposer), _defineProperty(_defineProperty2, _NotModified["default"], _DataSerializer["default"].notModifiedComposer), _defineProperty(_defineProperty2, _ExtendedTypes.Char8, _DataSerializer["default"].char8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Char16, _DataSerializer["default"].char16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int64, _DataSerializer["default"].int64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt64, _DataSerializer["default"].uInt64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int32, _DataSerializer["default"].int32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt32, _DataSerializer["default"].uInt32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int16, _DataSerializer["default"].int16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt16, _DataSerializer["default"].uInt16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int8, _DataSerializer["default"].int8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt8, _DataSerializer["default"].uInt8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float32, _DataSerializer["default"].float32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float64, _DataSerializer["default"].float64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float128, _DataSerializer["default"].float128Composer), _defineProperty(_defineProperty2, Number, _DataSerializer["default"].numberComposer), _defineProperty(_defineProperty2, Date, _DataSerializer["default"].dateTimeComposer), _defineProperty(_defineProperty2, _DC.DC, _DataSerializer["default"].rawDataComposer), _defineProperty(_defineProperty2, Uint8Array, _DataSerializer["default"].rawDataComposer), _defineProperty(_defineProperty2, String, _DataSerializer["default"].stringComposer), _defineProperty(_defineProperty2, Array, _DataSerializer["default"].listComposer), _defineProperty(_defineProperty2, _ResourceArray["default"], _DataSerializer["default"].resourceListComposer), _defineProperty(_defineProperty2, _RecordArray["default"], _DataSerializer["default"].recordListComposer), _defineProperty(_defineProperty2, Map, _DataSerializer["default"].mapComposer), _defineProperty(_defineProperty2, _PropertyValueArray["default"], _DataSerializer["default"].propertyValueArrayComposer), _defineProperty2));
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Net/IIP/DistributedPropertyContext.js":38,"../Net/IIP/DistributedResource.js":39,"../Resource/IResource.js":65,"../Resource/Template/TemplateType.js":76,"../Resource/Warehouse.js":78,"./BinaryList.js":13,"./DC.js":15,"./DataDeserializer.js":16,"./DataSerializer.js":17,"./ExtendedTypes.js":18,"./IEnum.js":20,"./IRecord.js":21,"./KeyList.js":22,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RecordArray.js":28,"./ResourceArray.js":30,"./ResourceArrayType.js":31,"./TransmissionType.js":32,"./Tuple.js":33,"./TypedList.js":34,"./TypedMap.js":35}],15:[function(require,module,exports){
+},{"../Core/AsyncBag.js":3,"../Core/AsyncReply.js":6,"../Net/IIP/DistributedPropertyContext.js":41,"../Net/IIP/DistributedResource.js":42,"../Resource/IResource.js":68,"../Resource/Template/TemplateType.js":80,"../Resource/Warehouse.js":82,"./BinaryList.js":14,"./DC.js":16,"./DataDeserializer.js":17,"./DataSerializer.js":18,"./ExtendedTypes.js":19,"./IEnum.js":21,"./IRecord.js":22,"./KeyList.js":23,"./NotModified.js":24,"./PropertyValue.js":27,"./PropertyValueArray.js":28,"./Record.js":29,"./RecordArray.js":30,"./ResourceArray.js":32,"./ResourceArrayType.js":33,"./TransmissionType.js":34,"./Tuple.js":35,"./TypedList.js":36,"./TypedMap.js":37}],16:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -2017,9 +2020,11 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
       return rt;
     }
   }, {
-    key: "getHex",
-    value: function getHex(offset, length) {
+    key: "toHex",
+    value: function toHex(offset, length) {
       var rt = "";
+      if (length == null) length = this.byteLength;
+      if (offset == null) offset = 0;
 
       for (var i = offset; i < offset + length; i++) {
         var h = this[i].toString(16);
@@ -2241,6 +2246,11 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
       return true;
     }
   }], [{
+    key: "guidToBytes",
+    value: function guidToBytes(value) {
+      return value.value;
+    }
+  }, {
     key: "boolToBytes",
     value: function boolToBytes(value) {
       var rt = new DC(1);
@@ -2260,8 +2270,8 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
       return new DC(list);
     }
   }, {
-    key: "hexToBytes",
-    value: function hexToBytes(value) {
+    key: "fromHex",
+    value: function fromHex(value) {
       // convert hex to Uint8Array
       var rt = new DC(value.length / 2);
 
@@ -2485,7 +2495,7 @@ function BL() {
 
 ;
 
-},{"./BinaryList.js":13,"./Guid.js":19}],16:[function(require,module,exports){
+},{"./BinaryList.js":14,"./Guid.js":20}],17:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -2716,7 +2726,7 @@ var DataDeserializer = /*#__PURE__*/function () {
           var record;
 
           if (template.definedType != null) {
-            record = _Warehouse["default"].createInstance(template.definedType);
+            record = new template.definedType();
           } else {
             record = new _Record["default"]();
           }
@@ -2762,8 +2772,7 @@ var DataDeserializer = /*#__PURE__*/function () {
 
       if (template != null) {
         if (template.definedType != null) {
-          var enumVal = _Warehouse["default"].createInstance(template.definedType);
-
+          var enumVal = new template.definedType();
           enumVal.index = index;
           enumVal.name = template.constants[index].name;
           enumVal.value = template.constants[index].value;
@@ -2777,8 +2786,7 @@ var DataDeserializer = /*#__PURE__*/function () {
         connection.getTemplate(classId).then(function (tmp) {
           if (tmp != null) {
             if (tmp.definedType != null) {
-              var enumVal = _Warehouse["default"].createInstance(tmp.definedType);
-
+              var enumVal = new tmp.definedType();
               enumVal.index = index;
               enumVal.name = tmp.constants[index].name;
               enumVal.value = tmp.constants[index].value;
@@ -3018,7 +3026,7 @@ var DataDeserializer = /*#__PURE__*/function () {
 
 exports["default"] = DataDeserializer;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncException.js":3,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/ExtendedTypes.js":18,"../Net/IIP/DistributedConnection.js":37,"../Resource/Template/TemplateType.js":76,"../Resource/Warehouse.js":78,"./Codec.js":14,"./DC.js":15,"./IEnum.js":20,"./NotModified.js":23,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RepresentationType.js":29,"./Tuple.js":33,"./TypedMap.js":35}],17:[function(require,module,exports){
+},{"../Core/AsyncBag.js":3,"../Core/AsyncException.js":4,"../Core/AsyncReply.js":6,"../Core/ErrorType.js":7,"../Core/ExceptionCode.js":8,"../Data/ExtendedTypes.js":19,"../Net/IIP/DistributedConnection.js":40,"../Resource/Template/TemplateType.js":80,"../Resource/Warehouse.js":82,"./Codec.js":15,"./DC.js":16,"./IEnum.js":21,"./NotModified.js":24,"./PropertyValue.js":27,"./PropertyValueArray.js":28,"./Record.js":29,"./RepresentationType.js":31,"./Tuple.js":35,"./TypedMap.js":37}],18:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -3183,10 +3191,10 @@ var DataSerializer = /*#__PURE__*/function () {
   }, {
     key: "enumComposer",
     value: function enumComposer(value, connection) {
-      var _Warehouse$getTemplat;
-
       if (value == null) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
-      var template = (_Warehouse$getTemplat = _Warehouse["default"].getTemplateByType(value.runtimeType)) !== null && _Warehouse$getTemplat !== void 0 ? _Warehouse$getTemplat : value.template;
+
+      var template = _Warehouse["default"].getTemplateByType(value.constructor);
+
       if (template == null) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
       var cts = template.constants.where(function (x) {
         return x.value == value;
@@ -3376,7 +3384,7 @@ var DataSerializer = /*#__PURE__*/function () {
     value: function recordComposer(value, connection) {
       var rt = (0, _BinaryList["default"])();
 
-      var template = _Warehouse["default"].getTemplateByType(value.runtimeType);
+      var template = _Warehouse["default"].getTemplateByType(value.constructor);
 
       if (template == null) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
       rt.addDC(_DC["default"].guidToBytes(template.classId));
@@ -3442,7 +3450,7 @@ var DataSerializer = /*#__PURE__*/function () {
 
 exports["default"] = DataSerializer;
 
-},{"../Resource/Warehouse.js":78,"./BinaryList.js":13,"./Codec.js":14,"./DC.js":15,"./RepresentationType.js":29,"./TransmissionType.js":32,"./Tuple.js":33}],18:[function(require,module,exports){
+},{"../Resource/Warehouse.js":82,"./BinaryList.js":14,"./Codec.js":15,"./DC.js":16,"./RepresentationType.js":31,"./TransmissionType.js":34,"./Tuple.js":35}],19:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -3743,7 +3751,7 @@ var Char8 = /*#__PURE__*/function (_String2) {
 
 exports.Char8 = Char8;
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3771,20 +3779,20 @@ var Guid = /*#__PURE__*/function () {
   _createClass(Guid, [{
     key: "valueOf",
     value: function valueOf() {
-      return this.value.getHex(0, 16);
+      return this.value.toHex(0, 16);
     }
   }, {
     key: "toString",
     value: function toString() {
-      return this.vlue.toHex('');
+      return this.value.toHex();
     } // [Symbol.toPrimitive](hint){
     //     console.log(hint);
     // }
 
   }], [{
-    key: "fromString",
-    value: function fromString(data) {
-      this.value = _DC["default"].fromHex(data, '');
+    key: "parse",
+    value: function parse(data) {
+      return new Guid(_DC["default"].fromHex(data, ''));
     }
   }]);
 
@@ -3793,7 +3801,7 @@ var Guid = /*#__PURE__*/function () {
 
 exports["default"] = Guid;
 
-},{"./DC.js":15}],20:[function(require,module,exports){
+},{"./DC.js":16}],21:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3833,7 +3841,7 @@ var IEnum = /*#__PURE__*/function () {
 
 exports["default"] = IEnum;
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -3863,7 +3871,7 @@ var IRecord = /*#__PURE__*/function () {
 
 exports["default"] = IRecord;
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4059,7 +4067,7 @@ var KeyList = /*#__PURE__*/function () {
 
 exports["default"] = KeyList;
 
-},{"../Core/IDestructible.js":8}],23:[function(require,module,exports){
+},{"../Core/IDestructible.js":9}],24:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4100,7 +4108,87 @@ var NotModified = function NotModified() {
 
 exports["default"] = NotModified;
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var Nullable = /*#__PURE__*/function () {
+  function Nullable() {
+    _classCallCheck(this, Nullable);
+  }
+
+  _createClass(Nullable, null, [{
+    key: "getType",
+    value: function getType(nullableType) {
+      return nullableType.constructor.underlyingType;
+    }
+  }, {
+    key: "of",
+    value: function of(type) {
+      if (type.isNullable) return type;
+      if (Nullable.cache[type] != null) return Nullable.cache[type];
+
+      var c = /*#__PURE__*/function (_type) {
+        _inherits(c, _type);
+
+        var _super = _createSuper(c);
+
+        function c() {
+          _classCallCheck(this, c);
+
+          return _super.apply(this, arguments);
+        }
+
+        return c;
+      }(type);
+
+      Object.defineProperty(c, "isNullable", {
+        value: true
+      });
+      Object.defineProperty(c, "underlyingType", {
+        value: type
+      });
+      Nullable.cache[type] = c;
+      return c;
+    }
+  }]);
+
+  return Nullable;
+}();
+
+exports["default"] = Nullable;
+
+_defineProperty(Nullable, "cache", {});
+
+},{}],26:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4119,7 +4207,7 @@ var ParseResult = function ParseResult(size, value) {
 
 exports["default"] = ParseResult;
 
-},{}],25:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4164,7 +4252,7 @@ var PropertyValue = function PropertyValue(value, age, date) {
 
 exports["default"] = PropertyValue;
 
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -4212,7 +4300,7 @@ var PropertyValueArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = PropertyValueArray;
 
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -4258,7 +4346,7 @@ var Record = /*#__PURE__*/function (_IRecord) {
 
 exports["default"] = Record;
 
-},{"./IRecord.js":21}],28:[function(require,module,exports){
+},{"./IRecord.js":22}],30:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -4350,7 +4438,7 @@ var RecordArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = RecordArray;
 
-},{"./IRecord.js":21}],29:[function(require,module,exports){
+},{"./IRecord.js":22}],31:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4372,7 +4460,35 @@ var _Warehouse = _interopRequireDefault(require("../Resource/Warehouse.js"));
 
 var _ExtendedTypes = require("./ExtendedTypes.js");
 
+var _Nullable = _interopRequireDefault(require("./Nullable.js"));
+
+var _IEnum = _interopRequireDefault(require("./IEnum.js"));
+
+var _TypedList = _interopRequireDefault(require("./TypedList.js"));
+
+var _TypedMap = _interopRequireDefault(require("./TypedMap.js"));
+
+var _RecordArray = _interopRequireDefault(require("./RecordArray.js"));
+
+var _ResourceArray = _interopRequireDefault(require("./ResourceArray.js"));
+
+var _Tuple = _interopRequireDefault(require("./Tuple.js"));
+
+var _Void = _interopRequireDefault(require("./Void.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
@@ -4423,28 +4539,67 @@ var RepresentationTypeIdentifier = {
   Tuple7: 0x78
 };
 exports.RepresentationTypeIdentifier = RepresentationTypeIdentifier;
-var RuntimeTypes = {};
-RuntimeTypes[RepresentationTypeIdentifier.Void] = [Object, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Bool] = [Boolean, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Char] = [_ExtendedTypes.Char8, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Char16] = [_ExtendedTypes.Char16, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt8] = [_ExtendedTypes.UInt8, _ExtendedTypes.UInt8];
-RuntimeTypes[RepresentationTypeIdentifier.Int8] = [_ExtendedTypes.Int8, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Int16] = [_ExtendedTypes.Int16, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt16] = [_ExtendedTypes.UInt16, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Int32] = [_ExtendedTypes.Int32, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt32] = [_ExtendedTypes.UInt32, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Int64] = [_ExtendedTypes.Int64, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt64] = [_ExtendedTypes.UInt64, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Int128] = [_ExtendedTypes.Int128, Object];
-RuntimeTypes[RepresentationTypeIdentifier.UInt128] = [_ExtendedTypes.UInt128, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Float32] = [_ExtendedTypes.Float32, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Float64] = [_ExtendedTypes.Float64, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Decimal] = [_ExtendedTypes.Float128, Object];
-RuntimeTypes[RepresentationTypeIdentifier.String] = [String, Object];
-RuntimeTypes[RepresentationTypeIdentifier.DateTime] = [Date, Object];
-RuntimeTypes[RepresentationTypeIdentifier.Resource] = [_IResource["default"], _IResource["default"]];
-RuntimeTypes[RepresentationTypeIdentifier.Record] = [_IRecord["default"], _IRecord["default"]];
+var IdentifierToTypeMap = {};
+IdentifierToTypeMap[RepresentationTypeIdentifier.Void] = _Void["default"];
+IdentifierToTypeMap[RepresentationTypeIdentifier.Bool] = Boolean;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Char] = _ExtendedTypes.Char8;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Char16] = _ExtendedTypes.Char16;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt8] = _ExtendedTypes.UInt8;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int8] = _ExtendedTypes.Int8;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int16] = _ExtendedTypes.Int16;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt16] = _ExtendedTypes.UInt16;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int32] = _ExtendedTypes.Int32;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt32] = _ExtendedTypes.UInt32;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int64] = _ExtendedTypes.Int64;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt64] = _ExtendedTypes.UInt64;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Int128] = _ExtendedTypes.Int128;
+IdentifierToTypeMap[RepresentationTypeIdentifier.UInt128] = _ExtendedTypes.UInt128;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Float32] = _ExtendedTypes.Float32;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Float64] = _ExtendedTypes.Float64;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Decimal] = _ExtendedTypes.Float128;
+IdentifierToTypeMap[RepresentationTypeIdentifier.String] = String;
+IdentifierToTypeMap[RepresentationTypeIdentifier.DateTime] = Date;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Resource] = _IResource["default"];
+IdentifierToTypeMap[RepresentationTypeIdentifier.Record] = _IRecord["default"];
+IdentifierToTypeMap[RepresentationTypeIdentifier.List] = Array;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Map] = Map;
+IdentifierToTypeMap[RepresentationTypeIdentifier.ResourceArray] = _ResourceArray["default"];
+IdentifierToTypeMap[RepresentationTypeIdentifier.RecordArray] = _RecordArray["default"];
+var TypeToIdentifierMap = {};
+TypeToIdentifierMap[_Void["default"]] = RepresentationTypeIdentifier.Void;
+TypeToIdentifierMap[Boolean] = RepresentationTypeIdentifier.Bool;
+TypeToIdentifierMap[_ExtendedTypes.Char8] = RepresentationTypeIdentifier.Char;
+TypeToIdentifierMap[_ExtendedTypes.Char16] = RepresentationTypeIdentifier.Char16;
+TypeToIdentifierMap[_ExtendedTypes.UInt8] = RepresentationTypeIdentifier.UInt8;
+TypeToIdentifierMap[_ExtendedTypes.Int8] = RepresentationTypeIdentifier.Int8;
+TypeToIdentifierMap[_ExtendedTypes.Int16] = RepresentationTypeIdentifier.Int16;
+TypeToIdentifierMap[_ExtendedTypes.UInt16] = RepresentationTypeIdentifier.UInt16;
+TypeToIdentifierMap[_ExtendedTypes.Int32] = RepresentationTypeIdentifier.Int32;
+TypeToIdentifierMap[_ExtendedTypes.UInt32] = RepresentationTypeIdentifier.UInt32;
+TypeToIdentifierMap[_ExtendedTypes.Int64] = RepresentationTypeIdentifier.Int64;
+TypeToIdentifierMap[_ExtendedTypes.UInt64] = RepresentationTypeIdentifier.UInt64;
+TypeToIdentifierMap[_ExtendedTypes.Int128] = RepresentationTypeIdentifier.Int128;
+TypeToIdentifierMap[_ExtendedTypes.UInt128] = RepresentationTypeIdentifier.UInt128;
+TypeToIdentifierMap[_ExtendedTypes.Float32] = RepresentationTypeIdentifier.Float32;
+TypeToIdentifierMap[_ExtendedTypes.Float64] = RepresentationTypeIdentifier.Float64;
+TypeToIdentifierMap[_ExtendedTypes.Float128] = RepresentationTypeIdentifier.Decimal;
+TypeToIdentifierMap[String] = RepresentationTypeIdentifier.String;
+TypeToIdentifierMap[Date] = RepresentationTypeIdentifier.DateTime;
+TypeToIdentifierMap[_IResource["default"]] = RepresentationTypeIdentifier.Resource;
+TypeToIdentifierMap[_IRecord["default"]] = RepresentationTypeIdentifier.Record;
+TypeToIdentifierMap[Array] = RepresentationTypeIdentifier.List;
+TypeToIdentifierMap[Map] = RepresentationTypeIdentifier.Map;
+TypeToIdentifierMap[_RecordArray["default"]] = RepresentationTypeIdentifier.RecordArray;
+TypeToIdentifierMap[_ResourceArray["default"]] = RepresentationTypeIdentifier.ResourceArray;
+TypeToIdentifierMap[Object] = RepresentationTypeIdentifier.Dynamic;
+var TupleIdentifierByLength = {
+  2: RepresentationTypeIdentifier.Tuple2,
+  3: RepresentationTypeIdentifier.Tuple3,
+  4: RepresentationTypeIdentifier.Tuple4,
+  5: RepresentationTypeIdentifier.Tuple5,
+  6: RepresentationTypeIdentifier.Tuple6,
+  7: RepresentationTypeIdentifier.Tuple7
+};
 
 var RepresentationTypeParseResults = //RepresentationType type;
 //int size;
@@ -4468,34 +4623,43 @@ var RepresentationType = /*#__PURE__*/function () {
   }
 
   _createClass(RepresentationType, [{
-    key: "toNullable",
-    value: //   static getTypeFromName(name) {
-    //     const types = {
-    //       "int": int,
-    //       "bool": bool,
-    //       "double": double,
-    //       "String": String,
-    //       "IResource": IResource,
-    //       "IRecord": IRecord,
-    //       "IEnum": IEnum,
-    //       "DC": DC,
-    //     };
-    //     if (types[name] != null) {
-    //       return types[name];
-    //     } else
-    //       return Object().runtimeType;
-    //   }
-    function toNullable() {
-      return new RepresentationType(this.identifier, true, this.guid, this.subTypes);
-    }
-  }, {
     key: "getRuntimeType",
     value: function getRuntimeType() {
-      var _Warehouse$getTemplat, _Warehouse$getTemplat2, _Warehouse$getTemplat3;
+      var runtimeType = null;
+      if (IdentifierToTypeMap[this.identifier] != undefined) runtimeType = IdentifierToTypeMap[this.identifier];
 
-      if (RuntimeTypes[this.identifier]) return this.nullable ? RuntimeTypes[this.identifier][1] : RuntimeTypes[this.identifier][0];
-      if (this.identifier == RepresentationTypeIdentifier.TypedRecord) return (_Warehouse$getTemplat = _Warehouse["default"].getTemplateByClassId(this.guid, _TemplateType["default"].Record)) === null || _Warehouse$getTemplat === void 0 ? void 0 : _Warehouse$getTemplat.definedType;else if (this.identifier == RepresentationTypeIdentifier.TypedResource) return (_Warehouse$getTemplat2 = _Warehouse["default"].getTemplateByClassId(this.guid, _TemplateType["default"].Unspecified)) === null || _Warehouse$getTemplat2 === void 0 ? void 0 : _Warehouse$getTemplat2.definedType;else if (this.identifier == RepresentationTypeIdentifier.Enum) return (_Warehouse$getTemplat3 = _Warehouse["default"].getTemplateByClassId(this.guid, _TemplateType["default"].Enum)) === null || _Warehouse$getTemplat3 === void 0 ? void 0 : _Warehouse$getTemplat3.definedType;
-      return null;
+      if (this.identifier == RepresentationTypeIdentifier.TypedResource) {
+        var _Warehouse$getTemplat;
+
+        runtimeType = (_Warehouse$getTemplat = _Warehouse["default"].getTemplateByClassId(this.guid)) === null || _Warehouse$getTemplat === void 0 ? void 0 : _Warehouse$getTemplat.definedType;
+      } else if (this.identifier == RepresentationTypeIdentifier.TypedRecord) {
+        var _Warehouse$getTemplat2;
+
+        runtimeType = (_Warehouse$getTemplat2 = _Warehouse["default"].getTemplateByClassId(this.guid, _TemplateType["default"].Record)) === null || _Warehouse$getTemplat2 === void 0 ? void 0 : _Warehouse$getTemplat2.definedType;
+      } else if (this.identifier == RepresentationTypeIdentifier.Enum) {
+        var _Warehouse$getTemplat3;
+
+        runtimeType = (_Warehouse$getTemplat3 = _Warehouse["default"].getTemplateByClassId(this.guid, _TemplateType["default"].Enum)) === null || _Warehouse$getTemplat3 === void 0 ? void 0 : _Warehouse$getTemplat3.definedType;
+      } else if (this.identifier == RepresentationTypeIdentifier.TypedList) {
+        var elementType = this.subTypes[0].getRuntimeType();
+        runtimeType = _TypedList["default"].of(elementType);
+      } else if (this.identifier == RepresentationTypeIdentifier.TypedMap) {
+        var keyType = this.subTypes[0].getRuntimeType();
+        var valueType = this.subTypes[1].getRuntimeType();
+        runtimeType = _TypedMap["default"].of(keyType, valueType);
+      } else if (this.identifier == RepresentationTypeIdentifier.Tuple2 || this.identifier == RepresentationTypeIdentifier.Tuple3 || this.identifier == RepresentationTypeIdentifier.Tuple4 || this.identifier == RepresentationTypeIdentifier.Tuple5 || this.identifier == RepresentationTypeIdentifier.Tuple6 || this.identifier == RepresentationTypeIdentifier.Tuple7) {
+        var subs = this.subTypes.map(function (x) {
+          return x.getRuntimeType();
+        });
+        runtimeType = _Tuple["default"].of.apply(_Tuple["default"], _toConsumableArray(subs));
+      }
+
+      if (this.nullable) return _Nullable["default"].of(runtimeType);else return runtimeType;
+    }
+  }, {
+    key: "toNullable",
+    value: function toNullable() {
+      return new RepresentationType(this.identifier, true, this.guid, this.subTypes);
     }
   }, {
     key: "compose",
@@ -4523,9 +4687,40 @@ var RepresentationType = /*#__PURE__*/function () {
   }, {
     key: "fromType",
     value: function fromType(type) {
-      var _Warehouse$typesFacto;
+      if (type == null) throw new Error("Type can't be null.");
+      var nullable = type.isNullable;
+      if (nullable) type = type.underlyingType; // original type
 
-      return (_Warehouse$typesFacto = _Warehouse["default"].typesFactory[type]) === null || _Warehouse$typesFacto === void 0 ? void 0 : _Warehouse$typesFacto.representationType;
+      var identifier = TypeToIdentifierMap[type];
+      if (identifier != null) return new RepresentationType(identifier, null);
+
+      if (type.prototype instanceof _IResource["default"]) {
+        var template = _Warehouse["default"].getTemplateByType(type);
+
+        return new RepresentationType(RepresentationTypeIdentifier.TypedResource, nullable, template.classId);
+      } else if (type.prototype instanceof _IRecord["default"]) {
+        var _template = _Warehouse["default"].getTemplateByType(type);
+
+        return new RepresentationType(RepresentationTypeIdentifier.TypedRecord, nullable, _template.classId);
+      } else if (type.prototype instanceof _IEnum["default"]) {
+        var _template2 = _Warehouse["default"].getTemplateByType(type);
+
+        return new RepresentationType(RepresentationTypeIdentifier.Enum, nullable, _template2.classId);
+      } else if (type.prototype instanceof _TypedList["default"]) {
+        var elementType = RepresentationType.fromType(type.elementType);
+        return new RepresentationType(RepresentationTypeIdentifier.TypedList, null, null, [elementType]);
+      } else if (type.prototype instanceof _TypedMap["default"]) {
+        var keyType = RepresentationType.fromType(type.keyType);
+        var valueType = RepresentationType.fromType(type.valueType);
+        return new RepresentationType(RepresentationTypeIdentifier.TypedMap, null, null, [keyType, valueType]);
+      } else if (type.prototype instanceof _Tuple["default"]) {
+        var subs = type.subTypes.map(function (x) {
+          return RepresentationType.fromType(x);
+        });
+        return new RepresentationType(TupleIdentifierByLength[subs.length], nullable, null, subs);
+      }
+
+      return null;
     }
   }, {
     key: "parse",
@@ -4565,7 +4760,7 @@ var RepresentationType = /*#__PURE__*/function () {
 
 exports.RepresentationType = exports["default"] = RepresentationType;
 
-},{"../Resource/IResource.js":65,"../Resource/Template/TemplateType.js":76,"../Resource/Warehouse.js":78,"./BinaryList.js":13,"./DC.js":15,"./ExtendedTypes.js":18,"./IRecord.js":21}],30:[function(require,module,exports){
+},{"../Resource/IResource.js":68,"../Resource/Template/TemplateType.js":80,"../Resource/Warehouse.js":82,"./BinaryList.js":14,"./DC.js":16,"./ExtendedTypes.js":19,"./IEnum.js":21,"./IRecord.js":22,"./Nullable.js":25,"./RecordArray.js":30,"./ResourceArray.js":32,"./Tuple.js":35,"./TypedList.js":36,"./TypedMap.js":37,"./Void.js":38}],32:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4657,7 +4852,7 @@ var ResourceArray = /*#__PURE__*/function (_Array) {
 
 exports["default"] = ResourceArray;
 
-},{"../Resource/IResource.js":65}],31:[function(require,module,exports){
+},{"../Resource/IResource.js":68}],33:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4671,7 +4866,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],32:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4897,7 +5092,7 @@ var TransmissionType = /*#__PURE__*/function () {
 
 exports.TransmissionType = exports["default"] = TransmissionType;
 
-},{"./DC.js":15}],33:[function(require,module,exports){
+},{"./DC.js":16}],35:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -4949,7 +5144,7 @@ var Tuple = /*#__PURE__*/function (_Array) {
   _createClass(Tuple, null, [{
     key: "getTypes",
     value: function getTypes(tuple) {
-      return tuple.constructor.types;
+      return tuple.constructor.subTypes;
     }
   }, {
     key: "of",
@@ -4981,7 +5176,7 @@ var Tuple = /*#__PURE__*/function (_Array) {
           return x.name;
         }).join('') + "Tuple"
       });
-      Object.defineProperty(c, "types", {
+      Object.defineProperty(c, "subTypes", {
         value: types
       });
       Tuple.cache[types] = c;
@@ -4996,7 +5191,7 @@ exports["default"] = Tuple;
 
 _defineProperty(Tuple, "cache", {});
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -5072,7 +5267,7 @@ var TypedList = /*#__PURE__*/function (_Array) {
     //             this.push(data[i]);
     // }
     function getType(typedList) {
-      return typedList.constructor.type;
+      return typedList.constructor.elementType;
     }
   }, {
     key: "of",
@@ -5096,7 +5291,7 @@ var TypedList = /*#__PURE__*/function (_Array) {
       Object.defineProperty(c, "name", {
         value: type.name + "List"
       });
-      Object.defineProperty(c, "type", {
+      Object.defineProperty(c, "elementType", {
         value: type
       });
       TypedList.cache[type] = c;
@@ -5111,7 +5306,7 @@ exports["default"] = TypedList;
 
 _defineProperty(TypedList, "cache", (_defineProperty2 = {}, _defineProperty(_defineProperty2, _IResource["default"], _ResourceArray["default"]), _defineProperty(_defineProperty2, _PropertyValue["default"], _PropertyValueArray["default"]), _defineProperty(_defineProperty2, _IRecord["default"], _RecordArray["default"]), _defineProperty(_defineProperty2, _Record["default"], _RecordArray["default"]), _defineProperty2));
 
-},{"../Resource/IResource.js":65,"./IRecord.js":21,"./PropertyValue.js":25,"./PropertyValueArray.js":26,"./Record.js":27,"./RecordArray.js":28,"./ResourceArray.js":30}],35:[function(require,module,exports){
+},{"../Resource/IResource.js":68,"./IRecord.js":22,"./PropertyValue.js":27,"./PropertyValueArray.js":28,"./Record.js":29,"./RecordArray.js":30,"./ResourceArray.js":32}],37:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -5219,7 +5414,23 @@ exports["default"] = TypedMap;
 
 _defineProperty(TypedMap, "cache", {});
 
-},{}],36:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Void = function Void() {
+  _classCallCheck(this, Void);
+};
+
+exports["default"] = Void;
+
+},{}],39:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5233,7 +5444,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],37:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -5355,6 +5566,8 @@ var _PropertyValueArray = _interopRequireDefault(require("../../Data/PropertyVal
 var _ExtendedTypes = require("../../Data/ExtendedTypes.js");
 
 var _ConnectionStatus = _interopRequireDefault(require("./ConnectionStatus.js"));
+
+var _TemplateDescriber = require("../../Resource/Template/TemplateDescriber.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -6133,13 +6346,15 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                   break;
                 }
 
-                // parse them as int
-                id = data.getUint32(8);
+                // remove from suspended.
+                this._suspendedResources.remove(_r._p.instanceId); // parse them as int
+
+
+                id = data.getUint32(8); // id changed ?
+
                 if (id != _r._p.instanceId) _r._p.instanceId = id;
 
                 this._neededResources.set(id, _r);
-
-                this._suspendedResources.remove(id);
 
                 _context.next = 27;
                 return this.fetch(id, null);
@@ -7652,7 +7867,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           var _template;
 
           template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Wrapper);
-          if (((_template = template) === null || _template === void 0 ? void 0 : _template.definedType) != null) dr = new template.getDependencies(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
+          if (((_template = template) === null || _template === void 0 ? void 0 : _template.definedType) != null) dr = new template.definedType(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
         } else {
           dr = resource;
           template = resource.instance.template;
@@ -7701,7 +7916,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
           });
         } else {
           if (resource == null) {
-            _Warehouse["default"].put(id.toString(), dr, this, null, template).then(initResource).error(function (ex) {
+            _Warehouse["default"].put(id.toString(), dr, self, null, template).then(initResource).error(function (ex) {
               return reply.triggerError(ex);
             });
           } else {
@@ -8133,10 +8348,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }], [{
     key: "template",
     get: function get() {
-      return {
-        namespace: "Esiur",
-        properties: [["status", _ExtendedTypes.UInt8]]
-      };
+      return new _TemplateDescriber.TemplateDescriber("Esiur", [new _TemplateDescriber.Prop("status", _ExtendedTypes.UInt8)]);
     }
   }]);
 
@@ -8145,7 +8357,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncBag.js":2,"../../Core/AsyncException.js":3,"../../Core/AsyncQueue.js":4,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Core/ProgressType.js":10,"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/ExtendedTypes.js":18,"../../Data/KeyList.js":22,"../../Data/PropertyValue.js":25,"../../Data/PropertyValueArray.js":26,"../../Data/TransmissionType.js":32,"../../Resource/IResource.js":65,"../../Resource/IStore.js":66,"../../Resource/Template/TemplateType.js":76,"../../Resource/Template/TypeTemplate.js":77,"../../Resource/Warehouse.js":78,"../../Security/Authority/Authentication.js":79,"../../Security/Authority/AuthenticationMethod.js":80,"../../Security/Authority/AuthenticationType.js":81,"../../Security/Authority/ClientAuthentication.js":82,"../../Security/Authority/HostAuthentication.js":83,"../../Security/Authority/Session.js":84,"../../Security/Integrity/SHA256.js":85,"../../Security/Permissions/ActionType.js":87,"../../Security/Permissions/Ruling.js":89,"../Packets//IIPPacketReport.js":56,"../Packets/IIPAuthPacket.js":49,"../Packets/IIPAuthPacketAction.js":50,"../Packets/IIPAuthPacketCommand.js":51,"../Packets/IIPPacket.js":52,"../Packets/IIPPacketAction.js":53,"../Packets/IIPPacketCommand.js":54,"../Packets/IIPPacketEvent.js":55,"../SendList.js":57,"../Sockets/SocketState.js":59,"../Sockets/WSocket.js":60,"./ConnectionStatus.js":36,"./DistributedPropertyContext.js":38,"./DistributedResource.js":39,"./DistributedResourceQueueItem.js":40,"./DistributedResourceQueueItemType.js":41}],38:[function(require,module,exports){
+},{"../../Core/AsyncBag.js":3,"../../Core/AsyncException.js":4,"../../Core/AsyncQueue.js":5,"../../Core/AsyncReply.js":6,"../../Core/ErrorType.js":7,"../../Core/ExceptionCode.js":8,"../../Core/ProgressType.js":11,"../../Data/Codec.js":15,"../../Data/DC.js":16,"../../Data/ExtendedTypes.js":19,"../../Data/KeyList.js":23,"../../Data/PropertyValue.js":27,"../../Data/PropertyValueArray.js":28,"../../Data/TransmissionType.js":34,"../../Resource/IResource.js":68,"../../Resource/IStore.js":69,"../../Resource/Template/TemplateDescriber.js":79,"../../Resource/Template/TemplateType.js":80,"../../Resource/Template/TypeTemplate.js":81,"../../Resource/Warehouse.js":82,"../../Security/Authority/Authentication.js":83,"../../Security/Authority/AuthenticationMethod.js":84,"../../Security/Authority/AuthenticationType.js":85,"../../Security/Authority/ClientAuthentication.js":86,"../../Security/Authority/HostAuthentication.js":87,"../../Security/Authority/Session.js":88,"../../Security/Integrity/SHA256.js":89,"../../Security/Permissions/ActionType.js":91,"../../Security/Permissions/Ruling.js":93,"../Packets//IIPPacketReport.js":59,"../Packets/IIPAuthPacket.js":52,"../Packets/IIPAuthPacketAction.js":53,"../Packets/IIPAuthPacketCommand.js":54,"../Packets/IIPPacket.js":55,"../Packets/IIPPacketAction.js":56,"../Packets/IIPPacketCommand.js":57,"../Packets/IIPPacketEvent.js":58,"../SendList.js":60,"../Sockets/SocketState.js":62,"../Sockets/WSocket.js":63,"./ConnectionStatus.js":39,"./DistributedPropertyContext.js":41,"./DistributedResource.js":42,"./DistributedResourceQueueItem.js":43,"./DistributedResourceQueueItemType.js":44}],41:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -8193,7 +8405,7 @@ var DistributedPropertyContext = function DistributedPropertyContext(p1, p2) {
 
 exports["default"] = DistributedPropertyContext;
 
-},{}],39:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8404,26 +8616,10 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
                 while (1) {
                   switch (_context.prev = _context.next) {
                     case 0:
-                      if (!self._p.destroyed) {
-                        _context.next = 2;
-                        break;
-                      }
-
-                      throw new Error("Trying to access a destroyed object.");
-
-                    case 2:
-                      if (!self._p.suspended) {
-                        _context.next = 4;
-                        break;
-                      }
-
-                      throw new Error("Trying to access a suspended object.");
-
-                    case 4:
-                      _context.next = 6;
+                      _context.next = 2;
                       return self._set(index, value);
 
-                    case 6:
+                    case 2:
                     case "end":
                       return _context.stop();
                   }
@@ -8511,11 +8707,9 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
   }, {
     key: "_set",
     value: function _set(index, value) {
-      if (!this._p.attached) {
-        console.log("Resource not attached.");
-        return;
-      }
-
+      if (this._p.destroyed) throw new Error("Trying to access a destroyed object.");
+      if (this._p.suspended) throw new Error("Trying to access a suspended object.");
+      if (!this._p.attached) throw new Error("Resource not attached.");
       if (this._p.neglect) return;
       if (index >= this._p.properties.length) return null; // Awaiting null is not a problem in JS
 
@@ -8541,7 +8735,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedResource;
 
-},{"../../Core//ExceptionCode.js":7,"../../Core/AsyncException.js":3,"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Data/Codec.js":14,"../../Data/ExtendedTypes.js":18,"../../Data/PropertyValue.js":25,"../../Data/PropertyValueArray.js":26,"../../Data/TypedMap.js":35,"../../Resource/IResource.js":65,"../../Resource/Template/EventTemplate.js":71,"../Packets//IIPPacketAction.js":53}],40:[function(require,module,exports){
+},{"../../Core//ExceptionCode.js":8,"../../Core/AsyncException.js":4,"../../Core/AsyncReply.js":6,"../../Core/ErrorType.js":7,"../../Data/Codec.js":15,"../../Data/ExtendedTypes.js":19,"../../Data/PropertyValue.js":27,"../../Data/PropertyValueArray.js":28,"../../Data/TypedMap.js":37,"../../Resource/IResource.js":68,"../../Resource/Template/EventTemplate.js":74,"../Packets//IIPPacketAction.js":56}],43:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8587,7 +8781,7 @@ var DistributedResourceQueueItem = function DistributedResourceQueueItem(resourc
 
 exports["default"] = DistributedResourceQueueItem;
 
-},{}],41:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8600,7 +8794,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],42:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -8734,7 +8928,7 @@ var DistributedServer = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = DistributedServer;
 
-},{"../../Core/AsyncReply.js":5,"../../Data/KeyList.js":22,"../../Resource/IResource.js":65,"./DistributedConnection.js":37}],43:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":6,"../../Data/KeyList.js":23,"../../Resource/IResource.js":68,"./DistributedConnection.js":40}],46:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -8792,7 +8986,7 @@ var EntryPoint = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = EntryPoint;
 
-},{"../../Resource/IResource.js":65}],44:[function(require,module,exports){
+},{"../../Resource/IResource.js":68}],47:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -8853,7 +9047,7 @@ var INetworkReceiver = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = INetworkReceiver;
 
-},{"../Core/IDestructible.js":8}],45:[function(require,module,exports){
+},{"../Core/IDestructible.js":9}],48:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8966,7 +9160,7 @@ var NetworkBuffer = /*#__PURE__*/function () {
 
 exports["default"] = NetworkBuffer;
 
-},{"../Data/DC.js":15}],46:[function(require,module,exports){
+},{"../Data/DC.js":16}],49:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -9012,7 +9206,7 @@ var NetowrkConnection = /*#__PURE__*/function (_INetworkReceiver) {
 
 exports["default"] = NetowrkConnection;
 
-},{"./INetworkReceiver.js":44}],47:[function(require,module,exports){
+},{"./INetworkReceiver.js":47}],50:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9028,7 +9222,7 @@ var NetworkServer = function NetworkServer() {
 
 exports["default"] = NetworkServer;
 
-},{}],48:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9044,7 +9238,7 @@ var NetworkSession = function NetworkSession() {
 
 exports["default"] = NetworkSession;
 
-},{}],49:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9234,7 +9428,7 @@ var IIPAuthPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPAuthPacket;
 
-},{"../../Security/Authority/AuthenticationMethod.js":80,"./IIPAuthPacketAction.js":50,"./IIPAuthPacketCommand.js":51}],50:[function(require,module,exports){
+},{"../../Security/Authority/AuthenticationMethod.js":84,"./IIPAuthPacketAction.js":53,"./IIPAuthPacketCommand.js":54}],53:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9251,7 +9445,7 @@ var _default = // const IIPAuthPacketAction =
 };
 exports["default"] = _default;
 
-},{}],51:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9267,7 +9461,7 @@ var _default = //const IIPAuthPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -9689,7 +9883,7 @@ var IIPPacket = /*#__PURE__*/function () {
 
 exports["default"] = IIPPacket;
 
-},{"../../Core/ExceptionCode.js":7,"../../Data/TransmissionType.js":32,"./IIPPacketAction.js":53,"./IIPPacketCommand.js":54,"./IIPPacketEvent.js":55,"./IIPPacketReport.js":56}],53:[function(require,module,exports){
+},{"../../Core/ExceptionCode.js":8,"../../Data/TransmissionType.js":34,"./IIPPacketAction.js":56,"./IIPPacketCommand.js":57,"./IIPPacketEvent.js":58,"./IIPPacketReport.js":59}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9736,7 +9930,7 @@ var _default = // const IIPPacketAction =
 };
 exports["default"] = _default;
 
-},{}],54:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9752,7 +9946,7 @@ var _default = // IIPPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],55:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9775,7 +9969,7 @@ var IIPPacketEvent = {
 var _default = IIPPacketEvent;
 exports["default"] = _default;
 
-},{}],56:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9791,7 +9985,7 @@ var IIPPacketReport = {
 var _default = IIPPacketReport;
 exports["default"] = _default;
 
-},{}],57:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9879,7 +10073,7 @@ var SendList = /*#__PURE__*/function (_BinaryList) {
 
 exports["default"] = SendList;
 
-},{"../Data/BinaryList.js":13}],58:[function(require,module,exports){
+},{"../Data/BinaryList.js":14}],61:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -9976,7 +10170,7 @@ var ISocket = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = ISocket;
 
-},{"../../Core/IDestructible.js":8,"./SocketState.js":59}],59:[function(require,module,exports){
+},{"../../Core/IDestructible.js":9,"./SocketState.js":62}],62:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9992,7 +10186,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],60:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -10258,7 +10452,7 @@ exports["default"] = WSocket;
 
 _defineProperty(WSocket, "webSocket", null);
 
-},{"../../Core/AsyncReply.js":5,"../../Core/ErrorType.js":6,"../../Core/ExceptionCode.js":7,"../../Data/DC.js":15,"../NetworkBuffer.js":45,"./ISocket.js":58,"./SocketState.js":59,"ws":1}],61:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":6,"../../Core/ErrorType.js":7,"../../Core/ExceptionCode.js":8,"../../Data/DC.js":16,"../NetworkBuffer.js":48,"./ISocket.js":61,"./SocketState.js":62,"ws":2}],64:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10325,7 +10519,632 @@ exports["default"] = ResourceProxy;
 
 _defineProperty(ResourceProxy, "cache", {});
 
-},{"../Resource/Warehouse.js":78}],62:[function(require,module,exports){
+},{"../Resource/Warehouse.js":82}],65:[function(require,module,exports){
+"use strict";
+
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
+
+var _RepresentationType = require("../Data/RepresentationType.js");
+
+var _TemplateType = _interopRequireDefault(require("../Resource/Template/TemplateType.js"));
+
+var _Warehouse = _interopRequireDefault(require("../Resource/Warehouse.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var TemplateGenerator = /*#__PURE__*/function () {
+  function TemplateGenerator() {
+    _classCallCheck(this, TemplateGenerator);
+  }
+
+  _createClass(TemplateGenerator, null, [{
+    key: "toLiteral",
+    value: function toLiteral(input) {
+      if (input == null) return "null";
+      var literal = "";
+      literal += "\"";
+      input.split('').forEach(function (c) {
+        switch (c) {
+          case '"':
+            literal += "\\\"";
+            break;
+
+          case '\\':
+            literal += "\\\\";
+            break;
+
+          case '\0':
+            literal += "\\0";
+            break;
+
+          case '\b':
+            literal += "\\b";
+            break;
+
+          case '\f':
+            literal += "\\f";
+            break;
+
+          case '\n':
+            literal += "\\n";
+            break;
+
+          case '\r':
+            literal += "\\r";
+            break;
+
+          case '\t':
+            literal += "\\t";
+            break;
+
+          case '\v':
+            literal += "\\v";
+            break;
+
+          default:
+            literal += c;
+            break;
+        }
+      });
+      literal += "\"";
+      return literal;
+    }
+  }, {
+    key: "generateRecord",
+    value: function generateRecord(template, templates) {
+      var _this = this;
+
+      var className = template.className.split('.').slice(-1)[0];
+      var rt = "";
+      var parentName;
+      var dependencies = [];
+
+      if (template.parentId != null) {
+        var parentClassName = templates.find(function (x) {
+          return x.classId.valueOf() == template.parentId.valueOf() && x.type == _TemplateType["default"].Record;
+        }).className;
+        parentName = this._translateClassName(parentClassName);
+        dependencies.push(parentClassName);
+        rt += "export default class ".concat(className, " extends ").concat(parentName, " {\r\n");
+      } else {
+        rt += "export default class ".concat(className, " extends Esiur.Data.IRecord { \r\n");
+      }
+
+      template.properties.forEach(function (p) {
+        if (p.inherited) return;
+
+        var ptTypeName = _this.getDecoratedTypeName(template, p.valueType, templates);
+
+        rt += "".concat(ptTypeName, " ").concat(p.name, ";\r\n\r\n");
+      });
+      rt += "\r\n"; // add template
+
+      var descProps = template.properties.map(function (p) {
+        var ptTypeName = _this.getTypeName(template, p.valueType, templates, dependencies);
+
+        return "new Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this._escape(p.readAnnotation), ", ").concat(_this._escape(p.writeAnnotation), ")");
+      });
+      var cls = template.className.split('.');
+      var namespace = cls.slice(0, cls.length - 1).join('.');
+      rt += "\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat(descProps.join(',\r\n'), "], \r\n").concat(parentName, ", ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n}");
+      rt += "\r\n}";
+      rt += "\r\nnew Esiur.Resource.Template.TypeTemplate(".concat(className, ", true);\r\n");
+      rt = this._getDependenciesImports(dependencies) + rt;
+      return rt;
+    }
+  }, {
+    key: "_translateClassName",
+    value: function _translateClassName(className) {
+      var cls = className.split('.');
+      return cls.join('_');
+    }
+  }, {
+    key: "getDecoratedTypeName",
+    value: function getDecoratedTypeName(forTemplate, representationType, templates) {
+      return "/* ".concat(this.getTypeName(forTemplate, representationType, templates), " */");
+    }
+  }, {
+    key: "getTypeName",
+    value: function getTypeName(forTemplate, representationType, templates, dependencies) {
+      var _this2 = this;
+
+      var name;
+
+      if (representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.TypedResource) {
+        if (representationType.guid.valueOf() == forTemplate.classId.valueOf()) name = forTemplate.className.split('.').slice(-1)[0];else {
+          var className = templates.find(function (x) {
+            return x.classId.valueOf() == representationType.guid.valueOf() && (x.type == _TemplateType["default"].Resource || x.type == _TemplateType["default"].Wrapper);
+          }).className;
+          if (!(dependencies !== null && dependencies !== void 0 && dependencies.includes(className))) dependencies === null || dependencies === void 0 ? void 0 : dependencies.push(className);
+          name = this._translateClassName(className);
+        }
+      } else if (representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.TypedRecord) {
+        if (representationType.guid.valueOf() == forTemplate.classId.valueOf()) name = forTemplate.className.split('.').slice(-1)[0];else {
+          var _className = templates.find(function (x) {
+            return x.classId.valueOf() == representationType.guid.valueOf() && x.type == _TemplateType["default"].Record;
+          }).className;
+          if (!(dependencies !== null && dependencies !== void 0 && dependencies.includes(_className))) dependencies === null || dependencies === void 0 ? void 0 : dependencies.push(_className);
+          name = this._translateClassName(_className);
+        }
+      } else if (representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.Enum) {
+        if (representationType.guid.valueOf() == forTemplate.classId.valueOf()) name = forTemplate.className.split('.').slice(-1)[0];else {
+          var _className2 = templates.find(function (x) {
+            return x.classId.valueOf() == representationType.guid.valueOf() && x.type == _TemplateType["default"].Enum;
+          }).className;
+          if (!(dependencies !== null && dependencies !== void 0 && dependencies.includes(_className2))) dependencies === null || dependencies === void 0 ? void 0 : dependencies.push(_className2);
+          name = this._translateClassName(_className2);
+        }
+      } else if (representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.TypedList) name = "Esiur.Data.TypedList.of(" + this.getTypeName(forTemplate, representationType.subTypes[0], templates, dependencies) + ")";else if (representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.TypedMap) name = "Esiur.Data.TypedMap.of(" + this.getTypeName(forTemplate, representationType.subTypes[0], templates, dependencies) + "," + this.getTypeName(forTemplate, representationType.subTypes[1], templates, dependencies) + ")";else if (representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.Tuple2 || representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.Tuple3 || representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.Tuple4 || representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.Tuple5 || representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.Tuple6 || representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.Tuple7) name = "Esiur.Data.Tuple.of(" + representationType.subTypes.map(function (x) {
+        return _this2.getTypeName(forTemplate, x, templates, dependencies);
+      }).join(',') + ")";else {
+        switch (representationType.identifier) {
+          case _RepresentationType.RepresentationTypeIdentifier.Dynamic:
+            name = "Object";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Bool:
+            name = "Boolean";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Char:
+            name = "String";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.DateTime:
+            name = "Date";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Decimal:
+            name = "Esiur.Data.Float128";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Float32:
+            name = "Esiur.Data.Float32";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Float64:
+            name = "Esiur.Data.Float64";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Int16:
+            name = "Esiur.Data.Int16";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Int32:
+            name = "Esiur.Data.Int32";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Int64:
+            name = "Esiur.Data.Int64";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Int8:
+            name = "Esiur.Data.Int8";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.String:
+            name = "String";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Map:
+            name = "Map";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.UInt16:
+            name = "Esiur.Data.UInt16";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.UInt32:
+            name = "Esiur.Data.UInt32";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.UInt64:
+            name = "Esiur.Data.UInt64";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.UInt8:
+            name = "Esiur.Data.UInt8";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.List:
+            name = "Esiur.Data.List";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Resource:
+            name = "Esiur.Resource.IResource";
+            break;
+
+          case _RepresentationType.RepresentationTypeIdentifier.Record:
+            name = "Esiur.Data.IRecord";
+            break;
+
+          default:
+            name = "Object";
+        }
+      }
+
+      return representationType.nullable ? "Esiur.Data.Nullable.of(".concat(name, ")") : name;
+    }
+  }, {
+    key: "isNullOrEmpty",
+    value: function isNullOrEmpty(v) {
+      return v == null || v == "";
+    }
+  }, {
+    key: "getTemplate",
+    value: function () {
+      var _getTemplate = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(url, dir, username, password) {
+        var _this3 = this;
+
+        var asyncSetters,
+            fs,
+            _urlRegex,
+            path,
+            con,
+            templates,
+            dstDir,
+            makeImports,
+            modulePath,
+            module,
+            _args2 = arguments;
+
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                asyncSetters = _args2.length > 4 && _args2[4] !== undefined ? _args2[4] : true;
+                _context2.next = 3;
+                return Promise.resolve().then(function () {
+                  return _interopRequireWildcard(require("fs"));
+                });
+
+              case 3:
+                fs = _context2.sent;
+                // var fs = require('fs');
+                _urlRegex = /^(?:([^\s|:]*):\/\/([^/]*)\/?(.*))/; //                  /^(?:([^\s|:]*):\/\/([^/]*)\/?)/;
+
+                if (_urlRegex.test(url)) {
+                  _context2.next = 7;
+                  break;
+                }
+
+                throw Error("Invalid IIP URL '".concat(url, "'"));
+
+              case 7:
+                path = url.split(_urlRegex);
+                _context2.next = 10;
+                return _Warehouse["default"].get(path[1] + "://" + path[2], username != null ? {
+                  "username": username,
+                  "password": password !== null && password !== void 0 ? password : ""
+                } : null);
+
+              case 10:
+                con = _context2.sent;
+
+                if (!(con == null)) {
+                  _context2.next = 13;
+                  break;
+                }
+
+                throw Error("Can't connect to server");
+
+              case 13:
+                if (dir == null || dir == "") dir = path[2].replaceAll(":", "_");
+                _context2.next = 16;
+                return con.getLinkTemplates(path[3]);
+
+              case 16:
+                templates = _context2.sent;
+
+                // no longer needed
+                _Warehouse["default"].remove(con);
+
+                dstDir = "lib/".concat(dir);
+
+                if (!fs.existsSync(dstDir)) {
+                  fs.mkdirSync(dstDir, {
+                    recursive: true
+                  });
+                }
+
+                makeImports = function makeImports(skipTemplate) {
+                  var imports = ""; // make import names
+
+                  templates.forEach(function (tmp) {
+                    if (tmp != skipTemplate) {
+                      var cls = tmp.className.split('.');
+                      imports += "import ".concat(cls.join('_'), " from './").concat(tmp.className, ".g.js';\r\n");
+                    }
+                  });
+                  imports += "\r\n\r\n";
+                  return imports;
+                }; // make sources
+
+
+                templates.forEach( /*#__PURE__*/function () {
+                  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(tmp) {
+                    var filePath, source;
+                    return regeneratorRuntime.wrap(function _callee$(_context) {
+                      while (1) {
+                        switch (_context.prev = _context.next) {
+                          case 0:
+                            console.log("Generating '".concat(tmp.className, "'."));
+                            filePath = "".concat(dstDir, "/").concat(tmp.className, ".g.js");
+                            source = "";
+
+                            if (tmp.type == _TemplateType["default"].Resource) {
+                              source = _this3.generateClass(tmp, templates, asyncSetters);
+                            } else if (tmp.type == _TemplateType["default"].Record) {
+                              source = _this3.generateRecord(tmp, templates);
+                            } else if (tmp.type == _TemplateType["default"].Enum) {
+                              source = _this3.generateEnum(tmp, templates);
+                            }
+
+                            fs.writeFileSync(filePath, source);
+
+                          case 5:
+                          case "end":
+                            return _context.stop();
+                        }
+                      }
+                    }, _callee);
+                  }));
+
+                  return function (_x5) {
+                    return _ref.apply(this, arguments);
+                  };
+                }()); // make module
+
+                modulePath = "".concat(dstDir, "/init.g.js");
+                module = makeImports() + "\r\nlet module = {}; \r\n";
+                templates.forEach(function (tmp) {
+                  var typeName = tmp.className.split('.').join('_');
+                  module += "Esiur.define(module, ".concat(typeName, ", '").concat(tmp.className, "');\r\n");
+                });
+                module += "\r\nexport default module;";
+                fs.writeFileSync(modulePath, module);
+                return _context2.abrupt("return", dstDir);
+
+              case 28:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }));
+
+      function getTemplate(_x, _x2, _x3, _x4) {
+        return _getTemplate.apply(this, arguments);
+      }
+
+      return getTemplate;
+    }()
+  }, {
+    key: "_escape",
+    value: function _escape(str) {
+      if (str == null) return "null";else return "'".concat(str, "'");
+    }
+  }, {
+    key: "generateEnum",
+    value: function generateEnum(template, templates) {
+      var _this4 = this;
+
+      var className = template.className.split('.').slice(-1)[0];
+      var rt = "";
+      var dependencies = [];
+      rt += "export default class ".concat(className, " extends Esiur.Data.IEnum {\r\n");
+      template.constants.forEach(function (c) {
+        rt += "static ".concat(c.name, " = new ").concat(className, "(").concat(c.index, ", ").concat(c.value, ", '").concat(c.name, "');\r\n");
+      });
+      rt += "\r\n"; // add template
+
+      var descConsts = template.constants.map(function (p) {
+        var ctTypeName = _this4.getTypeName(template, p.valueType, templates, dependencies);
+
+        return "new Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this4._escape(p.annotation), ")");
+      });
+      var cls = template.className.split('.');
+      var namespace = cls.slice(0, cls.length - 1).join('.');
+      rt += "\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat(descConsts.join(',\r\n'), "], \r\n null, ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n}");
+      rt += "\r\n}";
+      rt += "\r\nnew Esiur.Resource.Template.TypeTemplate(".concat(className, ", true);\r\n");
+      rt = this._getDependenciesImports(dependencies) + rt;
+      return rt;
+    }
+  }, {
+    key: "_getDependenciesImports",
+    value: function _getDependenciesImports(dependencies) {
+      var rt = "";
+      dependencies.forEach(function (className) {
+        rt += "import ".concat(className.split('.').join('_'), " from './").concat(className, ".g.js';\r\n");
+      });
+      return rt + "\r\n";
+    }
+  }, {
+    key: "generateClass",
+    value: function generateClass(template, templates) {
+      var _this5 = this;
+
+      var asyncSetters = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+      var className = template.className.split('.').slice(-1)[0];
+      var parentName = null;
+      var rt = "";
+      var dependencies = [];
+
+      if (template.parentId != null) {
+        var parentClassName = templates.find(function (x) {
+          return x.classId.valueOf() == template.parentId.valueOf() && (x.type == _TemplateType["default"].Resource || x.type == _TemplateType["default"].Wrapper);
+        }).className;
+        parentName = this._translateClassName(parentClassName);
+        dependencies.push(parentClassName);
+        rt += "export default class ".concat(className, " extends ").concat(parentName, " {\r\n");
+      } else {
+        rt += "export default class ".concat(className, " extends Esiur.Net.IIP.DistributedResource {\r\n");
+      } // rt += `constructor() {`;
+      // template.events.filter((e) => !e.inherited).forEach((e) => {
+      //   rt += `on('${e.name}', (x) => _${e.name}Controller.add(x));`;
+      // });
+      // rt += "}\r\n";
+
+
+      template.constants.forEach(function (c) {
+        var ctTypeName = _this5.getTypeName(template, c.valueType, templates, dependencies);
+
+        rt += "static ".concat(c.name, " = new ").concat(ctTypeName, "(").concat(c.value, ");\r\n");
+      });
+      template.functions.filter(function (f) {
+        return !f.inherited;
+      }).forEach(function (f) {
+        var rtTypeName = _this5.getDecoratedTypeName(template, f.returnType, templates);
+
+        var positionalArgs = f.args.filter(function (x) {
+          return !x.optional;
+        });
+        var optionalArgs = f.args.filter(function (x) {
+          return x.optional;
+        });
+
+        if (f.isStatic) {
+          //rt += `static AsyncReply<${rtTypeName}> ${f.name}(DistributedConnection connection`;
+          rt += "".concat(rtTypeName, " \r\n static ").concat(f.name, "(connection");
+          if (positionalArgs.length > 0) rt += ", ".concat(positionalArgs.map(function (a) {
+            return _this5.getDecoratedTypeName(template, a.type, templates) + " " + a.name;
+          }).join(','));
+
+          if (optionalArgs.length > 0) {
+            rt += ", [".concat(optionalArgs.map(function (a) {
+              return _this5.getDecoratedTypeName(template, a.type.toNullable(), templates) + " " + a.name;
+            }).join(','), "]");
+          }
+        } else {
+          //rt += `AsyncReply<${rtTypeName}> ${f.name}(`;
+          rt += "".concat(rtTypeName, " \r\n ").concat(f.name, "(");
+          if (positionalArgs.length > 0) rt += "".concat(positionalArgs.map(function (a) {
+            return _this5.getDecoratedTypeName(template, a.type, templates) + " " + a.name;
+          }).join(','));
+
+          if (optionalArgs.length > 0) {
+            if (positionalArgs.length > 0) rt += ","; //rt += `[${optionalArgs.map((a) => this.getTypeName(template, a.type.toNullable(), templates) + " " + a.name).join(',')}]`;
+
+            rt += "".concat(optionalArgs.map(function (a) {
+              return _this5.getDecoratedTypeName(template, a.type.toNullable(), templates) + " " + a.name + " = null";
+            }).join(','));
+          }
+        }
+
+        rt += ") {\r\n"; //                var argsMap = new (TypedMap.of(UInt8, Object));
+
+        rt += "var args = new (Esiur.Data.TypedMap.of(Esiur.Data.UInt8, Object))();\r\n";
+        rt += "".concat(positionalArgs.map(function (e) {
+          return "args.set(new Esiur.Data.UInt8(".concat(e.index.toString(), "), ").concat(e.name, ");");
+        }).join('\r\n'), "\r\n");
+        optionalArgs.forEach(function (a) {
+          rt += "if (".concat(a.name, " != null) args.set(new Esiur.Data.UInt8(").concat(a.index, "), ").concat(a.name, ");\r\n");
+        }); //rt += `var rt = new AsyncReply<${rtTypeName}>();\r\n`;
+
+        rt += "var rt = new Esiur.Core.AsyncReply();\r\n";
+
+        if (f.isStatic) {
+          rt += "connection.staticCall(Guid.parse('".concat(template.classId.toString(), "'), ").concat(f.index, ", args)");
+        } else {
+          rt += "this._invoke(".concat(f.index, ", args)");
+        }
+
+        rt += ".then((x) => rt.trigger(x))\r\n";
+        rt += ".error((x) => rt.triggerError(x))\r\n";
+        rt += ".chunk((x) => rt.triggerChunk(x));\r\n";
+        rt += "return rt; \r\n}\r\n";
+      });
+      template.properties.filter(function (p) {
+        return !p.inherited;
+      }).forEach(function (p) {
+        var ptTypeName = _this5.getDecoratedTypeName(template, p.valueType, templates);
+
+        rt += "".concat(ptTypeName, " get ").concat(p.name, "() { return this._get(").concat(p.index, "); }\r\n");
+        if (asyncSetters) rt += "set ".concat(p.name, "(").concat(ptTypeName, " value) { this._set(").concat(p.index, ", value); }\r\n");else rt += "set ".concat(p.name, "(").concat(ptTypeName, " value) { this._setSync(").concat(p.index, ", value); }\r\n");
+      }); // template.events.filter((e) => !e.inherited).forEach((e) => {
+      //   var etTypeName = this.getTypeName(template, e.argumentType, templates);
+      //   rt += `final _${e.name}Controller = StreamController<$etTypeName>();\r\n`;
+      //   rt += `Stream<${etTypeName}> get ${e.name} { \r\n`;
+      //   rt += `return _${e.name}Controller.stream;\r\n`;
+      //   rt += "}";
+      // });
+      // add template
+
+      var descProps = template.properties //.where((p) => !p.inherited)
+      .map(function (p) {
+        var ptTypeName = _this5.getTypeName(template, p.valueType, templates, dependencies);
+
+        return "new Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this5._escape(p.readAnnotation), ", ").concat(_this5._escape(p.writeAnnotation), ")");
+      });
+      var descFuncs = template.functions.map(function (f) {
+        var ftTypeName = _this5.getTypeName(template, f.returnType, templates, dependencies);
+
+        var args = f.args.map(function (a) {
+          var atTypeName = _this5.getTypeName(template, a.type, templates, dependencies);
+
+          return "new Esiur.Resource.Template.Arg('".concat(a.name, "', ").concat(atTypeName, ", ").concat(a.optional, ")");
+        }).join(', ');
+        return "new Esiur.Resource.Template.Func('".concat(f.name, "', ").concat(ftTypeName, ", [").concat(args, "], ").concat(_this5._escape(f.annotation), ")");
+      });
+      var descEvents = template.events //.where((e) => !e.inherited) @REVIEW
+      .map(function (e) {
+        var etTypeName = _this5.getTypeName(template, e.argumentType, templates, dependencies);
+
+        return "new Esiur.Resource.Template.Evt('".concat(e.name, "', ").concat(etTypeName, ", ").concat(e.listenable, ", ").concat(_this5._escape(e.annotation), ")");
+      });
+      var descConsts = template.constants.map(function (p) {
+        var ctTypeName = _this5.getTypeName(template, p.valueType, templates, dependencies);
+
+        return "new Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this5._escape(p.annotation), ")");
+      });
+      var cls = template.className.split('.');
+      var namespace = cls.slice(0, cls.length - 1).join('.');
+      rt += "\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat([].concat(_toConsumableArray(descProps), _toConsumableArray(descFuncs), _toConsumableArray(descEvents), _toConsumableArray(descConsts)).join(',\r\n'), "], \r\n").concat(parentName, ", ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n}");
+      rt += "\r\n}\r\n";
+      rt += "\r\nnew Esiur.Resource.Template.TypeTemplate(".concat(className, ", true);\r\n");
+      rt = this._getDependenciesImports(dependencies) + rt;
+      return rt;
+    }
+  }]);
+
+  return TemplateGenerator;
+}();
+
+exports["default"] = TemplateGenerator;
+
+},{"../Data/RepresentationType.js":31,"../Resource/Template/TemplateType.js":80,"../Resource/Warehouse.js":82,"fs":1}],66:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -10370,7 +11189,7 @@ var CustomResourceEvent = function CustomResourceEvent(issuer, receivers, value)
 
 exports["default"] = CustomResourceEvent;
 
-},{}],63:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10415,95 +11234,7 @@ var EventOccurredInfo = /*#__PURE__*/function () {
 
 exports["default"] = EventOccurredInfo;
 
-},{"../Security/Authority/Session.js":84,"./IResource.js":65,"./Template/EventTemplate.js":71}],64:[function(require,module,exports){
-"use strict";
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var FactoryEntry = /*#__PURE__*/function () {
-  function FactoryEntry(type, representationType) {
-    _classCallCheck(this, FactoryEntry);
-
-    this.type = type;
-    this.nullableType = this.getNullableType(type);
-    this.representationType = representationType;
-  }
-
-  _createClass(FactoryEntry, [{
-    key: "isMapKeySubType",
-    value: //Type get type => T;
-    //late Type nullableType;
-    //final Function instanceCreator;
-    //final Function arrayCreator = () => <T>[];
-    //final RepresentationType representationType;
-    function isMapKeySubType(map) {//return map is Map<T, dynamic>;
-    }
-  }, {
-    key: "isMapValueSubType",
-    value: function isMapValueSubType(map) {//return map is Map<dynamic, T>;
-    }
-  }, {
-    key: "isListSubType",
-    value: function isListSubType(list) {//return list is List<T>;
-    }
-  }, {
-    key: "getNullableType",
-    value: function getNullableType(type) {
-      var c = /*#__PURE__*/function (_type) {
-        _inherits(c, _type);
-
-        var _super = _createSuper(c);
-
-        function c() {
-          _classCallCheck(this, c);
-
-          return _super.apply(this, arguments);
-        }
-
-        return c;
-      }(type);
-
-      Object.defineProperty(c, "name", {
-        value: "Nullable" + type.name
-      });
-      Object.defineProperty(c, "nullable", {
-        value: true
-      });
-      return c;
-    }
-  }]);
-
-  return FactoryEntry;
-}();
-
-exports["default"] = FactoryEntry;
-
-},{}],65:[function(require,module,exports){
+},{"../Security/Authority/Session.js":88,"./IResource.js":68,"./Template/EventTemplate.js":74}],68:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10543,6 +11274,8 @@ var _AsyncBag = _interopRequireDefault(require("../Core/AsyncBag.js"));
 var _AsyncReply = _interopRequireDefault(require("../Core/AsyncReply.js"));
 
 var _IDestructible2 = _interopRequireDefault(require("../Core/IDestructible.js"));
+
+var _TemplateDescriber = require("./Template/TemplateDescriber.js");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
@@ -10603,12 +11336,7 @@ var IResource = /*#__PURE__*/function (_IDestructible) {
   }], [{
     key: "template",
     get: function get() {
-      return {
-        namespace: "Esiur",
-        properties: [],
-        functions: [],
-        events: []
-      };
+      return new _TemplateDescriber.TemplateDescriber("Esiur", []);
     }
   }]);
 
@@ -10617,7 +11345,7 @@ var IResource = /*#__PURE__*/function (_IDestructible) {
 
 exports["default"] = IResource;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IDestructible.js":8}],66:[function(require,module,exports){
+},{"../Core/AsyncBag.js":3,"../Core/AsyncReply.js":6,"../Core/IDestructible.js":9,"./Template/TemplateDescriber.js":79}],69:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10715,7 +11443,7 @@ var IStore = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = IStore;
 
-},{"./IResource.js":65}],67:[function(require,module,exports){
+},{"./IResource.js":68}],70:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11118,7 +11846,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = Instance;
 
-},{"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/KeyList.js":22,"../Data/PropertyValue.js":25,"../Data/PropertyValueArray.js":26,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Security/Permissions/IPermissionsManager.js":88,"../Security/Permissions/Ruling.js":89,"./CustomResourceEvent.js":62,"./EventOccurredInfo.js":63,"./PropertyModificationInfo.js":68,"./Warehouse.js":78}],68:[function(require,module,exports){
+},{"../Core/IEventHandler.js":10,"../Data/AutoList.js":12,"../Data/KeyList.js":23,"../Data/PropertyValue.js":27,"../Data/PropertyValueArray.js":28,"../Data/TypedList.js":36,"../Data/TypedMap.js":37,"../Security/Permissions/IPermissionsManager.js":92,"../Security/Permissions/Ruling.js":93,"./CustomResourceEvent.js":66,"./EventOccurredInfo.js":67,"./PropertyModificationInfo.js":71,"./Warehouse.js":82}],71:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11160,7 +11888,7 @@ var PropertyModificationInfo = /*#__PURE__*/function () {
 
 exports["default"] = PropertyModificationInfo;
 
-},{"./IResource.js":65,"./Template/PropertyTemplate.js":75}],69:[function(require,module,exports){
+},{"./IResource.js":68,"./Template/PropertyTemplate.js":78}],72:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11218,7 +11946,7 @@ var ArgumentTemplate = /*#__PURE__*/function () {
 
 exports["default"] = ArgumentTemplate;
 
-},{"../../Data/DC.js":15,"../../Data/ParseResult.js":24,"../../Data/RepresentationType.js":29}],70:[function(require,module,exports){
+},{"../../Data/DC.js":16,"../../Data/ParseResult.js":26,"../../Data/RepresentationType.js":31}],73:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -11301,7 +12029,7 @@ var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = ConstantTemplate;
 
-},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"./MemberTemplate.js":73}],71:[function(require,module,exports){
+},{"../../Data/Codec.js":15,"../../Data/DC.js":16,"./MemberTemplate.js":76}],74:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11411,7 +12139,7 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = EventTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":73}],72:[function(require,module,exports){
+},{"../../Data/DC.js":16,"./MemberTemplate.js":76}],75:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -11523,7 +12251,7 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = FunctionTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":73}],73:[function(require,module,exports){
+},{"../../Data/DC.js":16,"./MemberTemplate.js":76}],76:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11593,7 +12321,7 @@ var MemberTemplate = /*#__PURE__*/function () {
 
 exports["default"] = MemberTemplate;
 
-},{"../../Data/DC.js":15}],74:[function(require,module,exports){
+},{"../../Data/DC.js":16}],77:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11607,7 +12335,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],75:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -11700,7 +12428,202 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
 exports["default"] = PropertyTemplate;
 
-},{"../../Data/DC.js":15,"./MemberTemplate.js":73}],76:[function(require,module,exports){
+},{"../../Data/DC.js":16,"./MemberTemplate.js":76}],79:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Arg = exports.Func = exports.Const = exports.Evt = exports.Prop = exports.TemplateDescriber = void 0;
+
+var _Void = _interopRequireDefault(require("../../Data/Void.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var TemplateDescriber = function TemplateDescriber(namespace, members, parent) {
+  var version = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+  var annotation = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
+  var classId = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
+  var className = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
+
+  _classCallCheck(this, TemplateDescriber);
+
+  _defineProperty(this, "properties", void 0);
+
+  _defineProperty(this, "events", void 0);
+
+  _defineProperty(this, "functions", void 0);
+
+  _defineProperty(this, "constants", void 0);
+
+  _defineProperty(this, "namespace", void 0);
+
+  _defineProperty(this, "version", void 0);
+
+  _defineProperty(this, "parent", void 0);
+
+  _defineProperty(this, "annotation", void 0);
+
+  _defineProperty(this, "classId", void 0);
+
+  _defineProperty(this, "className", void 0);
+
+  if (namespace == null) throw new Error("Namespace name can't be null.");
+  if (members == null) throw new Error("Members name can't be null.");
+  this.namespace = namespace;
+  this.parent = parent;
+  this.properties = members.filter(function (x) {
+    return x instanceof Prop;
+  });
+  ;
+  this.functions = members.filter(function (x) {
+    return x instanceof Func;
+  });
+  this.events = members.filter(function (x) {
+    return x instanceof Evt;
+  });
+  ;
+  this.constants = members.filter(function (x) {
+    return x instanceof Const;
+  });
+  ;
+  this.version = version;
+  this.annotation = annotation;
+  this.classId = classId;
+  this.className = className;
+};
+
+exports.TemplateDescriber = TemplateDescriber;
+
+var Prop = function Prop(name) {
+  var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Object;
+  var readAnnotation = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  var writeAnnotation = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var recordable = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+
+  _classCallCheck(this, Prop);
+
+  _defineProperty(this, "name", void 0);
+
+  _defineProperty(this, "type", void 0);
+
+  _defineProperty(this, "readAnnotation", void 0);
+
+  _defineProperty(this, "writeAnnotation", void 0);
+
+  _defineProperty(this, "recordable", void 0);
+
+  if (name == null) throw new Error("Property name can't be null.");
+  this.name = name;
+  this.type = type !== null && type !== void 0 ? type : Object;
+  this.readAnnotation = readAnnotation;
+  this.writeAnnotation = writeAnnotation;
+  this.recordable = recordable;
+};
+
+exports.Prop = Prop;
+
+var Evt = function Evt(name) {
+  var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Object;
+  var listenable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+  var annotation = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+  _classCallCheck(this, Evt);
+
+  _defineProperty(this, "name", void 0);
+
+  _defineProperty(this, "listenable", void 0);
+
+  _defineProperty(this, "type", void 0);
+
+  _defineProperty(this, "annotation", void 0);
+
+  if (name == null) throw new Error("Event name can't be null.");
+  this.name = name;
+  this.type = type !== null && type !== void 0 ? type : Object;
+  this.listenable = listenable;
+  this.annotation = annotation;
+};
+
+exports.Evt = Evt;
+
+var Const = function Const(name) {
+  var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : String;
+  var value = arguments.length > 2 ? arguments[2] : undefined;
+  var annotation = arguments.length > 3 ? arguments[3] : undefined;
+
+  _classCallCheck(this, Const);
+
+  _defineProperty(this, "name", void 0);
+
+  _defineProperty(this, "type", void 0);
+
+  _defineProperty(this, "annotation", void 0);
+
+  _defineProperty(this, "value", void 0);
+
+  if (name == null) throw new Error("Constant name can't be null.");
+  this.name = name;
+  this.type = type !== null && type !== void 0 ? type : String;
+  this.value = value !== null && value !== void 0 ? value : "";
+  this.annotation = annotation;
+};
+
+exports.Const = Const;
+
+var Func = function Func(name) {
+  var returnType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _Void["default"];
+  var args = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+  var annotation = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+  var isStatic = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
+
+  _classCallCheck(this, Func);
+
+  _defineProperty(this, "name", void 0);
+
+  _defineProperty(this, "returnType", void 0);
+
+  _defineProperty(this, "args", void 0);
+
+  _defineProperty(this, "annotation", void 0);
+
+  _defineProperty(this, "isStatic", void 0);
+
+  if (name == null) throw new Error("Function name can't be null.");
+  this.name = name;
+  this.returnType = returnType !== null && returnType !== void 0 ? returnType : _Void["default"];
+  this.args = args !== null && args !== void 0 ? args : [];
+  this.annotation = annotation;
+  this.isStatic = isStatic;
+};
+
+exports.Func = Func;
+
+var Arg = function Arg(name) {
+  var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Object;
+  var optional = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
+
+  _classCallCheck(this, Arg);
+
+  _defineProperty(this, "name", void 0);
+
+  _defineProperty(this, "type", void 0);
+
+  _defineProperty(this, "optional", void 0);
+
+  if (name == null) throw new Error("Argument name can't be null.");
+  this.name = name;
+  this.type = type !== null && type !== void 0 ? type : Object;
+  this.optional = optional;
+};
+
+exports.Arg = Arg;
+
+},{"../../Data/Void.js":38}],80:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -11716,7 +12639,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],77:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11787,6 +12710,8 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 var TypeTemplate = /*#__PURE__*/function () {
   function TypeTemplate(type, addToWarehouse) {
+    var _describer$className, _describer$classId;
+
     _classCallCheck(this, TypeTemplate);
 
     this.properties = [];
@@ -11795,62 +12720,61 @@ var TypeTemplate = /*#__PURE__*/function () {
     this.members = [];
     this.constants = [];
     if (type === undefined) return;
-    if (type.prototype instanceof _DistributedResource["default"]) this.templateType = _TemplateType["default"].Wrapper;
-    if (type.prototype instanceof _IRecord["default"]) this.templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IResource["default"]) this.templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IEnum["default"]) this.templateType = _TemplateType["default"].Enum;else throw new Error("Type must implement IResource, IRecord, IEnum or a subtype of DistributedResource.");
+    if (type.prototype instanceof _DistributedResource["default"]) this.templateType = _TemplateType["default"].Wrapper;else if (type.prototype instanceof _IRecord["default"]) this.templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IResource["default"]) this.templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IEnum["default"]) this.templateType = _TemplateType["default"].Enum;else throw new Error("Type must implement IResource, IRecord, IEnum or a subtype of DistributedResource.");
     this.definedType = type;
-    var template = type.template; // set guid
+    var describer = type.template; // set guid
 
-    this.className = template.namespace + "." + type.prototype.constructor.name;
-    this.classId = _SHA["default"].compute(_DC.DC.stringToBytes(this.className)).getGuid(0);
-    if (addToWarehouse) addToWarehouse.putTemplate(this); //byte currentIndex = 0;
+    this.className = describer.namespace + "." + ((_describer$className = describer.className) !== null && _describer$className !== void 0 ? _describer$className : type.prototype.constructor.name);
+    this.classId = (_describer$classId = describer.classId) !== null && _describer$classId !== void 0 ? _describer$classId : _SHA["default"].compute(_DC.DC.stringToBytes(this.className)).getGuid(0);
+    if (addToWarehouse) _Warehouse["default"].putTemplate(this); //byte currentIndex = 0;
 
-    if (template.properties != null) for (var i = 0; i < template.properties.length; i++) {
-      var _RepresentationType$f, _pi$, _pi$2, _pi$3;
+    if (describer.properties != null) for (var i = 0; i < describer.properties.length; i++) {
+      var _RepresentationType$f;
 
       //[name, type, {read: comment, write: comment, recordable: }]
-      var pi = template.properties[i];
-      var pt = new _PropertyTemplate["default"](this, i, pi[0], false, (_RepresentationType$f = _RepresentationType["default"].fromType(pi[1])) !== null && _RepresentationType$f !== void 0 ? _RepresentationType$f : _RepresentationType["default"].Void, (_pi$ = pi[2]) === null || _pi$ === void 0 ? void 0 : _pi$.read, (_pi$2 = pi[2]) === null || _pi$2 === void 0 ? void 0 : _pi$2.write, (_pi$3 = pi[2]) === null || _pi$3 === void 0 ? void 0 : _pi$3.recordable);
+      var pi = describer.properties[i];
+      var pt = new _PropertyTemplate["default"](this, i, pi.name, false, (_RepresentationType$f = _RepresentationType["default"].fromType(pi.type)) !== null && _RepresentationType$f !== void 0 ? _RepresentationType$f : _RepresentationType["default"].Void, pi.readAnnotation, pi.writeAnnotation, pi.recordable);
       pt.propertyInfo = pi;
       this.properties.push(pt);
     }
-    if (template.constants != null) for (var _i = 0; _i < template.constants.length; _i++) {
+    if (describer.constants != null) for (var _i = 0; _i < describer.constants.length; _i++) {
       var _RepresentationType$f2;
 
-      var ci = template.constants[_i];
-      var ct = new _ConstantTemplate["default"](this, _i, ci[0], false, (_RepresentationType$f2 = _RepresentationType["default"].fromType(ci[1])) !== null && _RepresentationType$f2 !== void 0 ? _RepresentationType$f2 : _RepresentationType["default"].Void, ci.value, ci.help);
+      var ci = describer.constants[_i];
+      var ct = new _ConstantTemplate["default"](this, _i, ci.name, false, (_RepresentationType$f2 = _RepresentationType["default"].fromType(ci.type)) !== null && _RepresentationType$f2 !== void 0 ? _RepresentationType$f2 : _RepresentationType["default"].Void, ci.value, ci.annotation);
       ct.propertyInfo = ci;
       this.constants.push(ct);
     }
 
     if (this.templateType == _TemplateType["default"].Resource) {
-      if (template.events != null) {
-        for (var _i2 = 0; _i2 < template.events.length; _i2++) {
-          var _RepresentationType$f3, _ei$, _ei$2;
+      if (describer.events != null) {
+        for (var _i2 = 0; _i2 < describer.events.length; _i2++) {
+          var _RepresentationType$f3;
 
           // [name, type, {listenable: true/false, help: ""}]
-          var ei = template.events[_i2];
-          var et = new _EventTemplate["default"](this, _i2, ei[0], false, (_RepresentationType$f3 = _RepresentationType["default"].fromType(ei[1])) !== null && _RepresentationType$f3 !== void 0 ? _RepresentationType$f3 : _RepresentationType["default"].Void, (_ei$ = ei[2]) === null || _ei$ === void 0 ? void 0 : _ei$.help, (_ei$2 = ei[2]) === null || _ei$2 === void 0 ? void 0 : _ei$2.listenable);
+          var ei = describer.events[_i2];
+          var et = new _EventTemplate["default"](this, _i2, ei.name, false, (_RepresentationType$f3 = _RepresentationType["default"].fromType(ei.type)) !== null && _RepresentationType$f3 !== void 0 ? _RepresentationType$f3 : _RepresentationType["default"].Void, ei.annotation, ei.listenable);
           et.eventInfo = ei;
           this.events.push(et);
         }
       }
 
-      if (template.functions != null) {
-        for (var _i3 = 0; _i3 < template.functions.length; _i3++) {
+      if (describer.functions != null) {
+        for (var _i3 = 0; _i3 < describer.functions.length; _i3++) {
           var _RepresentationType$f5;
 
-          var fi = template.functions[_i3];
+          var fi = describer.functions[_i3];
           var args = [];
 
-          for (var ai = 0; ai < fi[1].length; ai++) {
-            var _RepresentationType$f4, _fi$1$ai$;
+          for (var ai = 0; ai < fi.args.length; ai++) {
+            var _RepresentationType$f4;
 
-            args.push(new _ArgumentTemplate["default"](fi[1][ai][0], (_RepresentationType$f4 = _RepresentationType["default"].fromType(fi[1][ai][1])) !== null && _RepresentationType$f4 !== void 0 ? _RepresentationType$f4 : _RepresentationType["default"].Dynamic, (_fi$1$ai$ = fi[1][ai][2]) === null || _fi$1$ai$ === void 0 ? void 0 : _fi$1$ai$.optional, ai));
+            args.push(new _ArgumentTemplate["default"](fi.args[ai].name, (_RepresentationType$f4 = _RepresentationType["default"].fromType(fi.args[ai].type)) !== null && _RepresentationType$f4 !== void 0 ? _RepresentationType$f4 : _RepresentationType["default"].Dynamic, fi.args[ai].optional, ai));
           } // [name, {param1: type, param2: int}, returnType, "Description"]
 
 
-          var isStatic = type[fi[0]] instanceof Function;
-          var ft = new _FunctionTemplate["default"](this, _i3, fi[0], false, isStatic, args, (_RepresentationType$f5 = _RepresentationType["default"].fromType(fi[2])) !== null && _RepresentationType$f5 !== void 0 ? _RepresentationType$f5 : _RepresentationType["default"].Void, fi[3]);
+          var isStatic = type[fi.name] instanceof Function;
+          var ft = new _FunctionTemplate["default"](this, _i3, fi.name, false, isStatic, args, (_RepresentationType$f5 = _RepresentationType["default"].fromType(fi.returnType)) !== null && _RepresentationType$f5 !== void 0 ? _RepresentationType$f5 : _RepresentationType["default"].Void, fi.annotation);
           ft.methodInfo = fi;
           this.functions.push(ft);
         }
@@ -11879,20 +12803,20 @@ var TypeTemplate = /*#__PURE__*/function () {
 
 
     var b = (0, _DC.BL)();
-    var hasClassAnnotation = template.annotation != null;
+    var hasClassAnnotation = describer.annotation != null;
 
     var cls = _DC.DC.stringToBytes(this.className);
 
     b.addUint8((hasClassAnnotation ? 0x40 : 0) | this.templateType).addUint8Array(this.classId.value).addUint8(cls.length).addUint8Array(cls);
 
     if (hasClassAnnotation) {
-      var classAnnotationBytes = _DC.DC.stringToBytes(template.annotation);
+      var classAnnotationBytes = _DC.DC.stringToBytes(describer.annotation);
 
       b.addUint16(classAnnotationBytes.length).addUint8Array(classAnnotationBytes);
-      this.annotation = template.annotation;
+      this.annotation = describer.annotation;
     }
 
-    b.addUint32(template.version).addUint16(this.members.length);
+    b.addUint32(describer.version).addUint16(this.members.length);
 
     for (var _i8 = 0; _i8 < this.functions.length; _i8++) {
       b.addUint8Array(this.functions[_i8].compose());
@@ -12328,9 +13252,9 @@ var TypeTemplate = /*#__PURE__*/function () {
 
 exports["default"] = TypeTemplate;
 
-},{"../../Data/Codec.js":14,"../../Data/DC.js":15,"../../Data/IEnum.js":20,"../../Data/IRecord.js":21,"../../Data/RepresentationType.js":29,"../../Net/IIP/DistributedConnection.js":37,"../../Net/IIP/DistributedResource.js":39,"../../Security/Integrity/SHA256.js":85,"../IResource.js":65,"../Warehouse.js":78,"./ArgumentTemplate.js":69,"./ConstantTemplate.js":70,"./EventTemplate.js":71,"./FunctionTemplate.js":72,"./PropertyTemplate.js":75,"./TemplateType.js":76}],78:[function(require,module,exports){
+},{"../../Data/Codec.js":15,"../../Data/DC.js":16,"../../Data/IEnum.js":21,"../../Data/IRecord.js":22,"../../Data/RepresentationType.js":31,"../../Net/IIP/DistributedConnection.js":40,"../../Net/IIP/DistributedResource.js":42,"../../Security/Integrity/SHA256.js":89,"../IResource.js":68,"../Warehouse.js":82,"./ArgumentTemplate.js":72,"./ConstantTemplate.js":73,"./EventTemplate.js":74,"./FunctionTemplate.js":75,"./PropertyTemplate.js":78,"./TemplateType.js":80}],82:[function(require,module,exports){
 /*
-* Copyright (c) 2017 Ahmed Kh. Zamil
+* Copyright (c) 2017 - 2022 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -12393,18 +13317,6 @@ var _TemplateType = _interopRequireDefault(require("./Template/TemplateType.js")
 
 var _DistributedResource = _interopRequireDefault(require("../Net/IIP/DistributedResource.js"));
 
-var _TypedList = _interopRequireDefault(require("../Data/TypedList.js"));
-
-var _ExtendedTypes = require("../Data/ExtendedTypes.js");
-
-var _Record = _interopRequireDefault(require("../Data/Record.js"));
-
-var _TypedMap = _interopRequireDefault(require("../Data/TypedMap.js"));
-
-var _RepresentationType = require("../Data/RepresentationType.js");
-
-var _FactoryEntry = _interopRequireDefault(require("./FactoryEntry.js"));
-
 var _IEnum = _interopRequireDefault(require("../Data/IEnum.js"));
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -12412,20 +13324,6 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -12476,7 +13374,6 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     _this.templates.add(_TemplateType["default"].Enum, new _KeyList["default"]());
 
     _this.protocols = new _KeyList["default"]();
-    _this.typesFactory = _this._getBuiltInTypes();
 
     _this._register("connected");
 
@@ -12691,22 +13588,23 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "getTemplateByType",
     value: function getTemplateByType(type) {
+      var _type$template$classN;
+
       if (type == null) return null;
       var templateType = _TemplateType["default"].Unspecified;
-      if (type.prototype instanceof _DistributedResource["default"]) templateType = _TemplateType["default"].Wrapper;
-      if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IEnum["default"]) templateType = _TemplateType["default"].Enum;else return null;
+      if (type.prototype instanceof _DistributedResource["default"]) templateType = _TemplateType["default"].Wrapper;else if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IEnum["default"]) templateType = _TemplateType["default"].Enum;else return null;
       if (type == _IResource["default"] || type == _IRecord["default"]) return null;
       if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false;
       var className = type.prototype.constructor.name;
       if (className.startsWith("E_")) className = className.substr(2);
-      className = type.template.namespace + "." + className;
+      className = type.template.namespace + "." + ((_type$template$classN = type.template.className) !== null && _type$template$classN !== void 0 ? _type$template$classN : className);
       var templates = this.templates.get(templateType); // loaded ?
 
       for (var i = 0; i < templates.length; i++) {
         if (templates.at(i).className == className) return templates.at(i);
       }
 
-      var template = new _TypeTemplate["default"](type, this);
+      var template = new _TypeTemplate["default"](type, true);
       return template;
     }
   }, {
@@ -12877,73 +13775,12 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
       return rt;
     }
-    /**
-     * @param {Function} instanceCreator - creator
-     * @param {RepresentationType} representationType - type
-     */
-
-  }, {
-    key: "_getTypeEntries",
-    value: function _getTypeEntries(type, representationType) {
-      var listType = _TypedList["default"].of(type);
-
-      var entry = new _FactoryEntry["default"](type, representationType);
-      var nullableEntry = new _FactoryEntry["default"](entry.nullableType, representationType.toNullable());
-      var listEntry = new _FactoryEntry["default"](listType, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedList, false, null, [representationType]));
-      var nullableList = new _FactoryEntry["default"](listEntry.nullableType, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedList, true, null, [representationType]));
-
-      var nullableItemListType = _TypedList["default"].of(entry.nullableType);
-
-      var listNullableItemEntry = new _FactoryEntry["default"](nullableItemListType, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedList, false, null, [representationType.toNullable()]));
-      var nullableListNullableItemEntry = new _FactoryEntry["default"](nullableItemListType, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedList, true, null, [representationType.toNullable()]));
-      return [entry, nullableEntry, listEntry, nullableList, listNullableItemEntry, nullableListNullableItemEntry];
-    }
-    /**
-     * @param {Function} instanceCreator - creator
-     * @param {RepresentationType} representationType - type
-     */
-
   }, {
     key: "defineType",
-    value: function defineType(type, representationType) {
-      var entries = this._getTypeEntries(type, representationType);
-
-      var _iterator = _createForOfIteratorHelper(entries),
-          _step;
-
-      try {
-        for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var e = _step.value;
-          this.typesFactory[e.type] = e;
-        } //.push(e);
-
-      } catch (err) {
-        _iterator.e(err);
-      } finally {
-        _iterator.f();
-      }
-    }
-  }, {
-    key: "_getBuiltInTypes",
-    value: function _getBuiltInTypes() {
-      var entries = [].concat(_toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int8, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int8, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt8, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt8, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int16, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int16, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt16, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt16, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Int64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int64, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.UInt64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt64, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Float32, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Float32, false))), _toConsumableArray(this._getTypeEntries(_ExtendedTypes.Float64, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Float64, false))), _toConsumableArray(this._getTypeEntries(String, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.String, String))), _toConsumableArray(this._getTypeEntries(Date, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.DateTime, Date))), _toConsumableArray(this._getTypeEntries(_Record["default"], new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Record, false))), _toConsumableArray(this._getTypeEntries(_IResource["default"], new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Resource, false))), _toConsumableArray(this._getTypeEntries(Array, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.List, false))), _toConsumableArray(this._getTypeEntries(Map, new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Map, false))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(String, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.String, false), _RepresentationType.RepresentationType.Dynamic]))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(_ExtendedTypes.UInt8, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.UInt8, false), _RepresentationType.RepresentationType.Dynamic]))), _toConsumableArray(this._getTypeEntries(_TypedMap["default"].of(_ExtendedTypes.Int32, Object), new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.TypedMap, false, null, [new _RepresentationType.RepresentationType(_RepresentationType.RepresentationTypeIdentifier.Int32, false), _RepresentationType.RepresentationType.Dynamic]))));
-      var rt = {};
-
-      var _iterator2 = _createForOfIteratorHelper(entries),
-          _step2;
-
-      try {
-        for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
-          var entry = _step2.value;
-          rt[entry.type] = entry;
-        }
-      } catch (err) {
-        _iterator2.e(err);
-      } finally {
-        _iterator2.f();
-      }
-
-      return rt;
+    value: function defineType(type) {
+      var template = this.getTemplateByType(type);
+      if (template == null) throw new Error("Unsupported type.");
+      this.putTemplate(template);
     }
   }]);
 
@@ -12964,7 +13801,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/IEventHandler.js":9,"../Data/AutoList.js":11,"../Data/ExtendedTypes.js":18,"../Data/IEnum.js":20,"../Data/IRecord.js":21,"../Data/KeyList.js":22,"../Data/Record.js":27,"../Data/RepresentationType.js":29,"../Data/TypedList.js":34,"../Data/TypedMap.js":35,"../Net/IIP/DistributedConnection.js":37,"../Net/IIP/DistributedResource.js":39,"../Proxy/ResourceProxy.js":61,"../Resource/Instance.js":67,"../Resource/Template/TypeTemplate.js":77,"../Stores/IndexedDBStore.js":90,"../Stores/MemoryStore.js":91,"./FactoryEntry.js":64,"./IResource.js":65,"./IStore.js":66,"./Template/TemplateType.js":76}],79:[function(require,module,exports){
+},{"../Core/AsyncBag.js":3,"../Core/AsyncReply.js":6,"../Core/IEventHandler.js":10,"../Data/AutoList.js":12,"../Data/IEnum.js":21,"../Data/IRecord.js":22,"../Data/KeyList.js":23,"../Net/IIP/DistributedConnection.js":40,"../Net/IIP/DistributedResource.js":42,"../Proxy/ResourceProxy.js":64,"../Resource/Instance.js":70,"../Resource/Template/TypeTemplate.js":81,"../Stores/IndexedDBStore.js":94,"../Stores/MemoryStore.js":95,"./IResource.js":68,"./IStore.js":69,"./Template/TemplateType.js":80}],83:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13027,7 +13864,7 @@ var Authentication = /*#__PURE__*/function () {
 
 exports["default"] = Authentication;
 
-},{}],80:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13042,7 +13879,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],81:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13058,7 +13895,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],82:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -13106,7 +13943,7 @@ var ClientAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = ClientAuthentication;
 
-},{"./Authentication.js":79,"./AuthenticationType.js":81}],83:[function(require,module,exports){
+},{"./Authentication.js":83,"./AuthenticationType.js":85}],87:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -13154,7 +13991,7 @@ var HostAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = HostAuthentication;
 
-},{"./Authentication.js":79,"./AuthenticationType.js":81}],84:[function(require,module,exports){
+},{"./Authentication.js":83,"./AuthenticationType.js":85}],88:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13201,7 +14038,7 @@ var Session = function Session(localAuthentication, remoteAuthentication) {
 
 exports["default"] = Session;
 
-},{}],85:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -13337,7 +14174,7 @@ var SHA256 = /*#__PURE__*/function () {
 
 exports["default"] = SHA256;
 
-},{"../../Data/DC.js":15}],86:[function(require,module,exports){
+},{"../../Data/DC.js":16}],90:[function(require,module,exports){
 "use strict";
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -13420,7 +14257,7 @@ var IMembership = /*#__PURE__*/function (_IResource) {
 
 exports["default"] = IMembership;
 
-},{"../../Core/AsyncReply.js":5,"../../Resource/IResource.js":65}],87:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":6,"../../Resource/IResource.js":68}],91:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13472,7 +14309,7 @@ var _default = // ActionType =
 };
 exports["default"] = _default;
 
-},{}],88:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13540,7 +14377,7 @@ var IPermissionsManager = /*#__PURE__*/function () {
 
 exports["default"] = IPermissionsManager;
 
-},{}],89:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13580,7 +14417,7 @@ var _default = //Ruling =
 };
 exports["default"] = _default;
 
-},{}],90:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -14015,7 +14852,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = IndexedDBStore;
 
-},{"../Core/AsyncBag.js":2,"../Core/AsyncReply.js":5,"../Core/ErrorType.js":6,"../Core/ExceptionCode.js":7,"../Data/RepresentationType.js":29,"../Data/TypedMap.js":35,"../Proxy/ResourceProxy.js":61,"../Resource/IResource.js":65,"../Resource/IStore.js":66,"../Resource/Warehouse.js":78}],91:[function(require,module,exports){
+},{"../Core/AsyncBag.js":3,"../Core/AsyncReply.js":6,"../Core/ErrorType.js":7,"../Core/ExceptionCode.js":8,"../Data/RepresentationType.js":31,"../Data/TypedMap.js":37,"../Proxy/ResourceProxy.js":64,"../Resource/IResource.js":68,"../Resource/IStore.js":69,"../Resource/Warehouse.js":82}],95:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14155,7 +14992,7 @@ var MemoryStore = /*#__PURE__*/function (_IStore) {
 
 exports["default"] = MemoryStore;
 
-},{"../Core/AsyncReply.js":5,"../Resource/IStore.js":66}],92:[function(require,module,exports){
+},{"../Core/AsyncReply.js":6,"../Resource/IStore.js":69}],96:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
 
@@ -14177,6 +15014,8 @@ var _IndexedDBStore = _interopRequireDefault(require("./Stores/IndexedDBStore.js
 var _IResource = _interopRequireDefault(require("./Resource/IResource.js"));
 
 var _ResourceProxy = _interopRequireDefault(require("./Proxy/ResourceProxy.js"));
+
+var _TemplateGenerator = _interopRequireDefault(require("./Proxy/TemplateGenerator.js"));
 
 var _DistributedConnection = _interopRequireDefault(require("./Net/IIP/DistributedConnection.js"));
 
@@ -14318,6 +15157,16 @@ var _Ruling = _interopRequireDefault(require("./Security/Permissions/Ruling.js")
 
 var _ExtendedTypes = require("./Data/ExtendedTypes.js");
 
+var _Tuple = _interopRequireDefault(require("./Data/Tuple.js"));
+
+var _Nullable = _interopRequireDefault(require("./Data/Nullable.js"));
+
+var _Void = _interopRequireDefault(require("./Data/Void.js"));
+
+var _IEnum = _interopRequireDefault(require("./Data/IEnum.js"));
+
+var _TemplateDescriber = require("./Resource/Template/TemplateDescriber.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var namespace = {
@@ -14343,6 +15192,7 @@ var namespace = {
     IRecord: _IRecord["default"],
     KeyList: _KeyList["default"],
     NotModified: _NotModified["default"],
+    ResourceArrayType: _ResourceArrayType["default"],
     PropertyValue: _PropertyValue["default"],
     Record: _Record["default"],
     ResourceArray: _ResourceArray["default"],
@@ -14364,7 +15214,11 @@ var namespace = {
     Float64: _ExtendedTypes.Float64,
     Float128: _ExtendedTypes.Float128,
     Char16: _ExtendedTypes.Char16,
-    Char8: _ExtendedTypes.Char8
+    Char8: _ExtendedTypes.Char8,
+    Tuple: _Tuple["default"],
+    Nullable: _Nullable["default"],
+    Void: _Void["default"],
+    IEnum: _IEnum["default"]
   },
   Net: {
     INetworkReceiver: _INetworkReceiver["default"],
@@ -14399,7 +15253,8 @@ var namespace = {
     }
   },
   Proxy: {
-    ResourceProxy: _ResourceProxy["default"]
+    ResourceProxy: _ResourceProxy["default"],
+    TemplateGenerator: _TemplateGenerator["default"]
   },
   Resource: {
     CustomResourceEvent: _CustomResourceEvent["default"],
@@ -14415,7 +15270,13 @@ var namespace = {
       MemberType: _MemberType["default"],
       PropertyTemplate: _PropertyTemplate["default"],
       TemplateType: _TemplateType["default"],
-      TypeTemplate: _TypeTemplate["default"]
+      TypeTemplate: _TypeTemplate["default"],
+      TemplateDescriber: _TemplateDescriber.TemplateDescriber,
+      Prop: _TemplateDescriber.Prop,
+      Func: _TemplateDescriber.Func,
+      Evt: _TemplateDescriber.Evt,
+      Const: _TemplateDescriber.Const,
+      Arg: _TemplateDescriber.Arg
     }
   },
   Security: {
@@ -14442,6 +15303,16 @@ var namespace = {
   Stores: {
     IndexedDBStore: _IndexedDBStore["default"],
     MemoryStore: _MemoryStore["default"]
+  },
+  define: function define(target, type, className) {
+    var sc = className.split('.');
+
+    for (var i = 0; i < sc.length; i++) {
+      if (target[sc[i]] == undefined) target[sc[i]] = {};
+      target = target[sc[i]];
+    }
+
+    target[sc[sc.length - 1]] = type;
   }
 };
 
@@ -14468,8 +15339,8 @@ if (typeof window !== 'undefined') {
   global.Esiur = namespace;
 }
 
-var _default = _Warehouse["default"];
+var _default = namespace;
 exports["default"] = _default;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Core/AsyncException.js":3,"./Core/AsyncQueue.js":4,"./Core/AsyncReply.js":5,"./Core/ErrorType.js":6,"./Core/ExceptionCode.js":7,"./Core/IDestructible.js":8,"./Core/IEventHandler.js":9,"./Core/ProgressType.js":10,"./Data/AutoList.js":11,"./Data/AutoMap.js":12,"./Data/BinaryList.js":13,"./Data/Codec.js":14,"./Data/DC.js":15,"./Data/ExtendedTypes.js":18,"./Data/Guid.js":19,"./Data/IRecord.js":21,"./Data/KeyList.js":22,"./Data/NotModified.js":23,"./Data/PropertyValue.js":25,"./Data/Record.js":27,"./Data/RepresentationType.js":29,"./Data/ResourceArray.js":30,"./Data/ResourceArrayType.js":31,"./Data/TransmissionType.js":32,"./Data/TypedList.js":34,"./Data/TypedMap.js":35,"./Net/IIP/DistributedConnection.js":37,"./Net/IIP/DistributedPropertyContext.js":38,"./Net/IIP/DistributedResource.js":39,"./Net/IIP/DistributedResourceQueueItem.js":40,"./Net/IIP/DistributedResourceQueueItemType.js":41,"./Net/IIP/DistributedServer.js":42,"./Net/IIP/EntryPoint.js":43,"./Net/INetworkReceiver.js":44,"./Net/NetworkBuffer.js":45,"./Net/NetworkConnections.js":46,"./Net/NetworkServer.js":47,"./Net/NetworkSession.js":48,"./Net/Packets/IIPAuthPacket.js":49,"./Net/Packets/IIPAuthPacketAction.js":50,"./Net/Packets/IIPAuthPacketCommand.js":51,"./Net/Packets/IIPPacket.js":52,"./Net/Packets/IIPPacketAction.js":53,"./Net/Packets/IIPPacketCommand.js":54,"./Net/Packets/IIPPacketEvent.js":55,"./Net/Packets/IIPPacketReport.js":56,"./Net/SendList.js":57,"./Net/Sockets/ISocket.js":58,"./Net/Sockets/SocketState.js":59,"./Net/Sockets/WSocket.js":60,"./Proxy/ResourceProxy.js":61,"./Resource/CustomResourceEvent.js":62,"./Resource/IResource.js":65,"./Resource/IStore.js":66,"./Resource/Instance.js":67,"./Resource/Template/ArgumentTemplate.js":69,"./Resource/Template/EventTemplate.js":71,"./Resource/Template/FunctionTemplate.js":72,"./Resource/Template/MemberTemplate.js":73,"./Resource/Template/MemberType.js":74,"./Resource/Template/PropertyTemplate.js":75,"./Resource/Template/TemplateType.js":76,"./Resource/Template/TypeTemplate.js":77,"./Resource/Warehouse.js":78,"./Security/Authority/Authentication.js":79,"./Security/Authority/AuthenticationMethod.js":80,"./Security/Authority/AuthenticationType.js":81,"./Security/Authority/ClientAuthentication.js":82,"./Security/Authority/HostAuthentication.js":83,"./Security/Authority/Session.js":84,"./Security/Integrity/SHA256.js":85,"./Security/Membership/IMembership.js":86,"./Security/Permissions/ActionType.js":87,"./Security/Permissions/IPermissionsManager.js":88,"./Security/Permissions/Ruling.js":89,"./Stores/IndexedDBStore.js":90,"./Stores/MemoryStore.js":91}]},{},[92]);
+},{"./Core/AsyncException.js":4,"./Core/AsyncQueue.js":5,"./Core/AsyncReply.js":6,"./Core/ErrorType.js":7,"./Core/ExceptionCode.js":8,"./Core/IDestructible.js":9,"./Core/IEventHandler.js":10,"./Core/ProgressType.js":11,"./Data/AutoList.js":12,"./Data/AutoMap.js":13,"./Data/BinaryList.js":14,"./Data/Codec.js":15,"./Data/DC.js":16,"./Data/ExtendedTypes.js":19,"./Data/Guid.js":20,"./Data/IEnum.js":21,"./Data/IRecord.js":22,"./Data/KeyList.js":23,"./Data/NotModified.js":24,"./Data/Nullable.js":25,"./Data/PropertyValue.js":27,"./Data/Record.js":29,"./Data/RepresentationType.js":31,"./Data/ResourceArray.js":32,"./Data/ResourceArrayType.js":33,"./Data/TransmissionType.js":34,"./Data/Tuple.js":35,"./Data/TypedList.js":36,"./Data/TypedMap.js":37,"./Data/Void.js":38,"./Net/IIP/DistributedConnection.js":40,"./Net/IIP/DistributedPropertyContext.js":41,"./Net/IIP/DistributedResource.js":42,"./Net/IIP/DistributedResourceQueueItem.js":43,"./Net/IIP/DistributedResourceQueueItemType.js":44,"./Net/IIP/DistributedServer.js":45,"./Net/IIP/EntryPoint.js":46,"./Net/INetworkReceiver.js":47,"./Net/NetworkBuffer.js":48,"./Net/NetworkConnections.js":49,"./Net/NetworkServer.js":50,"./Net/NetworkSession.js":51,"./Net/Packets/IIPAuthPacket.js":52,"./Net/Packets/IIPAuthPacketAction.js":53,"./Net/Packets/IIPAuthPacketCommand.js":54,"./Net/Packets/IIPPacket.js":55,"./Net/Packets/IIPPacketAction.js":56,"./Net/Packets/IIPPacketCommand.js":57,"./Net/Packets/IIPPacketEvent.js":58,"./Net/Packets/IIPPacketReport.js":59,"./Net/SendList.js":60,"./Net/Sockets/ISocket.js":61,"./Net/Sockets/SocketState.js":62,"./Net/Sockets/WSocket.js":63,"./Proxy/ResourceProxy.js":64,"./Proxy/TemplateGenerator.js":65,"./Resource/CustomResourceEvent.js":66,"./Resource/IResource.js":68,"./Resource/IStore.js":69,"./Resource/Instance.js":70,"./Resource/Template/ArgumentTemplate.js":72,"./Resource/Template/EventTemplate.js":74,"./Resource/Template/FunctionTemplate.js":75,"./Resource/Template/MemberTemplate.js":76,"./Resource/Template/MemberType.js":77,"./Resource/Template/PropertyTemplate.js":78,"./Resource/Template/TemplateDescriber.js":79,"./Resource/Template/TemplateType.js":80,"./Resource/Template/TypeTemplate.js":81,"./Resource/Warehouse.js":82,"./Security/Authority/Authentication.js":83,"./Security/Authority/AuthenticationMethod.js":84,"./Security/Authority/AuthenticationType.js":85,"./Security/Authority/ClientAuthentication.js":86,"./Security/Authority/HostAuthentication.js":87,"./Security/Authority/Session.js":88,"./Security/Integrity/SHA256.js":89,"./Security/Membership/IMembership.js":90,"./Security/Permissions/ActionType.js":91,"./Security/Permissions/IPermissionsManager.js":92,"./Security/Permissions/Ruling.js":93,"./Stores/IndexedDBStore.js":94,"./Stores/MemoryStore.js":95}]},{},[96]);
