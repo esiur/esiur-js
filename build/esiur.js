@@ -4631,7 +4631,7 @@ var RepresentationType = /*#__PURE__*/function () {
       if (this.identifier == RepresentationTypeIdentifier.TypedResource) {
         var _Warehouse$getTemplat;
 
-        runtimeType = (_Warehouse$getTemplat = _Warehouse["default"].getTemplateByClassId(this.guid)) === null || _Warehouse$getTemplat === void 0 ? void 0 : _Warehouse$getTemplat.definedType;
+        runtimeType = (_Warehouse$getTemplat = _Warehouse["default"].getTemplateByClassId(this.guid, _TemplateType["default"].Resource)) === null || _Warehouse$getTemplat === void 0 ? void 0 : _Warehouse$getTemplat.definedType;
       } else if (this.identifier == RepresentationTypeIdentifier.TypedRecord) {
         var _Warehouse$getTemplat2;
 
@@ -7864,10 +7864,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         var template = null;
 
         if (resource == null) {
-          var _template;
+          var _template, _template2;
 
-          template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Wrapper);
-          if (((_template = template) === null || _template === void 0 ? void 0 : _template.definedType) != null) dr = new template.definedType(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
+          template = _Warehouse["default"].getTemplateByClassId(classId, _TemplateType["default"].Resource);
+          if (((_template = template) === null || _template === void 0 ? void 0 : _template.definedType) != null && (_template2 = template) !== null && _template2 !== void 0 && _template2.isWrapper) dr = new template.definedType(self, id, rt[1], rt[2]);else dr = new _DistributedResource["default"](self, id, rt[1], rt[2]);
         } else {
           dr = resource;
           template = resource.instance.template;
@@ -10684,7 +10684,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
       if (representationType.identifier == _RepresentationType.RepresentationTypeIdentifier.TypedResource) {
         if (representationType.guid.valueOf() == forTemplate.classId.valueOf()) name = forTemplate.className.split('.').slice(-1)[0];else {
           var className = templates.find(function (x) {
-            return x.classId.valueOf() == representationType.guid.valueOf() && (x.type == _TemplateType["default"].Resource || x.type == _TemplateType["default"].Wrapper);
+            return x.classId.valueOf() == representationType.guid.valueOf() && x.type == _TemplateType["default"].Resource;
           }).className;
           if (!(dependencies !== null && dependencies !== void 0 && dependencies.includes(className))) dependencies === null || dependencies === void 0 ? void 0 : dependencies.push(className);
           name = this._translateClassName(className);
@@ -11004,7 +11004,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
 
       if (template.parentId != null) {
         var parentClassName = templates.find(function (x) {
-          return x.classId.valueOf() == template.parentId.valueOf() && (x.type == _TemplateType["default"].Resource || x.type == _TemplateType["default"].Wrapper);
+          return x.classId.valueOf() == template.parentId.valueOf() && x.type == _TemplateType["default"].Resource;
         }).className;
         parentName = this._translateClassName(parentClassName);
         dependencies.push(parentClassName);
@@ -11504,6 +11504,8 @@ var _PropertyModificationInfo = _interopRequireDefault(require("./PropertyModifi
 
 var _PropertyValueArray = _interopRequireDefault(require("../Data/PropertyValueArray.js"));
 
+var _DistributedResource = _interopRequireDefault(require("../Net/IIP/DistributedResource.js"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -11582,8 +11584,10 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
     } // connect events
 
 
-    for (var _i = 0; _i < _this.template.events.length; _i++) {
-      resource.on(_this.template.events[_i].name, _this._makeHandler(_this.template.events[_i]));
+    if (!(resource instanceof _DistributedResource["default"])) {
+      for (var _i = 0; _i < _this.template.events.length; _i++) {
+        resource.on(_this.template.events[_i].name, _this._makeHandler(_this.template.events[_i]));
+      }
     }
 
     return _this;
@@ -11846,7 +11850,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
 exports["default"] = Instance;
 
-},{"../Core/IEventHandler.js":10,"../Data/AutoList.js":12,"../Data/KeyList.js":23,"../Data/PropertyValue.js":27,"../Data/PropertyValueArray.js":28,"../Data/TypedList.js":36,"../Data/TypedMap.js":37,"../Security/Permissions/IPermissionsManager.js":92,"../Security/Permissions/Ruling.js":93,"./CustomResourceEvent.js":66,"./EventOccurredInfo.js":67,"./PropertyModificationInfo.js":71,"./Warehouse.js":82}],71:[function(require,module,exports){
+},{"../Core/IEventHandler.js":10,"../Data/AutoList.js":12,"../Data/KeyList.js":23,"../Data/PropertyValue.js":27,"../Data/PropertyValueArray.js":28,"../Data/TypedList.js":36,"../Data/TypedMap.js":37,"../Net/IIP/DistributedResource.js":42,"../Security/Permissions/IPermissionsManager.js":92,"../Security/Permissions/Ruling.js":93,"./CustomResourceEvent.js":66,"./EventOccurredInfo.js":67,"./PropertyModificationInfo.js":71,"./Warehouse.js":82}],71:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12631,11 +12635,9 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 var _default = {
-  Unspecified: 0,
-  Resource: 1,
-  Record: 2,
-  Wrapper: 3,
-  Enum: 4
+  Resource: 0,
+  Record: 1,
+  Enum: 2
 };
 exports["default"] = _default;
 
@@ -12708,19 +12710,29 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var TypeTemplate = /*#__PURE__*/function () {
   function TypeTemplate(type, addToWarehouse) {
     var _describer$className, _describer$classId;
 
     _classCallCheck(this, TypeTemplate);
 
-    this.properties = [];
-    this.events = [];
-    this.functions = [];
-    this.members = [];
-    this.constants = [];
+    _defineProperty(this, "isWrapper", false);
+
+    _defineProperty(this, "properties", []);
+
+    _defineProperty(this, "events", []);
+
+    _defineProperty(this, "functions", []);
+
+    _defineProperty(this, "members", []);
+
+    _defineProperty(this, "constants", []);
+
     if (type === undefined) return;
-    if (type.prototype instanceof _DistributedResource["default"]) this.templateType = _TemplateType["default"].Wrapper;else if (type.prototype instanceof _IRecord["default"]) this.templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IResource["default"]) this.templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IEnum["default"]) this.templateType = _TemplateType["default"].Enum;else throw new Error("Type must implement IResource, IRecord, IEnum or a subtype of DistributedResource.");
+    if (type.prototype instanceof _IRecord["default"]) this.templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IResource["default"]) this.templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IEnum["default"]) this.templateType = _TemplateType["default"].Enum;else throw new Error("Type must implement IResource, IRecord, IEnum or a subtype of DistributedResource.");
+    this.isWrapper = type.prototype instanceof _DistributedResource["default"];
     this.definedType = type;
     var describer = type.template; // set guid
 
@@ -13020,7 +13032,9 @@ var TypeTemplate = /*#__PURE__*/function () {
 
       _getDependenciesFunc(template, list);
 
-      return list;
+      return list.filter(function (value, index, self) {
+        return self.indexOf(value) === index;
+      });
     }
   }, {
     key: "getFunctionParameters",
@@ -13363,13 +13377,9 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     _this.resourceCounter = 0;
     _this.templates = new _KeyList["default"]();
 
-    _this.templates.add(_TemplateType["default"].Unspecified, new _KeyList["default"]());
-
     _this.templates.add(_TemplateType["default"].Resource, new _KeyList["default"]());
 
     _this.templates.add(_TemplateType["default"].Record, new _KeyList["default"]());
-
-    _this.templates.add(_TemplateType["default"].Wrapper, new _KeyList["default"]());
 
     _this.templates.add(_TemplateType["default"].Enum, new _KeyList["default"]());
 
@@ -13377,9 +13387,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
     _this._register("connected");
 
-    _this._register("disconnected"); ///this._urlRegex = /^(?:([\S]*):\/\/([^\/]*)\/?)/;
-    //        this._urlRegex = /^(?:([^\s|:]*):\/\/([^\/]*)\/?)/;
-
+    _this._register("disconnected");
 
     _this._urlRegex = /^(?:([^\s|:]*):\/\/([^/]*)\/?)/;
     return _this;
@@ -13583,6 +13591,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "putTemplate",
     value: function putTemplate(template) {
+      if (this.templates.get(template.type).containsKey(template.classId)) throw new Error("Template with same class Id already exists.");
       this.templates.get(template.type).add(template.classId, template);
     }
   }, {
@@ -13591,8 +13600,8 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
       var _type$template$classN;
 
       if (type == null) return null;
-      var templateType = _TemplateType["default"].Unspecified;
-      if (type.prototype instanceof _DistributedResource["default"]) templateType = _TemplateType["default"].Wrapper;else if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IEnum["default"]) templateType = _TemplateType["default"].Enum;else return null;
+      var templateType;
+      if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IEnum["default"]) templateType = _TemplateType["default"].Enum;else return null;
       if (type == _IResource["default"] || type == _IRecord["default"]) return null;
       if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false;
       var className = type.prototype.constructor.name;
@@ -13610,38 +13619,38 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "getTemplateByClassId",
     value: function getTemplateByClassId(classId) {
-      var templateType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _TemplateType["default"].Unspecified;
+      var templateType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
-      if (templateType == _TemplateType["default"].Unspecified) {
-        // look in resources
+      if (templateType == null) {
+        // look into resources
         var template = this.templates.get(_TemplateType["default"].Resource).get(classId);
-        if (template != null) return template; // look in records
+        if (template != null) return template; // look into records
 
         template = this.templates.get(_TemplateType["default"].Record).get(classId);
-        if (template != null) return template; // look in wrappers
+        if (template != null) return template; // look into enums
 
-        template = this.templates.get(_TemplateType["default"].Wrapper).get(classId);
+        template = this.templates.get(_TemplateType["default"].Enum).get(classId);
         return template;
       } else return this.templates.get(templateType).get(classId);
     }
   }, {
     key: "getTemplateByClassName",
     value: function getTemplateByClassName(className) {
-      var templateType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : _TemplateType["default"].Unspecified;
+      var templateType = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
-      if (templateType == _TemplateType["default"].Unspecified) {
-        // look in resources
+      if (templateType == null) {
+        // look into resources
         var template = this.templates.get(_TemplateType["default"].Resource).values.find(function (x) {
           return x.className == className;
         });
-        if (template != null) return template; // look in records
+        if (template != null) return template; // look into records
 
         template = this.templates.get(_TemplateType["default"].Record).values.find(function (x) {
           return x.className == className;
         });
-        if (template != null) return template; // look in wrappers
+        if (template != null) return template; // look into enums
 
-        template = this.templates.get(_TemplateType["default"].Wrapper).values.find(function (x) {
+        template = this.templates.get(_TemplateType["default"].Enum).values.find(function (x) {
           return x.className == className;
         });
         return template;
