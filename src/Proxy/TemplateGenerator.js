@@ -94,7 +94,6 @@ export default class TemplateGenerator {
 
     rt += "\r\n}";
 
-    rt += `\r\nnew Esiur.Resource.Template.TypeTemplate(${className}, true);\r\n`
 
     rt = this._getDependenciesImports(dependencies) + rt;
     return rt;
@@ -316,6 +315,7 @@ export default class TemplateGenerator {
       templates.forEach((tmp) => {
           let typeName = tmp.className.split('.').join('_');
           module += `Esiur.define(module, ${typeName}, '${tmp.className}');\r\n`;
+          module += `new Esiur.Resource.Template.TypeTemplate(${typeName}, true);\r\n`
       });
 
       module += "\r\nexport default module;";
@@ -353,7 +353,6 @@ export default class TemplateGenerator {
 
     rt += "\r\n}";
 
-    rt += `\r\nnew Esiur.Resource.Template.TypeTemplate(${className}, true);\r\n`
 
     rt = this._getDependenciesImports(dependencies) + rt;
     return rt;
@@ -512,8 +511,6 @@ export default class TemplateGenerator {
     rt += `\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${[...descProps, ...descFuncs, ...descEvents, ...descConsts].join(',\r\n')}], \r\n${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n}`;
 
     rt += "\r\n}\r\n";
-
-    rt += `\r\nnew Esiur.Resource.Template.TypeTemplate(${className}, true);\r\n`
     
     rt = this._getDependenciesImports(dependencies) + rt;
     return rt;
