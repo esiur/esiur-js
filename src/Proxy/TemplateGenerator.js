@@ -83,7 +83,7 @@ export default class TemplateGenerator {
     var descProps = template.properties 
         .map((p) => {
       var ptTypeName = this.getTypeName(template, p.valueType, templates, dependencies);
-      return `new Esiur.Resource.Template.Prop('${p.name}', ${ptTypeName}, ${this._escape(p.readAnnotation)}, ${this._escape(p.writeAnnotation)})`;
+      return `new Esiur.Resource.Template.Prop('${p.name}', ${ptTypeName}, ${this.toLiteral(p.readAnnotation)}, ${this.toLiteral(p.writeAnnotation)})`;
     });
 
 
@@ -325,12 +325,6 @@ export default class TemplateGenerator {
  
   }
 
-  static _escape(str) {
-    if (str == null)
-      return "null";
-    else
-      return `'${str}'`;
-  }
 
   static generateEnum(template, templates) {
     let className = template.className.split('.').slice(-1)[0];
@@ -348,7 +342,7 @@ export default class TemplateGenerator {
     // add template
     var descConsts = template.constants.map((p) => {
       var ctTypeName = this.getTypeName(template, p.valueType, templates, dependencies);
-      return `new Esiur.Resource.Template.Const('${p.name}', ${ctTypeName}, ${p.value}, ${this._escape(p.annotation)})`;
+      return `new Esiur.Resource.Template.Const('${p.name}', ${ctTypeName}, ${p.value}, ${this.toLiteral(p.annotation)})`;
     });
 
 
@@ -482,7 +476,7 @@ export default class TemplateGenerator {
     var descProps = template.properties //.where((p) => !p.inherited)
         .map((p) => {
       var ptTypeName = this.getTypeName(template, p.valueType, templates, dependencies);
-      return `new Esiur.Resource.Template.Prop('${p.name}', ${ptTypeName}, ${this._escape(p.readAnnotation)}, ${this._escape(p.writeAnnotation)})`;
+      return `new Esiur.Resource.Template.Prop('${p.name}', ${ptTypeName}, ${this.toLiteral(p.readAnnotation)}, ${this.toLiteral(p.writeAnnotation)})`;
     });
 
     var descFuncs = template.functions
@@ -494,20 +488,20 @@ export default class TemplateGenerator {
         return `new Esiur.Resource.Template.Arg('${a.name}', ${atTypeName}, ${a.optional})`;
       }).join(', ');
 
-      return `new Esiur.Resource.Template.Func('${f.name}', ${ftTypeName}, [${args}], ${this._escape(f.annotation)})`;
+      return `new Esiur.Resource.Template.Func('${f.name}', ${ftTypeName}, [${args}], ${this.toLiteral(f.annotation)})`;
     });
 
     var descEvents = template.events
         //.where((e) => !e.inherited) @REVIEW
         .map((e) => {
       var etTypeName = this.getTypeName(template, e.argumentType, templates, dependencies);
-      return `new Esiur.Resource.Template.Evt('${e.name}', ${etTypeName}, ${e.listenable}, ${this._escape(e.annotation)})`;
+      return `new Esiur.Resource.Template.Evt('${e.name}', ${etTypeName}, ${e.listenable}, ${this.toLiteral(e.annotation)})`;
     });
 
 
     var descConsts = template.constants.map((p) => {
       var ctTypeName = this.getTypeName(template, p.valueType, templates, dependencies);
-      return `new Esiur.Resource.Template.Const('${p.name}', ${ctTypeName}, ${p.value}, ${this._escape(p.annotation)})`;
+      return `new Esiur.Resource.Template.Const('${p.name}', ${ctTypeName}, ${p.value}, ${this.toLiteral(p.annotation)})`;
     });
 
     

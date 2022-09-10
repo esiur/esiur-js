@@ -10653,7 +10653,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
       var descProps = template.properties.map(function (p) {
         var ptTypeName = _this.getTypeName(template, p.valueType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this._escape(p.readAnnotation), ", ").concat(_this._escape(p.writeAnnotation), ")");
+        return "new Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this.toLiteral(p.readAnnotation), ", ").concat(_this.toLiteral(p.writeAnnotation), ")");
       });
       var cls = template.className.split('.');
       var namespace = cls.slice(0, cls.length - 1).join('.');
@@ -10951,11 +10951,6 @@ var TemplateGenerator = /*#__PURE__*/function () {
       return getTemplate;
     }()
   }, {
-    key: "_escape",
-    value: function _escape(str) {
-      if (str == null) return "null";else return "'".concat(str, "'");
-    }
-  }, {
     key: "generateEnum",
     value: function generateEnum(template, templates) {
       var _this4 = this;
@@ -10972,7 +10967,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
       var descConsts = template.constants.map(function (p) {
         var ctTypeName = _this4.getTypeName(template, p.valueType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this4._escape(p.annotation), ")");
+        return "new Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this4.toLiteral(p.annotation), ")");
       });
       var cls = template.className.split('.');
       var namespace = cls.slice(0, cls.length - 1).join('.');
@@ -11106,7 +11101,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
       .map(function (p) {
         var ptTypeName = _this5.getTypeName(template, p.valueType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this5._escape(p.readAnnotation), ", ").concat(_this5._escape(p.writeAnnotation), ")");
+        return "new Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this5.toLiteral(p.readAnnotation), ", ").concat(_this5.toLiteral(p.writeAnnotation), ")");
       });
       var descFuncs = template.functions.map(function (f) {
         var ftTypeName = _this5.getTypeName(template, f.returnType, templates, dependencies);
@@ -11116,18 +11111,18 @@ var TemplateGenerator = /*#__PURE__*/function () {
 
           return "new Esiur.Resource.Template.Arg('".concat(a.name, "', ").concat(atTypeName, ", ").concat(a.optional, ")");
         }).join(', ');
-        return "new Esiur.Resource.Template.Func('".concat(f.name, "', ").concat(ftTypeName, ", [").concat(args, "], ").concat(_this5._escape(f.annotation), ")");
+        return "new Esiur.Resource.Template.Func('".concat(f.name, "', ").concat(ftTypeName, ", [").concat(args, "], ").concat(_this5.toLiteral(f.annotation), ")");
       });
       var descEvents = template.events //.where((e) => !e.inherited) @REVIEW
       .map(function (e) {
         var etTypeName = _this5.getTypeName(template, e.argumentType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Evt('".concat(e.name, "', ").concat(etTypeName, ", ").concat(e.listenable, ", ").concat(_this5._escape(e.annotation), ")");
+        return "new Esiur.Resource.Template.Evt('".concat(e.name, "', ").concat(etTypeName, ", ").concat(e.listenable, ", ").concat(_this5.toLiteral(e.annotation), ")");
       });
       var descConsts = template.constants.map(function (p) {
         var ctTypeName = _this5.getTypeName(template, p.valueType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this5._escape(p.annotation), ")");
+        return "new Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this5.toLiteral(p.annotation), ")");
       });
       var cls = template.className.split('.');
       var namespace = cls.slice(0, cls.length - 1).join('.');
