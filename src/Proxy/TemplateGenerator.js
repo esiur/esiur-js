@@ -74,7 +74,7 @@ export default class TemplateGenerator {
     template.properties.forEach((p) => {
       if (p.inherited) return;
       let ptTypeName = this.getDecoratedTypeName(template, p.valueType, templates);
-      rt += `${ptTypeName} ${p.name};\r\n\r\n`;
+      rt += `\t${ptTypeName} ${p.name};\r\n\r\n`;
     });
 
     rt += "\r\n";
@@ -83,14 +83,14 @@ export default class TemplateGenerator {
     var descProps = template.properties 
         .map((p) => {
       var ptTypeName = this.getTypeName(template, p.valueType, templates, dependencies);
-      return `new Esiur.Resource.Template.Prop('${p.name}', ${ptTypeName}, ${this.toLiteral(p.readAnnotation)}, ${this.toLiteral(p.writeAnnotation)})`;
+      return `\t\t\tnew Esiur.Resource.Template.Prop('${p.name}', ${ptTypeName}, ${this.toLiteral(p.readAnnotation)}, ${this.toLiteral(p.writeAnnotation)})`;
     });
 
 
     let cls = template.className.split('.');
     let namespace = cls.slice(0, cls.length - 1).join('.');
 
-    rt += `\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${descProps.join(',\r\n')}], \r\n${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n}`;
+    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${descProps.join(',\r\n')}], \r\n\t\t\t${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
 
     rt += "\r\n}";
 
@@ -334,7 +334,7 @@ export default class TemplateGenerator {
     rt += `export default class ${className} extends Esiur.Data.IEnum {\r\n`;
 
     template.constants.forEach((c) => {
-      rt += `static ${c.name} = new ${className}(${c.index}, ${c.value}, '${c.name}');\r\n`;
+      rt += `\tstatic ${c.name} = new ${className}(${c.index}, ${c.value}, '${c.name}');\r\n`;
     });
 
     rt += "\r\n";
@@ -342,14 +342,14 @@ export default class TemplateGenerator {
     // add template
     var descConsts = template.constants.map((p) => {
       var ctTypeName = this.getTypeName(template, p.valueType, templates, dependencies);
-      return `new Esiur.Resource.Template.Const('${p.name}', ${ctTypeName}, ${p.value}, ${this.toLiteral(p.annotation)})`;
+      return `\t\t\tnew Esiur.Resource.Template.Const('${p.name}', ${ctTypeName}, ${p.value}, ${this.toLiteral(p.annotation)})`;
     });
 
 
     let cls = template.className.split('.');
     let namespace = cls.slice(0, cls.length - 1).join('.');
 
-    rt += `\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${descConsts.join(',\r\n')}], \r\n null, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n}`;
+    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${descConsts.join(',\r\n')}], \r\n\t\t\tnull, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
 
     rt += "\r\n}";
 
@@ -397,7 +397,7 @@ export default class TemplateGenerator {
 
     template.constants.forEach((c) => {
       var ctTypeName = this.getTypeName(template, c.valueType, templates, dependencies);
-      rt += `static ${c.name} = new ${ctTypeName}(${c.value});\r\n`;
+      rt += `\tstatic ${c.name} = new ${ctTypeName}(${c.value});\r\n`;
     });
 
     template.functions.filter((f) => !f.inherited).forEach((f) => {
@@ -407,7 +407,7 @@ export default class TemplateGenerator {
 
       if (f.isStatic) {
         //rt += `static AsyncReply<${rtTypeName}> ${f.name}(DistributedConnection connection`;
-        rt += `${rtTypeName} \r\n static ${f.name}(connection`;
+        rt += `\t${rtTypeName} \r\n\tstatic ${f.name}(connection`;
 
         if (positionalArgs.length > 0)
           rt += `, ${positionalArgs.map((a) => this.getDecoratedTypeName(template, a.type, templates) + " " + a.name).join(',')}`;
@@ -417,7 +417,7 @@ export default class TemplateGenerator {
         }
       } else {
         //rt += `AsyncReply<${rtTypeName}> ${f.name}(`;
-        rt += `${rtTypeName} \r\n ${f.name}(`;
+        rt += `\t${rtTypeName} \r\n\t${f.name}(`;
 
         if (positionalArgs.length > 0)
           rt += `${positionalArgs.map((a) => this.getDecoratedTypeName(template, a.type, templates) + " " + a.name).join(',')}`;
@@ -432,34 +432,34 @@ export default class TemplateGenerator {
       rt += ") {\r\n";
 //                var argsMap = new (TypedMap.of(UInt8, Object));
 
-      rt += "var args = new (Esiur.Data.TypedMap.of(Esiur.Data.UInt8, Object))();\r\n";
-      rt += `${positionalArgs.map((e) => `args.set(new Esiur.Data.UInt8(${e.index.toString()}), ${e.name});`).join('\r\n')}\r\n`;
+      rt += "\t\tvar args = new (Esiur.Data.TypedMap.of(Esiur.Data.UInt8, Object))();\r\n";
+      rt += `${positionalArgs.map((e) => `\t\targs.set(new Esiur.Data.UInt8(${e.index.toString()}), ${e.name});`).join('\r\n')}\r\n`;
 
       optionalArgs.forEach((a) => {
-        rt += `if (${a.name} != null) args.set(new Esiur.Data.UInt8(${a.index}), ${a.name});\r\n`;
+        rt += `\t\tif (${a.name} != null) args.set(new Esiur.Data.UInt8(${a.index}), ${a.name});\r\n`;
       });
 
       //rt += `var rt = new AsyncReply<${rtTypeName}>();\r\n`;
-      rt += `var rt = new Esiur.Core.AsyncReply();\r\n`;
+      rt += `\t\tvar rt = new Esiur.Core.AsyncReply();\r\n`;
       if (f.isStatic) {
-        rt += `connection.staticCall(Guid.parse('${template.classId.toString()}'), ${f.index}, args)`;
+        rt += `\t\tconnection.staticCall(Guid.parse('${template.classId.toString()}'), ${f.index}, args)\r\n`;
       } else {
-        rt += `this._invoke(${f.index}, args)`;
+        rt += `\t\tthis._invoke(${f.index}, args)\r\n`;
       }
-      rt += `.then((x) => rt.trigger(x))\r\n`;
-      rt += `.error((x) => rt.triggerError(x))\r\n`;
-      rt += `.chunk((x) => rt.triggerChunk(x));\r\n`;
-      rt += `return rt; \r\n}\r\n`;
+      rt += `\t\t\t.then((x) => rt.trigger(x))\r\n`;
+      rt += `\t\t\t.error((x) => rt.triggerError(x))\r\n`;
+      rt += `\t\t\t.chunk((x) => rt.triggerChunk(x));\r\n`;
+      rt += `\t\treturn rt; \r\n\t}\r\n`;
     });
 
     template.properties.filter((p) => !p.inherited).forEach((p) => {
       let ptTypeName = this.getDecoratedTypeName(template, p.valueType, templates);
-      rt += `${ptTypeName} get ${p.name}() { return this._get(${p.index}); }\r\n`;
+      rt += `\t${ptTypeName} get ${p.name}() { return this._get(${p.index}); }\r\n`;
 
       if (asyncSetters)
-        rt += `set ${p.name}(${ptTypeName} value) { this._set(${p.index}, value); }\r\n`;
+        rt += `\tset ${p.name}(${ptTypeName} value) { this._set(${p.index}, value); }\r\n`;
       else
-        rt += `set ${p.name}(${ptTypeName} value) { this._setSync(${p.index}, value); }\r\n`;
+        rt += `\tset ${p.name}(${ptTypeName} value) { this._setSync(${p.index}, value); }\r\n`;
     });
 
     // template.events.filter((e) => !e.inherited).forEach((e) => {
@@ -475,7 +475,7 @@ export default class TemplateGenerator {
     var descProps = template.properties //.where((p) => !p.inherited)
         .map((p) => {
       var ptTypeName = this.getTypeName(template, p.valueType, templates, dependencies);
-      return `new Esiur.Resource.Template.Prop('${p.name}', ${ptTypeName}, ${this.toLiteral(p.readAnnotation)}, ${this.toLiteral(p.writeAnnotation)})`;
+      return `\t\t\tnew Esiur.Resource.Template.Prop('${p.name}', ${ptTypeName}, ${this.toLiteral(p.readAnnotation)}, ${this.toLiteral(p.writeAnnotation)})`;
     });
 
     var descFuncs = template.functions
@@ -487,20 +487,20 @@ export default class TemplateGenerator {
         return `new Esiur.Resource.Template.Arg('${a.name}', ${atTypeName}, ${a.optional})`;
       }).join(', ');
 
-      return `new Esiur.Resource.Template.Func('${f.name}', ${ftTypeName}, [${args}], ${this.toLiteral(f.annotation)})`;
+      return `\t\t\tnew Esiur.Resource.Template.Func('${f.name}', ${ftTypeName}, [${args}], ${this.toLiteral(f.annotation)})`;
     });
 
     var descEvents = template.events
         //.where((e) => !e.inherited) @REVIEW
         .map((e) => {
       var etTypeName = this.getTypeName(template, e.argumentType, templates, dependencies);
-      return `new Esiur.Resource.Template.Evt('${e.name}', ${etTypeName}, ${e.listenable}, ${this.toLiteral(e.annotation)})`;
+      return `\t\t\tnew Esiur.Resource.Template.Evt('${e.name}', ${etTypeName}, ${e.listenable}, ${this.toLiteral(e.annotation)})`;
     });
 
 
     var descConsts = template.constants.map((p) => {
       var ctTypeName = this.getTypeName(template, p.valueType, templates, dependencies);
-      return `new Esiur.Resource.Template.Const('${p.name}', ${ctTypeName}, ${p.value}, ${this.toLiteral(p.annotation)})`;
+      return `\t\t\tnew Esiur.Resource.Template.Const('${p.name}', ${ctTypeName}, ${p.value}, ${this.toLiteral(p.annotation)})`;
     });
 
     
@@ -508,7 +508,7 @@ export default class TemplateGenerator {
     let cls = template.className.split('.');
     let namespace = cls.slice(0, cls.length - 1).join('.');
 
-    rt += `\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${[...descProps, ...descFuncs, ...descEvents, ...descConsts].join(',\r\n')}], \r\n${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n}`;
+    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${[...descProps, ...descFuncs, ...descEvents, ...descConsts].join(',\r\n')}], \r\n\t\t\t${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
 
     rt += "\r\n}\r\n";
     
