@@ -129,7 +129,7 @@ const namespace = {
     define: function(target, type, className) {
         let sc = className.split('.');
     
-        for(let i = 0; i < sc.length; i++) {
+        for(let i = 0; i < sc.length - 1; i++) {
             if (target[sc[i]] == undefined)
                 target[sc[i]] = {};
             target = target[sc[i]];

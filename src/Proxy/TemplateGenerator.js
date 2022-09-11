@@ -442,7 +442,7 @@ export default class TemplateGenerator {
       //rt += `var rt = new AsyncReply<${rtTypeName}>();\r\n`;
       rt += `\t\tvar rt = new Esiur.Core.AsyncReply();\r\n`;
       if (f.isStatic) {
-        rt += `\t\tconnection.staticCall(Guid.parse('${template.classId.toString()}'), ${f.index}, args)\r\n`;
+        rt += `\t\tconnection.staticCall(Esiur.Data.Guid.parse('${template.classId.toString()}'), ${f.index}, args)\r\n`;
       } else {
         rt += `\t\tthis._invoke(${f.index}, args)\r\n`;
       }

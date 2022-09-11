@@ -352,10 +352,10 @@ export default class DataSerializer {
 
   static recordComposer(
       value, connection) {
-    var rt = BinaryList();
+    let rt = new BinaryList();
     
 
-    var template = Warehouse.getTemplateByType(value.constructor);
+    let template = Warehouse.getTemplateByType(value.constructor);
 
     if (template == null)
       return new DataSerializerComposeResults(
@@ -363,10 +363,8 @@ export default class DataSerializer {
 
     rt.addDC(DC.guidToBytes(template.classId));
 
-    var recordData = value.serialize();
-
-    for (var pt in template.properties) {
-      var propValue = recordData[pt.name];
+    for (let pt of template.properties) {
+      let propValue = value[pt.name];
       rt.addDC(Codec.compose(propValue, connection));
     }
 
