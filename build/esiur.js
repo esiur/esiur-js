@@ -3382,17 +3382,26 @@ var DataSerializer = /*#__PURE__*/function () {
   }, {
     key: "recordComposer",
     value: function recordComposer(value, connection) {
-      var rt = (0, _BinaryList["default"])();
+      var rt = new _BinaryList["default"]();
 
       var template = _Warehouse["default"].getTemplateByType(value.constructor);
 
       if (template == null) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
       rt.addDC(_DC["default"].guidToBytes(template.classId));
-      var recordData = value.serialize();
 
-      for (var pt in template.properties) {
-        var propValue = recordData[pt.name];
-        rt.addDC(_Codec["default"].compose(propValue, connection));
+      var _iterator3 = _createForOfIteratorHelper(template.properties),
+          _step3;
+
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var pt = _step3.value;
+          var propValue = value[pt.name];
+          rt.addDC(_Codec["default"].compose(propValue, connection));
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
       }
 
       return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Record, rt.toDC());
@@ -3423,18 +3432,18 @@ var DataSerializer = /*#__PURE__*/function () {
       });
       rt.Add(value.length);
 
-      var _iterator3 = _createForOfIteratorHelper(types),
-          _step3;
+      var _iterator4 = _createForOfIteratorHelper(types),
+          _step4;
 
       try {
-        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var t = _step3.value;
+        for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+          var t = _step4.value;
           rt.addUint8Array(t);
         }
       } catch (err) {
-        _iterator3.e(err);
+        _iterator4.e(err);
       } finally {
-        _iterator3.f();
+        _iterator4.f();
       }
 
       var composed = DataSerializer.arrayComposer(value, connection);
@@ -8300,7 +8309,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       var c = this.callbackCounter++;
       this.requests.add(c, reply);
 
-      this._sendParams().addUint8(0x40 | _IIPPacket["default"].IIPPacketAction.StaticCall).addUint32(c).addGuid(classId).addUint8(index).addUint8Array(pb).done();
+      this._sendParams().addUint8(0x40 | _IIPPacketAction["default"].StaticCall).addUint32(c).addGuid(classId).addUint8(index).addUint8Array(pb).done();
 
       return reply;
     }
@@ -10646,20 +10655,19 @@ var TemplateGenerator = /*#__PURE__*/function () {
 
         var ptTypeName = _this.getDecoratedTypeName(template, p.valueType, templates);
 
-        rt += "".concat(ptTypeName, " ").concat(p.name, ";\r\n\r\n");
+        rt += "\t".concat(ptTypeName, " ").concat(p.name, ";\r\n\r\n");
       });
       rt += "\r\n"; // add template
 
       var descProps = template.properties.map(function (p) {
         var ptTypeName = _this.getTypeName(template, p.valueType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this.toLiteral(p.readAnnotation), ", ").concat(_this.toLiteral(p.writeAnnotation), ")");
+        return "\t\t\tnew Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this.toLiteral(p.readAnnotation), ", ").concat(_this.toLiteral(p.writeAnnotation), ")");
       });
       var cls = template.className.split('.');
       var namespace = cls.slice(0, cls.length - 1).join('.');
-      rt += "\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat(descProps.join(',\r\n'), "], \r\n").concat(parentName, ", ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n}");
+      rt += "\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat(descProps.join(',\r\n'), "], \r\n\t\t\t").concat(parentName, ", ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n\t}");
       rt += "\r\n}";
-      rt += "\r\nnew Esiur.Resource.Template.TypeTemplate(".concat(className, ", true);\r\n");
       rt = this._getDependenciesImports(dependencies) + rt;
       return rt;
     }
@@ -10931,6 +10939,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
                 templates.forEach(function (tmp) {
                   var typeName = tmp.className.split('.').join('_');
                   module += "Esiur.define(module, ".concat(typeName, ", '").concat(tmp.className, "');\r\n");
+                  module += "new Esiur.Resource.Template.TypeTemplate(".concat(typeName, ", true);\r\n");
                 });
                 module += "\r\nexport default module;";
                 fs.writeFileSync(modulePath, module);
@@ -10960,20 +10969,19 @@ var TemplateGenerator = /*#__PURE__*/function () {
       var dependencies = [];
       rt += "export default class ".concat(className, " extends Esiur.Data.IEnum {\r\n");
       template.constants.forEach(function (c) {
-        rt += "static ".concat(c.name, " = new ").concat(className, "(").concat(c.index, ", ").concat(c.value, ", '").concat(c.name, "');\r\n");
+        rt += "\tstatic ".concat(c.name, " = new ").concat(className, "(").concat(c.index, ", ").concat(c.value, ", '").concat(c.name, "');\r\n");
       });
       rt += "\r\n"; // add template
 
       var descConsts = template.constants.map(function (p) {
         var ctTypeName = _this4.getTypeName(template, p.valueType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this4.toLiteral(p.annotation), ")");
+        return "\t\t\tnew Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this4.toLiteral(p.annotation), ")");
       });
       var cls = template.className.split('.');
       var namespace = cls.slice(0, cls.length - 1).join('.');
-      rt += "\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat(descConsts.join(',\r\n'), "], \r\n null, ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n}");
+      rt += "\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat(descConsts.join(',\r\n'), "], \r\n\t\t\tnull, ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n\t}");
       rt += "\r\n}";
-      rt += "\r\nnew Esiur.Resource.Template.TypeTemplate(".concat(className, ", true);\r\n");
       rt = this._getDependenciesImports(dependencies) + rt;
       return rt;
     }
@@ -11016,7 +11024,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
       template.constants.forEach(function (c) {
         var ctTypeName = _this5.getTypeName(template, c.valueType, templates, dependencies);
 
-        rt += "static ".concat(c.name, " = new ").concat(ctTypeName, "(").concat(c.value, ");\r\n");
+        rt += "\tstatic ".concat(c.name, " = new ").concat(ctTypeName, "(").concat(c.value, ");\r\n");
       });
       template.functions.filter(function (f) {
         return !f.inherited;
@@ -11032,7 +11040,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
 
         if (f.isStatic) {
           //rt += `static AsyncReply<${rtTypeName}> ${f.name}(DistributedConnection connection`;
-          rt += "".concat(rtTypeName, " \r\n static ").concat(f.name, "(connection");
+          rt += "\t".concat(rtTypeName, " \r\n\tstatic ").concat(f.name, "(connection");
           if (positionalArgs.length > 0) rt += ", ".concat(positionalArgs.map(function (a) {
             return _this5.getDecoratedTypeName(template, a.type, templates) + " " + a.name;
           }).join(','));
@@ -11044,7 +11052,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
           }
         } else {
           //rt += `AsyncReply<${rtTypeName}> ${f.name}(`;
-          rt += "".concat(rtTypeName, " \r\n ").concat(f.name, "(");
+          rt += "\t".concat(rtTypeName, " \r\n\t").concat(f.name, "(");
           if (positionalArgs.length > 0) rt += "".concat(positionalArgs.map(function (a) {
             return _this5.getDecoratedTypeName(template, a.type, templates) + " " + a.name;
           }).join(','));
@@ -11060,34 +11068,34 @@ var TemplateGenerator = /*#__PURE__*/function () {
 
         rt += ") {\r\n"; //                var argsMap = new (TypedMap.of(UInt8, Object));
 
-        rt += "var args = new (Esiur.Data.TypedMap.of(Esiur.Data.UInt8, Object))();\r\n";
+        rt += "\t\tvar args = new (Esiur.Data.TypedMap.of(Esiur.Data.UInt8, Object))();\r\n";
         rt += "".concat(positionalArgs.map(function (e) {
-          return "args.set(new Esiur.Data.UInt8(".concat(e.index.toString(), "), ").concat(e.name, ");");
+          return "\t\targs.set(new Esiur.Data.UInt8(".concat(e.index.toString(), "), ").concat(e.name, ");");
         }).join('\r\n'), "\r\n");
         optionalArgs.forEach(function (a) {
-          rt += "if (".concat(a.name, " != null) args.set(new Esiur.Data.UInt8(").concat(a.index, "), ").concat(a.name, ");\r\n");
+          rt += "\t\tif (".concat(a.name, " != null) args.set(new Esiur.Data.UInt8(").concat(a.index, "), ").concat(a.name, ");\r\n");
         }); //rt += `var rt = new AsyncReply<${rtTypeName}>();\r\n`;
 
-        rt += "var rt = new Esiur.Core.AsyncReply();\r\n";
+        rt += "\t\tvar rt = new Esiur.Core.AsyncReply();\r\n";
 
         if (f.isStatic) {
-          rt += "connection.staticCall(Guid.parse('".concat(template.classId.toString(), "'), ").concat(f.index, ", args)");
+          rt += "\t\tconnection.staticCall(Esiur.Data.Guid.parse('".concat(template.classId.toString(), "'), ").concat(f.index, ", args)\r\n");
         } else {
-          rt += "this._invoke(".concat(f.index, ", args)");
+          rt += "\t\tthis._invoke(".concat(f.index, ", args)\r\n");
         }
 
-        rt += ".then((x) => rt.trigger(x))\r\n";
-        rt += ".error((x) => rt.triggerError(x))\r\n";
-        rt += ".chunk((x) => rt.triggerChunk(x));\r\n";
-        rt += "return rt; \r\n}\r\n";
+        rt += "\t\t\t.then((x) => rt.trigger(x))\r\n";
+        rt += "\t\t\t.error((x) => rt.triggerError(x))\r\n";
+        rt += "\t\t\t.chunk((x) => rt.triggerChunk(x));\r\n";
+        rt += "\t\treturn rt; \r\n\t}\r\n";
       });
       template.properties.filter(function (p) {
         return !p.inherited;
       }).forEach(function (p) {
         var ptTypeName = _this5.getDecoratedTypeName(template, p.valueType, templates);
 
-        rt += "".concat(ptTypeName, " get ").concat(p.name, "() { return this._get(").concat(p.index, "); }\r\n");
-        if (asyncSetters) rt += "set ".concat(p.name, "(").concat(ptTypeName, " value) { this._set(").concat(p.index, ", value); }\r\n");else rt += "set ".concat(p.name, "(").concat(ptTypeName, " value) { this._setSync(").concat(p.index, ", value); }\r\n");
+        rt += "\t".concat(ptTypeName, " get ").concat(p.name, "() { return this._get(").concat(p.index, "); }\r\n");
+        if (asyncSetters) rt += "\tset ".concat(p.name, "(").concat(ptTypeName, " value) { this._set(").concat(p.index, ", value); }\r\n");else rt += "\tset ".concat(p.name, "(").concat(ptTypeName, " value) { this._setSync(").concat(p.index, ", value); }\r\n");
       }); // template.events.filter((e) => !e.inherited).forEach((e) => {
       //   var etTypeName = this.getTypeName(template, e.argumentType, templates);
       //   rt += `final _${e.name}Controller = StreamController<$etTypeName>();\r\n`;
@@ -11101,7 +11109,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
       .map(function (p) {
         var ptTypeName = _this5.getTypeName(template, p.valueType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this5.toLiteral(p.readAnnotation), ", ").concat(_this5.toLiteral(p.writeAnnotation), ")");
+        return "\t\t\tnew Esiur.Resource.Template.Prop('".concat(p.name, "', ").concat(ptTypeName, ", ").concat(_this5.toLiteral(p.readAnnotation), ", ").concat(_this5.toLiteral(p.writeAnnotation), ")");
       });
       var descFuncs = template.functions.map(function (f) {
         var ftTypeName = _this5.getTypeName(template, f.returnType, templates, dependencies);
@@ -11111,24 +11119,23 @@ var TemplateGenerator = /*#__PURE__*/function () {
 
           return "new Esiur.Resource.Template.Arg('".concat(a.name, "', ").concat(atTypeName, ", ").concat(a.optional, ")");
         }).join(', ');
-        return "new Esiur.Resource.Template.Func('".concat(f.name, "', ").concat(ftTypeName, ", [").concat(args, "], ").concat(_this5.toLiteral(f.annotation), ")");
+        return "\t\t\tnew Esiur.Resource.Template.Func('".concat(f.name, "', ").concat(ftTypeName, ", [").concat(args, "], ").concat(_this5.toLiteral(f.annotation), ")");
       });
       var descEvents = template.events //.where((e) => !e.inherited) @REVIEW
       .map(function (e) {
         var etTypeName = _this5.getTypeName(template, e.argumentType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Evt('".concat(e.name, "', ").concat(etTypeName, ", ").concat(e.listenable, ", ").concat(_this5.toLiteral(e.annotation), ")");
+        return "\t\t\tnew Esiur.Resource.Template.Evt('".concat(e.name, "', ").concat(etTypeName, ", ").concat(e.listenable, ", ").concat(_this5.toLiteral(e.annotation), ")");
       });
       var descConsts = template.constants.map(function (p) {
         var ctTypeName = _this5.getTypeName(template, p.valueType, templates, dependencies);
 
-        return "new Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this5.toLiteral(p.annotation), ")");
+        return "\t\t\tnew Esiur.Resource.Template.Const('".concat(p.name, "', ").concat(ctTypeName, ", ").concat(p.value, ", ").concat(_this5.toLiteral(p.annotation), ")");
       });
       var cls = template.className.split('.');
       var namespace = cls.slice(0, cls.length - 1).join('.');
-      rt += "\r\nstatic get template() {return new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat([].concat(_toConsumableArray(descProps), _toConsumableArray(descFuncs), _toConsumableArray(descEvents), _toConsumableArray(descConsts)).join(',\r\n'), "], \r\n").concat(parentName, ", ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n}");
+      rt += "\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat([].concat(_toConsumableArray(descProps), _toConsumableArray(descFuncs), _toConsumableArray(descEvents), _toConsumableArray(descConsts)).join(',\r\n'), "], \r\n\t\t\t").concat(parentName, ", ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n\t}");
       rt += "\r\n}\r\n";
-      rt += "\r\nnew Esiur.Resource.Template.TypeTemplate(".concat(className, ", true);\r\n");
       rt = this._getDependenciesImports(dependencies) + rt;
       return rt;
     }
@@ -15311,7 +15318,7 @@ var namespace = {
   define: function define(target, type, className) {
     var sc = className.split('.');
 
-    for (var i = 0; i < sc.length; i++) {
+    for (var i = 0; i < sc.length - 1; i++) {
       if (target[sc[i]] == undefined) target[sc[i]] = {};
       target = target[sc[i]];
     }
