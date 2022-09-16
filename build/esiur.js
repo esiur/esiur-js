@@ -4575,6 +4575,7 @@ var RepresentationTypeIdentifier = {
 exports.RepresentationTypeIdentifier = RepresentationTypeIdentifier;
 var IdentifierToTypeMap = {};
 IdentifierToTypeMap[RepresentationTypeIdentifier.Void] = _Void["default"];
+IdentifierToTypeMap[RepresentationTypeIdentifier.Dynamic] = Object;
 IdentifierToTypeMap[RepresentationTypeIdentifier.Bool] = Boolean;
 IdentifierToTypeMap[RepresentationTypeIdentifier.Char] = _ExtendedTypes.Char8;
 IdentifierToTypeMap[RepresentationTypeIdentifier.Char16] = _ExtendedTypes.Char16;
@@ -4601,6 +4602,7 @@ IdentifierToTypeMap[RepresentationTypeIdentifier.ResourceArray] = _ResourceArray
 IdentifierToTypeMap[RepresentationTypeIdentifier.RecordArray] = _RecordArray["default"];
 var TypeToIdentifierMap = {};
 TypeToIdentifierMap[_Void["default"]] = RepresentationTypeIdentifier.Void;
+TypeToIdentifierMap[Object] = RepresentationTypeIdentifier.Dynamic;
 TypeToIdentifierMap[Boolean] = RepresentationTypeIdentifier.Bool;
 TypeToIdentifierMap[_ExtendedTypes.Char8] = RepresentationTypeIdentifier.Char;
 TypeToIdentifierMap[_ExtendedTypes.Char16] = RepresentationTypeIdentifier.Char16;
@@ -4625,7 +4627,6 @@ TypeToIdentifierMap[Array] = RepresentationTypeIdentifier.List;
 TypeToIdentifierMap[Map] = RepresentationTypeIdentifier.Map;
 TypeToIdentifierMap[_RecordArray["default"]] = RepresentationTypeIdentifier.RecordArray;
 TypeToIdentifierMap[_ResourceArray["default"]] = RepresentationTypeIdentifier.ResourceArray;
-TypeToIdentifierMap[Object] = RepresentationTypeIdentifier.Dynamic;
 var TupleIdentifierByLength = {
   2: RepresentationTypeIdentifier.Tuple2,
   3: RepresentationTypeIdentifier.Tuple3,
@@ -6187,7 +6188,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                   this._sendParams().addUint8(0x28).addUint8Array(this.session.Id).done();
 
                   if (this.instance == null) {
-                    _Warehouse["default"].put(this.localUsername, this, null, this.server).then(function (x) {
+                    _Warehouse["default"].put(this.remoteUsername.replaceAll("/", "_"), this, null, this.server).then(function (x) {
                       var _this2$_openReply, _this2$server;
 
                       _this2.ready = true;
@@ -6252,7 +6253,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 this.status = _ConnectionStatus["default"].Connected; // put it in the warehouse
 
                 if (this.instance == null) {
-                  _Warehouse["default"].put(this.localUsername, this, null, this.server).then(function (x) {
+                  _Warehouse["default"].put(this.localUsername.replaceAll("/", "_"), this, null, this.server).then(function (x) {
                     var _this2$_openReply3;
 
                     (_this2$_openReply3 = _this2._openReply) === null || _this2$_openReply3 === void 0 ? void 0 : _this2$_openReply3.trigger(true);

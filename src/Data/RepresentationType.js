@@ -59,6 +59,7 @@ export const RepresentationTypeIdentifier = {
 let IdentifierToTypeMap = {};
 
 IdentifierToTypeMap[RepresentationTypeIdentifier.Void] = Void;
+IdentifierToTypeMap[RepresentationTypeIdentifier.Dynamic] = Object;
 IdentifierToTypeMap[RepresentationTypeIdentifier.Bool] = Boolean;
 IdentifierToTypeMap[RepresentationTypeIdentifier.Char] = Char8;
 IdentifierToTypeMap[RepresentationTypeIdentifier.Char16] = Char16;
@@ -86,6 +87,7 @@ IdentifierToTypeMap[RepresentationTypeIdentifier.RecordArray] = RecordArray;
 
 const TypeToIdentifierMap = {};
 TypeToIdentifierMap[Void] = RepresentationTypeIdentifier.Void;
+TypeToIdentifierMap[Object] = RepresentationTypeIdentifier.Dynamic;
 TypeToIdentifierMap[Boolean] = RepresentationTypeIdentifier.Bool;
 TypeToIdentifierMap[Char8] = RepresentationTypeIdentifier.Char;
 TypeToIdentifierMap[Char16] = RepresentationTypeIdentifier.Char16;
@@ -110,7 +112,6 @@ TypeToIdentifierMap[Array] = RepresentationTypeIdentifier.List;
 TypeToIdentifierMap[Map] = RepresentationTypeIdentifier.Map;
 TypeToIdentifierMap[RecordArray] = RepresentationTypeIdentifier.RecordArray;
 TypeToIdentifierMap[ResourceArray] = RepresentationTypeIdentifier.ResourceArray;
-TypeToIdentifierMap[Object] = RepresentationTypeIdentifier.Dynamic;
 
 const TupleIdentifierByLength = {
   2: RepresentationTypeIdentifier.Tuple2,
