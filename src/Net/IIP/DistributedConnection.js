@@ -670,7 +670,7 @@ export default class DistributedConnection extends IStore {
 
                                 if (this.instance == null)
                                 {
-                                    Warehouse.put(this.localUsername, this, null, this.server).then(x =>
+                                    Warehouse.put(this.remoteUsername.replaceAll("/", "_"), this, null, this.server).then(x =>
                                     {
     
                                         this.ready = true;
@@ -787,7 +787,7 @@ export default class DistributedConnection extends IStore {
                             // put it in the warehouse
                             if (this.instance == null)
                             {
-                                Warehouse.put(this.localUsername, this, null, this.server).then(x =>
+                                Warehouse.put(this.localUsername.replaceAll("/", "_"), this, null, this.server).then(x =>
                                 {
                                     this._openReply?.trigger(true);
                                     this._openReply = null;

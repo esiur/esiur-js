@@ -3196,13 +3196,13 @@ var DataSerializer = /*#__PURE__*/function () {
       var template = _Warehouse["default"].getTemplateByType(value.constructor);
 
       if (template == null) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
-      var cts = template.constants.where(function (x) {
+      var cts = template.constants.filter(function (x) {
         return x.value == value;
       });
-      if (cts.isEmpty) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
+      if (cts.length == 0) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
       var rt = (0, _BinaryList["default"])();
       rt.addGuid(template.classId);
-      rt.addUint8(cts.first.index);
+      rt.addUint8(cts[0].index);
       return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Enum, rt.toDC());
     }
   }, {
@@ -3919,6 +3919,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "d
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -4036,6 +4042,25 @@ var KeyList = /*#__PURE__*/function () {
       while (this.length > 0) {
         this.removeAt(0);
       }
+    }
+  }, {
+    key: "first",
+    value: function first(selector) {
+      var _iterator = _createForOfIteratorHelper(this.values),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var v = _step.value;
+          if (selector(v)) return v;
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
+
+      return null;
     }
   }, {
     key: "filter",
@@ -10464,6 +10489,8 @@ _defineProperty(WSocket, "webSocket", null);
 },{"../../Core/AsyncReply.js":6,"../../Core/ErrorType.js":7,"../../Core/ExceptionCode.js":8,"../../Data/DC.js":16,"../NetworkBuffer.js":48,"./ISocket.js":61,"./SocketState.js":62,"ws":2}],64:[function(require,module,exports){
 "use strict";
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -10472,6 +10499,20 @@ exports["default"] = void 0;
 var _Warehouse = _interopRequireDefault(require("../Resource/Warehouse.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -10487,36 +10528,99 @@ var ResourceProxy = /*#__PURE__*/function () {
   }
 
   _createClass(ResourceProxy, null, [{
+    key: "getBase",
+    value: function getBase(type) {
+      if (type.baseType != null) return type.baseType;
+      return type;
+    }
+  }, {
     key: "getProxy",
     value: function getProxy(type) {
+      if (type.baseType != null) return type;
+
       var template = _Warehouse["default"].getTemplateByType(type);
 
-      var className = type.prototype.constructor.name;
-      var classUrl = "esiur://" + template.className.replace('.', '/');
+      var className = template.className;
+      if (ResourceProxy.cache[className]) return ResourceProxy.cache[className]; //let classUrl = "esiur://" + className.replace('.', '/');
+      // var code = `return ( class E_${className.replace('.', '/')} extends b { constructor() {super();} `;
+      // // generate class
+      // for (var i = 0; i < template.properties.length; i++) {
+      //     let pt = template.properties[i];
+      //     let desc = Object.getOwnPropertyDescriptor(type.prototype, pt.name);
+      //     if (desc) {
+      //         code += `\r\n\tset ${pt.name}(v) {\r\n\t\tsuper.${pt.name} = v; \r\n\t\t if (this.instance) this.instance.emitModification(this.instance.template.properties[${i}], v); } \r\n\tget ${pt.name}() { \r\n\t\treturn super.${pt.name};}`;
+      //     }
+      //     else {
+      //         code += `\r\n\tset ${pt.name}(v) {\r\n\t\tsuper._${pt.name} = v; \r\n\t\t if (this.instance) this.instance.emitModification(this.instance.template.properties[${i}], v); } \r\n\tget ${pt.name}() { \r\n\t\treturn this._${pt.name};}`;
+      //     }
+      // }
+      // var func = new Function("b", `//# sourceURL=${classUrl} \r\n ${code}});`);
+      // let proxyType = func.call(type /* this */, type);
 
-      if (template.namespace != null) {
-        className = template.namespace + "_" + className;
-      }
+      var makeClass = function makeClass(name) {
+        return _defineProperty({}, name, /*#__PURE__*/function (_type) {
+          _inherits(_class, _type);
 
-      if (ResourceProxy.cache[className]) return ResourceProxy.cache[className];
-      var code = "return ( class E_".concat(className, " extends b { constructor() {super();} "); // generate class
+          var _super = _createSuper(_class);
 
-      for (var i = 0; i < template.properties.length; i++) {
+          function _class() {
+            _classCallCheck(this, _class);
+
+            return _super.apply(this, arguments);
+          }
+
+          return _class;
+        }(type))[name];
+      };
+
+      var proxyType = makeClass(className.replace('.', '_'));
+
+      var _loop = function _loop(i) {
         var pt = template.properties[i];
         var desc = Object.getOwnPropertyDescriptor(type.prototype, pt.name);
 
         if (desc) {
-          code += "\r\n  set ".concat(pt.name, "(v) { \r\n super.").concat(pt.name, " = v; \r\n if (this.instance) this.instance.emitModification(this.instance.template.properties[").concat(i, "], v); } \r\n get ").concat(pt.name, "() { \r\n return super.").concat(pt.name, ";}");
+          Object.defineProperty(proxyType.prototype, pt.name, {
+            get: function get() {
+              var _desc$get;
+
+              // call parent getter
+              return (_desc$get = desc.get) === null || _desc$get === void 0 ? void 0 : _desc$get.apply(this);
+            },
+            set: function set(value) {
+              var _desc$set, _this$instance;
+
+              // call parent setter
+              (_desc$set = desc.set) === null || _desc$set === void 0 ? void 0 : _desc$set.call(this, value);
+              (_this$instance = this.instance) === null || _this$instance === void 0 ? void 0 : _this$instance.emitModification(pt, value);
+            }
+          });
         } else {
-          code += "\r\n  set ".concat(pt.name, "(v) { \r\n super._").concat(pt.name, " = v; \r\n if (this.instance) this.instance.emitModification(this.instance.template.properties[").concat(i, "], v); } \r\n get ").concat(pt.name, "() { \r\n return this._").concat(pt.name, ";}");
+          Object.defineProperty(proxyType.prototype, pt.name, {
+            get: function get() {
+              // get the backing field
+              return this["_" + pt.name];
+            },
+            set: function set(value) {
+              var _this$instance2;
+
+              // set the backing field
+              this["_" + pt.name] = value;
+              (_this$instance2 = this.instance) === null || _this$instance2 === void 0 ? void 0 : _this$instance2.emitModification(pt, value);
+            }
+          });
         }
+      };
+
+      for (var i = 0; i < template.properties.length; i++) {
+        _loop(i);
       }
 
-      var func = new Function("b", "//# sourceURL=".concat(classUrl, " \r\n ").concat(code, "});"));
-      var proxyType = func.call(type
-      /* this */
-      , type);
       ResourceProxy.cache[className] = proxyType;
+      Object.defineProperty(proxyType, "baseType", {
+        value: type
+      }); //Object.defineProperty(proxyType, "name", {value: className.replace('.', '_')});
+
       return proxyType;
     }
   }]);
@@ -10968,10 +11072,12 @@ var TemplateGenerator = /*#__PURE__*/function () {
       var rt = "";
       var dependencies = [];
       rt += "export default class ".concat(className, " extends Esiur.Data.IEnum {\r\n");
+      var options = [];
       template.constants.forEach(function (c) {
         rt += "\tstatic ".concat(c.name, " = new ").concat(className, "(").concat(c.index, ", ").concat(c.value, ", '").concat(c.name, "');\r\n");
+        options.push("this.".concat(c.name));
       });
-      rt += "\r\n"; // add template
+      rt += "\r\n\tstatic options = [".concat(options.join(', '), "];\r\n"); // add template
 
       var descConsts = template.constants.map(function (p) {
         var ctTypeName = _this4.getTypeName(template, p.valueType, templates, dependencies);
@@ -13599,23 +13705,26 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "getTemplateByType",
     value: function getTemplateByType(type) {
-      var _type$template$classN;
+      if (type == null) return null; // search our records
 
-      if (type == null) return null;
+      var template = this.templates.first(function (x) {
+        return x.defineType == type;
+      });
+      if (template != null) return template;
       var templateType;
       if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IEnum["default"]) templateType = _TemplateType["default"].Enum;else return null;
       if (type == _IResource["default"] || type == _IRecord["default"]) return null;
-      if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false;
-      var className = type.prototype.constructor.name;
-      if (className.startsWith("E_")) className = className.substr(2);
-      className = type.template.namespace + "." + ((_type$template$classN = type.template.className) !== null && _type$template$classN !== void 0 ? _type$template$classN : className);
-      var templates = this.templates.get(templateType); // loaded ?
+      if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false; // let className = type.prototype.constructor.name;
+      // if (className.startsWith("E_"))
+      //     className = className.substr(2);
+      // className = type.template.namespace + "." + (type.template.className ?? className);
+      // var templates = this.templates.get(templateType);
+      // // loaded ?
+      // for(var i = 0; i < templates.length; i++)
+      //     if (templates.at(i).className == className)
+      //         return templates.at(i);
 
-      for (var i = 0; i < templates.length; i++) {
-        if (templates.at(i).className == className) return templates.at(i);
-      }
-
-      var template = new _TypeTemplate["default"](type, true);
+      template = new _TypeTemplate["default"](type, true);
       return template;
     }
   }, {
