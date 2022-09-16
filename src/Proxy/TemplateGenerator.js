@@ -333,11 +333,13 @@ export default class TemplateGenerator {
 
     rt += `export default class ${className} extends Esiur.Data.IEnum {\r\n`;
 
+    let options = [];
     template.constants.forEach((c) => {
       rt += `\tstatic ${c.name} = new ${className}(${c.index}, ${c.value}, '${c.name}');\r\n`;
+      options.push(`this.${c.name}`);
     });
 
-    rt += "\r\n";
+    rt += `\r\n\tstatic options = [${options.join(', ')}];\r\n`;
 
     // add template
     var descConsts = template.constants.map((p) => {
@@ -396,14 +398,14 @@ export default class TemplateGenerator {
     // rt += "}\r\n";
 
     template.constants.forEach((c) => {
-      var ctTypeName = this.getTypeName(template, c.valueType, templates, dependencies);
+      let ctTypeName = this.getTypeName(template, c.valueType, templates, dependencies);
       rt += `\tstatic ${c.name} = new ${ctTypeName}(${c.value});\r\n`;
     });
 
     template.functions.filter((f) => !f.inherited).forEach((f) => {
-      var rtTypeName = this.getDecoratedTypeName(template, f.returnType, templates);
-      var positionalArgs = f.args.filter((x) => !x.optional);
-      var optionalArgs = f.args.filter((x) => x.optional);
+      let rtTypeName = this.getDecoratedTypeName(template, f.returnType, templates);
+      let positionalArgs = f.args.filter((x) => !x.optional);
+      let optionalArgs = f.args.filter((x) => x.optional);
 
       if (f.isStatic) {
         //rt += `static AsyncReply<${rtTypeName}> ${f.name}(DistributedConnection connection`;

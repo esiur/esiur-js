@@ -37,16 +37,7 @@ var server;
 
 class MyChat extends IResource {
     
-   // void (string, string)->void
-    static get templateOld() {
-        return {
-            namespace: "Chat",
-            properties: [["title", String], ["messages", Array], ["users", Array]],
-            events: [["message", Map], ["voice", 0, {listenable: true }], ["login"], ["logout"]],
-            functions: [[ "send", [["msg", String, {optional: true}] ]]]
-        };
-    }
-
+ 
     static get template() {
       return new TemplateDescriber("Chat",[
         new Prop("title", String), new Prop("messages", Array), new Prop("users", Array),

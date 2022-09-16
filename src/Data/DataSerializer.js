@@ -135,16 +135,16 @@ export default class DataSerializer {
       return new DataSerializerComposeResults(
           TransmissionTypeIdentifier.Null, new DC(0));
 
-    var cts = template.constants.where((x) => x.value == value);
+    var cts = template.constants.filter((x) => x.value == value);
 
-    if (cts.isEmpty)
+    if (cts.length == 0)
       return new DataSerializerComposeResults(
           TransmissionTypeIdentifier.Null, new DC(0));
 
     var rt = BinaryList();
 
     rt.addGuid(template.classId);
-    rt.addUint8(cts.first.index);
+    rt.addUint8(cts[0].index);
 
     return new DataSerializerComposeResults(
         TransmissionTypeIdentifier.Enum, rt.toDC());

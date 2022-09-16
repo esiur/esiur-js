@@ -15,7 +15,7 @@ import { Prop, TemplateDescriber } from "../../src/Resource/Template/TemplateDes
 
 class User extends IResource {
     static get template() {
-        return new TemplateDescriber("Esiur", [new Prop("username", String), new Prop("password", String)]);
+        return new TemplateDescriber("Demo", [new Prop("username", String), new Prop("password", String)]);
     }
 }
 

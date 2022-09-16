@@ -315,6 +315,12 @@ export class WH extends IEventHandler
         if (type == null)
             return null;
 
+        // search our records
+
+        let template = this.templates.first(x=> x.defineType == type);
+        if (template != null)
+            return template;
+
         let templateType;
 
         if (type.prototype instanceof IResource)
@@ -334,22 +340,22 @@ export class WH extends IEventHandler
             || type.prototype instanceof IRecord))
             return false;
             
-        let className = type.prototype.constructor.name;
+        // let className = type.prototype.constructor.name;
 
-        if (className.startsWith("E_"))
-            className = className.substr(2);
+        // if (className.startsWith("E_"))
+        //     className = className.substr(2);
         
-        className = type.template.namespace + "." + (type.template.className ?? className);
+        // className = type.template.namespace + "." + (type.template.className ?? className);
 
-        var templates = this.templates.get(templateType);
+        // var templates = this.templates.get(templateType);
 
         
-        // loaded ?
-        for(var i = 0; i < templates.length; i++)
-            if (templates.at(i).className == className)
-                return templates.at(i);
+        // // loaded ?
+        // for(var i = 0; i < templates.length; i++)
+        //     if (templates.at(i).className == className)
+        //         return templates.at(i);
                 
-        var template = new TypeTemplate(type, true);
+        template = new TypeTemplate(type, true);
         
         return template;
     }

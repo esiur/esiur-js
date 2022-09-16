@@ -132,6 +132,13 @@ export default class KeyList
             this.removeAt(0);
      }
 
+    first(selector) {
+        for(let v of this.values)
+            if (selector(v))
+                return v;
+        return null;
+    }
+
     filter(selector)
     {	
         if (selector instanceof Function){
