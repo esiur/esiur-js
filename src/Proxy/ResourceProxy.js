@@ -3,8 +3,11 @@ import Warehouse from "../Resource/Warehouse.js";
 export default class ResourceProxy {
     static cache = {};
 
-    static getBase(type) {
-        if (type.baseType != null)
+    static getBaseType(type) {
+        if (type == null)
+            throw new Error("Type can't be null.");
+
+       if (type.baseType != null)
             return type.baseType;
         
         return type;

@@ -137,7 +137,7 @@ export default class TypeTemplate {
 
          var list = [];
 
-         list.add(template);
+         list.push(template);
 
          var getDependenciesFunc = null;
 
@@ -161,11 +161,11 @@ export default class TypeTemplate {
                      }
                  }
 
-                 var args = ft.methodInfo.parameters;
+                 var args = ft.methodInfo.args;
 
                  for(let j = 0; j < args.length - 1; j++)
                  {
-                     var fpt = Warehouse.getTemplateByType(args[j].parameterType);
+                     var fpt = Warehouse.getTemplateByType(args[j].type);
                      if (fpt != null)
                      {
                          if (!bag.includes(fpt))
@@ -180,9 +180,9 @@ export default class TypeTemplate {
                  if (args.length > 0)
                  {
                      var last = args[args.length - 1];
-                     if (last.parameterType == DistributedConnection)
+                     if (last.type == DistributedConnection)
                      {
-                         let fpt = Warehouse.getTemplateByType(last.parameterType);
+                         let fpt = Warehouse.getTemplateByType(last.type);
                          if (fpt != null)
                          {
                              if (!bag.includes(fpt))
@@ -200,7 +200,7 @@ export default class TypeTemplate {
              for (let i = 0; i < tmp.properties.length; i++)
              {
                  var p = tmp.properties[i];
-                 var pt = Warehouse.getTemplateByType(p.propertyInfo.propertyType);
+                 var pt = Warehouse.getTemplateByType(p.propertyInfo.type);
                  if (pt != null)
                  {
                      if (!bag.includes(pt))
@@ -215,13 +215,13 @@ export default class TypeTemplate {
              for(let i = 0; i < tmp.events.length; i++)
              {
                  var e = tmp.events[i];
-                 var et = Warehouse.getTemplateByType(e.eventInfo.eventHandlerType);
+                 var et = Warehouse.getTemplateByType(e.eventInfo.type);
 
                  if (et != null)
                  {
                      if (!bag.includes(et))
                      {
-                         bag.Add(et);
+                         bag.add(et);
                          getDependenciesFunc(et, bag);
                      }
                  }

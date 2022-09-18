@@ -312,51 +312,32 @@ export class WH extends IEventHandler
 
     getTemplateByType(type)
     {
-        if (type == null)
+
+        let baseType = ResourceProxy.getBaseType(type);
+
+        if (baseType == IResource || baseType == IRecord || baseType == IEnum)
             return null;
 
         // search our records
 
-        let template = this.templates.first(x=> x.defineType == type);
-        if (template != null)
-            return template;
-
         let templateType;
 
-        if (type.prototype instanceof IResource)
+        if (baseType.prototype instanceof IResource)
             templateType = TemplateType.Resource;
-        else if (type.prototype instanceof IRecord)
+        else if (baseType.prototype instanceof IRecord)
             templateType = TemplateType.Record;
-        else if (type.prototype instanceof IEnum)
+        else if (baseType.prototype instanceof IEnum)
             templateType = TemplateType.Enum;
         else
             return null;
 
-        if (type == IResource 
-            || type == IRecord)
-            return null;
+        let template = this.templates.item(templateType).first(x=> x.definedType == baseType);
+        if (template != null)
+            return template;
+    
+        template = new TypeTemplate(baseType, true);
+        TypeTemplate.getDependencies(template);
 
-        if (!(type.prototype instanceof IResource 
-            || type.prototype instanceof IRecord))
-            return false;
-            
-        // let className = type.prototype.constructor.name;
-
-        // if (className.startsWith("E_"))
-        //     className = className.substr(2);
-        
-        // className = type.template.namespace + "." + (type.template.className ?? className);
-
-        // var templates = this.templates.get(templateType);
-
-        
-        // // loaded ?
-        // for(var i = 0; i < templates.length; i++)
-        //     if (templates.at(i).className == className)
-        //         return templates.at(i);
-                
-        template = new TypeTemplate(type, true);
-        
         return template;
     }
 

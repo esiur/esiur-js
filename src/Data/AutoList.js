@@ -76,6 +76,12 @@ export default class AutoList extends IEventHandler
         return this.list[index];
     }
     
+    first(selector){
+        for(var el of this.list)
+            if (selector(el))
+                return el;
+    }
+    
     remove(value)
     {
         this.removeAt(this.list.indexOf(value));

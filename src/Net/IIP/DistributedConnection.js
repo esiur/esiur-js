@@ -1918,12 +1918,12 @@ export default class DistributedConnection extends IStore {
 
         let parsed = Codec.parse(content, 0, this, null, transmissionType);
 
-        parsed.Then(results =>
+        parsed.then(results =>
         {
             // un hold the socket to send data immediately
             this.socket.unhold();
 
-            var fi = ft.MethodInfo;
+            var fi = ft.methodInfo;
 
             if (fi == null)
             {
