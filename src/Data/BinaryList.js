@@ -73,8 +73,15 @@ export default class BinaryList
     }
     
     addDC(value) {
-        this.list.push(...value);
+        // this is bad, will cause Maximum stack execution exception for large arrays
+        // this.list.push(...value); 
+        // Fixed
+        this.list =  this.list.concat(Array.from(value));
         return this;
+    }
+
+    insertDC(position, value){
+        this.list = this.list.slice(0, position).concat(value).concat(this.list.slice(position));
     }
     
     insertUint8Array(position, value) {
