@@ -2374,10 +2374,10 @@ export default class DistributedConnection extends IStore {
                 let dataType = ar[0];
                 let data = ar[1];
       
-                Codec.parse(data, 0, self, null, dataType).reply.then((resources) => {
+                Codec.parse(data, 0, self, null, dataType)
+                .reply.then((resources) => {
                     reply.trigger((resources))
-                }
-                ).error((ex) => reply.triggerError(ex));
+                }).error((ex) => reply.triggerError(ex));
              
             }).error(function (ex) {
                 reply.triggerError(ex);
