@@ -885,6 +885,12 @@ var _IDestructible = _interopRequireDefault(require("../Core/IDestructible.js"))
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -966,6 +972,23 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
     key: "item",
     value: function item(index) {
       return this.list[index];
+    }
+  }, {
+    key: "first",
+    value: function first(selector) {
+      var _iterator = _createForOfIteratorHelper(this.list),
+          _step;
+
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var el = _step.value;
+          if (selector(el)) return el;
+        }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
+      }
     }
   }, {
     key: "remove",
@@ -1157,18 +1180,6 @@ var _DC = _interopRequireDefault(require("./DC.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -1227,11 +1238,16 @@ var BinaryList = /*#__PURE__*/function () {
   }, {
     key: "addDC",
     value: function addDC(value) {
-      var _this$list;
-
-      (_this$list = this.list).push.apply(_this$list, _toConsumableArray(value));
-
+      // this is bad, will cause Maximum stack execution exception for large arrays
+      // this.list.push(...value); 
+      // Fixed
+      this.list = this.list.concat(Array.from(value));
       return this;
+    }
+  }, {
+    key: "insertDC",
+    value: function insertDC(position, value) {
+      this.list = this.list.slice(0, position).concat(value).concat(this.list.slice(position));
     }
   }, {
     key: "insertUint8Array",
@@ -7331,11 +7347,11 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       var parsed = _Codec["default"].parse(content, 0, this, null, transmissionType);
 
-      parsed.Then(function (results) {
+      parsed.then(function (results) {
         // un hold the socket to send data immediately
         _this5.socket.unhold();
 
-        var fi = ft.MethodInfo;
+        var fi = ft.methodInfo;
 
         if (fi == null) {
           // ft found, fi not found, this should never happen
@@ -10529,8 +10545,9 @@ var ResourceProxy = /*#__PURE__*/function () {
   }
 
   _createClass(ResourceProxy, null, [{
-    key: "getBase",
-    value: function getBase(type) {
+    key: "getBaseType",
+    value: function getBaseType(type) {
+      if (type == null) throw new Error("Type can't be null.");
       if (type.baseType != null) return type.baseType;
       return type;
     }
@@ -13057,7 +13074,7 @@ var TypeTemplate = /*#__PURE__*/function () {
     key: "getDependencies",
     value: function getDependencies(template) {
       var list = [];
-      list.add(template);
+      list.push(template);
       var _getDependenciesFunc = null;
 
       _getDependenciesFunc = function getDependenciesFunc(tmp, bag) {
@@ -13076,10 +13093,10 @@ var TypeTemplate = /*#__PURE__*/function () {
             }
           }
 
-          var args = ft.methodInfo.parameters;
+          var args = ft.methodInfo.args;
 
           for (var j = 0; j < args.length - 1; j++) {
-            var fpt = _Warehouse["default"].getTemplateByType(args[j].parameterType);
+            var fpt = _Warehouse["default"].getTemplateByType(args[j].type);
 
             if (fpt != null) {
               if (!bag.includes(fpt)) {
@@ -13094,8 +13111,8 @@ var TypeTemplate = /*#__PURE__*/function () {
           if (args.length > 0) {
             var last = args[args.length - 1];
 
-            if (last.parameterType == _DistributedConnection["default"]) {
-              var _fpt = _Warehouse["default"].getTemplateByType(last.parameterType);
+            if (last.type == _DistributedConnection["default"]) {
+              var _fpt = _Warehouse["default"].getTemplateByType(last.type);
 
               if (_fpt != null) {
                 if (!bag.includes(_fpt)) {
@@ -13112,7 +13129,7 @@ var TypeTemplate = /*#__PURE__*/function () {
         for (var _i11 = 0; _i11 < tmp.properties.length; _i11++) {
           var p = tmp.properties[_i11];
 
-          var pt = _Warehouse["default"].getTemplateByType(p.propertyInfo.propertyType);
+          var pt = _Warehouse["default"].getTemplateByType(p.propertyInfo.type);
 
           if (pt != null) {
             if (!bag.includes(pt)) {
@@ -13127,11 +13144,11 @@ var TypeTemplate = /*#__PURE__*/function () {
         for (var _i12 = 0; _i12 < tmp.events.length; _i12++) {
           var e = tmp.events[_i12];
 
-          var et = _Warehouse["default"].getTemplateByType(e.eventInfo.eventHandlerType);
+          var et = _Warehouse["default"].getTemplateByType(e.eventInfo.type);
 
           if (et != null) {
             if (!bag.includes(et)) {
-              bag.Add(et);
+              bag.add(et);
 
               _getDependenciesFunc(et, bag);
             }
@@ -13706,26 +13723,20 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "getTemplateByType",
     value: function getTemplateByType(type) {
-      if (type == null) return null; // search our records
+      var baseType = _ResourceProxy["default"].getBaseType(type);
 
-      var template = this.templates.first(function (x) {
-        return x.defineType == type;
+      if (baseType == _IResource["default"] || baseType == _IRecord["default"] || baseType == _IEnum["default"]) return null; // search our records
+
+      var templateType;
+      if (baseType.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (baseType.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else if (baseType.prototype instanceof _IEnum["default"]) templateType = _TemplateType["default"].Enum;else return null;
+      var template = this.templates.item(templateType).first(function (x) {
+        return x.definedType == baseType;
       });
       if (template != null) return template;
-      var templateType;
-      if (type.prototype instanceof _IResource["default"]) templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IRecord["default"]) templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IEnum["default"]) templateType = _TemplateType["default"].Enum;else return null;
-      if (type == _IResource["default"] || type == _IRecord["default"]) return null;
-      if (!(type.prototype instanceof _IResource["default"] || type.prototype instanceof _IRecord["default"])) return false; // let className = type.prototype.constructor.name;
-      // if (className.startsWith("E_"))
-      //     className = className.substr(2);
-      // className = type.template.namespace + "." + (type.template.className ?? className);
-      // var templates = this.templates.get(templateType);
-      // // loaded ?
-      // for(var i = 0; i < templates.length; i++)
-      //     if (templates.at(i).className == className)
-      //         return templates.at(i);
+      template = new _TypeTemplate["default"](baseType, true);
 
-      template = new _TypeTemplate["default"](type, true);
+      _TypeTemplate["default"].getDependencies(template);
+
       return template;
     }
   }, {
