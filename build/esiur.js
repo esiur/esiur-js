@@ -10938,6 +10938,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
         var _this3 = this;
 
         var asyncSetters,
+            globalName,
             fs,
             _urlRegex,
             path,
@@ -10954,47 +10955,48 @@ var TemplateGenerator = /*#__PURE__*/function () {
             switch (_context2.prev = _context2.next) {
               case 0:
                 asyncSetters = _args2.length > 4 && _args2[4] !== undefined ? _args2[4] : true;
-                _context2.next = 3;
+                globalName = _args2.length > 5 && _args2[5] !== undefined ? _args2[5] : null;
+                _context2.next = 4;
                 return Promise.resolve().then(function () {
                   return _interopRequireWildcard(require("fs"));
                 });
 
-              case 3:
+              case 4:
                 fs = _context2.sent;
                 // var fs = require('fs');
                 _urlRegex = /^(?:([^\s|:]*):\/\/([^/]*)\/?(.*))/; //                  /^(?:([^\s|:]*):\/\/([^/]*)\/?)/;
 
                 if (_urlRegex.test(url)) {
-                  _context2.next = 7;
+                  _context2.next = 8;
                   break;
                 }
 
                 throw Error("Invalid IIP URL '".concat(url, "'"));
 
-              case 7:
+              case 8:
                 path = url.split(_urlRegex);
-                _context2.next = 10;
+                _context2.next = 11;
                 return _Warehouse["default"].get(path[1] + "://" + path[2], username != null ? {
                   "username": username,
                   "password": password !== null && password !== void 0 ? password : ""
                 } : null);
 
-              case 10:
+              case 11:
                 con = _context2.sent;
 
                 if (!(con == null)) {
-                  _context2.next = 13;
+                  _context2.next = 14;
                   break;
                 }
 
                 throw Error("Can't connect to server");
 
-              case 13:
+              case 14:
                 if (dir == null || dir == "") dir = path[2].replaceAll(":", "_");
-                _context2.next = 16;
+                _context2.next = 17;
                 return con.getLinkTemplates(path[3]);
 
-              case 16:
+              case 17:
                 templates = _context2.sent;
 
                 // no longer needed
@@ -11063,11 +11065,17 @@ var TemplateGenerator = /*#__PURE__*/function () {
                   module += "Esiur.define(module, ".concat(typeName, ", '").concat(tmp.className, "');\r\n");
                   module += "new Esiur.Resource.Template.TypeTemplate(".concat(typeName, ", true);\r\n");
                 });
-                module += "\r\nexport default module;";
+                module += "\r\nexport default module;\r\n";
+
+                if (globalName != null) {
+                  module += "\r\nif (typeof window !== 'undefined') window[\"".concat(globalName, "\"] = module;\r\n");
+                  module += "\r\nelse if (typeof global !== 'undefined') global[\"".concat(globalName, "\"] = module;\r\n");
+                }
+
                 fs.writeFileSync(modulePath, module);
                 return _context2.abrupt("return", dstDir);
 
-              case 28:
+              case 30:
               case "end":
                 return _context2.stop();
             }

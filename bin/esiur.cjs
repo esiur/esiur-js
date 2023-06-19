@@ -12,6 +12,8 @@ if (process.argv.length == 2) {
   console.log("\t-u, --username\tAuthentication username.");
   console.log("\t-p, --password\tAuthentication password.");
   console.log("\t-d, --dir\tName of the directory to generate model inside.");
+  console.log("\t-g, --global\tDeclare a global variable for the module with the specified name.");
+
   process.exit();
 }
 
@@ -38,6 +40,8 @@ else if (cmd == "get-template")
   // get username
   let username = getOption(args, "--username", "-u");
   let password = getOption(args, "--password", "-p");
+  let globalName = getOption(args, "--global", "-g");
+
   let dir = getOption(args, "--dir", "-d");
 
   if (args.length == 0){
@@ -51,7 +55,7 @@ else if (cmd == "get-template")
 
   let getTemplate = async () => {
     let Esiur  = (await import('../src/esiur.js')).default;
-    await Esiur.Proxy.TemplateGenerator.getTemplate(url, dir, username, password, true);
+    await Esiur.Proxy.TemplateGenerator.getTemplate(url, dir, username, password, true, globalName);
 
     process.exit();
   }

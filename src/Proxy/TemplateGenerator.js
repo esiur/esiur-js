@@ -238,7 +238,7 @@ export default class TemplateGenerator {
     return v == null || v == "";
   }
 
-  static async getTemplate(url, dir, username,  password, asyncSetters = true)  {
+  static async getTemplate(url, dir, username,  password, asyncSetters = true, globalName = null)  {
 
 
       const fs = await import("fs");
@@ -318,7 +318,13 @@ export default class TemplateGenerator {
           module += `new Esiur.Resource.Template.TypeTemplate(${typeName}, true);\r\n`
       });
 
-      module += "\r\nexport default module;";
+      module += "\r\nexport default module;\r\n";
+
+      if (globalName != null) {
+        module += `\r\nif (typeof window !== 'undefined') window["${globalName}"] = module;\r\n`;
+        module += `\r\nelse if (typeof global !== 'undefined') global["${globalName}"] = module;\r\n`;
+      }
+
       fs.writeFileSync(modulePath, module);
 
       return dstDir;
