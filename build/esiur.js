@@ -1,6 +1,712 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+  for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+  return arr2;
+}
+module.exports = _arrayLikeToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
 },{}],2:[function(require,module,exports){
+function _arrayWithHoles(arr) {
+  if (Array.isArray(arr)) return arr;
+}
+module.exports = _arrayWithHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],3:[function(require,module,exports){
+var arrayLikeToArray = require("./arrayLikeToArray.js");
+function _arrayWithoutHoles(arr) {
+  if (Array.isArray(arr)) return arrayLikeToArray(arr);
+}
+module.exports = _arrayWithoutHoles, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./arrayLikeToArray.js":1}],4:[function(require,module,exports){
+function _assertThisInitialized(self) {
+  if (self === void 0) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+  return self;
+}
+module.exports = _assertThisInitialized, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],5:[function(require,module,exports){
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+      args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+      _next(undefined);
+    });
+  };
+}
+module.exports = _asyncToGenerator, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],6:[function(require,module,exports){
+function _classApplyDescriptorGet(receiver, descriptor) {
+  if (descriptor.get) {
+    return descriptor.get.call(receiver);
+  }
+  return descriptor.value;
+}
+module.exports = _classApplyDescriptorGet, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],7:[function(require,module,exports){
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+module.exports = _classCallCheck, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],8:[function(require,module,exports){
+function _classExtractFieldDescriptor(receiver, privateMap, action) {
+  if (!privateMap.has(receiver)) {
+    throw new TypeError("attempted to " + action + " private field on non-instance");
+  }
+  return privateMap.get(receiver);
+}
+module.exports = _classExtractFieldDescriptor, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],9:[function(require,module,exports){
+var classApplyDescriptorGet = require("./classApplyDescriptorGet.js");
+var classExtractFieldDescriptor = require("./classExtractFieldDescriptor.js");
+function _classPrivateFieldGet(receiver, privateMap) {
+  var descriptor = classExtractFieldDescriptor(receiver, privateMap, "get");
+  return classApplyDescriptorGet(receiver, descriptor);
+}
+module.exports = _classPrivateFieldGet, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./classApplyDescriptorGet.js":6,"./classExtractFieldDescriptor.js":8}],10:[function(require,module,exports){
+var setPrototypeOf = require("./setPrototypeOf.js");
+var isNativeReflectConstruct = require("./isNativeReflectConstruct.js");
+function _construct(Parent, args, Class) {
+  if (isNativeReflectConstruct()) {
+    module.exports = _construct = Reflect.construct.bind(), module.exports.__esModule = true, module.exports["default"] = module.exports;
+  } else {
+    module.exports = _construct = function _construct(Parent, args, Class) {
+      var a = [null];
+      a.push.apply(a, args);
+      var Constructor = Function.bind.apply(Parent, a);
+      var instance = new Constructor();
+      if (Class) setPrototypeOf(instance, Class.prototype);
+      return instance;
+    }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  }
+  return _construct.apply(null, arguments);
+}
+module.exports = _construct, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./isNativeReflectConstruct.js":18,"./setPrototypeOf.js":25}],11:[function(require,module,exports){
+var toPropertyKey = require("./toPropertyKey.js");
+function _defineProperties(target, props) {
+  for (var i = 0; i < props.length; i++) {
+    var descriptor = props[i];
+    descriptor.enumerable = descriptor.enumerable || false;
+    descriptor.configurable = true;
+    if ("value" in descriptor) descriptor.writable = true;
+    Object.defineProperty(target, toPropertyKey(descriptor.key), descriptor);
+  }
+}
+function _createClass(Constructor, protoProps, staticProps) {
+  if (protoProps) _defineProperties(Constructor.prototype, protoProps);
+  if (staticProps) _defineProperties(Constructor, staticProps);
+  Object.defineProperty(Constructor, "prototype", {
+    writable: false
+  });
+  return Constructor;
+}
+module.exports = _createClass, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./toPropertyKey.js":30}],12:[function(require,module,exports){
+var toPropertyKey = require("./toPropertyKey.js");
+function _defineProperty(obj, key, value) {
+  key = toPropertyKey(key);
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
+}
+module.exports = _defineProperty, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./toPropertyKey.js":30}],13:[function(require,module,exports){
+var superPropBase = require("./superPropBase.js");
+function _get() {
+  if (typeof Reflect !== "undefined" && Reflect.get) {
+    module.exports = _get = Reflect.get.bind(), module.exports.__esModule = true, module.exports["default"] = module.exports;
+  } else {
+    module.exports = _get = function _get(target, property, receiver) {
+      var base = superPropBase(target, property);
+      if (!base) return;
+      var desc = Object.getOwnPropertyDescriptor(base, property);
+      if (desc.get) {
+        return desc.get.call(arguments.length < 3 ? target : receiver);
+      }
+      return desc.value;
+    }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  }
+  return _get.apply(this, arguments);
+}
+module.exports = _get, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./superPropBase.js":27}],14:[function(require,module,exports){
+function _getPrototypeOf(o) {
+  module.exports = _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) {
+    return o.__proto__ || Object.getPrototypeOf(o);
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _getPrototypeOf(o);
+}
+module.exports = _getPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],15:[function(require,module,exports){
+var setPrototypeOf = require("./setPrototypeOf.js");
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function");
+  }
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      writable: true,
+      configurable: true
+    }
+  });
+  Object.defineProperty(subClass, "prototype", {
+    writable: false
+  });
+  if (superClass) setPrototypeOf(subClass, superClass);
+}
+module.exports = _inherits, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./setPrototypeOf.js":25}],16:[function(require,module,exports){
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+}
+module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],17:[function(require,module,exports){
+function _isNativeFunction(fn) {
+  return Function.toString.call(fn).indexOf("[native code]") !== -1;
+}
+module.exports = _isNativeFunction, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],18:[function(require,module,exports){
+function _isNativeReflectConstruct() {
+  if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+  if (Reflect.construct.sham) return false;
+  if (typeof Proxy === "function") return true;
+  try {
+    Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+module.exports = _isNativeReflectConstruct, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],19:[function(require,module,exports){
+function _iterableToArray(iter) {
+  if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+}
+module.exports = _iterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],20:[function(require,module,exports){
+function _iterableToArrayLimit(arr, i) {
+  var _i = null == arr ? null : "undefined" != typeof Symbol && arr[Symbol.iterator] || arr["@@iterator"];
+  if (null != _i) {
+    var _s,
+      _e,
+      _x,
+      _r,
+      _arr = [],
+      _n = !0,
+      _d = !1;
+    try {
+      if (_x = (_i = _i.call(arr)).next, 0 === i) {
+        if (Object(_i) !== _i) return;
+        _n = !1;
+      } else for (; !(_n = (_s = _x.call(_i)).done) && (_arr.push(_s.value), _arr.length !== i); _n = !0);
+    } catch (err) {
+      _d = !0, _e = err;
+    } finally {
+      try {
+        if (!_n && null != _i["return"] && (_r = _i["return"](), Object(_r) !== _r)) return;
+      } finally {
+        if (_d) throw _e;
+      }
+    }
+    return _arr;
+  }
+}
+module.exports = _iterableToArrayLimit, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],21:[function(require,module,exports){
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+module.exports = _nonIterableRest, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],22:[function(require,module,exports){
+function _nonIterableSpread() {
+  throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+}
+module.exports = _nonIterableSpread, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],23:[function(require,module,exports){
+var _typeof = require("./typeof.js")["default"];
+var assertThisInitialized = require("./assertThisInitialized.js");
+function _possibleConstructorReturn(self, call) {
+  if (call && (_typeof(call) === "object" || typeof call === "function")) {
+    return call;
+  } else if (call !== void 0) {
+    throw new TypeError("Derived constructors may only return object or undefined");
+  }
+  return assertThisInitialized(self);
+}
+module.exports = _possibleConstructorReturn, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./assertThisInitialized.js":4,"./typeof.js":31}],24:[function(require,module,exports){
+var _typeof = require("./typeof.js")["default"];
+function _regeneratorRuntime() {
+  "use strict"; /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+  module.exports = _regeneratorRuntime = function _regeneratorRuntime() {
+    return exports;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  var exports = {},
+    Op = Object.prototype,
+    hasOwn = Op.hasOwnProperty,
+    defineProperty = Object.defineProperty || function (obj, key, desc) {
+      obj[key] = desc.value;
+    },
+    $Symbol = "function" == typeof Symbol ? Symbol : {},
+    iteratorSymbol = $Symbol.iterator || "@@iterator",
+    asyncIteratorSymbol = $Symbol.asyncIterator || "@@asyncIterator",
+    toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+  function define(obj, key, value) {
+    return Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: !0,
+      configurable: !0,
+      writable: !0
+    }), obj[key];
+  }
+  try {
+    define({}, "");
+  } catch (err) {
+    define = function define(obj, key, value) {
+      return obj[key] = value;
+    };
+  }
+  function wrap(innerFn, outerFn, self, tryLocsList) {
+    var protoGenerator = outerFn && outerFn.prototype instanceof Generator ? outerFn : Generator,
+      generator = Object.create(protoGenerator.prototype),
+      context = new Context(tryLocsList || []);
+    return defineProperty(generator, "_invoke", {
+      value: makeInvokeMethod(innerFn, self, context)
+    }), generator;
+  }
+  function tryCatch(fn, obj, arg) {
+    try {
+      return {
+        type: "normal",
+        arg: fn.call(obj, arg)
+      };
+    } catch (err) {
+      return {
+        type: "throw",
+        arg: err
+      };
+    }
+  }
+  exports.wrap = wrap;
+  var ContinueSentinel = {};
+  function Generator() {}
+  function GeneratorFunction() {}
+  function GeneratorFunctionPrototype() {}
+  var IteratorPrototype = {};
+  define(IteratorPrototype, iteratorSymbol, function () {
+    return this;
+  });
+  var getProto = Object.getPrototypeOf,
+    NativeIteratorPrototype = getProto && getProto(getProto(values([])));
+  NativeIteratorPrototype && NativeIteratorPrototype !== Op && hasOwn.call(NativeIteratorPrototype, iteratorSymbol) && (IteratorPrototype = NativeIteratorPrototype);
+  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(IteratorPrototype);
+  function defineIteratorMethods(prototype) {
+    ["next", "throw", "return"].forEach(function (method) {
+      define(prototype, method, function (arg) {
+        return this._invoke(method, arg);
+      });
+    });
+  }
+  function AsyncIterator(generator, PromiseImpl) {
+    function invoke(method, arg, resolve, reject) {
+      var record = tryCatch(generator[method], generator, arg);
+      if ("throw" !== record.type) {
+        var result = record.arg,
+          value = result.value;
+        return value && "object" == _typeof(value) && hasOwn.call(value, "__await") ? PromiseImpl.resolve(value.__await).then(function (value) {
+          invoke("next", value, resolve, reject);
+        }, function (err) {
+          invoke("throw", err, resolve, reject);
+        }) : PromiseImpl.resolve(value).then(function (unwrapped) {
+          result.value = unwrapped, resolve(result);
+        }, function (error) {
+          return invoke("throw", error, resolve, reject);
+        });
+      }
+      reject(record.arg);
+    }
+    var previousPromise;
+    defineProperty(this, "_invoke", {
+      value: function value(method, arg) {
+        function callInvokeWithMethodAndArg() {
+          return new PromiseImpl(function (resolve, reject) {
+            invoke(method, arg, resolve, reject);
+          });
+        }
+        return previousPromise = previousPromise ? previousPromise.then(callInvokeWithMethodAndArg, callInvokeWithMethodAndArg) : callInvokeWithMethodAndArg();
+      }
+    });
+  }
+  function makeInvokeMethod(innerFn, self, context) {
+    var state = "suspendedStart";
+    return function (method, arg) {
+      if ("executing" === state) throw new Error("Generator is already running");
+      if ("completed" === state) {
+        if ("throw" === method) throw arg;
+        return doneResult();
+      }
+      for (context.method = method, context.arg = arg;;) {
+        var delegate = context.delegate;
+        if (delegate) {
+          var delegateResult = maybeInvokeDelegate(delegate, context);
+          if (delegateResult) {
+            if (delegateResult === ContinueSentinel) continue;
+            return delegateResult;
+          }
+        }
+        if ("next" === context.method) context.sent = context._sent = context.arg;else if ("throw" === context.method) {
+          if ("suspendedStart" === state) throw state = "completed", context.arg;
+          context.dispatchException(context.arg);
+        } else "return" === context.method && context.abrupt("return", context.arg);
+        state = "executing";
+        var record = tryCatch(innerFn, self, context);
+        if ("normal" === record.type) {
+          if (state = context.done ? "completed" : "suspendedYield", record.arg === ContinueSentinel) continue;
+          return {
+            value: record.arg,
+            done: context.done
+          };
+        }
+        "throw" === record.type && (state = "completed", context.method = "throw", context.arg = record.arg);
+      }
+    };
+  }
+  function maybeInvokeDelegate(delegate, context) {
+    var methodName = context.method,
+      method = delegate.iterator[methodName];
+    if (undefined === method) return context.delegate = null, "throw" === methodName && delegate.iterator["return"] && (context.method = "return", context.arg = undefined, maybeInvokeDelegate(delegate, context), "throw" === context.method) || "return" !== methodName && (context.method = "throw", context.arg = new TypeError("The iterator does not provide a '" + methodName + "' method")), ContinueSentinel;
+    var record = tryCatch(method, delegate.iterator, context.arg);
+    if ("throw" === record.type) return context.method = "throw", context.arg = record.arg, context.delegate = null, ContinueSentinel;
+    var info = record.arg;
+    return info ? info.done ? (context[delegate.resultName] = info.value, context.next = delegate.nextLoc, "return" !== context.method && (context.method = "next", context.arg = undefined), context.delegate = null, ContinueSentinel) : info : (context.method = "throw", context.arg = new TypeError("iterator result is not an object"), context.delegate = null, ContinueSentinel);
+  }
+  function pushTryEntry(locs) {
+    var entry = {
+      tryLoc: locs[0]
+    };
+    1 in locs && (entry.catchLoc = locs[1]), 2 in locs && (entry.finallyLoc = locs[2], entry.afterLoc = locs[3]), this.tryEntries.push(entry);
+  }
+  function resetTryEntry(entry) {
+    var record = entry.completion || {};
+    record.type = "normal", delete record.arg, entry.completion = record;
+  }
+  function Context(tryLocsList) {
+    this.tryEntries = [{
+      tryLoc: "root"
+    }], tryLocsList.forEach(pushTryEntry, this), this.reset(!0);
+  }
+  function values(iterable) {
+    if (iterable) {
+      var iteratorMethod = iterable[iteratorSymbol];
+      if (iteratorMethod) return iteratorMethod.call(iterable);
+      if ("function" == typeof iterable.next) return iterable;
+      if (!isNaN(iterable.length)) {
+        var i = -1,
+          next = function next() {
+            for (; ++i < iterable.length;) if (hasOwn.call(iterable, i)) return next.value = iterable[i], next.done = !1, next;
+            return next.value = undefined, next.done = !0, next;
+          };
+        return next.next = next;
+      }
+    }
+    return {
+      next: doneResult
+    };
+  }
+  function doneResult() {
+    return {
+      value: undefined,
+      done: !0
+    };
+  }
+  return GeneratorFunction.prototype = GeneratorFunctionPrototype, defineProperty(Gp, "constructor", {
+    value: GeneratorFunctionPrototype,
+    configurable: !0
+  }), defineProperty(GeneratorFunctionPrototype, "constructor", {
+    value: GeneratorFunction,
+    configurable: !0
+  }), GeneratorFunction.displayName = define(GeneratorFunctionPrototype, toStringTagSymbol, "GeneratorFunction"), exports.isGeneratorFunction = function (genFun) {
+    var ctor = "function" == typeof genFun && genFun.constructor;
+    return !!ctor && (ctor === GeneratorFunction || "GeneratorFunction" === (ctor.displayName || ctor.name));
+  }, exports.mark = function (genFun) {
+    return Object.setPrototypeOf ? Object.setPrototypeOf(genFun, GeneratorFunctionPrototype) : (genFun.__proto__ = GeneratorFunctionPrototype, define(genFun, toStringTagSymbol, "GeneratorFunction")), genFun.prototype = Object.create(Gp), genFun;
+  }, exports.awrap = function (arg) {
+    return {
+      __await: arg
+    };
+  }, defineIteratorMethods(AsyncIterator.prototype), define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
+    return this;
+  }), exports.AsyncIterator = AsyncIterator, exports.async = function (innerFn, outerFn, self, tryLocsList, PromiseImpl) {
+    void 0 === PromiseImpl && (PromiseImpl = Promise);
+    var iter = new AsyncIterator(wrap(innerFn, outerFn, self, tryLocsList), PromiseImpl);
+    return exports.isGeneratorFunction(outerFn) ? iter : iter.next().then(function (result) {
+      return result.done ? result.value : iter.next();
+    });
+  }, defineIteratorMethods(Gp), define(Gp, toStringTagSymbol, "Generator"), define(Gp, iteratorSymbol, function () {
+    return this;
+  }), define(Gp, "toString", function () {
+    return "[object Generator]";
+  }), exports.keys = function (val) {
+    var object = Object(val),
+      keys = [];
+    for (var key in object) keys.push(key);
+    return keys.reverse(), function next() {
+      for (; keys.length;) {
+        var key = keys.pop();
+        if (key in object) return next.value = key, next.done = !1, next;
+      }
+      return next.done = !0, next;
+    };
+  }, exports.values = values, Context.prototype = {
+    constructor: Context,
+    reset: function reset(skipTempReset) {
+      if (this.prev = 0, this.next = 0, this.sent = this._sent = undefined, this.done = !1, this.delegate = null, this.method = "next", this.arg = undefined, this.tryEntries.forEach(resetTryEntry), !skipTempReset) for (var name in this) "t" === name.charAt(0) && hasOwn.call(this, name) && !isNaN(+name.slice(1)) && (this[name] = undefined);
+    },
+    stop: function stop() {
+      this.done = !0;
+      var rootRecord = this.tryEntries[0].completion;
+      if ("throw" === rootRecord.type) throw rootRecord.arg;
+      return this.rval;
+    },
+    dispatchException: function dispatchException(exception) {
+      if (this.done) throw exception;
+      var context = this;
+      function handle(loc, caught) {
+        return record.type = "throw", record.arg = exception, context.next = loc, caught && (context.method = "next", context.arg = undefined), !!caught;
+      }
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i],
+          record = entry.completion;
+        if ("root" === entry.tryLoc) return handle("end");
+        if (entry.tryLoc <= this.prev) {
+          var hasCatch = hasOwn.call(entry, "catchLoc"),
+            hasFinally = hasOwn.call(entry, "finallyLoc");
+          if (hasCatch && hasFinally) {
+            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+          } else if (hasCatch) {
+            if (this.prev < entry.catchLoc) return handle(entry.catchLoc, !0);
+          } else {
+            if (!hasFinally) throw new Error("try statement without catch or finally");
+            if (this.prev < entry.finallyLoc) return handle(entry.finallyLoc);
+          }
+        }
+      }
+    },
+    abrupt: function abrupt(type, arg) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc <= this.prev && hasOwn.call(entry, "finallyLoc") && this.prev < entry.finallyLoc) {
+          var finallyEntry = entry;
+          break;
+        }
+      }
+      finallyEntry && ("break" === type || "continue" === type) && finallyEntry.tryLoc <= arg && arg <= finallyEntry.finallyLoc && (finallyEntry = null);
+      var record = finallyEntry ? finallyEntry.completion : {};
+      return record.type = type, record.arg = arg, finallyEntry ? (this.method = "next", this.next = finallyEntry.finallyLoc, ContinueSentinel) : this.complete(record);
+    },
+    complete: function complete(record, afterLoc) {
+      if ("throw" === record.type) throw record.arg;
+      return "break" === record.type || "continue" === record.type ? this.next = record.arg : "return" === record.type ? (this.rval = this.arg = record.arg, this.method = "return", this.next = "end") : "normal" === record.type && afterLoc && (this.next = afterLoc), ContinueSentinel;
+    },
+    finish: function finish(finallyLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.finallyLoc === finallyLoc) return this.complete(entry.completion, entry.afterLoc), resetTryEntry(entry), ContinueSentinel;
+      }
+    },
+    "catch": function _catch(tryLoc) {
+      for (var i = this.tryEntries.length - 1; i >= 0; --i) {
+        var entry = this.tryEntries[i];
+        if (entry.tryLoc === tryLoc) {
+          var record = entry.completion;
+          if ("throw" === record.type) {
+            var thrown = record.arg;
+            resetTryEntry(entry);
+          }
+          return thrown;
+        }
+      }
+      throw new Error("illegal catch attempt");
+    },
+    delegateYield: function delegateYield(iterable, resultName, nextLoc) {
+      return this.delegate = {
+        iterator: values(iterable),
+        resultName: resultName,
+        nextLoc: nextLoc
+      }, "next" === this.method && (this.arg = undefined), ContinueSentinel;
+    }
+  }, exports;
+}
+module.exports = _regeneratorRuntime, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./typeof.js":31}],25:[function(require,module,exports){
+function _setPrototypeOf(o, p) {
+  module.exports = _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) {
+    o.__proto__ = p;
+    return o;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _setPrototypeOf(o, p);
+}
+module.exports = _setPrototypeOf, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],26:[function(require,module,exports){
+var arrayWithHoles = require("./arrayWithHoles.js");
+var iterableToArrayLimit = require("./iterableToArrayLimit.js");
+var unsupportedIterableToArray = require("./unsupportedIterableToArray.js");
+var nonIterableRest = require("./nonIterableRest.js");
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+module.exports = _slicedToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./arrayWithHoles.js":2,"./iterableToArrayLimit.js":20,"./nonIterableRest.js":21,"./unsupportedIterableToArray.js":32}],27:[function(require,module,exports){
+var getPrototypeOf = require("./getPrototypeOf.js");
+function _superPropBase(object, property) {
+  while (!Object.prototype.hasOwnProperty.call(object, property)) {
+    object = getPrototypeOf(object);
+    if (object === null) break;
+  }
+  return object;
+}
+module.exports = _superPropBase, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./getPrototypeOf.js":14}],28:[function(require,module,exports){
+var arrayWithoutHoles = require("./arrayWithoutHoles.js");
+var iterableToArray = require("./iterableToArray.js");
+var unsupportedIterableToArray = require("./unsupportedIterableToArray.js");
+var nonIterableSpread = require("./nonIterableSpread.js");
+function _toConsumableArray(arr) {
+  return arrayWithoutHoles(arr) || iterableToArray(arr) || unsupportedIterableToArray(arr) || nonIterableSpread();
+}
+module.exports = _toConsumableArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./arrayWithoutHoles.js":3,"./iterableToArray.js":19,"./nonIterableSpread.js":22,"./unsupportedIterableToArray.js":32}],29:[function(require,module,exports){
+var _typeof = require("./typeof.js")["default"];
+function _toPrimitive(input, hint) {
+  if (_typeof(input) !== "object" || input === null) return input;
+  var prim = input[Symbol.toPrimitive];
+  if (prim !== undefined) {
+    var res = prim.call(input, hint || "default");
+    if (_typeof(res) !== "object") return res;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return (hint === "string" ? String : Number)(input);
+}
+module.exports = _toPrimitive, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./typeof.js":31}],30:[function(require,module,exports){
+var _typeof = require("./typeof.js")["default"];
+var toPrimitive = require("./toPrimitive.js");
+function _toPropertyKey(arg) {
+  var key = toPrimitive(arg, "string");
+  return _typeof(key) === "symbol" ? key : String(key);
+}
+module.exports = _toPropertyKey, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./toPrimitive.js":29,"./typeof.js":31}],31:[function(require,module,exports){
+function _typeof(obj) {
+  "@babel/helpers - typeof";
+
+  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) {
+    return typeof obj;
+  } : function (obj) {
+    return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(obj);
+}
+module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{}],32:[function(require,module,exports){
+var arrayLikeToArray = require("./arrayLikeToArray.js");
+function _unsupportedIterableToArray(o, minLen) {
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+  var n = Object.prototype.toString.call(o).slice(8, -1);
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return Array.from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+module.exports = _unsupportedIterableToArray, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./arrayLikeToArray.js":1}],33:[function(require,module,exports){
+var getPrototypeOf = require("./getPrototypeOf.js");
+var setPrototypeOf = require("./setPrototypeOf.js");
+var isNativeFunction = require("./isNativeFunction.js");
+var construct = require("./construct.js");
+function _wrapNativeSuper(Class) {
+  var _cache = typeof Map === "function" ? new Map() : undefined;
+  module.exports = _wrapNativeSuper = function _wrapNativeSuper(Class) {
+    if (Class === null || !isNativeFunction(Class)) return Class;
+    if (typeof Class !== "function") {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+    if (typeof _cache !== "undefined") {
+      if (_cache.has(Class)) return _cache.get(Class);
+      _cache.set(Class, Wrapper);
+    }
+    function Wrapper() {
+      return construct(Class, arguments, getPrototypeOf(this).constructor);
+    }
+    Wrapper.prototype = Object.create(Class.prototype, {
+      constructor: {
+        value: Wrapper,
+        enumerable: false,
+        writable: true,
+        configurable: true
+      }
+    });
+    return setPrototypeOf(Wrapper, Class);
+  }, module.exports.__esModule = true, module.exports["default"] = module.exports;
+  return _wrapNativeSuper(Class);
+}
+module.exports = _wrapNativeSuper, module.exports.__esModule = true, module.exports["default"] = module.exports;
+},{"./construct.js":10,"./getPrototypeOf.js":14,"./isNativeFunction.js":17,"./setPrototypeOf.js":25}],34:[function(require,module,exports){
+// TODO(Babel 8): Remove this file.
+
+var runtime = require("../helpers/regeneratorRuntime")();
+module.exports = runtime;
+
+// Copied from https://github.com/facebook/regenerator/blob/main/packages/runtime/runtime.js#L736=
+try {
+  regeneratorRuntime = runtime;
+} catch (accidentalStrictMode) {
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
+}
+
+},{"../helpers/regeneratorRuntime":24}],35:[function(require,module,exports){
+
+},{}],36:[function(require,module,exports){
 'use strict';
 
 module.exports = function () {
@@ -10,7 +716,7 @@ module.exports = function () {
   );
 };
 
-},{}],3:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -38,47 +744,38 @@ module.exports = function () {
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _AsyncReply2 = _interopRequireDefault(require("./AsyncReply.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var AsyncBag = /*#__PURE__*/function (_AsyncReply) {
-  _inherits(AsyncBag, _AsyncReply);
+  (0, _inherits2["default"])(AsyncBag, _AsyncReply);
 
   var _super = _createSuper(AsyncBag);
 
   function AsyncBag() {
     var _this;
 
-    _classCallCheck(this, AsyncBag);
-
+    (0, _classCallCheck2["default"])(this, AsyncBag);
     _this = _super.call(this);
     _this.replies = [];
     _this.results = [];
@@ -87,7 +784,7 @@ var AsyncBag = /*#__PURE__*/function (_AsyncReply) {
     return _this;
   }
 
-  _createClass(AsyncBag, [{
+  (0, _createClass2["default"])(AsyncBag, [{
     key: "seal",
     value: function seal() {
       this.sealedBag = true;
@@ -124,13 +821,12 @@ var AsyncBag = /*#__PURE__*/function (_AsyncReply) {
       }
     }
   }]);
-
   return AsyncBag;
 }(_AsyncReply2["default"]);
 
 exports["default"] = AsyncBag;
 
-},{"./AsyncReply.js":6}],4:[function(require,module,exports){
+},{"./AsyncReply.js":40,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],38:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -158,53 +854,40 @@ exports["default"] = AsyncBag;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
+
 var _ExceptionCode = _interopRequireDefault(require("./ExceptionCode.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var AsyncException = /*#__PURE__*/function (_Error) {
-  _inherits(AsyncException, _Error);
+  (0, _inherits2["default"])(AsyncException, _Error);
 
   var _super = _createSuper(AsyncException);
 
   function AsyncException(type, code, message) {
     var _this;
 
-    _classCallCheck(this, AsyncException);
-
+    (0, _classCallCheck2["default"])(this, AsyncException);
     _this = _super.call(this);
 
     if (type instanceof AsyncException) {
@@ -220,7 +903,7 @@ var AsyncException = /*#__PURE__*/function (_Error) {
     return _this;
   }
 
-  _createClass(AsyncException, [{
+  (0, _createClass2["default"])(AsyncException, [{
     key: "raise",
     value: function raise(type, code, message) {
       this.type = type;
@@ -243,13 +926,12 @@ var AsyncException = /*#__PURE__*/function (_Error) {
       return (this.type == 0 ? "Management" : "Exception") + " (" + this.code + ") : " + this.message;
     }
   }]);
-
   return AsyncException;
-}( /*#__PURE__*/_wrapNativeSuper(Error));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Error));
 
 exports["default"] = AsyncException;
 
-},{"./ExceptionCode.js":8}],5:[function(require,module,exports){
+},{"./ExceptionCode.js":42,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],39:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -277,51 +959,43 @@ exports["default"] = AsyncException;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _AsyncReply2 = _interopRequireDefault(require("./AsyncReply.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var AsyncQueue = /*#__PURE__*/function (_AsyncReply) {
-  _inherits(AsyncQueue, _AsyncReply);
+  (0, _inherits2["default"])(AsyncQueue, _AsyncReply);
 
   var _super = _createSuper(AsyncQueue);
 
   function AsyncQueue() {
     var _this;
 
-    _classCallCheck(this, AsyncQueue);
-
+    (0, _classCallCheck2["default"])(this, AsyncQueue);
     _this = _super.call(this);
     _this.list = [];
-
-    var self = _assertThisInitialized(_this);
+    var self = (0, _assertThisInitialized2["default"])(_this);
 
     _this.processQueue = function () {
       for (var i = 0; i < self.list.length; i++) {
@@ -345,7 +1019,7 @@ var AsyncQueue = /*#__PURE__*/function (_AsyncReply) {
     return _this;
   }
 
-  _createClass(AsyncQueue, [{
+  (0, _createClass2["default"])(AsyncQueue, [{
     key: "add",
     value: function add(reply) {
       this.list.push(reply);
@@ -359,13 +1033,12 @@ var AsyncQueue = /*#__PURE__*/function (_AsyncReply) {
       this.processQueue();
     }
   }]);
-
   return AsyncQueue;
 }(_AsyncReply2["default"]);
 
 exports["default"] = AsyncQueue;
 
-},{"./AsyncReply.js":6}],6:[function(require,module,exports){
+},{"./AsyncReply.js":40,"@babel/runtime/helpers/assertThisInitialized":4,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],40:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -393,12 +1066,24 @@ exports["default"] = AsyncQueue;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
 var _AsyncException = _interopRequireDefault(require("./AsyncException.js"));
 
@@ -406,43 +1091,19 @@ var _ExceptionCode = _interopRequireDefault(require("./ExceptionCode.js"));
 
 var _ErrorType = _interopRequireDefault(require("./ErrorType.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var AsyncReply = /*#__PURE__*/function (_Promise) {
-  _inherits(AsyncReply, _Promise);
+  (0, _inherits2["default"])(AsyncReply, _Promise);
 
   var _super = _createSuper(AsyncReply);
 
   function AsyncReply(result) {
     var _this;
 
-    _classCallCheck(this, AsyncReply);
+    (0, _classCallCheck2["default"])(this, AsyncReply);
 
     if (result instanceof Function) {
       _this = _super.call(this, result);
@@ -464,10 +1125,10 @@ var AsyncReply = /*#__PURE__*/function (_Promise) {
       _this.result = null;
     }
 
-    return _possibleConstructorReturn(_this);
+    return (0, _possibleConstructorReturn2["default"])(_this);
   }
 
-  _createClass(AsyncReply, [{
+  (0, _createClass2["default"])(AsyncReply, [{
     key: "then",
     value: function then(callback, onError) {
       if (callback != undefined) {
@@ -570,13 +1231,12 @@ var AsyncReply = /*#__PURE__*/function (_Promise) {
       return this;
     }
   }]);
-
   return AsyncReply;
-}( /*#__PURE__*/_wrapNativeSuper(Promise));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Promise));
 
 exports["default"] = AsyncReply;
 
-},{"./AsyncException.js":4,"./ErrorType.js":7,"./ExceptionCode.js":8}],7:[function(require,module,exports){
+},{"./AsyncException.js":38,"./ErrorType.js":41,"./ExceptionCode.js":42,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],41:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -589,7 +1249,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],8:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -639,7 +1299,7 @@ var _default = //const ExceptionCode =
 };
 exports["default"] = _default;
 
-},{}],9:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -667,61 +1327,51 @@ exports["default"] = _default;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _IEventHandler2 = _interopRequireDefault(require("./IEventHandler.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var IDestructible = /*#__PURE__*/function (_IEventHandler) {
-  _inherits(IDestructible, _IEventHandler);
+  (0, _inherits2["default"])(IDestructible, _IEventHandler);
 
   var _super = _createSuper(IDestructible);
 
   function IDestructible() {
-    _classCallCheck(this, IDestructible);
-
+    (0, _classCallCheck2["default"])(this, IDestructible);
     return _super.call(this);
   }
 
-  _createClass(IDestructible, [{
+  (0, _createClass2["default"])(IDestructible, [{
     key: "destroy",
     value: function destroy() {
       this._emit("destroy", this);
     }
   }]);
-
   return IDestructible;
 }(_IEventHandler2["default"]);
 
 exports["default"] = IDestructible;
 
-},{"./IEventHandler.js":10}],10:[function(require,module,exports){
+},{"./IEventHandler.js":44,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],44:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -749,25 +1399,24 @@ exports["default"] = IDestructible;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var IEventHandler = /*#__PURE__*/function () {
   function IEventHandler() {
-    _classCallCheck(this, IEventHandler);
-
+    (0, _classCallCheck2["default"])(this, IEventHandler);
     this._events = {};
   }
 
-  _createClass(IEventHandler, [{
+  (0, _createClass2["default"])(IEventHandler, [{
     key: "_register",
     value: function _register(event) {
       this._events[event] = [];
@@ -825,13 +1474,12 @@ var IEventHandler = /*#__PURE__*/function () {
       }
     }
   }]);
-
   return IEventHandler;
 }();
 
 exports["default"] = IEventHandler;
 
-},{}],11:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],45:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -844,7 +1492,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],12:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -872,18 +1520,30 @@ exports["default"] = _default;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
+
 var _IEventHandler2 = _interopRequireDefault(require("../Core/IEventHandler.js"));
 
 var _IDestructible = _interopRequireDefault(require("../Core/IDestructible.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -891,47 +1551,24 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
-
-function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 var _item_destroyed = /*#__PURE__*/new WeakMap();
 
 var AutoList = /*#__PURE__*/function (_IEventHandler) {
-  _inherits(AutoList, _IEventHandler);
+  (0, _inherits2["default"])(AutoList, _IEventHandler);
 
   var _super = _createSuper(AutoList);
 
   function AutoList() {
     var _this;
 
-    _classCallCheck(this, AutoList);
-
+    (0, _classCallCheck2["default"])(this, AutoList);
     _this = _super.call(this);
 
-    _item_destroyed.set(_assertThisInitialized(_this), {
+    _item_destroyed.set((0, _assertThisInitialized2["default"])(_this), {
       writable: true,
       value: function value(sender) {
         this.remove(sender);
@@ -942,7 +1579,7 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
     return _this;
   }
 
-  _createClass(AutoList, [{
+  (0, _createClass2["default"])(AutoList, [{
     key: "length",
     get: function get() {
       return this.list.length;
@@ -950,7 +1587,7 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "add",
     value: function add(value) {
-      if (value instanceof _IDestructible["default"]) value.on("destroy", _classPrivateFieldGet(this, _item_destroyed), this);
+      if (value instanceof _IDestructible["default"]) value.on("destroy", (0, _classPrivateFieldGet2["default"])(this, _item_destroyed), this);
       this.list.push(value);
 
       this._emit("add", value);
@@ -959,8 +1596,8 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
     key: "set",
     value: function set(index, value) {
       if (index >= this.list.length || index < 0) return;
-      if (value instanceof _IDestructible["default"]) value.on("destroy", _classPrivateFieldGet(this, _item_destroyed), this);
-      if (this.list[index] instanceof _IDestructible["default"]) this.list[index].off("destroy", _classPrivateFieldGet(this, _item_destroyed));
+      if (value instanceof _IDestructible["default"]) value.on("destroy", (0, _classPrivateFieldGet2["default"])(this, _item_destroyed), this);
+      if (this.list[index] instanceof _IDestructible["default"]) this.list[index].off("destroy", (0, _classPrivateFieldGet2["default"])(this, _item_destroyed));
       this.list[index] = value;
     }
   }, {
@@ -1010,19 +1647,18 @@ var AutoList = /*#__PURE__*/function (_IEventHandler) {
     value: function removeAt(index) {
       if (index >= this.list.length || index < 0) return;
       var item = this.list[index];
-      if (item instanceof _IDestructible["default"]) item.off("destroy", _classPrivateFieldGet(this, _item_destroyed));
+      if (item instanceof _IDestructible["default"]) item.off("destroy", (0, _classPrivateFieldGet2["default"])(this, _item_destroyed));
       this.list.splice(index, 1);
 
       this._emit("remove", item);
     }
   }]);
-
   return AutoList;
 }(_IEventHandler2["default"]);
 
 exports["default"] = AutoList;
 
-},{"../Core/IDestructible.js":9,"../Core/IEventHandler.js":10}],13:[function(require,module,exports){
+},{"../Core/IDestructible.js":43,"../Core/IEventHandler.js":44,"@babel/runtime/helpers/assertThisInitialized":4,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/classPrivateFieldGet":9,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],47:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1050,60 +1686,49 @@ exports["default"] = AutoList;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
+
 var _IEventHandler2 = _interopRequireDefault(require("../Core/IEventHandler.js"));
 
 var _IDestructible = _interopRequireDefault(require("../Core/IDestructible.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
-
-function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 var _item_destroyed = /*#__PURE__*/new WeakMap();
 
 var AutoMap = /*#__PURE__*/function (_IEventHandler) {
-  _inherits(AutoMap, _IEventHandler);
+  (0, _inherits2["default"])(AutoMap, _IEventHandler);
 
   var _super = _createSuper(AutoMap);
 
   function AutoMap() {
     var _this;
 
-    _classCallCheck(this, AutoMap);
-
+    (0, _classCallCheck2["default"])(this, AutoMap);
     _this = _super.call(this);
 
-    _item_destroyed.set(_assertThisInitialized(_this), {
+    _item_destroyed.set((0, _assertThisInitialized2["default"])(_this), {
       writable: true,
       value: function value(sender) {
         this.remove(sender);
@@ -1114,10 +1739,10 @@ var AutoMap = /*#__PURE__*/function (_IEventHandler) {
     return _this;
   }
 
-  _createClass(AutoMap, [{
+  (0, _createClass2["default"])(AutoMap, [{
     key: "add",
     value: function add(key, value) {
-      if (value instanceof _IDestructible["default"]) value.on("destroy", _classPrivateFieldGet(this, _item_destroyed));
+      if (value instanceof _IDestructible["default"]) value.on("destroy", (0, _classPrivateFieldGet2["default"])(this, _item_destroyed));
       this.dic[key] = value;
 
       this._emit("add", key, value);
@@ -1132,18 +1757,17 @@ var AutoMap = /*#__PURE__*/function (_IEventHandler) {
     key: "remove",
     value: function remove(key) {
       if (this.dic[key] !== undefined) {
-        if (this.dic[key] instanceof _IDestructible["default"]) this.dic[key].off("destroy", _classPrivateFieldGet(this, _item_destroyed));
+        if (this.dic[key] instanceof _IDestructible["default"]) this.dic[key].off("destroy", (0, _classPrivateFieldGet2["default"])(this, _item_destroyed));
         delete this.dic[key];
       }
     }
   }]);
-
   return AutoMap;
 }(_IEventHandler2["default"]);
 
 exports["default"] = AutoMap;
 
-},{"../Core/IDestructible.js":9,"../Core/IEventHandler.js":10}],14:[function(require,module,exports){
+},{"../Core/IDestructible.js":43,"../Core/IEventHandler.js":44,"@babel/runtime/helpers/assertThisInitialized":4,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/classPrivateFieldGet":9,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],48:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1171,29 +1795,26 @@ exports["default"] = AutoMap;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _DC = _interopRequireDefault(require("./DC.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 var BinaryList = /*#__PURE__*/function () {
   function BinaryList() {
-    _classCallCheck(this, BinaryList);
-
+    (0, _classCallCheck2["default"])(this, BinaryList);
     this.list = []; //this.data = [];
   }
 
-  _createClass(BinaryList, [{
+  (0, _createClass2["default"])(BinaryList, [{
     key: "addDateTime",
     value: function addDateTime(value, endian) {
       this.addDC(_DC["default"].dateTimeToBytes(value, endian));
@@ -1427,13 +2048,12 @@ var BinaryList = /*#__PURE__*/function () {
       return new _DC["default"](this.list);
     }
   }]);
-
   return BinaryList;
 }();
 
 exports["default"] = BinaryList;
 
-},{"./DC.js":16}],15:[function(require,module,exports){
+},{"./DC.js":50,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],49:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1461,10 +2081,18 @@ exports["default"] = BinaryList;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = exports.CodecParseResults = exports.CodecComposeResults = void 0;
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _defineProperty3 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _AsyncBag = _interopRequireDefault(require("../Core/AsyncBag.js"));
 
@@ -1520,21 +2148,10 @@ var _Tuple = _interopRequireDefault(require("./Tuple.js"));
 
 var _defineProperty2;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 var CodecComposeResults = //final int transmissionTypeIdentifier;
 //final DC data;
 function CodecComposeResults(transmissionTypeIdentifier, data) {
-  _classCallCheck(this, CodecComposeResults);
-
+  (0, _classCallCheck2["default"])(this, CodecComposeResults);
   this.transmissionTypeIdentifier = transmissionTypeIdentifier;
   this.data = data;
 };
@@ -1544,8 +2161,7 @@ exports.CodecComposeResults = CodecComposeResults;
 var CodecParseResults = //final AsyncReply reply;
 //final int size;
 function CodecParseResults(size, reply) {
-  _classCallCheck(this, CodecParseResults);
-
+  (0, _classCallCheck2["default"])(this, CodecParseResults);
   this.size = size;
   this.reply = reply;
 };
@@ -1554,10 +2170,10 @@ exports.CodecParseResults = CodecParseResults;
 
 var Codec = /*#__PURE__*/function () {
   function Codec() {
-    _classCallCheck(this, Codec);
+    (0, _classCallCheck2["default"])(this, Codec);
   }
 
-  _createClass(Codec, null, [{
+  (0, _createClass2["default"])(Codec, null, [{
     key: "parse",
     value: //AsyncReply Parser(byte[] data, uint offset, uint length, DistributedConnection connection);
     /// <summary>
@@ -1706,23 +2322,18 @@ var Codec = /*#__PURE__*/function () {
       return false;
     }
   }]);
-
   return Codec;
 }();
 
 exports["default"] = Codec;
-
-_defineProperty(Codec, "fixedParsers", [[_DataDeserializer["default"].nullParser, _DataDeserializer["default"].booleanFalseParser, _DataDeserializer["default"].booleanTrueParser, _DataDeserializer["default"].notModifiedParser], [_DataDeserializer["default"].byteParser, _DataDeserializer["default"].sByteParser, _DataDeserializer["default"].char8Parser], [_DataDeserializer["default"].int16Parser, _DataDeserializer["default"].uInt16Parser, _DataDeserializer["default"].char16Parser], [_DataDeserializer["default"].int32Parser, _DataDeserializer["default"].uInt32Parser, _DataDeserializer["default"].float32Parser, _DataDeserializer["default"].resourceParser, _DataDeserializer["default"].localResourceParser], [_DataDeserializer["default"].int64Parser, _DataDeserializer["default"].uInt64Parser, _DataDeserializer["default"].float64Parser, _DataDeserializer["default"].dateTimeParser], [_DataDeserializer["default"].int128Parser, // int 128
+(0, _defineProperty3["default"])(Codec, "fixedParsers", [[_DataDeserializer["default"].nullParser, _DataDeserializer["default"].booleanFalseParser, _DataDeserializer["default"].booleanTrueParser, _DataDeserializer["default"].notModifiedParser], [_DataDeserializer["default"].byteParser, _DataDeserializer["default"].sByteParser, _DataDeserializer["default"].char8Parser], [_DataDeserializer["default"].int16Parser, _DataDeserializer["default"].uInt16Parser, _DataDeserializer["default"].char16Parser], [_DataDeserializer["default"].int32Parser, _DataDeserializer["default"].uInt32Parser, _DataDeserializer["default"].float32Parser, _DataDeserializer["default"].resourceParser, _DataDeserializer["default"].localResourceParser], [_DataDeserializer["default"].int64Parser, _DataDeserializer["default"].uInt64Parser, _DataDeserializer["default"].float64Parser, _DataDeserializer["default"].dateTimeParser], [_DataDeserializer["default"].int128Parser, // int 128
 _DataDeserializer["default"].uInt128Parser, // uint 128
 _DataDeserializer["default"].float128Parser]]);
+(0, _defineProperty3["default"])(Codec, "dynamicParsers", [_DataDeserializer["default"].rawDataParser, _DataDeserializer["default"].stringParser, _DataDeserializer["default"].listParser, _DataDeserializer["default"].resourceListParser, _DataDeserializer["default"].recordListParser]);
+(0, _defineProperty3["default"])(Codec, "typedParsers", [_DataDeserializer["default"].recordParser, _DataDeserializer["default"].typedListParser, _DataDeserializer["default"].typedMapParser, _DataDeserializer["default"].tupleParser, _DataDeserializer["default"].enumParser, _DataDeserializer["default"].constantParser]);
+(0, _defineProperty3["default"])(Codec, "composers", (_defineProperty2 = {}, (0, _defineProperty3["default"])(_defineProperty2, Boolean, _DataSerializer["default"].boolComposer), (0, _defineProperty3["default"])(_defineProperty2, _NotModified["default"], _DataSerializer["default"].notModifiedComposer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Char8, _DataSerializer["default"].char8Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Char16, _DataSerializer["default"].char16Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Int64, _DataSerializer["default"].int64Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.UInt64, _DataSerializer["default"].uInt64Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Int32, _DataSerializer["default"].int32Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.UInt32, _DataSerializer["default"].uInt32Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Int16, _DataSerializer["default"].int16Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.UInt16, _DataSerializer["default"].uInt16Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Int8, _DataSerializer["default"].int8Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.UInt8, _DataSerializer["default"].uInt8Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Float32, _DataSerializer["default"].float32Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Float64, _DataSerializer["default"].float64Composer), (0, _defineProperty3["default"])(_defineProperty2, _ExtendedTypes.Float128, _DataSerializer["default"].float128Composer), (0, _defineProperty3["default"])(_defineProperty2, Number, _DataSerializer["default"].numberComposer), (0, _defineProperty3["default"])(_defineProperty2, Date, _DataSerializer["default"].dateTimeComposer), (0, _defineProperty3["default"])(_defineProperty2, _DC.DC, _DataSerializer["default"].rawDataComposer), (0, _defineProperty3["default"])(_defineProperty2, Uint8Array, _DataSerializer["default"].rawDataComposer), (0, _defineProperty3["default"])(_defineProperty2, String, _DataSerializer["default"].stringComposer), (0, _defineProperty3["default"])(_defineProperty2, Array, _DataSerializer["default"].listComposer), (0, _defineProperty3["default"])(_defineProperty2, _ResourceArray["default"], _DataSerializer["default"].resourceListComposer), (0, _defineProperty3["default"])(_defineProperty2, _RecordArray["default"], _DataSerializer["default"].recordListComposer), (0, _defineProperty3["default"])(_defineProperty2, Map, _DataSerializer["default"].mapComposer), (0, _defineProperty3["default"])(_defineProperty2, _PropertyValueArray["default"], _DataSerializer["default"].propertyValueArrayComposer), _defineProperty2));
 
-_defineProperty(Codec, "dynamicParsers", [_DataDeserializer["default"].rawDataParser, _DataDeserializer["default"].stringParser, _DataDeserializer["default"].listParser, _DataDeserializer["default"].resourceListParser, _DataDeserializer["default"].recordListParser]);
-
-_defineProperty(Codec, "typedParsers", [_DataDeserializer["default"].recordParser, _DataDeserializer["default"].typedListParser, _DataDeserializer["default"].typedMapParser, _DataDeserializer["default"].tupleParser, _DataDeserializer["default"].enumParser, _DataDeserializer["default"].constantParser]);
-
-_defineProperty(Codec, "composers", (_defineProperty2 = {}, _defineProperty(_defineProperty2, Boolean, _DataSerializer["default"].boolComposer), _defineProperty(_defineProperty2, _NotModified["default"], _DataSerializer["default"].notModifiedComposer), _defineProperty(_defineProperty2, _ExtendedTypes.Char8, _DataSerializer["default"].char8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Char16, _DataSerializer["default"].char16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int64, _DataSerializer["default"].int64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt64, _DataSerializer["default"].uInt64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int32, _DataSerializer["default"].int32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt32, _DataSerializer["default"].uInt32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int16, _DataSerializer["default"].int16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt16, _DataSerializer["default"].uInt16Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Int8, _DataSerializer["default"].int8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.UInt8, _DataSerializer["default"].uInt8Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float32, _DataSerializer["default"].float32Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float64, _DataSerializer["default"].float64Composer), _defineProperty(_defineProperty2, _ExtendedTypes.Float128, _DataSerializer["default"].float128Composer), _defineProperty(_defineProperty2, Number, _DataSerializer["default"].numberComposer), _defineProperty(_defineProperty2, Date, _DataSerializer["default"].dateTimeComposer), _defineProperty(_defineProperty2, _DC.DC, _DataSerializer["default"].rawDataComposer), _defineProperty(_defineProperty2, Uint8Array, _DataSerializer["default"].rawDataComposer), _defineProperty(_defineProperty2, String, _DataSerializer["default"].stringComposer), _defineProperty(_defineProperty2, Array, _DataSerializer["default"].listComposer), _defineProperty(_defineProperty2, _ResourceArray["default"], _DataSerializer["default"].resourceListComposer), _defineProperty(_defineProperty2, _RecordArray["default"], _DataSerializer["default"].recordListComposer), _defineProperty(_defineProperty2, Map, _DataSerializer["default"].mapComposer), _defineProperty(_defineProperty2, _PropertyValueArray["default"], _DataSerializer["default"].propertyValueArrayComposer), _defineProperty2));
-
-},{"../Core/AsyncBag.js":3,"../Core/AsyncReply.js":6,"../Net/IIP/DistributedPropertyContext.js":41,"../Net/IIP/DistributedResource.js":42,"../Resource/IResource.js":68,"../Resource/Template/TemplateType.js":80,"../Resource/Warehouse.js":82,"./BinaryList.js":14,"./DC.js":16,"./DataDeserializer.js":17,"./DataSerializer.js":18,"./ExtendedTypes.js":19,"./IEnum.js":21,"./IRecord.js":22,"./KeyList.js":23,"./NotModified.js":24,"./PropertyValue.js":27,"./PropertyValueArray.js":28,"./Record.js":29,"./RecordArray.js":30,"./ResourceArray.js":32,"./ResourceArrayType.js":33,"./TransmissionType.js":34,"./Tuple.js":35,"./TypedList.js":36,"./TypedMap.js":37}],16:[function(require,module,exports){
+},{"../Core/AsyncBag.js":37,"../Core/AsyncReply.js":40,"../Net/IIP/DistributedPropertyContext.js":75,"../Net/IIP/DistributedResource.js":76,"../Resource/IResource.js":102,"../Resource/Template/TemplateType.js":114,"../Resource/Warehouse.js":116,"./BinaryList.js":48,"./DC.js":50,"./DataDeserializer.js":51,"./DataSerializer.js":52,"./ExtendedTypes.js":53,"./IEnum.js":55,"./IRecord.js":56,"./KeyList.js":57,"./NotModified.js":58,"./PropertyValue.js":61,"./PropertyValueArray.js":62,"./Record.js":63,"./RecordArray.js":64,"./ResourceArray.js":66,"./ResourceArrayType.js":67,"./TransmissionType.js":68,"./Tuple.js":69,"./TypedList.js":70,"./TypedMap.js":71,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/interopRequireDefault":16}],50:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -1750,7 +2361,7 @@ _defineProperty(Codec, "composers", (_defineProperty2 = {}, _defineProperty(_def
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1758,37 +2369,25 @@ Object.defineProperty(exports, "__esModule", {
 exports.BL = BL;
 exports.DC = exports["default"] = exports.Endian = exports.TWO_PWR_32 = exports.UNIX_EPOCH = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
+
 var _BinaryList = _interopRequireDefault(require("./BinaryList.js"));
 
 var _Guid = _interopRequireDefault(require("./Guid.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var UNIX_EPOCH = 621355968000000000;
 exports.UNIX_EPOCH = UNIX_EPOCH;
@@ -1801,15 +2400,14 @@ var Endian = {
 exports.Endian = Endian;
 
 var DC = /*#__PURE__*/function (_Uint8Array) {
-  _inherits(DC, _Uint8Array);
+  (0, _inherits2["default"])(DC, _Uint8Array);
 
   var _super = _createSuper(DC);
 
   function DC(bufferOrSize) {
     var _this;
 
-    _classCallCheck(this, DC);
-
+    (0, _classCallCheck2["default"])(this, DC);
     _this = _super.call(this, bufferOrSize); //if (bufferOrSize instanceof ArrayBuffer) {
     //  this.buffer = bufferOrSize;
     //}
@@ -1822,7 +2420,7 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
     return _this;
   }
 
-  _createClass(DC, [{
+  (0, _createClass2["default"])(DC, [{
     key: "append",
     value: function append(src, offset, length) {
       if (!(src instanceof DC)) src = new DC(src);
@@ -2499,9 +3097,8 @@ var DC = /*#__PURE__*/function (_Uint8Array) {
       return rt;
     }
   }]);
-
   return DC;
-}( /*#__PURE__*/_wrapNativeSuper(Uint8Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Uint8Array));
 
 exports.DC = exports["default"] = DC;
 
@@ -2511,13 +3108,23 @@ function BL() {
 
 ;
 
-},{"./BinaryList.js":14,"./Guid.js":20}],17:[function(require,module,exports){
+},{"./BinaryList.js":48,"./Guid.js":54,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],51:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = exports.PropertyValueParserResults = void 0;
+
+var _construct2 = _interopRequireDefault(require("@babel/runtime/helpers/construct"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _IEnum = _interopRequireDefault(require("./IEnum.js"));
 
@@ -2557,37 +3164,10 @@ var _ExceptionCode = _interopRequireDefault(require("../Core/ExceptionCode.js"))
 
 var _ErrorType = _interopRequireDefault(require("../Core/ErrorType.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
-
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 var PropertyValueParserResults = //final int size;
 ///final AsyncReply<PropertyValue> reply;
 function PropertyValueParserResults(size, reply) {
-  _classCallCheck(this, PropertyValueParserResults);
-
+  (0, _classCallCheck2["default"])(this, PropertyValueParserResults);
   this.size = size;
   this.reply = reply;
 };
@@ -2596,10 +3176,10 @@ exports.PropertyValueParserResults = PropertyValueParserResults;
 
 var DataDeserializer = /*#__PURE__*/function () {
   function DataDeserializer() {
-    _classCallCheck(this, DataDeserializer);
+    (0, _classCallCheck2["default"])(this, DataDeserializer);
   }
 
-  _createClass(DataDeserializer, null, [{
+  (0, _createClass2["default"])(DataDeserializer, null, [{
     key: "nullParser",
     value: function nullParser(data, offset, length, connection, requestSequence) {
       return new _AsyncReply["default"](null);
@@ -2944,7 +3524,7 @@ var DataDeserializer = /*#__PURE__*/function () {
 
       results.seal();
       results.then(function (ar) {
-        rt.trigger(_construct(_Tuple["default"].of.apply(_Tuple["default"], types), _toConsumableArray(ar)));
+        rt.trigger((0, _construct2["default"])(_Tuple["default"].of.apply(_Tuple["default"], types), (0, _toConsumableArray2["default"])(ar)));
       });
       return rt;
     }
@@ -3036,21 +3616,28 @@ var DataDeserializer = /*#__PURE__*/function () {
       // return reply;
     }
   }]);
-
   return DataDeserializer;
 }();
 
 exports["default"] = DataDeserializer;
 
-},{"../Core/AsyncBag.js":3,"../Core/AsyncException.js":4,"../Core/AsyncReply.js":6,"../Core/ErrorType.js":7,"../Core/ExceptionCode.js":8,"../Data/ExtendedTypes.js":19,"../Net/IIP/DistributedConnection.js":40,"../Resource/Template/TemplateType.js":80,"../Resource/Warehouse.js":82,"./Codec.js":15,"./DC.js":16,"./IEnum.js":21,"./NotModified.js":24,"./PropertyValue.js":27,"./PropertyValueArray.js":28,"./Record.js":29,"./RepresentationType.js":31,"./Tuple.js":35,"./TypedMap.js":37}],18:[function(require,module,exports){
+},{"../Core/AsyncBag.js":37,"../Core/AsyncException.js":38,"../Core/AsyncReply.js":40,"../Core/ErrorType.js":41,"../Core/ExceptionCode.js":42,"../Data/ExtendedTypes.js":53,"../Net/IIP/DistributedConnection.js":74,"../Resource/Template/TemplateType.js":114,"../Resource/Warehouse.js":116,"./Codec.js":49,"./DC.js":50,"./IEnum.js":55,"./NotModified.js":58,"./PropertyValue.js":61,"./PropertyValueArray.js":62,"./Record.js":63,"./RepresentationType.js":65,"./Tuple.js":69,"./TypedMap.js":71,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/construct":10,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/toConsumableArray":28}],52:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _typeof = require("@babel/runtime/helpers/typeof");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = exports.DataSerializerComposeResults = void 0;
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _BinaryList = _interopRequireDefault(require("./BinaryList.js"));
 
@@ -3070,33 +3657,16 @@ function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "functio
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
 var DataSerializerComposeResults = //  int identifier;
 //DC data;
 function DataSerializerComposeResults(identifier, data) {
-  _classCallCheck(this, DataSerializerComposeResults);
-
+  (0, _classCallCheck2["default"])(this, DataSerializerComposeResults);
   this.identifier = identifier;
   this.data = data;
 };
@@ -3105,10 +3675,10 @@ exports.DataSerializerComposeResults = DataSerializerComposeResults;
 
 var DataSerializer = /*#__PURE__*/function () {
   function DataSerializer() {
-    _classCallCheck(this, DataSerializer);
+    (0, _classCallCheck2["default"])(this, DataSerializer);
   }
 
-  _createClass(DataSerializer, null, [{
+  (0, _createClass2["default"])(DataSerializer, null, [{
     key: "historyComposer",
     value: //public delegate byte[] Serializer(object value);
     function historyComposer(history, connection) {
@@ -3315,7 +3885,7 @@ var DataSerializer = /*#__PURE__*/function () {
 
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var _step$value = _slicedToArray(_step.value, 2),
+          var _step$value = (0, _slicedToArray2["default"])(_step.value, 2),
               k = _step$value[0],
               v = _step$value[1];
 
@@ -3469,81 +4039,65 @@ var DataSerializer = /*#__PURE__*/function () {
       }
     }
   }]);
-
   return DataSerializer;
 }();
 
 exports["default"] = DataSerializer;
 
-},{"../Resource/Warehouse.js":82,"./BinaryList.js":14,"./Codec.js":15,"./DC.js":16,"./RepresentationType.js":31,"./TransmissionType.js":34,"./Tuple.js":35}],19:[function(require,module,exports){
+},{"../Resource/Warehouse.js":116,"./BinaryList.js":48,"./Codec.js":49,"./DC.js":50,"./RepresentationType.js":65,"./TransmissionType.js":68,"./Tuple.js":69,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/slicedToArray":26,"@babel/runtime/helpers/typeof":31}],53:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Char8 = exports.Char16 = exports.Float128 = exports.Float64 = exports.Float32 = exports.UInt8 = exports.UInt16 = exports.UInt32 = exports.UInt64 = exports.UInt128 = exports.Int8 = exports.Int16 = exports.Int32 = exports.Int64 = exports.Int128 = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var Num = /*#__PURE__*/function (_Number) {
-  _inherits(Num, _Number);
+  (0, _inherits2["default"])(Num, _Number);
 
   var _super = _createSuper(Num);
 
   function Num(value) {
-    _classCallCheck(this, Num);
-
+    (0, _classCallCheck2["default"])(this, Num);
     return _super.call(this, value);
   }
 
-  _createClass(Num, [{
+  (0, _createClass2["default"])(Num, [{
     key: "toString",
     value: function toString() {
-      return _get(_getPrototypeOf(Num.prototype), "toString", this).call(this);
+      return (0, _get2["default"])((0, _getPrototypeOf2["default"])(Num.prototype), "toString", this).call(this);
     }
   }]);
-
   return Num;
-}( /*#__PURE__*/_wrapNativeSuper(Number));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Number));
 
 var Int128 = /*#__PURE__*/function (_Num) {
-  _inherits(Int128, _Num);
+  (0, _inherits2["default"])(Int128, _Num);
 
   var _super2 = _createSuper(Int128);
 
   function Int128() {
-    _classCallCheck(this, Int128);
-
+    (0, _classCallCheck2["default"])(this, Int128);
     return _super2.apply(this, arguments);
   }
 
@@ -3553,13 +4107,12 @@ var Int128 = /*#__PURE__*/function (_Num) {
 exports.Int128 = Int128;
 
 var Int64 = /*#__PURE__*/function (_Num2) {
-  _inherits(Int64, _Num2);
+  (0, _inherits2["default"])(Int64, _Num2);
 
   var _super3 = _createSuper(Int64);
 
   function Int64() {
-    _classCallCheck(this, Int64);
-
+    (0, _classCallCheck2["default"])(this, Int64);
     return _super3.apply(this, arguments);
   }
 
@@ -3569,13 +4122,12 @@ var Int64 = /*#__PURE__*/function (_Num2) {
 exports.Int64 = Int64;
 
 var Int32 = /*#__PURE__*/function (_Num3) {
-  _inherits(Int32, _Num3);
+  (0, _inherits2["default"])(Int32, _Num3);
 
   var _super4 = _createSuper(Int32);
 
   function Int32() {
-    _classCallCheck(this, Int32);
-
+    (0, _classCallCheck2["default"])(this, Int32);
     return _super4.apply(this, arguments);
   }
 
@@ -3585,13 +4137,12 @@ var Int32 = /*#__PURE__*/function (_Num3) {
 exports.Int32 = Int32;
 
 var Int16 = /*#__PURE__*/function (_Num4) {
-  _inherits(Int16, _Num4);
+  (0, _inherits2["default"])(Int16, _Num4);
 
   var _super5 = _createSuper(Int16);
 
   function Int16() {
-    _classCallCheck(this, Int16);
-
+    (0, _classCallCheck2["default"])(this, Int16);
     return _super5.apply(this, arguments);
   }
 
@@ -3601,13 +4152,12 @@ var Int16 = /*#__PURE__*/function (_Num4) {
 exports.Int16 = Int16;
 
 var Int8 = /*#__PURE__*/function (_Num5) {
-  _inherits(Int8, _Num5);
+  (0, _inherits2["default"])(Int8, _Num5);
 
   var _super6 = _createSuper(Int8);
 
   function Int8() {
-    _classCallCheck(this, Int8);
-
+    (0, _classCallCheck2["default"])(this, Int8);
     return _super6.apply(this, arguments);
   }
 
@@ -3617,13 +4167,12 @@ var Int8 = /*#__PURE__*/function (_Num5) {
 exports.Int8 = Int8;
 
 var UInt128 = /*#__PURE__*/function (_Num6) {
-  _inherits(UInt128, _Num6);
+  (0, _inherits2["default"])(UInt128, _Num6);
 
   var _super7 = _createSuper(UInt128);
 
   function UInt128() {
-    _classCallCheck(this, UInt128);
-
+    (0, _classCallCheck2["default"])(this, UInt128);
     return _super7.apply(this, arguments);
   }
 
@@ -3633,13 +4182,12 @@ var UInt128 = /*#__PURE__*/function (_Num6) {
 exports.UInt128 = UInt128;
 
 var UInt64 = /*#__PURE__*/function (_Num7) {
-  _inherits(UInt64, _Num7);
+  (0, _inherits2["default"])(UInt64, _Num7);
 
   var _super8 = _createSuper(UInt64);
 
   function UInt64() {
-    _classCallCheck(this, UInt64);
-
+    (0, _classCallCheck2["default"])(this, UInt64);
     return _super8.apply(this, arguments);
   }
 
@@ -3649,13 +4197,12 @@ var UInt64 = /*#__PURE__*/function (_Num7) {
 exports.UInt64 = UInt64;
 
 var UInt32 = /*#__PURE__*/function (_Num8) {
-  _inherits(UInt32, _Num8);
+  (0, _inherits2["default"])(UInt32, _Num8);
 
   var _super9 = _createSuper(UInt32);
 
   function UInt32() {
-    _classCallCheck(this, UInt32);
-
+    (0, _classCallCheck2["default"])(this, UInt32);
     return _super9.apply(this, arguments);
   }
 
@@ -3665,13 +4212,12 @@ var UInt32 = /*#__PURE__*/function (_Num8) {
 exports.UInt32 = UInt32;
 
 var UInt16 = /*#__PURE__*/function (_Num9) {
-  _inherits(UInt16, _Num9);
+  (0, _inherits2["default"])(UInt16, _Num9);
 
   var _super10 = _createSuper(UInt16);
 
   function UInt16() {
-    _classCallCheck(this, UInt16);
-
+    (0, _classCallCheck2["default"])(this, UInt16);
     return _super10.apply(this, arguments);
   }
 
@@ -3681,13 +4227,12 @@ var UInt16 = /*#__PURE__*/function (_Num9) {
 exports.UInt16 = UInt16;
 
 var UInt8 = /*#__PURE__*/function (_Num10) {
-  _inherits(UInt8, _Num10);
+  (0, _inherits2["default"])(UInt8, _Num10);
 
   var _super11 = _createSuper(UInt8);
 
   function UInt8() {
-    _classCallCheck(this, UInt8);
-
+    (0, _classCallCheck2["default"])(this, UInt8);
     return _super11.apply(this, arguments);
   }
 
@@ -3697,13 +4242,12 @@ var UInt8 = /*#__PURE__*/function (_Num10) {
 exports.UInt8 = UInt8;
 
 var Float32 = /*#__PURE__*/function (_Num11) {
-  _inherits(Float32, _Num11);
+  (0, _inherits2["default"])(Float32, _Num11);
 
   var _super12 = _createSuper(Float32);
 
   function Float32() {
-    _classCallCheck(this, Float32);
-
+    (0, _classCallCheck2["default"])(this, Float32);
     return _super12.apply(this, arguments);
   }
 
@@ -3713,13 +4257,12 @@ var Float32 = /*#__PURE__*/function (_Num11) {
 exports.Float32 = Float32;
 
 var Float64 = /*#__PURE__*/function (_Num12) {
-  _inherits(Float64, _Num12);
+  (0, _inherits2["default"])(Float64, _Num12);
 
   var _super13 = _createSuper(Float64);
 
   function Float64() {
-    _classCallCheck(this, Float64);
-
+    (0, _classCallCheck2["default"])(this, Float64);
     return _super13.apply(this, arguments);
   }
 
@@ -3729,13 +4272,12 @@ var Float64 = /*#__PURE__*/function (_Num12) {
 exports.Float64 = Float64;
 
 var Float128 = /*#__PURE__*/function (_Num13) {
-  _inherits(Float128, _Num13);
+  (0, _inherits2["default"])(Float128, _Num13);
 
   var _super14 = _createSuper(Float128);
 
   function Float128() {
-    _classCallCheck(this, Float128);
-
+    (0, _classCallCheck2["default"])(this, Float128);
     return _super14.apply(this, arguments);
   }
 
@@ -3745,63 +4287,83 @@ var Float128 = /*#__PURE__*/function (_Num13) {
 exports.Float128 = Float128;
 
 var Char16 = /*#__PURE__*/function (_String) {
-  _inherits(Char16, _String);
+  (0, _inherits2["default"])(Char16, _String);
 
   var _super15 = _createSuper(Char16);
 
   function Char16() {
-    _classCallCheck(this, Char16);
-
+    (0, _classCallCheck2["default"])(this, Char16);
     return _super15.apply(this, arguments);
   }
 
   return Char16;
-}( /*#__PURE__*/_wrapNativeSuper(String));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(String));
 
 exports.Char16 = Char16;
 
 var Char8 = /*#__PURE__*/function (_String2) {
-  _inherits(Char8, _String2);
+  (0, _inherits2["default"])(Char8, _String2);
 
   var _super16 = _createSuper(Char8);
 
   function Char8() {
-    _classCallCheck(this, Char8);
-
+    (0, _classCallCheck2["default"])(this, Char8);
     return _super16.apply(this, arguments);
   }
 
   return Char8;
-}( /*#__PURE__*/_wrapNativeSuper(String));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(String));
 
 exports.Char8 = Char8;
 
-},{}],20:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],54:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _DC = _interopRequireDefault(require("./DC.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*
+* Copyright (c) 2017-2022 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
+/**
+ * Created by Ahmed Zamil on 02/09/2017.
+ */
 var Guid = /*#__PURE__*/function () {
   function Guid(dc) {
-    _classCallCheck(this, Guid);
-
+    (0, _classCallCheck2["default"])(this, Guid);
     this.value = dc;
   }
 
-  _createClass(Guid, [{
+  (0, _createClass2["default"])(Guid, [{
     key: "valueOf",
     value: function valueOf() {
       return this.value.toHex(0, 16);
@@ -3820,31 +4382,29 @@ var Guid = /*#__PURE__*/function () {
       return new Guid(_DC["default"].fromHex(data, ''));
     }
   }]);
-
   return Guid;
 }();
 
 exports["default"] = Guid;
 
-},{"./DC.js":16}],21:[function(require,module,exports){
+},{"./DC.js":50,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],55:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 //import TemplateDescriber from '../Resource/Template/TemplateDescriber.js';
 var IEnum = /*#__PURE__*/function () {
   function IEnum(index, value, name, template) {
-    _classCallCheck(this, IEnum);
-
+    (0, _classCallCheck2["default"])(this, IEnum);
     this.index = index;
     this.value = value;
     this.name = name;
@@ -3854,49 +4414,47 @@ var IEnum = /*#__PURE__*/function () {
   // }
 
 
-  _createClass(IEnum, [{
+  (0, _createClass2["default"])(IEnum, [{
     key: "toString",
     value: function toString() {
       return "".concat(this.name, "<").concat(this.value, ">");
     }
   }]);
-
   return IEnum;
 }();
 
 exports["default"] = IEnum;
 
-},{}],22:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],56:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var IRecord = /*#__PURE__*/function () {
   function IRecord() {
-    _classCallCheck(this, IRecord);
+    (0, _classCallCheck2["default"])(this, IRecord);
   }
 
-  _createClass(IRecord, [{
+  (0, _createClass2["default"])(IRecord, [{
     key: "toString",
     value: function toString() {//return serialize().toString();
     }
   }]);
-
   return IRecord;
 }();
 
 exports["default"] = IRecord;
 
-},{}],23:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],57:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -3924,16 +4482,22 @@ exports["default"] = IRecord;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
+
 var _IDestructible = _interopRequireDefault(require("../Core/IDestructible.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -3941,23 +4505,11 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
-
-function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
-
 var _item_destroyed = /*#__PURE__*/new WeakMap();
 
 var KeyList = /*#__PURE__*/function () {
   function KeyList() {
-    _classCallCheck(this, KeyList);
+    (0, _classCallCheck2["default"])(this, KeyList);
 
     _item_destroyed.set(this, {
       writable: true,
@@ -3975,7 +4527,7 @@ var KeyList = /*#__PURE__*/function () {
     this.values = [];
   }
 
-  _createClass(KeyList, [{
+  (0, _createClass2["default"])(KeyList, [{
     key: "toObject",
     value: function toObject() {
       var rt = {};
@@ -4011,7 +4563,7 @@ var KeyList = /*#__PURE__*/function () {
     key: "add",
     value: function add(key, value) {
       this.remove(key);
-      if (value instanceof _IDestructible["default"]) value.on("destroy", _classPrivateFieldGet(this, _item_destroyed), this);
+      if (value instanceof _IDestructible["default"]) value.on("destroy", (0, _classPrivateFieldGet2["default"])(this, _item_destroyed), this);
       this.keys.push(key);
       this.values.push(value);
     }
@@ -4048,7 +4600,7 @@ var KeyList = /*#__PURE__*/function () {
   }, {
     key: "removeAt",
     value: function removeAt(index) {
-      if (this.values[index] instanceof _IDestructible["default"]) this.values[index].off("destroy", _classPrivateFieldGet(this, _item_destroyed));
+      if (this.values[index] instanceof _IDestructible["default"]) this.values[index].off("destroy", (0, _classPrivateFieldGet2["default"])(this, _item_destroyed));
       this.keys.splice(index, 1);
       this.values.splice(index, 1);
     }
@@ -4087,7 +4639,7 @@ var KeyList = /*#__PURE__*/function () {
         var match = function match(small, big) {
           if (small == big) {
             return true;
-          } else if (_typeof(small) == "object" && _typeof(big) == "object" && small != null && big != null) {
+          } else if ((0, _typeof2["default"])(small) == "object" && (0, _typeof2["default"])(big) == "object" && small != null && big != null) {
             if (small.constructor.name == "Object") {
               for (var i in small) {
                 if (!match(small[i], big[i])) return false;
@@ -4111,13 +4663,12 @@ var KeyList = /*#__PURE__*/function () {
       return this.keys.length;
     }
   }]);
-
   return KeyList;
 }();
 
 exports["default"] = KeyList;
 
-},{"../Core/IDestructible.js":9}],24:[function(require,module,exports){
+},{"../Core/IDestructible.js":43,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/classPrivateFieldGet":9,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/typeof":31}],58:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4145,57 +4696,53 @@ exports["default"] = KeyList;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var NotModified = function NotModified() {
-  _classCallCheck(this, NotModified);
+  (0, _classCallCheck2["default"])(this, NotModified);
 };
 
 exports["default"] = NotModified;
 
-},{}],25:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],59:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 var Nullable = /*#__PURE__*/function () {
   function Nullable() {
-    _classCallCheck(this, Nullable);
+    (0, _classCallCheck2["default"])(this, Nullable);
   }
 
-  _createClass(Nullable, null, [{
+  (0, _createClass2["default"])(Nullable, null, [{
     key: "getType",
     value: function getType(nullableType) {
       return nullableType.constructor.underlyingType;
@@ -4207,13 +4754,12 @@ var Nullable = /*#__PURE__*/function () {
       if (Nullable.cache[type] != null) return Nullable.cache[type];
 
       var c = /*#__PURE__*/function (_type) {
-        _inherits(c, _type);
+        (0, _inherits2["default"])(c, _type);
 
         var _super = _createSuper(c);
 
         function c() {
-          _classCallCheck(this, c);
-
+          (0, _classCallCheck2["default"])(this, c);
           return _super.apply(this, arguments);
         }
 
@@ -4230,34 +4776,33 @@ var Nullable = /*#__PURE__*/function () {
       return c;
     }
   }]);
-
   return Nullable;
 }();
 
 exports["default"] = Nullable;
+(0, _defineProperty2["default"])(Nullable, "cache", {});
 
-_defineProperty(Nullable, "cache", {});
-
-},{}],26:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],60:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var ParseResult = function ParseResult(size, value) {
-  _classCallCheck(this, ParseResult);
-
+  (0, _classCallCheck2["default"])(this, ParseResult);
   this.size = size;
   this.value = value;
 };
 
 exports["default"] = ParseResult;
 
-},{}],27:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],61:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4285,16 +4830,17 @@ exports["default"] = ParseResult;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var PropertyValue = function PropertyValue(value, age, date) {
-  _classCallCheck(this, PropertyValue);
-
+  (0, _classCallCheck2["default"])(this, PropertyValue);
   this.value = value;
   this.age = age;
   this.date = date;
@@ -4302,92 +4848,76 @@ var PropertyValue = function PropertyValue(value, age, date) {
 
 exports["default"] = PropertyValue;
 
-},{}],28:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],62:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var PropertyValueArray = /*#__PURE__*/function (_Array) {
-  _inherits(PropertyValueArray, _Array);
+  (0, _inherits2["default"])(PropertyValueArray, _Array);
 
   var _super = _createSuper(PropertyValueArray);
 
   function PropertyValueArray() {
-    _classCallCheck(this, PropertyValueArray);
-
+    (0, _classCallCheck2["default"])(this, PropertyValueArray);
     return _super.apply(this, arguments);
   }
 
   return PropertyValueArray;
-}( /*#__PURE__*/_wrapNativeSuper(Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Array));
 
 exports["default"] = PropertyValueArray;
 
-},{}],29:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],63:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _IRecord2 = _interopRequireDefault(require("./IRecord.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var Record = /*#__PURE__*/function (_IRecord) {
-  _inherits(Record, _IRecord);
+  (0, _inherits2["default"])(Record, _IRecord);
 
   var _super = _createSuper(Record);
 
   function Record() {
-    _classCallCheck(this, Record);
-
+    (0, _classCallCheck2["default"])(this, Record);
     return _super.apply(this, arguments);
   }
 
@@ -4396,7 +4926,7 @@ var Record = /*#__PURE__*/function (_IRecord) {
 
 exports["default"] = Record;
 
-},{"./IRecord.js":22}],30:[function(require,module,exports){
+},{"./IRecord.js":56,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],64:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -4424,77 +4954,69 @@ exports["default"] = Record;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
+
 var _IRecord = _interopRequireDefault(require("./IRecord.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var RecordArray = /*#__PURE__*/function (_Array) {
-  _inherits(RecordArray, _Array);
+  (0, _inherits2["default"])(RecordArray, _Array);
 
   var _super = _createSuper(RecordArray);
 
   function RecordArray() {
-    _classCallCheck(this, RecordArray);
-
+    (0, _classCallCheck2["default"])(this, RecordArray);
     return _super.apply(this, arguments);
   }
 
-  _createClass(RecordArray, [{
+  (0, _createClass2["default"])(RecordArray, [{
     key: "push",
     value: function push(value) {
-      if (value instanceof _IRecord["default"]) _get(_getPrototypeOf(RecordArray.prototype), "push", this).call(this, value);else return;
+      if (value instanceof _IRecord["default"]) (0, _get2["default"])((0, _getPrototypeOf2["default"])(RecordArray.prototype), "push", this).call(this, value);else return;
     }
   }]);
-
   return RecordArray;
-}( /*#__PURE__*/_wrapNativeSuper(Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Array));
 
 exports["default"] = RecordArray;
 
-},{"./IRecord.js":22}],31:[function(require,module,exports){
+},{"./IRecord.js":56,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],65:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.RepresentationType = exports["default"] = exports.RepresentationTypeParseResults = exports.RepresentationTypeIdentifier = void 0;
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var _TemplateType = _interopRequireDefault(require("../Resource/Template/TemplateType.js"));
 
@@ -4525,26 +5047,6 @@ var _ResourceArray = _interopRequireDefault(require("./ResourceArray.js"));
 var _Tuple = _interopRequireDefault(require("./Tuple.js"));
 
 var _Void = _interopRequireDefault(require("./Void.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var RepresentationTypeIdentifier = {
   Void: 0x0,
@@ -4655,8 +5157,7 @@ var TupleIdentifierByLength = {
 var RepresentationTypeParseResults = //RepresentationType type;
 //int size;
 function RepresentationTypeParseResults(size, type) {
-  _classCallCheck(this, RepresentationTypeParseResults);
-
+  (0, _classCallCheck2["default"])(this, RepresentationTypeParseResults);
   this.size = size;
   this.type = type;
 };
@@ -4665,15 +5166,14 @@ exports.RepresentationTypeParseResults = RepresentationTypeParseResults;
 
 var RepresentationType = /*#__PURE__*/function () {
   function RepresentationType(identifier, nullable, guid, subTypes) {
-    _classCallCheck(this, RepresentationType);
-
+    (0, _classCallCheck2["default"])(this, RepresentationType);
     this.identifier = identifier;
     this.nullable = nullable;
     this.guid = guid;
     this.subTypes = subTypes;
   }
 
-  _createClass(RepresentationType, [{
+  (0, _createClass2["default"])(RepresentationType, [{
     key: "getRuntimeType",
     value: function getRuntimeType() {
       var runtimeType = null;
@@ -4702,7 +5202,7 @@ var RepresentationType = /*#__PURE__*/function () {
         var subs = this.subTypes.map(function (x) {
           return x.getRuntimeType();
         });
-        runtimeType = _Tuple["default"].of.apply(_Tuple["default"], _toConsumableArray(subs));
+        runtimeType = _Tuple["default"].of.apply(_Tuple["default"], (0, _toConsumableArray2["default"])(subs));
       }
 
       if (this.nullable) return _Nullable["default"].of(runtimeType);else return runtimeType;
@@ -4805,13 +5305,12 @@ var RepresentationType = /*#__PURE__*/function () {
       }
     }
   }]);
-
   return RepresentationType;
 }();
 
 exports.RepresentationType = exports["default"] = RepresentationType;
 
-},{"../Resource/IResource.js":68,"../Resource/Template/TemplateType.js":80,"../Resource/Warehouse.js":82,"./BinaryList.js":14,"./DC.js":16,"./ExtendedTypes.js":19,"./IEnum.js":21,"./IRecord.js":22,"./Nullable.js":25,"./RecordArray.js":30,"./ResourceArray.js":32,"./Tuple.js":35,"./TypedList.js":36,"./TypedMap.js":37,"./Void.js":38}],32:[function(require,module,exports){
+},{"../Resource/IResource.js":102,"../Resource/Template/TemplateType.js":114,"../Resource/Warehouse.js":116,"./BinaryList.js":48,"./DC.js":50,"./ExtendedTypes.js":53,"./IEnum.js":55,"./IRecord.js":56,"./Nullable.js":59,"./RecordArray.js":64,"./ResourceArray.js":66,"./Tuple.js":69,"./TypedList.js":70,"./TypedMap.js":71,"./Void.js":72,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/toConsumableArray":28}],66:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -4839,71 +5338,55 @@ exports.RepresentationType = exports["default"] = RepresentationType;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
+
 var _IResource = _interopRequireDefault(require("../Resource/IResource.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var ResourceArray = /*#__PURE__*/function (_Array) {
-  _inherits(ResourceArray, _Array);
+  (0, _inherits2["default"])(ResourceArray, _Array);
 
   var _super = _createSuper(ResourceArray);
 
   function ResourceArray() {
-    _classCallCheck(this, ResourceArray);
-
+    (0, _classCallCheck2["default"])(this, ResourceArray);
     return _super.apply(this, arguments);
   }
 
-  _createClass(ResourceArray, [{
+  (0, _createClass2["default"])(ResourceArray, [{
     key: "push",
     value: function push(value) {
-      if (value instanceof _IResource["default"]) _get(_getPrototypeOf(ResourceArray.prototype), "push", this).call(this, value);else return;
+      if (value instanceof _IResource["default"]) (0, _get2["default"])((0, _getPrototypeOf2["default"])(ResourceArray.prototype), "push", this).call(this, value);else return;
     }
   }]);
-
   return ResourceArray;
-}( /*#__PURE__*/_wrapNativeSuper(Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Array));
 
 exports["default"] = ResourceArray;
 
-},{"../Resource/IResource.js":68}],33:[function(require,module,exports){
+},{"../Resource/IResource.js":102,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],67:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -4917,23 +5400,21 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],34:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.TransmissionType = exports["default"] = exports.TransmissionTypeParseResults = exports.TransmissionTypeClass = exports.TransmissionTypeIdentifier = void 0;
 
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
 var _DC = _interopRequireDefault(require("./DC.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var TransmissionTypeIdentifier = {
   Null: 0x0,
@@ -4982,8 +5463,7 @@ var TransmissionTypeClass = {
 exports.TransmissionTypeClass = TransmissionTypeClass;
 
 var TransmissionTypeParseResults = function TransmissionTypeParseResults(size, type) {
-  _classCallCheck(this, TransmissionTypeParseResults);
-
+  (0, _classCallCheck2["default"])(this, TransmissionTypeParseResults);
   this.size = size;
   this.type = type;
 };
@@ -4993,9 +5473,7 @@ exports.TransmissionTypeParseResults = TransmissionTypeParseResults;
 var TransmissionType = /*#__PURE__*/function () {
   function TransmissionType(identifier, classType, index, offset, contentLength) {
     var exponent = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
-
-    _classCallCheck(this, TransmissionType);
-
+    (0, _classCallCheck2["default"])(this, TransmissionType);
     this.identifier = identifier;
     this.classType = classType;
     this.index = index;
@@ -5004,7 +5482,7 @@ var TransmissionType = /*#__PURE__*/function () {
     this.exponent = exponent;
   }
 
-  _createClass(TransmissionType, null, [{
+  (0, _createClass2["default"])(TransmissionType, null, [{
     key: "Null",
     get: //   final int identifier;
     //   final int index;
@@ -5137,62 +5615,50 @@ var TransmissionType = /*#__PURE__*/function () {
       }
     }
   }]);
-
   return TransmissionType;
 }();
 
 exports.TransmissionType = exports["default"] = TransmissionType;
 
-},{"./DC.js":16}],35:[function(require,module,exports){
+},{"./DC.js":50,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],69:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 var Tuple = /*#__PURE__*/function (_Array) {
-  _inherits(Tuple, _Array);
+  (0, _inherits2["default"])(Tuple, _Array);
 
   var _super = _createSuper(Tuple);
 
   function Tuple() {
-    _classCallCheck(this, Tuple);
-
+    (0, _classCallCheck2["default"])(this, Tuple);
     return _super.apply(this, arguments);
   }
 
-  _createClass(Tuple, null, [{
+  (0, _createClass2["default"])(Tuple, null, [{
     key: "getTypes",
     value: function getTypes(tuple) {
       return tuple.constructor.subTypes;
@@ -5209,13 +5675,12 @@ var Tuple = /*#__PURE__*/function (_Array) {
       if (Tuple.cache[types] != null) return Tuple.cache[types];
 
       var c = /*#__PURE__*/function (_Tuple) {
-        _inherits(c, _Tuple);
+        (0, _inherits2["default"])(c, _Tuple);
 
         var _super2 = _createSuper(c);
 
         function c() {
-          _classCallCheck(this, c);
-
+          (0, _classCallCheck2["default"])(this, c);
           return _super2.apply(this, arguments);
         }
 
@@ -5234,23 +5699,35 @@ var Tuple = /*#__PURE__*/function (_Array) {
       return c;
     }
   }]);
-
   return Tuple;
-}( /*#__PURE__*/_wrapNativeSuper(Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Array));
 
 exports["default"] = Tuple;
+(0, _defineProperty2["default"])(Tuple, "cache", {});
 
-_defineProperty(Tuple, "cache", {});
-
-},{}],36:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],70:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
+
+var _defineProperty3 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _IResource = _interopRequireDefault(require("../Resource/IResource.js"));
 
@@ -5268,48 +5745,21 @@ var _ResourceArray = _interopRequireDefault(require("./ResourceArray.js"));
 
 var _defineProperty2;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 var TypedList = /*#__PURE__*/function (_Array) {
-  _inherits(TypedList, _Array);
+  (0, _inherits2["default"])(TypedList, _Array);
 
   var _super = _createSuper(TypedList);
 
   function TypedList() {
-    _classCallCheck(this, TypedList);
-
+    (0, _classCallCheck2["default"])(this, TypedList);
     return _super.apply(this, arguments);
   }
 
-  _createClass(TypedList, null, [{
+  (0, _createClass2["default"])(TypedList, null, [{
     key: "getType",
     value: // constructor(data)
     // {
@@ -5326,13 +5776,12 @@ var TypedList = /*#__PURE__*/function (_Array) {
       if (TypedList.cache[type] != null) return TypedList.cache[type];
 
       var c = /*#__PURE__*/function (_TypedList) {
-        _inherits(c, _TypedList);
+        (0, _inherits2["default"])(c, _TypedList);
 
         var _super2 = _createSuper(c);
 
         function c() {
-          _classCallCheck(this, c);
-
+          (0, _classCallCheck2["default"])(this, c);
           return _super2.apply(this, arguments);
         }
 
@@ -5349,62 +5798,49 @@ var TypedList = /*#__PURE__*/function (_Array) {
       return c;
     }
   }]);
-
   return TypedList;
-}( /*#__PURE__*/_wrapNativeSuper(Array));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Array));
 
 exports["default"] = TypedList;
+(0, _defineProperty3["default"])(TypedList, "cache", (_defineProperty2 = {}, (0, _defineProperty3["default"])(_defineProperty2, _IResource["default"], _ResourceArray["default"]), (0, _defineProperty3["default"])(_defineProperty2, _PropertyValue["default"], _PropertyValueArray["default"]), (0, _defineProperty3["default"])(_defineProperty2, _IRecord["default"], _RecordArray["default"]), (0, _defineProperty3["default"])(_defineProperty2, _Record["default"], _RecordArray["default"]), _defineProperty2));
 
-_defineProperty(TypedList, "cache", (_defineProperty2 = {}, _defineProperty(_defineProperty2, _IResource["default"], _ResourceArray["default"]), _defineProperty(_defineProperty2, _PropertyValue["default"], _PropertyValueArray["default"]), _defineProperty(_defineProperty2, _IRecord["default"], _RecordArray["default"]), _defineProperty(_defineProperty2, _Record["default"], _RecordArray["default"]), _defineProperty2));
-
-},{"../Resource/IResource.js":68,"./IRecord.js":22,"./PropertyValue.js":27,"./PropertyValueArray.js":28,"./Record.js":29,"./RecordArray.js":30,"./ResourceArray.js":32}],37:[function(require,module,exports){
+},{"../Resource/IResource.js":102,"./IRecord.js":56,"./PropertyValue.js":61,"./PropertyValueArray.js":62,"./Record.js":63,"./RecordArray.js":64,"./ResourceArray.js":66,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],71:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+var _wrapNativeSuper2 = _interopRequireDefault(require("@babel/runtime/helpers/wrapNativeSuper"));
 
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function _construct(Parent, args, Class) { if (_isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 var TypedMap = /*#__PURE__*/function (_Map) {
-  _inherits(TypedMap, _Map);
+  (0, _inherits2["default"])(TypedMap, _Map);
 
   var _super = _createSuper(TypedMap);
 
   function TypedMap(data) {
     var _this;
 
-    _classCallCheck(this, TypedMap);
-
+    (0, _classCallCheck2["default"])(this, TypedMap);
     _this = _super.call(this);
     if (data instanceof Object) for (var i in data) {
       _this.set(i, data[i]);
@@ -5412,7 +5848,7 @@ var TypedMap = /*#__PURE__*/function (_Map) {
     return _this;
   }
 
-  _createClass(TypedMap, null, [{
+  (0, _createClass2["default"])(TypedMap, null, [{
     key: "getTypes",
     value: function getTypes(typedMap) {
       var _typedMap$constructor, _typedMap$constructor2;
@@ -5427,13 +5863,12 @@ var TypedMap = /*#__PURE__*/function (_Map) {
       //        return TypedMap.cache[keyType][valueType];
 
       var c = /*#__PURE__*/function (_TypedMap) {
-        _inherits(c, _TypedMap);
+        (0, _inherits2["default"])(c, _TypedMap);
 
         var _super2 = _createSuper(c);
 
         function c() {
-          _classCallCheck(this, c);
-
+          (0, _classCallCheck2["default"])(this, c);
           return _super2.apply(this, arguments);
         }
 
@@ -5457,31 +5892,31 @@ var TypedMap = /*#__PURE__*/function (_Map) {
       return c;
     }
   }]);
-
   return TypedMap;
-}( /*#__PURE__*/_wrapNativeSuper(Map));
+}( /*#__PURE__*/(0, _wrapNativeSuper2["default"])(Map));
 
 exports["default"] = TypedMap;
+(0, _defineProperty2["default"])(TypedMap, "cache", {});
 
-_defineProperty(TypedMap, "cache", {});
-
-},{}],38:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/wrapNativeSuper":33}],72:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var Void = function Void() {
-  _classCallCheck(this, Void);
+  (0, _classCallCheck2["default"])(this, Void);
 };
 
 exports["default"] = Void;
 
-},{}],39:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],73:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -5495,7 +5930,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],40:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -5523,12 +5958,36 @@ exports["default"] = _default;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _classPrivateFieldGet2 = _interopRequireDefault(require("@babel/runtime/helpers/classPrivateFieldGet"));
 
 var _IStore2 = _interopRequireDefault(require("../../Resource/IStore.js"));
 
@@ -5620,63 +6079,15 @@ var _ConnectionStatus = _interopRequireDefault(require("./ConnectionStatus.js"))
 
 var _TemplateDescriber = require("../../Resource/Template/TemplateDescriber.js");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _classPrivateFieldGet(receiver, privateMap) { var descriptor = _classExtractFieldDescriptor(receiver, privateMap, "get"); return _classApplyDescriptorGet(receiver, descriptor); }
-
-function _classExtractFieldDescriptor(receiver, privateMap, action) { if (!privateMap.has(receiver)) { throw new TypeError("attempted to " + action + " private field on non-instance"); } return privateMap.get(receiver); }
-
-function _classApplyDescriptorGet(receiver, descriptor) { if (descriptor.get) { return descriptor.get.call(receiver); } return descriptor.value; }
 
 var _instance_resourceDestroyed = /*#__PURE__*/new WeakMap();
 
@@ -5685,18 +6096,17 @@ var _instance_propertyModified = /*#__PURE__*/new WeakMap();
 var _instance_eventOccurred = /*#__PURE__*/new WeakMap();
 
 var DistributedConnection = /*#__PURE__*/function (_IStore) {
-  _inherits(DistributedConnection, _IStore);
+  (0, _inherits2["default"])(DistributedConnection, _IStore);
 
   var _super = _createSuper(DistributedConnection);
 
   function DistributedConnection(server) {
     var _this;
 
-    _classCallCheck(this, DistributedConnection);
-
+    (0, _classCallCheck2["default"])(this, DistributedConnection);
     _this = _super.call(this);
 
-    _instance_resourceDestroyed.set(_assertThisInitialized(_this), {
+    _instance_resourceDestroyed.set((0, _assertThisInitialized2["default"])(_this), {
       writable: true,
       value: function value(resource) {
         this._unsubscribe(resource); // compose the packet
@@ -5706,7 +6116,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       }
     });
 
-    _instance_propertyModified.set(_assertThisInitialized(_this), {
+    _instance_propertyModified.set((0, _assertThisInitialized2["default"])(_this), {
       writable: true,
       value: function value(info) {
         var _info$resource$instan;
@@ -5715,7 +6125,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       }
     });
 
-    _instance_eventOccurred.set(_assertThisInitialized(_this), {
+    _instance_eventOccurred.set((0, _assertThisInitialized2["default"])(_this), {
       writable: true,
       value: function value(info) {
         if (info.eventTemplate.listenable) {
@@ -5777,7 +6187,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     return _this;
   }
 
-  _createClass(DistributedConnection, [{
+  (0, _createClass2["default"])(DistributedConnection, [{
     key: "sendAll",
     value: function sendAll(data) {
       this.socket.sendAll(data.buffer);
@@ -6343,10 +6753,10 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "reconnect",
     value: function () {
-      var _reconnect = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      var _reconnect = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
         var toBeRestored, i, r, _i, _toBeRestored, _r, link, ar, dataType, data, id;
 
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+        return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
@@ -6643,11 +7053,11 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
           var _resource = _step.value;
 
-          _resource.instance.off("EventOccurred", _classPrivateFieldGet(this, _instance_eventOccurred), this);
+          _resource.instance.off("EventOccurred", (0, _classPrivateFieldGet2["default"])(this, _instance_eventOccurred), this);
 
-          _resource.instance.off("PropertyModified", _classPrivateFieldGet(this, _instance_propertyModified), this);
+          _resource.instance.off("PropertyModified", (0, _classPrivateFieldGet2["default"])(this, _instance_propertyModified), this);
 
-          _resource.instance.off("ResourceDestroyed", _classPrivateFieldGet(this, _instance_resourceDestroyed), this);
+          _resource.instance.off("ResourceDestroyed", (0, _classPrivateFieldGet2["default"])(this, _instance_resourceDestroyed), this);
         }
       } catch (err) {
         _iterator.e(err);
@@ -6662,7 +7072,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
     value: function destroy() {
       this._unsubscribeAll();
 
-      _get(_getPrototypeOf(DistributedConnection.prototype), "destroy", this).call(this);
+      (0, _get2["default"])((0, _getPrototypeOf2["default"])(DistributedConnection.prototype), "destroy", this).call(this);
     }
   }, {
     key: "networkClose",
@@ -6792,8 +7202,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "detachResource",
     value: function () {
-      var _detachResource = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(instanceId) {
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+      var _detachResource = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(instanceId) {
+        return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -7075,17 +7485,17 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
   }, {
     key: "_subscribe",
     value: function _subscribe(resource) {
-      resource.instance.on("EventOccurred", _classPrivateFieldGet(this, _instance_eventOccurred), this);
-      resource.instance.on("PropertyModified", _classPrivateFieldGet(this, _instance_propertyModified), this);
-      resource.instance.on("ResourceDestroyed", _classPrivateFieldGet(this, _instance_resourceDestroyed), this);
+      resource.instance.on("EventOccurred", (0, _classPrivateFieldGet2["default"])(this, _instance_eventOccurred), this);
+      resource.instance.on("PropertyModified", (0, _classPrivateFieldGet2["default"])(this, _instance_propertyModified), this);
+      resource.instance.on("ResourceDestroyed", (0, _classPrivateFieldGet2["default"])(this, _instance_resourceDestroyed), this);
       this.subscriptions.set(resource, []);
     }
   }, {
     key: "_unsubscribe",
     value: function _unsubscribe(resource) {
-      resource.instance.off("EventOccurred", _classPrivateFieldGet(this, _instance_eventOccurred), this);
-      resource.instance.off("PropertyModified", _classPrivateFieldGet(this, _instance_propertyModified), this);
-      resource.instance.off("ResourceDestroyed", _classPrivateFieldGet(this, _instance_resourceDestroyed), this);
+      resource.instance.off("EventOccurred", (0, _classPrivateFieldGet2["default"])(this, _instance_eventOccurred), this);
+      resource.instance.off("PropertyModified", (0, _classPrivateFieldGet2["default"])(this, _instance_propertyModified), this);
+      resource.instance.off("ResourceDestroyed", (0, _classPrivateFieldGet2["default"])(this, _instance_resourceDestroyed), this);
       this.subscriptions["delete"](resource);
     }
   }, {
@@ -7440,7 +7850,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       try {
         for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-          var _step3$value = _slicedToArray(_step3.value, 2),
+          var _step3$value = (0, _slicedToArray2["default"])(_step3.value, 2),
               k = _step3$value[0],
               _v = _step3$value[1];
 
@@ -7901,7 +8311,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
       var reply = new _AsyncReply["default"]();
       this.resourceRequests.set(id, reply);
-      var newSequence = requestSequence != null ? [].concat(_toConsumableArray(requestSequence), [id]) : [id];
+      var newSequence = requestSequence != null ? [].concat((0, _toConsumableArray2["default"])(requestSequence), [id]) : [id];
       var self = this;
 
       this._sendRequest(_IIPPacketAction["default"].AttachResource).addUint32(id).done().then(function (rt) {
@@ -8402,13 +8812,12 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
       return new _TemplateDescriber.TemplateDescriber("Esiur", [new _TemplateDescriber.Prop("status", _ExtendedTypes.UInt8)]);
     }
   }]);
-
   return DistributedConnection;
 }(_IStore2["default"]);
 
 exports["default"] = DistributedConnection;
 
-},{"../../Core/AsyncBag.js":3,"../../Core/AsyncException.js":4,"../../Core/AsyncQueue.js":5,"../../Core/AsyncReply.js":6,"../../Core/ErrorType.js":7,"../../Core/ExceptionCode.js":8,"../../Core/ProgressType.js":11,"../../Data/Codec.js":15,"../../Data/DC.js":16,"../../Data/ExtendedTypes.js":19,"../../Data/KeyList.js":23,"../../Data/PropertyValue.js":27,"../../Data/PropertyValueArray.js":28,"../../Data/TransmissionType.js":34,"../../Resource/IResource.js":68,"../../Resource/IStore.js":69,"../../Resource/Template/TemplateDescriber.js":79,"../../Resource/Template/TemplateType.js":80,"../../Resource/Template/TypeTemplate.js":81,"../../Resource/Warehouse.js":82,"../../Security/Authority/Authentication.js":83,"../../Security/Authority/AuthenticationMethod.js":84,"../../Security/Authority/AuthenticationType.js":85,"../../Security/Authority/ClientAuthentication.js":86,"../../Security/Authority/HostAuthentication.js":87,"../../Security/Authority/Session.js":88,"../../Security/Integrity/SHA256.js":89,"../../Security/Permissions/ActionType.js":91,"../../Security/Permissions/Ruling.js":93,"../Packets//IIPPacketReport.js":59,"../Packets/IIPAuthPacket.js":52,"../Packets/IIPAuthPacketAction.js":53,"../Packets/IIPAuthPacketCommand.js":54,"../Packets/IIPPacket.js":55,"../Packets/IIPPacketAction.js":56,"../Packets/IIPPacketCommand.js":57,"../Packets/IIPPacketEvent.js":58,"../SendList.js":60,"../Sockets/SocketState.js":62,"../Sockets/WSocket.js":63,"./ConnectionStatus.js":39,"./DistributedPropertyContext.js":41,"./DistributedResource.js":42,"./DistributedResourceQueueItem.js":43,"./DistributedResourceQueueItemType.js":44}],41:[function(require,module,exports){
+},{"../../Core/AsyncBag.js":37,"../../Core/AsyncException.js":38,"../../Core/AsyncQueue.js":39,"../../Core/AsyncReply.js":40,"../../Core/ErrorType.js":41,"../../Core/ExceptionCode.js":42,"../../Core/ProgressType.js":45,"../../Data/Codec.js":49,"../../Data/DC.js":50,"../../Data/ExtendedTypes.js":53,"../../Data/KeyList.js":57,"../../Data/PropertyValue.js":61,"../../Data/PropertyValueArray.js":62,"../../Data/TransmissionType.js":68,"../../Resource/IResource.js":102,"../../Resource/IStore.js":103,"../../Resource/Template/TemplateDescriber.js":113,"../../Resource/Template/TemplateType.js":114,"../../Resource/Template/TypeTemplate.js":115,"../../Resource/Warehouse.js":116,"../../Security/Authority/Authentication.js":117,"../../Security/Authority/AuthenticationMethod.js":118,"../../Security/Authority/AuthenticationType.js":119,"../../Security/Authority/ClientAuthentication.js":120,"../../Security/Authority/HostAuthentication.js":121,"../../Security/Authority/Session.js":122,"../../Security/Integrity/SHA256.js":123,"../../Security/Permissions/ActionType.js":125,"../../Security/Permissions/Ruling.js":127,"../Packets//IIPPacketReport.js":93,"../Packets/IIPAuthPacket.js":86,"../Packets/IIPAuthPacketAction.js":87,"../Packets/IIPAuthPacketCommand.js":88,"../Packets/IIPPacket.js":89,"../Packets/IIPPacketAction.js":90,"../Packets/IIPPacketCommand.js":91,"../Packets/IIPPacketEvent.js":92,"../SendList.js":94,"../Sockets/SocketState.js":96,"../Sockets/WSocket.js":97,"./ConnectionStatus.js":73,"./DistributedPropertyContext.js":75,"./DistributedResource.js":76,"./DistributedResourceQueueItem.js":77,"./DistributedResourceQueueItemType.js":78,"@babel/runtime/helpers/assertThisInitialized":4,"@babel/runtime/helpers/asyncToGenerator":5,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/classPrivateFieldGet":9,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/slicedToArray":26,"@babel/runtime/helpers/toConsumableArray":28,"@babel/runtime/regenerator":34}],75:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -8436,15 +8845,17 @@ exports["default"] = DistributedConnection;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var DistributedPropertyContext = function DistributedPropertyContext(p1, p2) {
-  _classCallCheck(this, DistributedPropertyContext);
+  (0, _classCallCheck2["default"])(this, DistributedPropertyContext);
 
   if (arguments.length == 1) {
     this.method = p1;
@@ -8456,7 +8867,7 @@ var DistributedPropertyContext = function DistributedPropertyContext(p1, p2) {
 
 exports["default"] = DistributedPropertyContext;
 
-},{}],42:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],76:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8484,12 +8895,26 @@ exports["default"] = DistributedPropertyContext;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _IResource2 = _interopRequireDefault(require("../../Resource/IResource.js"));
 
@@ -8515,42 +8940,19 @@ var _PropertyValueArray = _interopRequireDefault(require("../../Data/PropertyVal
 
 var _PropertyValue = _interopRequireDefault(require("../../Data/PropertyValue.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var DistributedResource = /*#__PURE__*/function (_IResource) {
-  _inherits(DistributedResource, _IResource);
+  (0, _inherits2["default"])(DistributedResource, _IResource);
 
   var _super = _createSuper(DistributedResource);
 
   function DistributedResource(connection, instanceId, age, link) {
     var _this;
 
-    _classCallCheck(this, DistributedResource);
-
+    (0, _classCallCheck2["default"])(this, DistributedResource);
     _this = _super.call(this);
     _this._p = {
       destroyed: false,
@@ -8565,7 +8967,7 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
     return _this;
   }
 
-  _createClass(DistributedResource, [{
+  (0, _createClass2["default"])(DistributedResource, [{
     key: "destroy",
     value: function destroy() {
       this._p.destroyed = true;
@@ -8662,8 +9064,8 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
 
         var makeSetter = function makeSetter(index) {
           return /*#__PURE__*/function () {
-            var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(value) {
-              return regeneratorRuntime.wrap(function _callee$(_context) {
+            var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(value) {
+              return _regenerator["default"].wrap(function _callee$(_context) {
                 while (1) {
                   switch (_context.prev = _context.next) {
                     case 0:
@@ -8780,13 +9182,12 @@ var DistributedResource = /*#__PURE__*/function (_IResource) {
       return reply;
     }
   }]);
-
   return DistributedResource;
 }(_IResource2["default"]);
 
 exports["default"] = DistributedResource;
 
-},{"../../Core//ExceptionCode.js":8,"../../Core/AsyncException.js":4,"../../Core/AsyncReply.js":6,"../../Core/ErrorType.js":7,"../../Data/Codec.js":15,"../../Data/ExtendedTypes.js":19,"../../Data/PropertyValue.js":27,"../../Data/PropertyValueArray.js":28,"../../Data/TypedMap.js":37,"../../Resource/IResource.js":68,"../../Resource/Template/EventTemplate.js":74,"../Packets//IIPPacketAction.js":56}],43:[function(require,module,exports){
+},{"../../Core//ExceptionCode.js":42,"../../Core/AsyncException.js":38,"../../Core/AsyncReply.js":40,"../../Core/ErrorType.js":41,"../../Data/Codec.js":49,"../../Data/ExtendedTypes.js":53,"../../Data/PropertyValue.js":61,"../../Data/PropertyValueArray.js":62,"../../Data/TypedMap.js":71,"../../Resource/IResource.js":102,"../../Resource/Template/EventTemplate.js":108,"../Packets//IIPPacketAction.js":90,"@babel/runtime/helpers/asyncToGenerator":5,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/regenerator":34}],77:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -8814,16 +9215,17 @@ exports["default"] = DistributedResource;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var DistributedResourceQueueItem = function DistributedResourceQueueItem(resource, type, value, index) {
-  _classCallCheck(this, DistributedResourceQueueItem);
-
+  (0, _classCallCheck2["default"])(this, DistributedResourceQueueItem);
   this.resource = resource;
   this.index = index;
   this.type = type;
@@ -8832,7 +9234,7 @@ var DistributedResourceQueueItem = function DistributedResourceQueueItem(resourc
 
 exports["default"] = DistributedResourceQueueItem;
 
-},{}],44:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],78:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8845,7 +9247,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],45:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -8873,12 +9275,22 @@ exports["default"] = _default;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _IResource2 = _interopRequireDefault(require("../../Resource/IResource.js"));
 
@@ -8888,38 +9300,19 @@ var _DistributedConnection = _interopRequireDefault(require("./DistributedConnec
 
 var _KeyList = _interopRequireDefault(require("../../Data/KeyList.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var DistributedServer = /*#__PURE__*/function (_IResource) {
-  _inherits(DistributedServer, _IResource);
+  (0, _inherits2["default"])(DistributedServer, _IResource);
 
   var _super = _createSuper(DistributedServer);
 
   function DistributedServer() {
     var _this;
 
-    _classCallCheck(this, DistributedServer);
-
+    (0, _classCallCheck2["default"])(this, DistributedServer);
     _this = _super.call(this);
     _this.connections = [];
     _this.calls = new _KeyList["default"]();
@@ -8927,7 +9320,7 @@ var DistributedServer = /*#__PURE__*/function (_IResource) {
   } //@TODO: con.off("close", ...)
 
 
-  _createClass(DistributedServer, [{
+  (0, _createClass2["default"])(DistributedServer, [{
     key: "destroy",
     value: function destroy() {
       this.connections = [];
@@ -8973,116 +9366,96 @@ var DistributedServer = /*#__PURE__*/function (_IResource) {
       this.calls.add(call, handler);
     }
   }]);
-
   return DistributedServer;
 }(_IResource2["default"]);
 
 exports["default"] = DistributedServer;
 
-},{"../../Core/AsyncReply.js":6,"../../Data/KeyList.js":23,"../../Resource/IResource.js":68,"./DistributedConnection.js":40}],46:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":40,"../../Data/KeyList.js":57,"../../Resource/IResource.js":102,"./DistributedConnection.js":74,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],80:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _IResource2 = _interopRequireDefault(require("../../Resource/IResource.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var EntryPoint = /*#__PURE__*/function (_IResource) {
-  _inherits(EntryPoint, _IResource);
+  (0, _inherits2["default"])(EntryPoint, _IResource);
 
   var _super = _createSuper(EntryPoint);
 
   function EntryPoint() {
-    _classCallCheck(this, EntryPoint);
-
+    (0, _classCallCheck2["default"])(this, EntryPoint);
     return _super.apply(this, arguments);
   }
 
-  _createClass(EntryPoint, [{
+  (0, _createClass2["default"])(EntryPoint, [{
     key: "query",
     value: function query(path, sender) {}
   }, {
     key: "create",
     value: function create() {}
   }]);
-
   return EntryPoint;
 }(_IResource2["default"]);
 
 exports["default"] = EntryPoint;
 
-},{"../../Resource/IResource.js":68}],47:[function(require,module,exports){
+},{"../../Resource/IResource.js":102,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],81:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _IDestructible2 = _interopRequireDefault(require("../Core/IDestructible.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var INetworkReceiver = /*#__PURE__*/function (_IDestructible) {
-  _inherits(INetworkReceiver, _IDestructible);
+  (0, _inherits2["default"])(INetworkReceiver, _IDestructible);
 
   var _super = _createSuper(INetworkReceiver);
 
   function INetworkReceiver() {
-    _classCallCheck(this, INetworkReceiver);
-
+    (0, _classCallCheck2["default"])(this, INetworkReceiver);
     return _super.apply(this, arguments);
   }
 
-  _createClass(INetworkReceiver, [{
+  (0, _createClass2["default"])(INetworkReceiver, [{
     key: "networkClose",
     value: function networkClose(sender) {}
   }, {
@@ -9092,39 +9465,60 @@ var INetworkReceiver = /*#__PURE__*/function (_IDestructible) {
     key: "networkConnect",
     value: function networkConnect(sender) {}
   }]);
-
   return INetworkReceiver;
 }(_IDestructible2["default"]);
 
 exports["default"] = INetworkReceiver;
 
-},{"../Core/IDestructible.js":9}],48:[function(require,module,exports){
+},{"../Core/IDestructible.js":43,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],82:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _DC = _interopRequireDefault(require("../Data/DC.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
+/**
+ * Created by Ahmed Zamil on 01/09/2017.
+ */
 var NetworkBuffer = /*#__PURE__*/function () {
   function NetworkBuffer() {
-    _classCallCheck(this, NetworkBuffer);
-
+    (0, _classCallCheck2["default"])(this, NetworkBuffer);
     this.neededDataLength = 0;
     this.data = new _DC["default"](0);
   }
 
-  _createClass(NetworkBuffer, [{
+  (0, _createClass2["default"])(NetworkBuffer, [{
     key: "protected",
     get: function get() {
       return this.neededDataLength > this.data.length;
@@ -9205,50 +9599,42 @@ var NetworkBuffer = /*#__PURE__*/function () {
       return rt;
     }
   }]);
-
   return NetworkBuffer;
 }();
 
 exports["default"] = NetworkBuffer;
 
-},{"../Data/DC.js":16}],49:[function(require,module,exports){
+},{"../Data/DC.js":50,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],83:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _INetworkReceiver2 = _interopRequireDefault(require("./INetworkReceiver.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var NetowrkConnection = /*#__PURE__*/function (_INetworkReceiver) {
-  _inherits(NetowrkConnection, _INetworkReceiver);
+  (0, _inherits2["default"])(NetowrkConnection, _INetworkReceiver);
 
   var _super = _createSuper(NetowrkConnection);
 
   function NetowrkConnection() {
-    _classCallCheck(this, NetowrkConnection);
-
+    (0, _classCallCheck2["default"])(this, NetowrkConnection);
     return _super.apply(this, arguments);
   }
 
@@ -9257,39 +9643,43 @@ var NetowrkConnection = /*#__PURE__*/function (_INetworkReceiver) {
 
 exports["default"] = NetowrkConnection;
 
-},{"./INetworkReceiver.js":47}],50:[function(require,module,exports){
+},{"./INetworkReceiver.js":81,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],84:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var NetworkServer = function NetworkServer() {
-  _classCallCheck(this, NetworkServer);
+  (0, _classCallCheck2["default"])(this, NetworkServer);
 };
 
 exports["default"] = NetworkServer;
 
-},{}],51:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],85:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var NetworkSession = function NetworkSession() {
-  _classCallCheck(this, NetworkSession);
+  (0, _classCallCheck2["default"])(this, NetworkSession);
 };
 
 exports["default"] = NetworkSession;
 
-},{}],52:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],86:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -9317,10 +9707,16 @@ exports["default"] = NetworkSession;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _IIPAuthPacketCommand = _interopRequireDefault(require("./IIPAuthPacketCommand.js"));
 
@@ -9328,18 +9724,9 @@ var _IIPAuthPacketAction = _interopRequireDefault(require("./IIPAuthPacketAction
 
 var _AuthenticationMethod = _interopRequireDefault(require("../../Security/Authority/AuthenticationMethod.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 var IIPAuthPacket = /*#__PURE__*/function () {
   function IIPAuthPacket() {
-    _classCallCheck(this, IIPAuthPacket);
-
+    (0, _classCallCheck2["default"])(this, IIPAuthPacket);
     this.command = 0;
     this.action = 0;
     this.errorCode = 0;
@@ -9363,7 +9750,7 @@ var IIPAuthPacket = /*#__PURE__*/function () {
     this.dataLengthNeeded = 0;
   }
 
-  _createClass(IIPAuthPacket, [{
+  (0, _createClass2["default"])(IIPAuthPacket, [{
     key: "notEnough",
     value: function notEnough(offset, ends, needed) {
       if (offset + needed > ends) {
@@ -9473,13 +9860,12 @@ var IIPAuthPacket = /*#__PURE__*/function () {
       return offset - oOffset;
     }
   }]);
-
   return IIPAuthPacket;
 }();
 
 exports["default"] = IIPAuthPacket;
 
-},{"../../Security/Authority/AuthenticationMethod.js":84,"./IIPAuthPacketAction.js":53,"./IIPAuthPacketCommand.js":54}],53:[function(require,module,exports){
+},{"../../Security/Authority/AuthenticationMethod.js":118,"./IIPAuthPacketAction.js":87,"./IIPAuthPacketCommand.js":88,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],87:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9496,7 +9882,7 @@ var _default = // const IIPAuthPacketAction =
 };
 exports["default"] = _default;
 
-},{}],54:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9512,7 +9898,7 @@ var _default = //const IIPAuthPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],55:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -9540,10 +9926,16 @@ exports["default"] = _default;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _IIPPacketAction = _interopRequireDefault(require("./IIPPacketAction.js"));
 
@@ -9557,18 +9949,9 @@ var _TransmissionType = _interopRequireDefault(require("../../Data/TransmissionT
 
 var _ExceptionCode = _interopRequireDefault(require("../../Core/ExceptionCode.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 var IIPPacket = /*#__PURE__*/function () {
   function IIPPacket() {
-    _classCallCheck(this, IIPPacket);
-
+    (0, _classCallCheck2["default"])(this, IIPPacket);
     this.command = 0;
     this.action = 0;
     this.event = 0;
@@ -9594,7 +9977,7 @@ var IIPPacket = /*#__PURE__*/function () {
     this.currentTime = null;
   }
 
-  _createClass(IIPPacket, [{
+  (0, _createClass2["default"])(IIPPacket, [{
     key: "notEnough",
     value: function notEnough(offset, ends, needed) {
       if (offset + needed > ends) {
@@ -9928,13 +10311,12 @@ var IIPPacket = /*#__PURE__*/function () {
       return offset - this.originalOffset;
     }
   }]);
-
   return IIPPacket;
 }();
 
 exports["default"] = IIPPacket;
 
-},{"../../Core/ExceptionCode.js":8,"../../Data/TransmissionType.js":34,"./IIPPacketAction.js":56,"./IIPPacketCommand.js":57,"./IIPPacketEvent.js":58,"./IIPPacketReport.js":59}],56:[function(require,module,exports){
+},{"../../Core/ExceptionCode.js":42,"../../Data/TransmissionType.js":68,"./IIPPacketAction.js":90,"./IIPPacketCommand.js":91,"./IIPPacketEvent.js":92,"./IIPPacketReport.js":93,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],90:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9981,7 +10363,7 @@ var _default = // const IIPPacketAction =
 };
 exports["default"] = _default;
 
-},{}],57:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9997,7 +10379,7 @@ var _default = // IIPPacketCommand =
 };
 exports["default"] = _default;
 
-},{}],58:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10020,7 +10402,7 @@ var IIPPacketEvent = {
 var _default = IIPPacketEvent;
 exports["default"] = _default;
 
-},{}],59:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10036,7 +10418,7 @@ var IIPPacketReport = {
 var _default = IIPPacketReport;
 exports["default"] = _default;
 
-},{}],60:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -10064,104 +10446,86 @@ exports["default"] = _default;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _BinaryList2 = _interopRequireDefault(require("../Data/BinaryList.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var SendList = /*#__PURE__*/function (_BinaryList) {
-  _inherits(SendList, _BinaryList);
+  (0, _inherits2["default"])(SendList, _BinaryList);
 
   var _super = _createSuper(SendList);
 
   function SendList(connection, doneReply) {
     var _this;
 
-    _classCallCheck(this, SendList);
-
+    (0, _classCallCheck2["default"])(this, SendList);
     _this = _super.call(this);
     _this.connection = connection;
     _this.reply = doneReply;
     return _this;
   }
 
-  _createClass(SendList, [{
+  (0, _createClass2["default"])(SendList, [{
     key: "done",
     value: function done() {
       this.connection.sendAll(this.toArray());
       return this.reply;
     }
   }]);
-
   return SendList;
 }(_BinaryList2["default"]);
 
 exports["default"] = SendList;
 
-},{"../Data/BinaryList.js":14}],61:[function(require,module,exports){
+},{"../Data/BinaryList.js":48,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],95:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _IDestructible2 = _interopRequireDefault(require("../../Core/IDestructible.js"));
 
 var _SocketState = _interopRequireDefault(require("./SocketState.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var ISocket = /*#__PURE__*/function (_IDestructible) {
-  _inherits(ISocket, _IDestructible);
+  (0, _inherits2["default"])(ISocket, _IDestructible);
 
   var _super = _createSuper(ISocket);
 
@@ -10170,15 +10534,14 @@ var ISocket = /*#__PURE__*/function (_IDestructible) {
   function ISocket() {
     var _this;
 
-    _classCallCheck(this, ISocket);
-
+    (0, _classCallCheck2["default"])(this, ISocket);
     _this = _super.call(this);
     _this.state = _SocketState["default"].Initial;
     return _this;
   } //    get state() {}
 
 
-  _createClass(ISocket, [{
+  (0, _createClass2["default"])(ISocket, [{
     key: "sendAsync",
     value: function sendAsync(message, offset, length) {}
   }, {
@@ -10215,13 +10578,12 @@ var ISocket = /*#__PURE__*/function (_IDestructible) {
     key: "unhold",
     value: function unhold() {}
   }]);
-
   return ISocket;
 }(_IDestructible2["default"]);
 
 exports["default"] = ISocket;
 
-},{"../../Core/IDestructible.js":9,"./SocketState.js":62}],62:[function(require,module,exports){
+},{"../../Core/IDestructible.js":43,"./SocketState.js":96,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],96:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -10237,15 +10599,33 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],63:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _typeof = require("@babel/runtime/helpers/typeof");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _AsyncReply = _interopRequireDefault(require("../../Core/AsyncReply.js"));
 
@@ -10261,48 +10641,23 @@ var _NetworkBuffer = _interopRequireDefault(require("../NetworkBuffer.js"));
 
 var _DC = _interopRequireDefault(require("../../Data/DC.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 var WSocket = /*#__PURE__*/function (_ISocket) {
-  _inherits(WSocket, _ISocket);
+  (0, _inherits2["default"])(WSocket, _ISocket);
 
   var _super = _createSuper(WSocket);
 
   function WSocket(websocket) {
     var _this;
 
-    _classCallCheck(this, WSocket);
-
+    (0, _classCallCheck2["default"])(this, WSocket);
     _this = _super.call(this);
     _this.receiveNetworkBuffer = new _NetworkBuffer["default"]();
     _this.sendNetworkBuffer = new _NetworkBuffer["default"]();
@@ -10323,7 +10678,7 @@ var WSocket = /*#__PURE__*/function (_ISocket) {
     return _this;
   }
 
-  _createClass(WSocket, [{
+  (0, _createClass2["default"])(WSocket, [{
     key: "destroy",
     value: function destroy() {
       this.close();
@@ -10447,9 +10802,9 @@ var WSocket = /*#__PURE__*/function (_ISocket) {
   }], [{
     key: "getWebScoket",
     value: function () {
-      var _getWebScoket = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+      var _getWebScoket = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
         var wsModule;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+        return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
@@ -10495,56 +10850,46 @@ var WSocket = /*#__PURE__*/function (_ISocket) {
       return getWebScoket;
     }()
   }]);
-
   return WSocket;
 }(_ISocket2["default"]);
 
 exports["default"] = WSocket;
+(0, _defineProperty2["default"])(WSocket, "webSocket", null);
 
-_defineProperty(WSocket, "webSocket", null);
-
-},{"../../Core/AsyncReply.js":6,"../../Core/ErrorType.js":7,"../../Core/ExceptionCode.js":8,"../../Data/DC.js":16,"../NetworkBuffer.js":48,"./ISocket.js":61,"./SocketState.js":62,"ws":2}],64:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":40,"../../Core/ErrorType.js":41,"../../Core/ExceptionCode.js":42,"../../Data/DC.js":50,"../NetworkBuffer.js":82,"./ISocket.js":95,"./SocketState.js":96,"@babel/runtime/helpers/asyncToGenerator":5,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/typeof":31,"@babel/runtime/regenerator":34,"ws":36}],98:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _Warehouse = _interopRequireDefault(require("../Resource/Warehouse.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 var ResourceProxy = /*#__PURE__*/function () {
   function ResourceProxy() {
-    _classCallCheck(this, ResourceProxy);
+    (0, _classCallCheck2["default"])(this, ResourceProxy);
   }
 
-  _createClass(ResourceProxy, null, [{
+  (0, _createClass2["default"])(ResourceProxy, null, [{
     key: "getBaseType",
     value: function getBaseType(type) {
       if (type == null) throw new Error("Type can't be null.");
@@ -10576,14 +10921,13 @@ var ResourceProxy = /*#__PURE__*/function () {
       // let proxyType = func.call(type /* this */, type);
 
       var makeClass = function makeClass(name) {
-        return _defineProperty({}, name, /*#__PURE__*/function (_type) {
-          _inherits(_class, _type);
+        return (0, _defineProperty2["default"])({}, name, /*#__PURE__*/function (_type) {
+          (0, _inherits2["default"])(_class, _type);
 
           var _super = _createSuper(_class);
 
           function _class() {
-            _classCallCheck(this, _class);
-
+            (0, _classCallCheck2["default"])(this, _class);
             return _super.apply(this, arguments);
           }
 
@@ -10642,23 +10986,33 @@ var ResourceProxy = /*#__PURE__*/function () {
       return proxyType;
     }
   }]);
-
   return ResourceProxy;
 }();
 
 exports["default"] = ResourceProxy;
+(0, _defineProperty2["default"])(ResourceProxy, "cache", {});
 
-_defineProperty(ResourceProxy, "cache", {});
-
-},{"../Resource/Warehouse.js":82}],65:[function(require,module,exports){
+},{"../Resource/Warehouse.js":116,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],99:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _typeof = require("@babel/runtime/helpers/typeof");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
+
+var _toConsumableArray2 = _interopRequireDefault(require("@babel/runtime/helpers/toConsumableArray"));
+
+var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _RepresentationType = require("../Data/RepresentationType.js");
 
@@ -10666,40 +11020,16 @@ var _TemplateType = _interopRequireDefault(require("../Resource/Template/Templat
 
 var _Warehouse = _interopRequireDefault(require("../Resource/Warehouse.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
-
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
 function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 var TemplateGenerator = /*#__PURE__*/function () {
   function TemplateGenerator() {
-    _classCallCheck(this, TemplateGenerator);
+    (0, _classCallCheck2["default"])(this, TemplateGenerator);
   }
 
-  _createClass(TemplateGenerator, null, [{
+  (0, _createClass2["default"])(TemplateGenerator, null, [{
     key: "toLiteral",
     value: function toLiteral(input) {
       if (input == null) return "null";
@@ -10934,7 +11264,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
   }, {
     key: "getTemplate",
     value: function () {
-      var _getTemplate = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(url, dir, username, password) {
+      var _getTemplate = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee2(url, dir, username, password) {
         var _this3 = this;
 
         var asyncSetters,
@@ -10950,7 +11280,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
             module,
             _args2 = arguments;
 
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return _regenerator["default"].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -11002,7 +11332,7 @@ var TemplateGenerator = /*#__PURE__*/function () {
                 // no longer needed
                 _Warehouse["default"].remove(con);
 
-                dstDir = "lib/".concat(dir);
+                dstDir = "".concat(dir);
 
                 if (!fs.existsSync(dstDir)) {
                   fs.mkdirSync(dstDir, {
@@ -11025,9 +11355,9 @@ var TemplateGenerator = /*#__PURE__*/function () {
 
 
                 templates.forEach( /*#__PURE__*/function () {
-                  var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(tmp) {
+                  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(tmp) {
                     var filePath, source;
-                    return regeneratorRuntime.wrap(function _callee$(_context) {
+                    return _regenerator["default"].wrap(function _callee$(_context) {
                       while (1) {
                         switch (_context.prev = _context.next) {
                           case 0:
@@ -11266,19 +11596,18 @@ var TemplateGenerator = /*#__PURE__*/function () {
       });
       var cls = template.className.split('.');
       var namespace = cls.slice(0, cls.length - 1).join('.');
-      rt += "\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat([].concat(_toConsumableArray(descProps), _toConsumableArray(descFuncs), _toConsumableArray(descEvents), _toConsumableArray(descConsts)).join(',\r\n'), "], \r\n\t\t\t").concat(parentName, ", ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n\t}");
+      rt += "\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('".concat(namespace, "', [\r\n").concat([].concat((0, _toConsumableArray2["default"])(descProps), (0, _toConsumableArray2["default"])(descFuncs), (0, _toConsumableArray2["default"])(descEvents), (0, _toConsumableArray2["default"])(descConsts)).join(',\r\n'), "], \r\n\t\t\t").concat(parentName, ", ").concat(template.version, ", ").concat(this.toLiteral(template.annotation), ", Esiur.Data.Guid.parse('").concat(template.classId.toString(), "'), '").concat(className, "');\r\n\t}");
       rt += "\r\n}\r\n";
       rt = this._getDependenciesImports(dependencies) + rt;
       return rt;
     }
   }]);
-
   return TemplateGenerator;
 }();
 
 exports["default"] = TemplateGenerator;
 
-},{"../Data/RepresentationType.js":31,"../Resource/Template/TemplateType.js":80,"../Resource/Warehouse.js":82,"fs":1}],66:[function(require,module,exports){
+},{"../Data/RepresentationType.js":65,"../Resource/Template/TemplateType.js":114,"../Resource/Warehouse.js":116,"@babel/runtime/helpers/asyncToGenerator":5,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/toConsumableArray":28,"@babel/runtime/helpers/typeof":31,"@babel/runtime/regenerator":34,"fs":35}],100:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2018 Ahmed Kh. Zamil
 *
@@ -11306,16 +11635,17 @@ exports["default"] = TemplateGenerator;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var CustomResourceEvent = function CustomResourceEvent(issuer, receivers, value) {
-  _classCallCheck(this, CustomResourceEvent);
-
+  (0, _classCallCheck2["default"])(this, CustomResourceEvent);
   this.issuer = issuer;
   this.receivers = receivers;
   this.value = value;
@@ -11323,13 +11653,19 @@ var CustomResourceEvent = function CustomResourceEvent(issuer, receivers, value)
 
 exports["default"] = CustomResourceEvent;
 
-},{}],67:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],101:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _Session = _interopRequireDefault(require("../Security/Authority/Session.js"));
 
@@ -11337,18 +11673,9 @@ var _IResource = _interopRequireDefault(require("./IResource.js"));
 
 var _EventTemplate = _interopRequireDefault(require("./Template/EventTemplate.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 var EventOccurredInfo = /*#__PURE__*/function () {
   function EventOccurredInfo(resource, eventTemplate, value, issuer, receivers) {
-    _classCallCheck(this, EventOccurredInfo);
-
+    (0, _classCallCheck2["default"])(this, EventOccurredInfo);
     this.resource = resource;
     this.eventTemplate = eventTemplate;
     this.value = value;
@@ -11356,19 +11683,18 @@ var EventOccurredInfo = /*#__PURE__*/function () {
     this.receivers = receivers;
   }
 
-  _createClass(EventOccurredInfo, [{
+  (0, _createClass2["default"])(EventOccurredInfo, [{
     key: "name",
     get: function get() {
       return this.eventTemplate.name;
     }
   }]);
-
   return EventOccurredInfo;
 }();
 
 exports["default"] = EventOccurredInfo;
 
-},{"../Security/Authority/Session.js":88,"./IResource.js":68,"./Template/EventTemplate.js":74}],68:[function(require,module,exports){
+},{"../Security/Authority/Session.js":122,"./IResource.js":102,"./Template/EventTemplate.js":108,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],102:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11396,12 +11722,22 @@ exports["default"] = EventOccurredInfo;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = exports.ResourceTrigger = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _AsyncBag = _interopRequireDefault(require("../Core/AsyncBag.js"));
 
@@ -11411,27 +11747,9 @@ var _IDestructible2 = _interopRequireDefault(require("../Core/IDestructible.js")
 
 var _TemplateDescriber = require("./Template/TemplateDescriber.js");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
 var ResourceTrigger = {
   Open: 0,
@@ -11445,17 +11763,16 @@ var ResourceTrigger = {
 exports.ResourceTrigger = ResourceTrigger;
 
 var IResource = /*#__PURE__*/function (_IDestructible) {
-  _inherits(IResource, _IDestructible);
+  (0, _inherits2["default"])(IResource, _IDestructible);
 
   var _super = _createSuper(IResource);
 
   function IResource() {
-    _classCallCheck(this, IResource);
-
+    (0, _classCallCheck2["default"])(this, IResource);
     return _super.call(this);
   }
 
-  _createClass(IResource, [{
+  (0, _createClass2["default"])(IResource, [{
     key: "trigger",
     value: function trigger(_trigger) {
       return new _AsyncReply["default"](true);
@@ -11473,13 +11790,12 @@ var IResource = /*#__PURE__*/function (_IDestructible) {
       return new _TemplateDescriber.TemplateDescriber("Esiur", []);
     }
   }]);
-
   return IResource;
 }(_IDestructible2["default"]);
 
 exports["default"] = IResource;
 
-},{"../Core/AsyncBag.js":3,"../Core/AsyncReply.js":6,"../Core/IDestructible.js":9,"./Template/TemplateDescriber.js":79}],69:[function(require,module,exports){
+},{"../Core/AsyncBag.js":37,"../Core/AsyncReply.js":40,"../Core/IDestructible.js":43,"./Template/TemplateDescriber.js":113,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],103:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11507,49 +11823,40 @@ exports["default"] = IResource;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _IResource2 = _interopRequireDefault(require("./IResource.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var IStore = /*#__PURE__*/function (_IResource) {
-  _inherits(IStore, _IResource);
+  (0, _inherits2["default"])(IStore, _IResource);
 
   var _super = _createSuper(IStore);
 
   function IStore() {
-    _classCallCheck(this, IStore);
-
+    (0, _classCallCheck2["default"])(this, IStore);
     return _super.call(this);
   }
 
-  _createClass(IStore, [{
+  (0, _createClass2["default"])(IStore, [{
     key: "get",
     value: function get(path) {}
   }, {
@@ -11571,13 +11878,12 @@ var IStore = /*#__PURE__*/function (_IResource) {
     key: "remove",
     value: function remove(resource) {}
   }]);
-
   return IStore;
 }(_IResource2["default"]);
 
 exports["default"] = IStore;
 
-},{"./IResource.js":68}],70:[function(require,module,exports){
+},{"./IResource.js":102,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],104:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -11605,12 +11911,26 @@ exports["default"] = IStore;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _IEventHandler2 = _interopRequireDefault(require("../Core/IEventHandler.js"));
 
@@ -11640,34 +11960,12 @@ var _PropertyValueArray = _interopRequireDefault(require("../Data/PropertyValueA
 
 var _DistributedResource = _interopRequireDefault(require("../Net/IIP/DistributedResource.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var Instance = /*#__PURE__*/function (_IEventHandler) {
-  _inherits(Instance, _IEventHandler);
+  (0, _inherits2["default"])(Instance, _IEventHandler);
 
   var _super = _createSuper(Instance);
 
@@ -11676,9 +11974,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
 
     var customTemplate = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
     var age = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
-
-    _classCallCheck(this, Instance);
-
+    (0, _classCallCheck2["default"])(this, Instance);
     _this = _super.call(this);
     _this.store = store;
     _this.resource = new WeakRef(resource);
@@ -11690,8 +11986,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
     _this.parents = new _AutoList["default"]();
     _this.managers = new _AutoList["default"]();
     _this.attributes = new _KeyList["default"]();
-
-    var self = _assertThisInitialized(_this);
+    var self = (0, _assertThisInitialized2["default"])(_this);
 
     _this.children.on("add", function (value) {
       var r = self.resource.deref();
@@ -11727,7 +12022,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
     return _this;
   }
 
-  _createClass(Instance, [{
+  (0, _createClass2["default"])(Instance, [{
     key: "getAge",
     value: function getAge(index) {
       if (index < this.ages.length) return this.ages[index];else return 0;
@@ -11810,8 +12105,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
       this.modificationDates[pt.index] = now;
       if (pt.recordable) (_this$store = this.store) === null || _this$store === void 0 ? void 0 : _this$store.record(resource, pt.name, value, this.ages[pt.index], now);else (_this$store2 = this.store) === null || _this$store2 === void 0 ? void 0 : _this$store2.modify(resource, pt.name, value, this.ages[pt.index], now);
       var pmInfo = new _PropertyModificationInfo["default"](resource, pt, value, this.instanceAge);
-
-      _get(_getPrototypeOf(Instance.prototype), "_emit", this).call(this, "PropertyModified", pmInfo);
+      (0, _get2["default"])((0, _getPrototypeOf2["default"])(Instance.prototype), "_emit", this).call(this, "PropertyModified", pmInfo);
 
       resource._emit(":".concat(pt.name), value);
     }
@@ -11842,8 +12136,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
     value: function _emitResourceEvent(issuer, receivers, eventTemplate, value) {
       var resource = this.resource.deref();
       if (resource == null) return;
-
-      _get(_getPrototypeOf(Instance.prototype), "_emit", this).call(this, "EventOccurred", new _EventOccurredInfo["default"](resource, eventTemplate, value, issuer, receivers));
+      (0, _get2["default"])((0, _getPrototypeOf2["default"])(Instance.prototype), "_emit", this).call(this, "EventOccurred", new _EventOccurredInfo["default"](resource, eventTemplate, value, issuer, receivers));
     }
   }, {
     key: "getPropertyValue",
@@ -11978,61 +12271,62 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
       }
     }
   }]);
-
   return Instance;
 }(_IEventHandler2["default"]);
 
 exports["default"] = Instance;
 
-},{"../Core/IEventHandler.js":10,"../Data/AutoList.js":12,"../Data/KeyList.js":23,"../Data/PropertyValue.js":27,"../Data/PropertyValueArray.js":28,"../Data/TypedList.js":36,"../Data/TypedMap.js":37,"../Net/IIP/DistributedResource.js":42,"../Security/Permissions/IPermissionsManager.js":92,"../Security/Permissions/Ruling.js":93,"./CustomResourceEvent.js":66,"./EventOccurredInfo.js":67,"./PropertyModificationInfo.js":71,"./Warehouse.js":82}],71:[function(require,module,exports){
+},{"../Core/IEventHandler.js":44,"../Data/AutoList.js":46,"../Data/KeyList.js":57,"../Data/PropertyValue.js":61,"../Data/PropertyValueArray.js":62,"../Data/TypedList.js":70,"../Data/TypedMap.js":71,"../Net/IIP/DistributedResource.js":76,"../Security/Permissions/IPermissionsManager.js":126,"../Security/Permissions/Ruling.js":127,"./CustomResourceEvent.js":100,"./EventOccurredInfo.js":101,"./PropertyModificationInfo.js":105,"./Warehouse.js":116,"@babel/runtime/helpers/assertThisInitialized":4,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],105:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _IResource = _interopRequireDefault(require("./IResource.js"));
 
 var _PropertyTemplate = _interopRequireDefault(require("./Template/PropertyTemplate.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 var PropertyModificationInfo = /*#__PURE__*/function () {
   function PropertyModificationInfo(resource, propertyTemplate, value, age) {
-    _classCallCheck(this, PropertyModificationInfo);
-
+    (0, _classCallCheck2["default"])(this, PropertyModificationInfo);
     this.resource = resource;
     this.propertyTemplate = propertyTemplate;
     this.value = value;
     this.age = age;
   }
 
-  _createClass(PropertyModificationInfo, [{
+  (0, _createClass2["default"])(PropertyModificationInfo, [{
     key: "name",
     get: function get() {
       return this.propertyTemplate.name;
     }
   }]);
-
   return PropertyModificationInfo;
 }();
 
 exports["default"] = PropertyModificationInfo;
 
-},{"./IResource.js":68,"./Template/PropertyTemplate.js":78}],72:[function(require,module,exports){
+},{"./IResource.js":102,"./Template/PropertyTemplate.js":112,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],106:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var _DC = require("../../Data/DC.js");
 
@@ -12040,25 +12334,16 @@ var _RepresentationType = _interopRequireDefault(require("../../Data/Representat
 
 var _ParseResult = _interopRequireDefault(require("../../Data/ParseResult.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 var ArgumentTemplate = /*#__PURE__*/function () {
   function ArgumentTemplate(name, type, optional, index) {
-    _classCallCheck(this, ArgumentTemplate);
-
+    (0, _classCallCheck2["default"])(this, ArgumentTemplate);
     this.name = name;
     this.type = type;
     this.optional = optional;
     this.index = index;
   }
 
-  _createClass(ArgumentTemplate, [{
+  (0, _createClass2["default"])(ArgumentTemplate, [{
     key: "compose",
     value: function compose() {
       var name = _DC.DC.stringToBytes(this.name);
@@ -12078,21 +12363,32 @@ var ArgumentTemplate = /*#__PURE__*/function () {
       return new _ParseResult["default"](cs + 2 + tdr.size, new ArgumentTemplate(name, tdr.type, optional, index));
     }
   }]);
-
   return ArgumentTemplate;
 }();
 
 exports["default"] = ArgumentTemplate;
 
-},{"../../Data/DC.js":16,"../../Data/ParseResult.js":26,"../../Data/RepresentationType.js":31}],73:[function(require,module,exports){
+},{"../../Data/DC.js":50,"../../Data/ParseResult.js":60,"../../Data/RepresentationType.js":65,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],107:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _DC = require("../../Data/DC.js");
 
@@ -12100,42 +12396,19 @@ var _MemberTemplate2 = _interopRequireDefault(require("./MemberTemplate.js"));
 
 var _Codec = _interopRequireDefault(require("../../Data/Codec.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
-  _inherits(ConstantTemplate, _MemberTemplate);
+  (0, _inherits2["default"])(ConstantTemplate, _MemberTemplate);
 
   var _super = _createSuper(ConstantTemplate);
 
   function ConstantTemplate(template, index, name, inherited, valueType, value, annotation) {
     var _this;
 
-    _classCallCheck(this, ConstantTemplate);
-
+    (0, _classCallCheck2["default"])(this, ConstantTemplate);
     _this = _super.call(this, template, index, name, inherited);
     _this.valueType = valueType;
     _this.value = value;
@@ -12143,11 +12416,10 @@ var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
     return _this;
   }
 
-  _createClass(ConstantTemplate, [{
+  (0, _createClass2["default"])(ConstantTemplate, [{
     key: "compose",
     value: function compose() {
-      var name = _get(_getPrototypeOf(ConstantTemplate.prototype), "compose", this).call(this);
-
+      var name = (0, _get2["default"])((0, _getPrototypeOf2["default"])(ConstantTemplate.prototype), "compose", this).call(this);
       var hdr = this.inherited ? 0x80 : 0;
 
       if (this.annotation != null) {
@@ -12161,13 +12433,12 @@ var ConstantTemplate = /*#__PURE__*/function (_MemberTemplate) {
       }
     }
   }]);
-
   return ConstantTemplate;
 }(_MemberTemplate2["default"]);
 
 exports["default"] = ConstantTemplate;
 
-},{"../../Data/Codec.js":15,"../../Data/DC.js":16,"./MemberTemplate.js":76}],74:[function(require,module,exports){
+},{"../../Data/Codec.js":49,"../../Data/DC.js":50,"./MemberTemplate.js":110,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],108:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -12195,45 +12466,35 @@ exports["default"] = ConstantTemplate;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _DC = require("../../Data/DC.js");
 
 var _MemberTemplate2 = _interopRequireDefault(require("./MemberTemplate.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
-  _inherits(EventTemplate, _MemberTemplate);
+  (0, _inherits2["default"])(EventTemplate, _MemberTemplate);
 
   var _super = _createSuper(EventTemplate);
 
@@ -12242,9 +12503,7 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
 
     var annotation = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
     var listenable = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : false;
-
-    _classCallCheck(this, EventTemplate);
-
+    (0, _classCallCheck2["default"])(this, EventTemplate);
     _this = _super.call(this, template, index, name, inherited);
     _this.argumentType = argumentType;
     _this.annotation = annotation;
@@ -12252,11 +12511,10 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
     return _this;
   }
 
-  _createClass(EventTemplate, [{
+  (0, _createClass2["default"])(EventTemplate, [{
     key: "compose",
     value: function compose() {
-      var name = _get(_getPrototypeOf(EventTemplate.prototype), "compose", this).call(this);
-
+      var name = (0, _get2["default"])((0, _getPrototypeOf2["default"])(EventTemplate.prototype), "compose", this).call(this);
       var hdr = this.inherited ? 0x80 : 0;
       if (this.listenable) hdr |= 0x8;
 
@@ -12271,13 +12529,12 @@ var EventTemplate = /*#__PURE__*/function (_MemberTemplate) {
       }
     }
   }]);
-
   return EventTemplate;
 }(_MemberTemplate2["default"]);
 
 exports["default"] = EventTemplate;
 
-},{"../../Data/DC.js":16,"./MemberTemplate.js":76}],75:[function(require,module,exports){
+},{"../../Data/DC.js":50,"./MemberTemplate.js":110,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],109:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2022 Ahmed Kh. Zamil
 *
@@ -12305,45 +12562,35 @@ exports["default"] = EventTemplate;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _DC = require("../../Data/DC.js");
 
 var _MemberTemplate2 = _interopRequireDefault(require("./MemberTemplate.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
-  _inherits(FunctionTemplate, _MemberTemplate);
+  (0, _inherits2["default"])(FunctionTemplate, _MemberTemplate);
 
   var _super = _createSuper(FunctionTemplate);
 
@@ -12351,9 +12598,7 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
     var _this;
 
     var annotation = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
-
-    _classCallCheck(this, FunctionTemplate);
-
+    (0, _classCallCheck2["default"])(this, FunctionTemplate);
     _this = _super.call(this, template, index, name, inherited);
     _this.args = args;
     _this.returnType = returnType;
@@ -12362,11 +12607,10 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
     return _this;
   }
 
-  _createClass(FunctionTemplate, [{
+  (0, _createClass2["default"])(FunctionTemplate, [{
     key: "compose",
     value: function compose() {
-      var name = _get(_getPrototypeOf(FunctionTemplate.prototype), "compose", this).call(this);
-
+      var name = (0, _get2["default"])((0, _getPrototypeOf2["default"])(FunctionTemplate.prototype), "compose", this).call(this);
       var bl = new _DC.BL().addUint8(name.length).addDC(name).addDC(this.returnType.compose()).addUint8(this.args.length);
 
       for (var i = 0; i < this.args.length; i++) {
@@ -12383,13 +12627,12 @@ var FunctionTemplate = /*#__PURE__*/function (_MemberTemplate) {
       return bl.toDC();
     }
   }]);
-
   return FunctionTemplate;
 }(_MemberTemplate2["default"]);
 
 exports["default"] = FunctionTemplate;
 
-},{"../../Data/DC.js":16,"./MemberTemplate.js":76}],76:[function(require,module,exports){
+},{"../../Data/DC.js":50,"./MemberTemplate.js":110,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],110:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -12417,32 +12660,29 @@ exports["default"] = FunctionTemplate;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _DC = _interopRequireDefault(require("../../Data/DC.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 var MemberTemplate = /*#__PURE__*/function () {
   function MemberTemplate(template, index, name, inherited) {
-    _classCallCheck(this, MemberTemplate);
-
+    (0, _classCallCheck2["default"])(this, MemberTemplate);
     this.template = template;
     this.index = index;
     this.name = name;
     this.inherited = inherited;
   }
 
-  _createClass(MemberTemplate, [{
+  (0, _createClass2["default"])(MemberTemplate, [{
     key: "fullname",
     get: function get() {
       return this.template.className + "." + this.name;
@@ -12453,13 +12693,12 @@ var MemberTemplate = /*#__PURE__*/function () {
       return _DC["default"].stringToBytes(this.name);
     }
   }]);
-
   return MemberTemplate;
 }();
 
 exports["default"] = MemberTemplate;
 
-},{"../../Data/DC.js":16}],77:[function(require,module,exports){
+},{"../../Data/DC.js":50,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],111:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12473,48 +12712,38 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],78:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _get2 = _interopRequireDefault(require("@babel/runtime/helpers/get"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _DC = require("../../Data/DC.js");
 
 var _MemberTemplate2 = _interopRequireDefault(require("./MemberTemplate.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _get(target, property, receiver) { if (typeof Reflect !== "undefined" && Reflect.get) { _get = Reflect.get; } else { _get = function _get(target, property, receiver) { var base = _superPropBase(target, property); if (!base) return; var desc = Object.getOwnPropertyDescriptor(base, property); if (desc.get) { return desc.get.call(receiver); } return desc.value; }; } return _get(target, property, receiver || target); }
-
-function _superPropBase(object, property) { while (!Object.prototype.hasOwnProperty.call(object, property)) { object = _getPrototypeOf(object); if (object === null) break; } return object; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
-  _inherits(PropertyTemplate, _MemberTemplate);
+  (0, _inherits2["default"])(PropertyTemplate, _MemberTemplate);
 
   var _super = _createSuper(PropertyTemplate);
 
@@ -12524,9 +12753,7 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
     var readAnnotation = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
     var writeAnnotation = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
     var recordable = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : false;
-
-    _classCallCheck(this, PropertyTemplate);
-
+    (0, _classCallCheck2["default"])(this, PropertyTemplate);
     _this = _super.call(this, template, index, name, inherited);
     _this.valueType = valueType;
     _this.readAnnotation = readAnnotation;
@@ -12535,11 +12762,10 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
     return _this;
   }
 
-  _createClass(PropertyTemplate, [{
+  (0, _createClass2["default"])(PropertyTemplate, [{
     key: "compose",
     value: function compose() {
-      var name = _get(_getPrototypeOf(PropertyTemplate.prototype), "compose", this).call(this);
-
+      var name = (0, _get2["default"])((0, _getPrototypeOf2["default"])(PropertyTemplate.prototype), "compose", this).call(this);
       var pv = this.permission << 1 | (this.recordable ? 1 : 0);
       if (this.inherited) pv |= 0x80;
 
@@ -12560,56 +12786,43 @@ var PropertyTemplate = /*#__PURE__*/function (_MemberTemplate) {
       } else return (0, _DC.BL)().addUint8(0x20 | pv).addUint8(name.length).addDC(name).addDC(this.valueType.compose()).toDC();
     }
   }]);
-
   return PropertyTemplate;
 }(_MemberTemplate2["default"]);
 
 exports["default"] = PropertyTemplate;
 
-},{"../../Data/DC.js":16,"./MemberTemplate.js":76}],79:[function(require,module,exports){
+},{"../../Data/DC.js":50,"./MemberTemplate.js":110,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/get":13,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],113:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.Arg = exports.Func = exports.Const = exports.Evt = exports.Prop = exports.TemplateDescriber = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
+
 var _Void = _interopRequireDefault(require("../../Data/Void.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var TemplateDescriber = function TemplateDescriber(namespace, members, parent) {
   var version = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
   var annotation = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : null;
   var classId = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : null;
   var className = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
-
-  _classCallCheck(this, TemplateDescriber);
-
-  _defineProperty(this, "properties", void 0);
-
-  _defineProperty(this, "events", void 0);
-
-  _defineProperty(this, "functions", void 0);
-
-  _defineProperty(this, "constants", void 0);
-
-  _defineProperty(this, "namespace", void 0);
-
-  _defineProperty(this, "version", void 0);
-
-  _defineProperty(this, "parent", void 0);
-
-  _defineProperty(this, "annotation", void 0);
-
-  _defineProperty(this, "classId", void 0);
-
-  _defineProperty(this, "className", void 0);
-
+  (0, _classCallCheck2["default"])(this, TemplateDescriber);
+  (0, _defineProperty2["default"])(this, "properties", void 0);
+  (0, _defineProperty2["default"])(this, "events", void 0);
+  (0, _defineProperty2["default"])(this, "functions", void 0);
+  (0, _defineProperty2["default"])(this, "constants", void 0);
+  (0, _defineProperty2["default"])(this, "namespace", void 0);
+  (0, _defineProperty2["default"])(this, "version", void 0);
+  (0, _defineProperty2["default"])(this, "parent", void 0);
+  (0, _defineProperty2["default"])(this, "annotation", void 0);
+  (0, _defineProperty2["default"])(this, "classId", void 0);
+  (0, _defineProperty2["default"])(this, "className", void 0);
   if (namespace == null) throw new Error("Namespace name can't be null.");
   if (members == null) throw new Error("Members name can't be null.");
   this.namespace = namespace;
@@ -12642,19 +12855,12 @@ var Prop = function Prop(name) {
   var readAnnotation = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
   var writeAnnotation = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
   var recordable = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
-
-  _classCallCheck(this, Prop);
-
-  _defineProperty(this, "name", void 0);
-
-  _defineProperty(this, "type", void 0);
-
-  _defineProperty(this, "readAnnotation", void 0);
-
-  _defineProperty(this, "writeAnnotation", void 0);
-
-  _defineProperty(this, "recordable", void 0);
-
+  (0, _classCallCheck2["default"])(this, Prop);
+  (0, _defineProperty2["default"])(this, "name", void 0);
+  (0, _defineProperty2["default"])(this, "type", void 0);
+  (0, _defineProperty2["default"])(this, "readAnnotation", void 0);
+  (0, _defineProperty2["default"])(this, "writeAnnotation", void 0);
+  (0, _defineProperty2["default"])(this, "recordable", void 0);
   if (name == null) throw new Error("Property name can't be null.");
   this.name = name;
   this.type = type !== null && type !== void 0 ? type : Object;
@@ -12669,17 +12875,11 @@ var Evt = function Evt(name) {
   var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Object;
   var listenable = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
   var annotation = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
-  _classCallCheck(this, Evt);
-
-  _defineProperty(this, "name", void 0);
-
-  _defineProperty(this, "listenable", void 0);
-
-  _defineProperty(this, "type", void 0);
-
-  _defineProperty(this, "annotation", void 0);
-
+  (0, _classCallCheck2["default"])(this, Evt);
+  (0, _defineProperty2["default"])(this, "name", void 0);
+  (0, _defineProperty2["default"])(this, "listenable", void 0);
+  (0, _defineProperty2["default"])(this, "type", void 0);
+  (0, _defineProperty2["default"])(this, "annotation", void 0);
   if (name == null) throw new Error("Event name can't be null.");
   this.name = name;
   this.type = type !== null && type !== void 0 ? type : Object;
@@ -12693,17 +12893,11 @@ var Const = function Const(name) {
   var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : String;
   var value = arguments.length > 2 ? arguments[2] : undefined;
   var annotation = arguments.length > 3 ? arguments[3] : undefined;
-
-  _classCallCheck(this, Const);
-
-  _defineProperty(this, "name", void 0);
-
-  _defineProperty(this, "type", void 0);
-
-  _defineProperty(this, "annotation", void 0);
-
-  _defineProperty(this, "value", void 0);
-
+  (0, _classCallCheck2["default"])(this, Const);
+  (0, _defineProperty2["default"])(this, "name", void 0);
+  (0, _defineProperty2["default"])(this, "type", void 0);
+  (0, _defineProperty2["default"])(this, "annotation", void 0);
+  (0, _defineProperty2["default"])(this, "value", void 0);
   if (name == null) throw new Error("Constant name can't be null.");
   this.name = name;
   this.type = type !== null && type !== void 0 ? type : String;
@@ -12718,19 +12912,12 @@ var Func = function Func(name) {
   var args = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
   var annotation = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
   var isStatic = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
-
-  _classCallCheck(this, Func);
-
-  _defineProperty(this, "name", void 0);
-
-  _defineProperty(this, "returnType", void 0);
-
-  _defineProperty(this, "args", void 0);
-
-  _defineProperty(this, "annotation", void 0);
-
-  _defineProperty(this, "isStatic", void 0);
-
+  (0, _classCallCheck2["default"])(this, Func);
+  (0, _defineProperty2["default"])(this, "name", void 0);
+  (0, _defineProperty2["default"])(this, "returnType", void 0);
+  (0, _defineProperty2["default"])(this, "args", void 0);
+  (0, _defineProperty2["default"])(this, "annotation", void 0);
+  (0, _defineProperty2["default"])(this, "isStatic", void 0);
   if (name == null) throw new Error("Function name can't be null.");
   this.name = name;
   this.returnType = returnType !== null && returnType !== void 0 ? returnType : _Void["default"];
@@ -12744,15 +12931,10 @@ exports.Func = Func;
 var Arg = function Arg(name) {
   var type = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : Object;
   var optional = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
-
-  _classCallCheck(this, Arg);
-
-  _defineProperty(this, "name", void 0);
-
-  _defineProperty(this, "type", void 0);
-
-  _defineProperty(this, "optional", void 0);
-
+  (0, _classCallCheck2["default"])(this, Arg);
+  (0, _defineProperty2["default"])(this, "name", void 0);
+  (0, _defineProperty2["default"])(this, "type", void 0);
+  (0, _defineProperty2["default"])(this, "optional", void 0);
   if (name == null) throw new Error("Argument name can't be null.");
   this.name = name;
   this.type = type !== null && type !== void 0 ? type : Object;
@@ -12761,7 +12943,7 @@ var Arg = function Arg(name) {
 
 exports.Arg = Arg;
 
-},{"../../Data/Void.js":38}],80:[function(require,module,exports){
+},{"../../Data/Void.js":72,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/interopRequireDefault":16}],114:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -12775,7 +12957,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],81:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -12799,10 +12981,18 @@ exports["default"] = _default;
 */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _FunctionTemplate = _interopRequireDefault(require("./FunctionTemplate.js"));
 
@@ -12836,34 +13026,17 @@ var _RepresentationType = _interopRequireDefault(require("../../Data/Representat
 
 var _Codec = _interopRequireDefault(require("../../Data/Codec.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 var TypeTemplate = /*#__PURE__*/function () {
   function TypeTemplate(type, addToWarehouse) {
     var _describer$className, _describer$classId;
 
-    _classCallCheck(this, TypeTemplate);
-
-    _defineProperty(this, "isWrapper", false);
-
-    _defineProperty(this, "properties", []);
-
-    _defineProperty(this, "events", []);
-
-    _defineProperty(this, "functions", []);
-
-    _defineProperty(this, "members", []);
-
-    _defineProperty(this, "constants", []);
-
+    (0, _classCallCheck2["default"])(this, TypeTemplate);
+    (0, _defineProperty2["default"])(this, "isWrapper", false);
+    (0, _defineProperty2["default"])(this, "properties", []);
+    (0, _defineProperty2["default"])(this, "events", []);
+    (0, _defineProperty2["default"])(this, "functions", []);
+    (0, _defineProperty2["default"])(this, "members", []);
+    (0, _defineProperty2["default"])(this, "constants", []);
     if (type === undefined) return;
     if (type.prototype instanceof _IRecord["default"]) this.templateType = _TemplateType["default"].Record;else if (type.prototype instanceof _IResource["default"]) this.templateType = _TemplateType["default"].Resource;else if (type.prototype instanceof _IEnum["default"]) this.templateType = _TemplateType["default"].Enum;else throw new Error("Type must implement IResource, IRecord, IEnum or a subtype of DistributedResource.");
     this.isWrapper = type.prototype instanceof _DistributedResource["default"];
@@ -12979,7 +13152,7 @@ var TypeTemplate = /*#__PURE__*/function () {
     this.content = b.toArray();
   }
 
-  _createClass(TypeTemplate, [{
+  (0, _createClass2["default"])(TypeTemplate, [{
     key: "getEventTemplateByName",
     value: function getEventTemplateByName(eventName) {
       for (var i = 0; i < this.events.length; i++) {
@@ -13394,13 +13567,12 @@ var TypeTemplate = /*#__PURE__*/function () {
       return od;
     }
   }]);
-
   return TypeTemplate;
 }();
 
 exports["default"] = TypeTemplate;
 
-},{"../../Data/Codec.js":15,"../../Data/DC.js":16,"../../Data/IEnum.js":21,"../../Data/IRecord.js":22,"../../Data/RepresentationType.js":31,"../../Net/IIP/DistributedConnection.js":40,"../../Net/IIP/DistributedResource.js":42,"../../Security/Integrity/SHA256.js":89,"../IResource.js":68,"../Warehouse.js":82,"./ArgumentTemplate.js":72,"./ConstantTemplate.js":73,"./EventTemplate.js":74,"./FunctionTemplate.js":75,"./PropertyTemplate.js":78,"./TemplateType.js":80}],82:[function(require,module,exports){
+},{"../../Data/Codec.js":49,"../../Data/DC.js":50,"../../Data/IEnum.js":55,"../../Data/IRecord.js":56,"../../Data/RepresentationType.js":65,"../../Net/IIP/DistributedConnection.js":74,"../../Net/IIP/DistributedResource.js":76,"../../Security/Integrity/SHA256.js":123,"../IResource.js":102,"../Warehouse.js":116,"./ArgumentTemplate.js":106,"./ConstantTemplate.js":107,"./EventTemplate.js":108,"./FunctionTemplate.js":109,"./PropertyTemplate.js":112,"./TemplateType.js":114,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/defineProperty":12,"@babel/runtime/helpers/interopRequireDefault":16}],116:[function(require,module,exports){
 /*
 * Copyright (c) 2017 - 2022 Ahmed Kh. Zamil
 *
@@ -13428,10 +13600,26 @@ exports["default"] = TypeTemplate;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _typeof3 = require("@babel/runtime/helpers/typeof");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = exports.WH = void 0;
+
+var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _AsyncReply = _interopRequireDefault(require("../Core/AsyncReply.js"));
 
@@ -13469,42 +13657,21 @@ var _IEnum = _interopRequireDefault(require("../Data/IEnum.js"));
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
 
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || _typeof3(obj) !== "object" && typeof obj !== "function") { return { "default": obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj["default"] = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var WH = /*#__PURE__*/function (_IEventHandler) {
-  _inherits(WH, _IEventHandler);
+  (0, _inherits2["default"])(WH, _IEventHandler);
 
   var _super = _createSuper(WH);
 
   function WH() {
     var _this;
 
-    _classCallCheck(this, WH);
-
+    (0, _classCallCheck2["default"])(this, WH);
     _this = _super.call(this);
     _this.stores = new _AutoList["default"]();
     _this.resources = new _KeyList["default"]();
@@ -13527,7 +13694,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
     return _this;
   }
 
-  _createClass(WH, [{
+  (0, _createClass2["default"])(WH, [{
     key: "newInstance",
     value: function newInstance(type, properties) {
       var proxyType = _ResourceProxy["default"].getProxy(type);
@@ -13833,7 +14000,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
                   return x.instance.name == p[i];
                 }); // <IResource>(p[i]);
 
-                if (children.length > 0) {
+                if (children != null && children.length > 0) {
                   if (i == p.length - 1) {
                     rt.trigger(children);
                     return;
@@ -13857,7 +14024,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
         var _ret = _loop();
 
-        if (_typeof(_ret) === "object") return _ret.v;
+        if ((0, _typeof2["default"])(_ret) === "object") return _ret.v;
       }
 
       return new _AsyncReply["default"](null);
@@ -13923,7 +14090,6 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
       this.putTemplate(template);
     }
   }]);
-
   return WH;
 }(_IEventHandler2["default"]);
 
@@ -13941,7 +14107,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 var _default = Warehouse;
 exports["default"] = _default;
 
-},{"../Core/AsyncBag.js":3,"../Core/AsyncReply.js":6,"../Core/IEventHandler.js":10,"../Data/AutoList.js":12,"../Data/IEnum.js":21,"../Data/IRecord.js":22,"../Data/KeyList.js":23,"../Net/IIP/DistributedConnection.js":40,"../Net/IIP/DistributedResource.js":42,"../Proxy/ResourceProxy.js":64,"../Resource/Instance.js":70,"../Resource/Template/TypeTemplate.js":81,"../Stores/IndexedDBStore.js":94,"../Stores/MemoryStore.js":95,"./IResource.js":68,"./IStore.js":69,"./Template/TemplateType.js":80}],83:[function(require,module,exports){
+},{"../Core/AsyncBag.js":37,"../Core/AsyncReply.js":40,"../Core/IEventHandler.js":44,"../Data/AutoList.js":46,"../Data/IEnum.js":55,"../Data/IRecord.js":56,"../Data/KeyList.js":57,"../Net/IIP/DistributedConnection.js":74,"../Net/IIP/DistributedResource.js":76,"../Proxy/ResourceProxy.js":98,"../Resource/Instance.js":104,"../Resource/Template/TypeTemplate.js":115,"../Stores/IndexedDBStore.js":128,"../Stores/MemoryStore.js":129,"./IResource.js":102,"./IStore.js":103,"./Template/TemplateType.js":114,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/typeof":31}],117:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -13969,21 +14135,20 @@ exports["default"] = _default;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var Authentication = /*#__PURE__*/function () {
   function Authentication(type) {
-    _classCallCheck(this, Authentication);
-
+    (0, _classCallCheck2["default"])(this, Authentication);
     this.method = 0;
     this.tokenIndex = 0;
     this.type = type;
@@ -13992,19 +14157,18 @@ var Authentication = /*#__PURE__*/function () {
     this.username = null;
   }
 
-  _createClass(Authentication, [{
+  (0, _createClass2["default"])(Authentication, [{
     key: "fullName",
     get: function get() {
       return this.domain + "@" + this.username;
     }
   }]);
-
   return Authentication;
 }();
 
 exports["default"] = Authentication;
 
-},{}],84:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],118:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14019,7 +14183,7 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],85:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -14035,46 +14199,39 @@ var _default = {
 };
 exports["default"] = _default;
 
-},{}],86:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _Authentication2 = _interopRequireDefault(require("./Authentication.js"));
 
 var _AuthenticationType = _interopRequireDefault(require("./AuthenticationType.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var ClientAuthentication = /*#__PURE__*/function (_Authentication) {
-  _inherits(ClientAuthentication, _Authentication);
+  (0, _inherits2["default"])(ClientAuthentication, _Authentication);
 
   var _super = _createSuper(ClientAuthentication);
 
   function ClientAuthentication() {
-    _classCallCheck(this, ClientAuthentication);
-
+    (0, _classCallCheck2["default"])(this, ClientAuthentication);
     return _super.call(this, _AuthenticationType["default"].Client);
   }
 
@@ -14083,46 +14240,39 @@ var ClientAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = ClientAuthentication;
 
-},{"./Authentication.js":83,"./AuthenticationType.js":85}],87:[function(require,module,exports){
+},{"./Authentication.js":117,"./AuthenticationType.js":119,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],121:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _Authentication2 = _interopRequireDefault(require("./Authentication.js"));
 
 var _AuthenticationType = _interopRequireDefault(require("./AuthenticationType.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var HostAuthentication = /*#__PURE__*/function (_Authentication) {
-  _inherits(HostAuthentication, _Authentication);
+  (0, _inherits2["default"])(HostAuthentication, _Authentication);
 
   var _super = _createSuper(HostAuthentication);
 
   function HostAuthentication() {
-    _classCallCheck(this, HostAuthentication);
-
+    (0, _classCallCheck2["default"])(this, HostAuthentication);
     return _super.call(this, _AuthenticationType["default"].Host);
   }
 
@@ -14131,7 +14281,7 @@ var HostAuthentication = /*#__PURE__*/function (_Authentication) {
 
 exports["default"] = HostAuthentication;
 
-},{"./Authentication.js":83,"./AuthenticationType.js":85}],88:[function(require,module,exports){
+},{"./Authentication.js":117,"./AuthenticationType.js":119,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],122:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14159,16 +14309,17 @@ exports["default"] = HostAuthentication;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
 var Session = function Session(localAuthentication, remoteAuthentication) {
-  _classCallCheck(this, Session);
-
+  (0, _classCallCheck2["default"])(this, Session);
   this.localAuthentication = localAuthentication;
   this.remoteAuthentication = remoteAuthentication;
   this.id = null;
@@ -14178,28 +14329,54 @@ var Session = function Session(localAuthentication, remoteAuthentication) {
 
 exports["default"] = Session;
 
-},{}],89:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/interopRequireDefault":16}],123:[function(require,module,exports){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
 var _DC = require("../../Data/DC.js");
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/*
+* Copyright (c) 2017 Ahmed Kh. Zamil
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
+/** 
+ * Created by Ahmed Zamil on 25/12/2017.
+ * Ref: https://en.wikipedia.org/wiki/SHA-2
+ */
 var SHA256 = /*#__PURE__*/function () {
   function SHA256() {
-    _classCallCheck(this, SHA256);
+    (0, _classCallCheck2["default"])(this, SHA256);
   }
 
-  _createClass(SHA256, null, [{
+  (0, _createClass2["default"])(SHA256, null, [{
     key: "RROT",
     value: function RROT(n, d) {
       return n >>> d | n << 32 - d;
@@ -14308,60 +14485,50 @@ var SHA256 = /*#__PURE__*/function () {
       return results.toDC();
     }
   }]);
-
   return SHA256;
 }();
 
 exports["default"] = SHA256;
 
-},{"../../Data/DC.js":16}],90:[function(require,module,exports){
+},{"../../Data/DC.js":50,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],124:[function(require,module,exports){
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _AsyncReply = _interopRequireDefault(require("../../Core/AsyncReply.js"));
 
 var _IResource2 = _interopRequireDefault(require("../../Resource/IResource.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var IMembership = /*#__PURE__*/function (_IResource) {
-  _inherits(IMembership, _IResource);
+  (0, _inherits2["default"])(IMembership, _IResource);
 
   var _super = _createSuper(IMembership);
 
   function IMembership() {
-    _classCallCheck(this, IMembership);
-
+    (0, _classCallCheck2["default"])(this, IMembership);
     return _super.apply(this, arguments);
   }
 
-  _createClass(IMembership, [{
+  (0, _createClass2["default"])(IMembership, [{
     key: "userExists",
     value: function userExists(username, domain) {
       return new _AsyncReply["default"](false);
@@ -14391,13 +14558,12 @@ var IMembership = /*#__PURE__*/function (_IResource) {
     key: "tokenExists",
     value: function tokenExists(tokenIndex, domain) {}
   }]);
-
   return IMembership;
 }(_IResource2["default"]);
 
 exports["default"] = IMembership;
 
-},{"../../Core/AsyncReply.js":6,"../../Resource/IResource.js":68}],91:[function(require,module,exports){
+},{"../../Core/AsyncReply.js":40,"../../Resource/IResource.js":102,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],125:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14449,7 +14615,7 @@ var _default = // ActionType =
 };
 exports["default"] = _default;
 
-},{}],92:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14477,23 +14643,23 @@ exports["default"] = _default;
  */
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
 var IPermissionsManager = /*#__PURE__*/function () {
   function IPermissionsManager() {
-    _classCallCheck(this, IPermissionsManager);
+    (0, _classCallCheck2["default"])(this, IPermissionsManager);
   }
 
-  _createClass(IPermissionsManager, [{
+  (0, _createClass2["default"])(IPermissionsManager, [{
     key: "applicable",
     value: /// <summary>
     /// Check for permission.
@@ -14511,13 +14677,12 @@ var IPermissionsManager = /*#__PURE__*/function () {
     key: "settings",
     get: function get() {}
   }]);
-
   return IPermissionsManager;
 }();
 
 exports["default"] = IPermissionsManager;
 
-},{}],93:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/interopRequireDefault":16}],127:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -14557,7 +14722,7 @@ var _default = //Ruling =
 };
 exports["default"] = _default;
 
-},{}],94:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 /*
 * Copyright (c) 2017-2021 Ahmed Kh. Zamil
 *
@@ -14585,12 +14750,24 @@ exports["default"] = _default;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+
+var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
 
 var _IResource = require("../Resource/IResource.js");
 
@@ -14612,59 +14789,32 @@ var _TypedMap = _interopRequireDefault(require("../Data/TypedMap.js"));
 
 var _ResourceProxy = _interopRequireDefault(require("../Proxy/ResourceProxy.js"));
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
-
-function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
-
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-
-function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
-
-function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
-
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var IndexedDBStore = /*#__PURE__*/function (_IStore) {
-  _inherits(IndexedDBStore, _IStore);
+  (0, _inherits2["default"])(IndexedDBStore, _IStore);
 
   var _super = _createSuper(IndexedDBStore);
 
   function IndexedDBStore() {
     var _this;
 
-    _classCallCheck(this, IndexedDBStore);
-
+    (0, _classCallCheck2["default"])(this, IndexedDBStore);
     _this = _super.call(this);
     _this.resources = new Map();
     _this.classes = new Map();
     return _this;
   }
 
-  _createClass(IndexedDBStore, [{
+  (0, _createClass2["default"])(IndexedDBStore, [{
     key: "compose",
     value: function compose(value) {
       var type = _RepresentationType.RepresentationType.fromType(value);
@@ -14941,7 +15091,7 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
 
       try {
         for (_iterator.s(); !(_step = _iterator.n()).done;) {
-          var _step$value = _slicedToArray(_step.value, 2),
+          var _step$value = (0, _slicedToArray2["default"])(_step.value, 2),
               k = _step$value[0],
               v = _step$value[1];
 
@@ -14986,13 +15136,12 @@ var IndexedDBStore = /*#__PURE__*/function (_IStore) {
     //  }
 
   }]);
-
   return IndexedDBStore;
 }(_IStore2["default"]);
 
 exports["default"] = IndexedDBStore;
 
-},{"../Core/AsyncBag.js":3,"../Core/AsyncReply.js":6,"../Core/ErrorType.js":7,"../Core/ExceptionCode.js":8,"../Data/RepresentationType.js":31,"../Data/TypedMap.js":37,"../Proxy/ResourceProxy.js":64,"../Resource/IResource.js":68,"../Resource/IStore.js":69,"../Resource/Warehouse.js":82}],95:[function(require,module,exports){
+},{"../Core/AsyncBag.js":37,"../Core/AsyncReply.js":40,"../Core/ErrorType.js":41,"../Core/ExceptionCode.js":42,"../Data/RepresentationType.js":65,"../Data/TypedMap.js":71,"../Proxy/ResourceProxy.js":98,"../Resource/IResource.js":102,"../Resource/IStore.js":103,"../Resource/Warehouse.js":116,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23,"@babel/runtime/helpers/slicedToArray":26}],129:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
@@ -15020,18 +15169,26 @@ exports["default"] = IndexedDBStore;
  */
 "use strict";
 
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
+var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/classCallCheck"));
+
+var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
+
+var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
+
+var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
+
+var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
 var _IStore2 = _interopRequireDefault(require("../Resource/IStore.js"));
 
 var _AsyncReply = _interopRequireDefault(require("../Core/AsyncReply.js"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
@@ -15039,42 +15196,25 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = (0, _getPrototypeOf2["default"])(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = (0, _getPrototypeOf2["default"])(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return (0, _possibleConstructorReturn2["default"])(this, result); }; }
 
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
 var MemoryStore = /*#__PURE__*/function (_IStore) {
-  _inherits(MemoryStore, _IStore);
+  (0, _inherits2["default"])(MemoryStore, _IStore);
 
   var _super = _createSuper(MemoryStore);
 
   function MemoryStore() {
     var _this;
 
-    _classCallCheck(this, MemoryStore);
-
+    (0, _classCallCheck2["default"])(this, MemoryStore);
     _this = _super.call(this);
     _this.resources = new Map();
     return _this;
   }
 
-  _createClass(MemoryStore, [{
+  (0, _createClass2["default"])(MemoryStore, [{
     key: "put",
     value: function put(resource) {
       this.resources.set(resource.instance.id, resource);
@@ -15126,15 +15266,16 @@ var MemoryStore = /*#__PURE__*/function (_IStore) {
     key: "getRecord",
     value: function getRecord(resource, fromDate, toDate) {}
   }]);
-
   return MemoryStore;
 }(_IStore2["default"]);
 
 exports["default"] = MemoryStore;
 
-},{"../Core/AsyncReply.js":6,"../Resource/IStore.js":69}],96:[function(require,module,exports){
+},{"../Core/AsyncReply.js":40,"../Resource/IStore.js":103,"@babel/runtime/helpers/classCallCheck":7,"@babel/runtime/helpers/createClass":11,"@babel/runtime/helpers/getPrototypeOf":14,"@babel/runtime/helpers/inherits":15,"@babel/runtime/helpers/interopRequireDefault":16,"@babel/runtime/helpers/possibleConstructorReturn":23}],130:[function(require,module,exports){
 (function (global){(function (){
 "use strict";
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -15306,8 +15447,6 @@ var _Void = _interopRequireDefault(require("./Data/Void.js"));
 var _IEnum = _interopRequireDefault(require("./Data/IEnum.js"));
 
 var _TemplateDescriber = require("./Resource/Template/TemplateDescriber.js");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 
 var namespace = {
   Core: {
@@ -15483,4 +15622,4 @@ var _default = namespace;
 exports["default"] = _default;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./Core/AsyncException.js":4,"./Core/AsyncQueue.js":5,"./Core/AsyncReply.js":6,"./Core/ErrorType.js":7,"./Core/ExceptionCode.js":8,"./Core/IDestructible.js":9,"./Core/IEventHandler.js":10,"./Core/ProgressType.js":11,"./Data/AutoList.js":12,"./Data/AutoMap.js":13,"./Data/BinaryList.js":14,"./Data/Codec.js":15,"./Data/DC.js":16,"./Data/ExtendedTypes.js":19,"./Data/Guid.js":20,"./Data/IEnum.js":21,"./Data/IRecord.js":22,"./Data/KeyList.js":23,"./Data/NotModified.js":24,"./Data/Nullable.js":25,"./Data/PropertyValue.js":27,"./Data/Record.js":29,"./Data/RepresentationType.js":31,"./Data/ResourceArray.js":32,"./Data/ResourceArrayType.js":33,"./Data/TransmissionType.js":34,"./Data/Tuple.js":35,"./Data/TypedList.js":36,"./Data/TypedMap.js":37,"./Data/Void.js":38,"./Net/IIP/DistributedConnection.js":40,"./Net/IIP/DistributedPropertyContext.js":41,"./Net/IIP/DistributedResource.js":42,"./Net/IIP/DistributedResourceQueueItem.js":43,"./Net/IIP/DistributedResourceQueueItemType.js":44,"./Net/IIP/DistributedServer.js":45,"./Net/IIP/EntryPoint.js":46,"./Net/INetworkReceiver.js":47,"./Net/NetworkBuffer.js":48,"./Net/NetworkConnections.js":49,"./Net/NetworkServer.js":50,"./Net/NetworkSession.js":51,"./Net/Packets/IIPAuthPacket.js":52,"./Net/Packets/IIPAuthPacketAction.js":53,"./Net/Packets/IIPAuthPacketCommand.js":54,"./Net/Packets/IIPPacket.js":55,"./Net/Packets/IIPPacketAction.js":56,"./Net/Packets/IIPPacketCommand.js":57,"./Net/Packets/IIPPacketEvent.js":58,"./Net/Packets/IIPPacketReport.js":59,"./Net/SendList.js":60,"./Net/Sockets/ISocket.js":61,"./Net/Sockets/SocketState.js":62,"./Net/Sockets/WSocket.js":63,"./Proxy/ResourceProxy.js":64,"./Proxy/TemplateGenerator.js":65,"./Resource/CustomResourceEvent.js":66,"./Resource/IResource.js":68,"./Resource/IStore.js":69,"./Resource/Instance.js":70,"./Resource/Template/ArgumentTemplate.js":72,"./Resource/Template/EventTemplate.js":74,"./Resource/Template/FunctionTemplate.js":75,"./Resource/Template/MemberTemplate.js":76,"./Resource/Template/MemberType.js":77,"./Resource/Template/PropertyTemplate.js":78,"./Resource/Template/TemplateDescriber.js":79,"./Resource/Template/TemplateType.js":80,"./Resource/Template/TypeTemplate.js":81,"./Resource/Warehouse.js":82,"./Security/Authority/Authentication.js":83,"./Security/Authority/AuthenticationMethod.js":84,"./Security/Authority/AuthenticationType.js":85,"./Security/Authority/ClientAuthentication.js":86,"./Security/Authority/HostAuthentication.js":87,"./Security/Authority/Session.js":88,"./Security/Integrity/SHA256.js":89,"./Security/Membership/IMembership.js":90,"./Security/Permissions/ActionType.js":91,"./Security/Permissions/IPermissionsManager.js":92,"./Security/Permissions/Ruling.js":93,"./Stores/IndexedDBStore.js":94,"./Stores/MemoryStore.js":95}]},{},[96]);
+},{"./Core/AsyncException.js":38,"./Core/AsyncQueue.js":39,"./Core/AsyncReply.js":40,"./Core/ErrorType.js":41,"./Core/ExceptionCode.js":42,"./Core/IDestructible.js":43,"./Core/IEventHandler.js":44,"./Core/ProgressType.js":45,"./Data/AutoList.js":46,"./Data/AutoMap.js":47,"./Data/BinaryList.js":48,"./Data/Codec.js":49,"./Data/DC.js":50,"./Data/ExtendedTypes.js":53,"./Data/Guid.js":54,"./Data/IEnum.js":55,"./Data/IRecord.js":56,"./Data/KeyList.js":57,"./Data/NotModified.js":58,"./Data/Nullable.js":59,"./Data/PropertyValue.js":61,"./Data/Record.js":63,"./Data/RepresentationType.js":65,"./Data/ResourceArray.js":66,"./Data/ResourceArrayType.js":67,"./Data/TransmissionType.js":68,"./Data/Tuple.js":69,"./Data/TypedList.js":70,"./Data/TypedMap.js":71,"./Data/Void.js":72,"./Net/IIP/DistributedConnection.js":74,"./Net/IIP/DistributedPropertyContext.js":75,"./Net/IIP/DistributedResource.js":76,"./Net/IIP/DistributedResourceQueueItem.js":77,"./Net/IIP/DistributedResourceQueueItemType.js":78,"./Net/IIP/DistributedServer.js":79,"./Net/IIP/EntryPoint.js":80,"./Net/INetworkReceiver.js":81,"./Net/NetworkBuffer.js":82,"./Net/NetworkConnections.js":83,"./Net/NetworkServer.js":84,"./Net/NetworkSession.js":85,"./Net/Packets/IIPAuthPacket.js":86,"./Net/Packets/IIPAuthPacketAction.js":87,"./Net/Packets/IIPAuthPacketCommand.js":88,"./Net/Packets/IIPPacket.js":89,"./Net/Packets/IIPPacketAction.js":90,"./Net/Packets/IIPPacketCommand.js":91,"./Net/Packets/IIPPacketEvent.js":92,"./Net/Packets/IIPPacketReport.js":93,"./Net/SendList.js":94,"./Net/Sockets/ISocket.js":95,"./Net/Sockets/SocketState.js":96,"./Net/Sockets/WSocket.js":97,"./Proxy/ResourceProxy.js":98,"./Proxy/TemplateGenerator.js":99,"./Resource/CustomResourceEvent.js":100,"./Resource/IResource.js":102,"./Resource/IStore.js":103,"./Resource/Instance.js":104,"./Resource/Template/ArgumentTemplate.js":106,"./Resource/Template/EventTemplate.js":108,"./Resource/Template/FunctionTemplate.js":109,"./Resource/Template/MemberTemplate.js":110,"./Resource/Template/MemberType.js":111,"./Resource/Template/PropertyTemplate.js":112,"./Resource/Template/TemplateDescriber.js":113,"./Resource/Template/TemplateType.js":114,"./Resource/Template/TypeTemplate.js":115,"./Resource/Warehouse.js":116,"./Security/Authority/Authentication.js":117,"./Security/Authority/AuthenticationMethod.js":118,"./Security/Authority/AuthenticationType.js":119,"./Security/Authority/ClientAuthentication.js":120,"./Security/Authority/HostAuthentication.js":121,"./Security/Authority/Session.js":122,"./Security/Integrity/SHA256.js":123,"./Security/Membership/IMembership.js":124,"./Security/Permissions/ActionType.js":125,"./Security/Permissions/IPermissionsManager.js":126,"./Security/Permissions/Ruling.js":127,"./Stores/IndexedDBStore.js":128,"./Stores/MemoryStore.js":129,"@babel/runtime/helpers/interopRequireDefault":16}]},{},[130]);

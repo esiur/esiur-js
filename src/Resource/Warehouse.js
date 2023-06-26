@@ -437,7 +437,7 @@ export class WH extends IEventHandler
                         for (var i = 1; i < p.length; i++)
                         {
                             var children = resource.instance.children.list.filter(x=>x.instance.name == p[i]);// <IResource>(p[i]);
-                            if (children.length > 0)
+                            if (children != null && children.length > 0)
                             {
                                 if (i == p.length - 1)
                                 {

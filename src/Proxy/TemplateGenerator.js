@@ -267,7 +267,7 @@ export default class TemplateGenerator {
       // no longer needed
       Warehouse.remove(con);
 
-      let dstDir = `lib/${dir}`;
+      let dstDir = `${dir}`;
 
 
       if (!fs.existsSync(dstDir)){
