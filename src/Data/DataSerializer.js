@@ -135,13 +135,13 @@ export default class DataSerializer {
       return new DataSerializerComposeResults(
           TransmissionTypeIdentifier.Null, new DC(0));
 
-    var cts = template.constants.filter((x) => x.value == value);
+    var cts = template.constants.filter((x) => x.value == value.value);
 
     if (cts.length == 0)
       return new DataSerializerComposeResults(
           TransmissionTypeIdentifier.Null, new DC(0));
 
-    var rt = BinaryList();
+    var rt = new BinaryList();
 
     rt.addGuid(template.classId);
     rt.addUint8(cts[0].index);

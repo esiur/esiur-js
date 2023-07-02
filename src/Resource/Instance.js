@@ -216,6 +216,7 @@ export default class Instance extends IEventHandler
     {
         super();
 
+        this.isDestroyed = false;
         this.store = store;
         this.resource = new WeakRef(resource);
         this.id = id;
@@ -247,6 +248,7 @@ export default class Instance extends IEventHandler
 
 
         resource.on("destroy", function(sender){
+            self.isDestroyed = true;
             self._emit("ResourceDestroyed", sender);
         });
 

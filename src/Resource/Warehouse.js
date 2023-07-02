@@ -201,7 +201,10 @@ export class WH extends IEventHandler
 
         if (resource.instance.store != null)
             resource.instance.store.remove(resource);
+
         resource.destroy();
+        
+        resource.instance = null;
 
         return true;
     }

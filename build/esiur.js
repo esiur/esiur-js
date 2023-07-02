@@ -3783,10 +3783,10 @@ var DataSerializer = /*#__PURE__*/function () {
 
       if (template == null) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
       var cts = template.constants.filter(function (x) {
-        return x.value == value;
+        return x.value == value.value;
       });
       if (cts.length == 0) return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Null, new _DC["default"](0));
-      var rt = (0, _BinaryList["default"])();
+      var rt = new _BinaryList["default"]();
       rt.addGuid(template.classId);
       rt.addUint8(cts[0].index);
       return new DataSerializerComposeResults(_TransmissionType.TransmissionTypeIdentifier.Enum, rt.toDC());
@@ -11976,6 +11976,7 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
     var age = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
     (0, _classCallCheck2["default"])(this, Instance);
     _this = _super.call(this);
+    _this.isDestroyed = false;
     _this.store = store;
     _this.resource = new WeakRef(resource);
     _this.id = id;
@@ -11999,6 +12000,8 @@ var Instance = /*#__PURE__*/function (_IEventHandler) {
     });
 
     resource.on("destroy", function (sender) {
+      self.isDestroyed = true;
+
       self._emit("ResourceDestroyed", sender);
     });
     if (customTemplate != null) _this.template = customTemplate;else _this.template = _Warehouse["default"].getTemplateByType(resource.constructor); // set ages
@@ -13811,6 +13814,7 @@ var WH = /*#__PURE__*/function (_IEventHandler) {
 
       if (resource.instance.store != null) resource.instance.store.remove(resource);
       resource.destroy();
+      resource.instance = null;
       return true;
     }
   }, {
