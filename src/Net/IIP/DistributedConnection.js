@@ -670,7 +670,7 @@ export default class DistributedConnection extends IStore {
 
                                 if (this.instance == null)
                                 {
-                                    Warehouse.put(this.remoteUsername.replaceAll("/", "_"), this, null, this.server).then(x =>
+                                    Warehouse.put(authPacket.remoteUsername.replaceAll("/", "_"), this, null, this.server).then(x =>
                                     {
     
                                         this.ready = true;
