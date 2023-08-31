@@ -908,9 +908,6 @@ export default class DistributedConnection extends IStore {
 
                             await this.fetch(id, null);
 
-                            // set active
-                            r._p.suspended = false;
-
                             console.log("Restored " + id);
                         } 
                     }
