@@ -110,6 +110,7 @@ export default class DistributedConnection extends IStore {
         this._register("ready");
         this._register("error");
         this._register("close");
+        this._register("resumed");
 
         if (server != null)
         {
@@ -907,8 +908,10 @@ export default class DistributedConnection extends IStore {
 
                             await this.fetch(id, null);
 
-                            console.log("Restored " + id);
+                            // set active
+                            r._p.suspended = false;
 
+                            console.log("Restored " + id);
                         } 
                     }
                     catch (ex)
@@ -931,6 +934,8 @@ export default class DistributedConnection extends IStore {
         catch (ex) {
             return false;
         }
+
+        this._emit("resumed", this);
 
         return true;
     }

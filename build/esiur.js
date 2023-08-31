@@ -6147,6 +6147,8 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
     _this._register("close");
 
+    _this._register("resumed");
+
     if (server != null) {
       _this.session = new _Session["default"](new _Authentication["default"](_AuthenticationType["default"].Host), new _Authentication["default"](_AuthenticationType["default"].Client));
       _this.server = server;
@@ -6614,7 +6616,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                   this._sendParams().addUint8(0x28).addUint8Array(this.session.Id).done();
 
                   if (this.instance == null) {
-                    _Warehouse["default"].put(this.remoteUsername.replaceAll("/", "_"), this, null, this.server).then(function (x) {
+                    _Warehouse["default"].put(authPacket.remoteUsername.replaceAll("/", "_"), this, null, this.server).then(function (x) {
                       var _this2$_openReply, _this2$server;
 
                       _this2.ready = true;
@@ -6786,7 +6788,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
               case 10:
                 if (!(_i < _toBeRestored.length)) {
-                  _context.next = 39;
+                  _context.next = 40;
                   break;
                 }
 
@@ -6803,7 +6805,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 data = ar[1];
 
                 if (!(dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.ResourceList || dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.List)) {
-                  _context.next = 28;
+                  _context.next = 29;
                   break;
                 }
 
@@ -6821,59 +6823,63 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 return this.fetch(id, null);
 
               case 27:
+                // set active
+                _r._p.suspended = false;
                 console.log("Restored " + id);
 
-              case 28:
-                _context.next = 36;
+              case 29:
+                _context.next = 37;
                 break;
 
-              case 30:
-                _context.prev = 30;
+              case 31:
+                _context.prev = 31;
                 _context.t0 = _context["catch"](14);
 
                 if (!(_context.t0.code == _ExceptionCode["default"].ResourceNotFound)) {
-                  _context.next = 35;
+                  _context.next = 36;
                   break;
                 }
 
-                _context.next = 36;
+                _context.next = 37;
                 break;
 
-              case 35:
-                return _context.abrupt("break", 39);
-
               case 36:
+                return _context.abrupt("break", 40);
+
+              case 37:
                 _i++;
                 _context.next = 10;
                 break;
 
-              case 39:
-                _context.next = 44;
+              case 40:
+                _context.next = 45;
                 break;
 
-              case 41:
-                _context.prev = 41;
+              case 42:
+                _context.prev = 42;
                 _context.t1 = _context["catch"](6);
                 console.log(_context.t1);
 
-              case 44:
-                _context.next = 49;
+              case 45:
+                _context.next = 50;
                 break;
 
-              case 46:
-                _context.prev = 46;
+              case 47:
+                _context.prev = 47;
                 _context.t2 = _context["catch"](1);
                 return _context.abrupt("return", false);
 
-              case 49:
+              case 50:
+                this._emit("resumed", this);
+
                 return _context.abrupt("return", true);
 
-              case 50:
+              case 52:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[1, 46], [6, 41], [14, 30]]);
+        }, _callee, this, [[1, 47], [6, 42], [14, 31]]);
       }));
 
       function reconnect() {
