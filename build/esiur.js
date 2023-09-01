@@ -6788,7 +6788,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
 
               case 10:
                 if (!(_i < _toBeRestored.length)) {
-                  _context.next = 40;
+                  _context.next = 39;
                   break;
                 }
 
@@ -6805,7 +6805,7 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 data = ar[1];
 
                 if (!(dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.ResourceList || dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.List)) {
-                  _context.next = 29;
+                  _context.next = 28;
                   break;
                 }
 
@@ -6823,63 +6823,61 @@ var DistributedConnection = /*#__PURE__*/function (_IStore) {
                 return this.fetch(id, null);
 
               case 27:
-                // set active
-                _r._p.suspended = false;
                 console.log("Restored " + id);
 
-              case 29:
-                _context.next = 37;
+              case 28:
+                _context.next = 36;
                 break;
 
-              case 31:
-                _context.prev = 31;
+              case 30:
+                _context.prev = 30;
                 _context.t0 = _context["catch"](14);
 
                 if (!(_context.t0.code == _ExceptionCode["default"].ResourceNotFound)) {
-                  _context.next = 36;
+                  _context.next = 35;
                   break;
                 }
 
-                _context.next = 37;
+                _context.next = 36;
                 break;
 
-              case 36:
-                return _context.abrupt("break", 40);
+              case 35:
+                return _context.abrupt("break", 39);
 
-              case 37:
+              case 36:
                 _i++;
                 _context.next = 10;
                 break;
 
-              case 40:
-                _context.next = 45;
+              case 39:
+                _context.next = 44;
                 break;
 
-              case 42:
-                _context.prev = 42;
+              case 41:
+                _context.prev = 41;
                 _context.t1 = _context["catch"](6);
                 console.log(_context.t1);
 
-              case 45:
-                _context.next = 50;
+              case 44:
+                _context.next = 49;
                 break;
 
-              case 47:
-                _context.prev = 47;
+              case 46:
+                _context.prev = 46;
                 _context.t2 = _context["catch"](1);
                 return _context.abrupt("return", false);
 
-              case 50:
+              case 49:
                 this._emit("resumed", this);
 
                 return _context.abrupt("return", true);
 
-              case 52:
+              case 51:
               case "end":
                 return _context.stop();
             }
           }
-        }, _callee, this, [[1, 47], [6, 42], [14, 31]]);
+        }, _callee, this, [[1, 46], [6, 41], [14, 30]]);
       }));
 
       function reconnect() {
