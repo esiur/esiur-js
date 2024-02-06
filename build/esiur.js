@@ -909,7 +909,7 @@ var AsyncException = /*#__PURE__*/function (_Error) {
       this.type = type;
       this.code = code;
 
-      if (type == 0) {
+      if (type == 0 && message == null) {
         for (var i in _ExceptionCode["default"]) {
           if (_ExceptionCode["default"][i] == code) {
             this.message = i;
@@ -10738,9 +10738,9 @@ var WSocket = /*#__PURE__*/function (_ISocket) {
           rt.trigger(true);
         };
 
-        ws.onerror = function () {
+        ws.onerror = function (ee) {
           self.state = _SocketState["default"].Closed;
-          rt.triggerError(_ErrorType["default"].Management, _ExceptionCode["default"].HostNotReachable);
+          rt.triggerError(_ErrorType["default"].Management, _ExceptionCode["default"].HostNotReachable, ee.message);
         };
 
         self._assign(ws);

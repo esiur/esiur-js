@@ -50,7 +50,7 @@ export default class AsyncException extends Error
          this.type = type;
          this.code = code;
 
-         if (type == 0)
+         if (type == 0 && message == null)
          {
             for(var i in ExceptionCode)
                 if (ExceptionCode[i] == code)

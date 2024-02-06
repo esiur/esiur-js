@@ -106,9 +106,9 @@ export default class WSocket extends ISocket
                 rt.trigger(true);
             };
     
-            ws.onerror = () => {
+            ws.onerror = (ee) => {
                 self.state = SocketState.Closed;
-                rt.triggerError(ErrorType.Management, ExceptionCode.HostNotReachable);
+                rt.triggerError(ErrorType.Management, ExceptionCode.HostNotReachable, ee.message);
             };
     
             self._assign(ws);
