@@ -1,7 +1,8 @@
+// AuthenticationMethod
 export default
 {
     None: 0,
-    Certificate: 1,
-    Credentials: 2,
-    Token: 3
+    Credentials: 1,
+    Token: 2,
+    Certificate: 3
 };

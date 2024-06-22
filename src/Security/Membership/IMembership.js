@@ -7,32 +7,44 @@ export default class IMembership extends IResource
         return new AsyncReply(false);
     }
 
-    getPassword(username, domain)
-    {
+    tokenExists(tokenIndex, domain) {
+        return new AsyncReply(false);
+    }
+
+    getPassword(username, domain) {
         return new AsyncReply(null);
+    }
+
+    getToken(tokenIndex, domain) {
+        return new AsyncReply(null);
+    }
+    
+    authorize(session){
+        return new AsyncReply(new AuthorizationResults());
+    }
+
+    authorizePlain(session, reference, value){
+        return new AsyncReply(new AuthorizationResults());
+    }
+
+    authorizeHashed(session, reference, algorithm, value) {
+        return new AsyncReply(new AuthorizationResults());
+    }
+
+    authorizeEncrypted(session, reference, algorithm,  value) {
+        return new AsyncReply(new AuthorizationResults());
+    }
+
+    login(session) {
+        return new AsyncReply(true);
+    }
+
+    logout(session){
+        return new AsyncReply(true);
     }
 
     get guestsAllowed() {
         return false;
     }
 
-    getToken(tokenIndex, domain)
-    {
-        return new AsyncReply(null);
-    }
-    
-    login(session)
-    {
-
-    }
-
-    logout(session)
-    {
-
-    }
-
-    tokenExists(tokenIndex, domain)
-    {
-
-    }
 }

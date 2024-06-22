@@ -1,7 +1,8 @@
-export default //const IIPAuthPacketCommand =
+// IIPAuthPacketCommand
+export default 
 {
-    Action: 0,
-    Declare: 1,
-    Acknowledge: 2,
-    Error: 3
+    Initialize: 0,
+    Acknowledge: 1,
+    Action: 2,
+    Event: 3
 };

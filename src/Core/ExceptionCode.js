@@ -37,5 +37,8 @@ export default //const ExceptionCode =
     AlreadyUnlistened: 34,
     NotListenable: 35,
     ParseError: 36,
-    Timeout: 37
+    Timeout: 37,
+    NotSupported: 38,
+    NotImplemented: 39
+
 };

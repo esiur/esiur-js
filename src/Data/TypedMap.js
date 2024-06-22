@@ -9,6 +9,8 @@ export default class TypedMap extends Map {
                 this.set(i, data[i]);
     }
 
+    
+
     static getTypes(typedMap){
         return [typedMap.constructor.keyType ?? Object, typedMap.constructor.valueType ?? Object];
     }

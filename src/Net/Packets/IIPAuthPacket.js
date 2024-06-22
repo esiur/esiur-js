@@ -15,7 +15,7 @@
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* LIABILITY, WHETHER IN ANthis.action OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
@@ -33,36 +33,37 @@ import AuthenticationMethod from "../../Security/Authority/AuthenticationMethod.
 
 export default class IIPAuthPacket
 {
-    constructor()
-    {
-        this.command = 0;
-        this.action = 0;
-        this.errorCode = 0;
-        this.errorMessage = "";
-        this.localMethod = 0;
-        this.sourceInfo = "";
-        this.hash = "";
-        this.sessionId = "";
-        this.remoteMethod = 0;
-        this.domain = "";
-        this.CertificateId = 0;
-        this.localUsername = "";
-        this.remoteUsername = "";
-        this.localPassword = "";
-        this.remotePassword = "";
-        this.localToken = [];
-        this.reemoteToken = [];
-        this.asymetricEncryptionKey = [];
-        this.localNonce = [];
-        this.remoteNonce = [];
-        this.dataLengthNeeded = 0;
-    }
+    command = 0;
+    initialization = 0;
+    acknowledgement = 0;
+    action = 0;
+    event = 0;
+  
+    localMethod = AuthenticationMethod.None;
+    remoteMethod = AuthenticationMethod.None;
+  
+    errorCode = 0;
+    message = "";
+  
+    publicKeyAlgorithm = 0;
+    hashAlgorithm = 0;
+  
+    certificate = null;
+    challenge = null;
+    asymetricEncryptionKey = null;
+    sessionId = null;
+  
+    dataType = null;
+  
+    reference = 0;
+  
+    #dataLengthNeeded = 0;
 
-    notEnough(offset, ends, needed)
+    #notEnough(offset, ends, needed)
     {
         if (offset + needed > ends)
         {
-            this.dataLengthNeeded = needed - (ends - offset);
+            this.#dataLengthNeeded = needed - (ends - offset);
             return true;
         }
         else
@@ -73,192 +74,261 @@ export default class IIPAuthPacket
     {
         var oOffset = offset;
 
-        if (this.notEnough(offset, ends, 1))
-            return -this.dataLengthNeeded;
+        if (this.#notEnough(offset, ends, 1))
+            return -this.#dataLengthNeeded;
 
         this.command = data.getUint8(offset) >> 6;
 
-        if (this.command == IIPAuthPacketCommand.Action)
-        {
-            this.action = data[offset++] & 0x3f;
+        if (this.command == IIPAuthPacketCommand.Initialize) {
 
-            if (this.action == IIPAuthPacketAction.AuthenticateHash)
-            {
-                if (this.notEnough(offset, ends, 32))
-                    return -this.dataLengthNeeded;
+            this.localMethod = ((data[offset] >> 4) & 0x3);
+            this.remoteMethod = ((data[offset] >> 2) & 0x3);
+      
+            this.initialization = (data[offset++] & 0xFC); // remove last two reserved LSBs
+      
+            if (this.#notEnough(offset, ends, 1)) 
+                return -this.#dataLengthNeeded;
+      
+            let parsed = TransmissionType.parse(data, offset, ends);
+      
+            if (parsed.type == null) 
+                return -parsed.size;
+      
+            this.dataType = parsed.type;
+            offset += parsed.size;
+      
+          } else if (this.command == IIPAuthPacketCommand.Acknowledge) {
+      
+            this.localMethod = ((data[offset] >> 4) & 0x3);
+            this.remoteMethod = ((data[offset] >> 2) & 0x3);
+      
+            this.acknowledgement = (data[offset++] & 0xFC); // remove last two reserved LSBs
+      
+            if (this.#notEnough(offset, ends, 1)) 
+                return -this.#dataLengthNeeded;
+      
+            let parsed = TransmissionType.parse(data, offset, ends);
+      
+            if (parsed.type == null) 
+                return -parsed.size;
+      
+            this.dataType = parsed.type;
+            offset += parsed.size;
+      
+          } else if (command == IIPAuthPacketCommand.Action) {
+      
+            this.action = (data[offset++]);
 
-                this.hash = data.getUint8Array(offset, 32);
-
-                offset += 32;
+            if (this.action == IIPAuthPacketAction.AuthenticateHash ||
+               this.action == IIPAuthPacketAction.AuthenticatePublicHash ||
+               this.action == IIPAuthPacketAction.AuthenticatePrivateHash ||
+               this.action == IIPAuthPacketAction.AuthenticatePublicPrivateHash) {
+      
+              if (this.#notEnough(offset, ends, 3)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.hashAlgorithm = data[offset++];
+      
+              let hashLength = data.getUint16(offset);
+              offset += 2;
+      
+              if (this.#notEnough(offset, ends, hashLength)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.challenge = data.clip(offset, hashLength);
+              offset += hashLength;
+      
+            } else if (action == IIPAuthPacketAction.AuthenticatePrivateHashCert ||
+               this.action == IIPAuthPacketAction.AuthenticatePublicPrivateHashCert) {
+      
+              if (this.#notEnough(offset, ends, 3)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.hashAlgorithm = data[offset++];
+      
+              let hashLength = data.getUint16(offset);
+              offset += 2;
+      
+              if (this.#notEnough(offset, ends, hashLength)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.challenge = data.clip(offset, hashLength);
+              offset += hashLength;
+      
+              if (this.#notEnough(offset, ends, 2)) 
+                  return -this.#dataLengthNeeded;
+      
+              let certLength = data.getUint16(offset);
+              offset += 2;
+      
+              if (this.#notEnough(offset, ends, certLength)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.certificate = data.clip(offset, certLength);
+      
+              offset += certLength;
+      
+            } else if (action == IIPAuthPacketAction.IAuthPlain) {
+              
+              if (this.#notEnough(offset, ends, 5)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.reference = data.getUint32(offset);
+              offset += 4;
+      
+              var parsed = TransmissionType.parse(data, offset, ends);
+      
+              if (parsed.type == null) 
+                  return -parsed.size;
+      
+              this.dataType = parsed.type;
+              offset += parsed.size;
+      
+            } else if (action == IIPAuthPacketAction.IAuthHashed) {
+      
+              if (this.#notEnough(offset, ends, 7)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.reference = data.getUint32(offset);
+              offset += 4;
+      
+              this.hashAlgorithm = data[offset++];
+      
+              let cl = data.getUint16(offset);
+              offset += 2;
+      
+              if (this.#notEnough(offset, ends, cl)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.challenge = data.clip(offset, cl);
+      
+              offset += cl;
+      
+            } else if (action == IIPAuthPacketAction.IAuthEncrypted) {
+      
+              if (this.#notEnough(offset, ends, 7)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.reference = data.getUint32(offset);
+              offset += 4;
+      
+              this.publicKeyAlgorithm = data[offset++];
+      
+              let cl = data.getUint16(offset);
+              offset += 2;
+      
+              if (this.#notEnough(offset, ends, cl)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.challenge = data.clip(offset, cl);
+      
+              offset += cl;
+      
+            } else if (action == IIPAuthPacketAction.EstablishNewSession) {
+              // Nothing here
+            } else if (action == IIPAuthPacketAction.EstablishResumeSession) {
+      
+                if (this.#notEnough(offset, ends, 1)) 
+                    return -this.#dataLengthNeeded;
+        
+                let sessionLength = data[offset++];
+        
+                if (this.#notEnough(offset, ends, sessionLength)) 
+                    return -this.#dataLengthNeeded;
+        
+                this.sessionId = data.clip(offset, sessionLength);
+        
+                offset += sessionLength;
+  
+            } else if (action == IIPAuthPacketAction.EncryptKeyExchange) {
+      
+              if (this.#notEnough(offset, ends, 2)) 
+                  return -this.#dataLengthNeeded;
+      
+              let keyLength = data.getUint16(offset);
+      
+              offset += 2;
+      
+              if (this.#notEnough(offset, ends, keyLength)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.asymetricEncryptionKey = data.clip(offset, keyLength);
+      
+              offset += keyLength;
+      
+            } else if (action == IIPAuthPacketAction.RegisterEndToEndKey ||
+               this.action == IIPAuthPacketAction.RegisterHomomorphic) {
+      
+              if (this.#notEnough(offset, ends, 3)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.publicKeyAlgorithm = data[offset++];
+      
+              let keyLength = data.getUint16(offset);
+      
+              offset += 2;
+      
+              if (this.#notEnough(offset, ends, keyLength)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.asymetricEncryptionKey = data.clip(offset, keyLength);
+      
+              offset += keyLength;
+      
             }
-            else if (this.action == IIPAuthPacketAction.NewConnection)
-            {
-                if (this.notEnough(offset, ends, 2))
-                    return -this.dataLengthNeeded;
-
-                var length = data.getUint16(offset);
-
-                offset += 2;
-
-                if (this.notEnough(offset, ends, length))
-                    return -this.dataLengthNeeded;
-
-                this.sourceInfo = data.clip(offset, length);
-
-                offset += 32;
+          } else if (command == IIPAuthPacketCommand.Event) {
+      
+            this.event = data[offset++];
+      
+            if (this.event == IIPAuthPacketEvent.ErrorTerminate ||
+                this.event == IIPAuthPacketEvent.ErrorMustEncrypt ||
+                this.event == IIPAuthPacketEvent.ErrorRetry) {
+      
+              if (this.#notEnough(offset, ends, 3)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.errorCode = data[offset++];
+              let msgLength = data.getUint16(offset);
+              offset += 2;
+      
+              if (this.#notEnough(offset, ends, msgLength)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.message = data.getString(offset, msgLength);
+      
+              offset += msgLength;
+      
+            } else if (this.event == IIPAuthPacketEvent.IndicationEstablished) {
+      
+              if (this.#notEnough(offset, ends, 1)) 
+                  return -this.#dataLengthNeeded;
+      
+              let sessionLength = data[offset++];
+      
+              if (this.#notEnough(offset, ends, sessionLength)) 
+                  return -this.#dataLengthNeeded;
+      
+              this.sessionId = data.clip(offset, sessionLength);
+      
+              offset += sessionLength;
+      
+            } else if (this.event == IIPAuthPacketEvent.IAuthPlain ||
+                this.event == IIPAuthPacketEvent.IAuthHashed ||
+                this.event == IIPAuthPacketEvent.IAuthEncrypted) {
+      
+              if (this.#notEnough(offset, ends, 1)) 
+                  return -this.#dataLengthNeeded;
+      
+              let parsed = TransmissionType.parse(data, offset, ends);
+      
+              if (parsed.type == null) 
+                  return -parsed.size;
+      
+              this.dataType = parsed.type;
+              offset += parsed.size;
             }
-            else if (this.action == IIPAuthPacketAction.ResumeConnection
-                || this.action == IIPAuthPacketAction.ConnectionEstablished)
-            {
-                if (this.notEnough(offset, ends, 32))
-                    return -this.dataLengthNeeded;
-
-                this.sessionId = data.clip(offset, 32);
-
-                offset += 32;
-            }
-        }
-        else if (this.command == IIPAuthPacketCommand.Declare)
-        {
-            this.remoteMethod = ((data.getUint8(offset) >> 4) & 0x3);
-            this.localMethod = ((data.getUint8(offset) >> 2) & 0x3);
-
-            var encrypt = ((data.getUint8(offset++) & 0x2) == 0x2);
-
-
-            if (this.notEnough(offset, ends, 1))
-                return -this.dataLengthNeeded;
-
-            var domainLength = data.getUint8(offset++);
-            if (this.notEnough(offset, ends, domainLength))
-                return -this.dataLengthNeeded;
-
-            this.domain = data.getString(offset, domainLength);
-
-            offset += domainLength;
-
-
-            if (this.remoteMethod == AuthenticationMethod.Credentials)
-            {
-                if (this.localMethod == AuthenticationMethod.None)
-                {
-                    if (this.notEnough(offset, ends, 33))
-                        return -this.dataLengthNeeded;
-
-                    this.remoteNonce = data.clip(offset, 32);
-
-                    offset += 32;
-
-                    var length = data.getUint8(offset++);
-
-                    if (this.notEnough(offset, ends, length))
-                        return -this.dataLengthNeeded;
-
-                    this.remoteUsername = data.getString(offset, length);
-
-
-                    offset += length;
-                }
-            }
-            else if (this.remoteMethod == AuthenticationMethod.Token)
-            {
-                if (this.localMethod == AuthenticationMethod.None)
-                {
-                    if (this.notEnough(offset, ends, 40))
-                            return -this.dataLengthNeeded;
-                    
-                    this.remoteNonce = data.clip(offset, 32);
-
-                    offset += 32;
-
-                    this.remoteTokenIndex = data.getUint64(offset);
-                    offset += 8;
-                 }
-            }
-
-            if (encrypt)
-            {
-                if (this.notEnough(offset, ends, 2))
-                    return -this.dataLengthNeeded;
-
-                var keyLength = data.getUint16(offset);
-
-                offset += 2;
-
-                if (this.notEnough(offset, ends, keyLength))
-                    return -this.dataLengthNeeded;
-
-                this.asymetricEncryptionKey = data.clip(offset, keyLength);
-
-                offset += keyLength;
-            }
-        }
-        else if (this.command == IIPAuthPacketCommand.Acknowledge)
-        {
-            this.remoteMethod  = (data.getUint8(offset) >> 4) & 0x3;
-            this.localMethod = (data.getUint8(offset) >> 2) & 0x3;
-            var encrypt = ((data.getUint8(offset++) & 0x2) == 0x2);
-
-            
-            if (this.remoteMethod == AuthenticationMethod.None)
-            {
-                if (this.localMethod == AuthenticationMethod.None)
-                {
-                    // do nothing
-                }
-            }
-            else if (this.remoteMethod == AuthenticationMethod.Credentials
-                || this.remoteMethod == AuthenticationMethod.Token)
-            {
-                if (this.localMethod == AuthenticationMethod.None)
-                {
-                    if (this.notEnough(offset, ends, 32))
-                        return -this.dataLengthNeeded;
-
-                    this.remoteNonce = data.clip(offset, 32);
-
-                    offset += 32;
-
-                }
-            }
-
-            if (encrypt)
-            {
-                if (this.notEnough(offset, ends, 2))
-                    return -this.dataLengthNeeded;
-
-                var keyLength = data.getUint16(offset);
-
-                offset += 2;
-
-                if (this.notEnough(offset, ends, keyLength))
-                    return -this.dataLengthNeeded;
-
-                this.asymetricEncryptionKey = data.clip(offset, keyLength);
-
-                offset += keyLength;
-            }
-        }
-        else if (this.command == IIPAuthPacketCommand.Error)
-        {
-            if (this.notEnough(offset, ends, 5))
-                return -this.dataLengthNeeded;
-
-            offset++;
-            this.errorCode = data.getUint8(offset++);
-
-
-            var cl = data.getUint16(offset);
-            offset += 2;
-
-            if (this.notEnough(offset, ends, cl))
-                return -this.dataLengthNeeded;
-
-            this.errorMessage = data.getString(offset, cl);
-            offset += cl;
-
-        }
-
+          }
+      
 
         return offset - oOffset;
 

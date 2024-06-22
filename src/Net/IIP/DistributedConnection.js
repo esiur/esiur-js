@@ -83,19 +83,79 @@ import PropertyValueArray from '../../Data/PropertyValueArray.js';
 import { UInt8 } from '../../Data/ExtendedTypes.js';
 import ConnectionStatus from './ConnectionStatus.js';
 import { Prop, TemplateDescriber } from '../../Resource/Template/TemplateDescriber.js';
+import TypedMap from '../../Data/TypedMap.js';
+
+import IIPAuthPacketHeader from '../../Net/Packets/IIPAuthPacketHeader.js';
 
 export default class DistributedConnection extends IStore {
 
+    // fields
+    #port;
+    #hostname;
+    #secure;
+    #socket;
 
-    sendAll(data) {
-        this.socket.sendAll(data.buffer);
+    #lastKeepAliveSent
+    #lastKeepAliveReceived;
+
+    #status;
+    #readyToEstablish = false;
+    #openReply;
+
+    #session = new Session();
+    #packet = new IIPPacket();
+    #authPacket = new IIPAuthPacket();
+
+    #neededResources = new KeyList();
+    
+    #attachedResources = new KeyList();
+    #suspendedResources = new KeyList();
+
+    #invalidCredentials = false;
+    #localPasswordOrToken = null;
+
+    #keepAliveTimer;
+
+    #loginDate;
+
+    jitter = 0;
+
+    keepAliveTime = 10;
+    keepAliveInterval = 30;
+    reconnectInterval = 5;
+    autoReconnect = false;
+
+
+    #server;
+    #templates = new KeyList();
+    #requests = new KeyList();// {};
+
+    #templateRequests = new KeyList();
+    #templateByNameRequests = new KeyList();
+    #resourceRequests = new KeyList();// {};
+    #callbackCounter = 0;
+
+    #queue = new AsyncQueue();
+    #subscriptions = new Map();
+    #ready;
+
+    get session() {
+        return this.#session;
     }
 
-    _sendParams(doneReply) {
+    get status () {
+        return this.#status;
+    }
+
+    #sendAll(data) {
+        this.#socket.sendAll(data.buffer);
+    }
+
+    #sendParams(doneReply) {
         return new SendList(this, doneReply);
     }
 
-    _generateNonce(length) {
+    #generateCode(length) {
         var rt = new Uint8Array(length);
         for (var i = 0; i < length; i++)
             rt[i] = Math.random() * 255;
@@ -107,42 +167,18 @@ export default class DistributedConnection extends IStore {
 
         super();
 
+        this.#session.authenticationType = AuthenticationType.Host;
+        this.#session.localMethod = AuthenticationMethod.None;
+    
+        this.#server = server;
+  
         this._register("ready");
         this._register("error");
         this._register("close");
         this._register("resumed");
 
-        if (server != null)
-        {
-            this.session = new Session(new Authentication(AuthenticationType.Host), new Authentication(AuthenticationType.Client));
-            this.server = server;
-        }
-        else
-            this.session = new Session(new Authentication(AuthenticationType.Client), new Authentication(AuthenticationType.Host));
 
-        this._packet = new IIPPacket();
-        this._authPacket = new IIPAuthPacket();
-
-        //this.resources = new KeyList();//{};
-
-        this._neededResources = new KeyList();
-        this._attachedResources = new KeyList();
-        this._suspendedResources = new KeyList();
-
-
-        this.templates = new KeyList();
-        this.requests = new KeyList();// {};
-
-        this.templateRequests = new KeyList();
-        this.templateByNameRequests = new KeyList();
-        this.resourceRequests = new KeyList();// {};
-        this.callbackCounter = 0;
-
-        this.queue = new AsyncQueue();
-
-        this.subscriptions = new Map();
-
-        this.queue.then(function (x) {
+        this.#queue.then(function (x) {
             if (x.type == DistributedResourceQueueItemType.Event) {
                 x.resource._emitEventByIndex(x.index, x.value);
             }
@@ -151,26 +187,15 @@ export default class DistributedConnection extends IStore {
             }
         });
 
-        this._localNonce = this._generateNonce(32);
-
-        this.jitter = 0;
-        this.keepAliveTime = 10;
-        this.keepAliveInterval = 30;
-        this.reconnectInterval = 5;
-        this._invalidCredentials = false;
-
-        this.autoReconnect = false;
     }
 
 
 
-    _processPacket(msg, offset, ends, data) {
+    #processPacket(msg, offset, ends, data) {
 
+        if (this.#ready) {
 
-        var authPacket = this._authPacket;
-
-        if (this.ready) {
-            var packet = new IIPPacket();
+            let packet = this.#packet;
 
             var rt = packet.parse(msg, offset, ends);
 
@@ -439,9 +464,9 @@ export default class DistributedConnection extends IStore {
         }
 
         else {
-            var rt = authPacket.parse(msg, offset, ends);
+            let authPacket = this.#authPacket;
 
-            //console.log("Auth", rt, authPacket.command);
+            let rt = authPacket.parse(msg, offset, ends);
 
             if (rt <= 0) {
                 data.holdAllFor(msg, ends - rt);
@@ -450,374 +475,11 @@ export default class DistributedConnection extends IStore {
             else {
                 offset += rt;
 
-                if (this.session.localAuthentication.type == AuthenticationType.Host)
-                {
-                    if (authPacket.command == IIPAuthPacketCommand.Declare)
-                    {
-                        this.session.remoteAuthentication.method = authPacket.remoteMethod;
-
-                        if (authPacket.remoteMethod == AuthenticationMethod.Credentials 
-                            && authPacket.localMethod == AuthenticationMethod.None)
-                        {
-                            try
-                            {
-                                this.server.membership.userExists(authPacket.remoteUsername, authPacket.domain).then(x =>
-                                {
-                                    if (x)
-                                    {
-                                        this.session.remoteAuthentication.username = authPacket.remoteUsername;
-                                        this._remoteNonce = authPacket.remoteNonce;
-                                        this.session.remoteAuthentication.domain = authPacket.domain;
-                                        this._sendParams()
-                                                    .addUint8(0xa0)
-                                                    .addUint8Array(this._localNonce)
-                                                    .done();
-                                    }
-                                    else
-                                    {
-                                        this._sendParams().addUint8(0xc0)
-                                                        .addUint8(ExceptionCode.UserOrTokenNotFound)
-                                                        .addUint16(14)
-                                                        .addString("User not found")
-                                                        .done();
-                                    }
-                                });
-                            }
-                            catch (ex)
-                            {
-                                console.log(ex);
-
-                                var errMsg = DC.stringToBytes(ex.message);
-
-                                this._sendParams()
-                                    .addUint8(0xc0)
-                                    .addUint8(ExceptionCode.GeneralFailure)
-                                    .addUint16(errMsg.length)
-                                    .addUint8Array(errMsg)
-                                    .done();
-                            }
-                        }
-                        else if (authPacket.remoteMethod == AuthenticationMethod.Token 
-                                && authPacket.localMethod == AuthenticationMethod.None)
-                        {
-                            try
-                            {
-                                // Check if user and token exists
-                                this.server.membership.tokenExists(authPacket.remoteTokenIndex, authPacket.domain).then(x =>
-                                {
-                                    if (x != null)
-                                    {
-                                        this.session.remoteAuthentication.username = x;
-                                        this.session.remoteAuthentication.tokenIndex = authPacket.remoteTokenIndex;
-                                        this._remoteNonce = authPacket.remoteNonce;
-                                        this.session.remoteAuthentication.domain = authPacket.domain;
-                                        this._sendParams()
-                                                    .addUint8(0xa0)
-                                                    .addUint8Array(this._localNonce)
-                                                    .done();
-                                    }
-                                    else
-                                    {
-                                        //Console.WriteLine("User not found");
-                                        this._sendParams()
-                                                        .addUint8(0xc0)
-                                                        .addUint8(ExceptionCode.UserOrTokenNotFound)
-                                                        .addUint16(15)
-                                                        .addString("Token not found")
-                                                        .done();
-                                    }
-                                });
-                            }
-                            catch (ex)
-                            {
-                                console.log(ex);
-
-                                var errMsg = DC.stringToBytes(ex.message);
-
-                                this._sendParams()
-                                        .addUint8(0xc0)
-                                        .addUint8(ExceptionCode.GeneralFailure)
-                                        .addUint16(errMsg.length)
-                                        .addUint8Array(errMsg)
-                                        .done();
-                            }
-                        }
-
-                        else if (authPacket.remoteMethod == AuthenticationMethod.None 
-                            && authPacket.localMethod == AuthenticationMethod.None)
-                        {
-                            try
-                            {
-                                // Check if guests are allowed
-                                if (this.server?.membership.guestsAllowed)
-                                {
-                                    this.session.remoteAuthentication.username = "g-" + Math.random().toString(36).substring(10);
-                                    this.session.remoteAuthentication.domain = authPacket.domain;
-                                    this.readyToEstablish = true;
-                                    this._sendParams()
-                                                .addUint8(0x80)
-                                                .done();
-                                }
-                                else
-                                {
-                                    this._sendParams()
-                                                .addUInt8(0xc0)
-                                                .addUint8(ExceptionCode.AccessDenied)
-                                                .addUint16(18)
-                                                .addString("Guests not allowed")
-                                                .done();
-                                }
-                            }
-                            catch (ex)
-                            {
-                                var errMsg = DC.stringToBytes(ex.message);
-
-                                this._sendParams()
-                                        .addUInt8(0xc0)
-                                        .addUint8(ExceptionCode.GeneralFailure)
-                                        .addUint16(errMsg.length)
-                                        .addUint8Array(errMsg)
-                                        .done();
-                            }
-                        }
-
-                    }
-                    else if (authPacket.command == IIPAuthPacketCommand.Action)
-                    {
-                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash)
-                        {
-                            var remoteHash = authPacket.hash;
-                            var reply = null;
-
-                            try
-                            {
-                                if (this.session.remoteAuthentication.method == AuthenticationMethod.Credentials)
-                                {
-                                    reply = this.server.membership.getPassword(this.session.remoteAuthentication.username,
-                                                                  this.session.remoteAuthentication.domain);
-                                }
-                                else if (this.session.remoteAuthentication.method == AuthenticationMethod.Token)
-                                {
-                                    reply = this.server.membership.getToken(this.session.remoteAuthentication.tokenIndex,
-                                                                    this.session.remoteAuthentication.domain);
-                                }
-                                else
-                                {
-                                    // Error
-                                }
-
-                                reply.then((pw) =>
-                                {
-                                    if (pw != null)
-                                    {
-                                        var hash = SHA256.compute(BL()
-                                                                                .addUint8Array(pw)
-                                                                                .addUint8Array(this._remoteNonce)
-                                                                                .addUint8Array(this._localNonce)
-                                                                                .toArray());
-                                        if (hash.sequenceEqual(remoteHash))
-                                        {
-                                            // send our hash
-                                            var localHash = SHA256.compute(BL()
-                                                                    .addUint8Array(this._localNonce)
-                                                                    .addUint8Array(this._remoteNonce)
-                                                                    .addUint8Array(pw)
-                                                                    .toArray());
-                                            
-                                            this._sendParams()
-                                                .addUint8(0)
-                                                .addUint8Array(localHash)
-                                                .done();
-
-                                            this.readyToEstablish = true;
-                                        }
-                                        else
-                                        {
-                                            
-                                            this._sendParams()
-                                                            .addUint8(0xc0)
-                                                            .addUint8(ExceptionCode.AccessDenied)
-                                                            .addUint16(13)
-                                                            .addString("Access Denied")
-                                                            .done();
-                                        }
-                                    }
-                                });
-                            }
-                            catch (ex)
-                            {
-                                console.log(ex);
-
-                                var errMsg = DC.stringToBytes(ex.message);
-
-                                this._sendParams()
-                                    .addUint8(0xc0)
-                                    .addUint8(ExceptionCode.GeneralFailure)
-                                    .addUint16(errMsg.length)
-                                    .addUint8Array(errMsg)
-                                    .done();
-                            }
-                        }
-                        else if (authPacket.action == IIPAuthPacketAction.NewConnection)
-                        {
-                            if (this.readyToEstablish)
-                            {
-                                this.session.Id = this._generateNonce(32);
-                                
-                                this._sendParams()
-                                                .addUint8(0x28)
-                                                .addUint8Array(this.session.Id)
-                                                .done();
-
-                                if (this.instance == null)
-                                {
-                                    Warehouse.put(authPacket.remoteUsername.replaceAll("/", "_"), this, null, this.server).then(x =>
-                                    {
-    
-                                        this.ready = true;
-                                        this.status = ConnectionStatus.Connected;
-
-                                        this._openReply?.trigger(true);
-                                        this._openReply = null;
-                                        
-                                        this._emit("ready", this);
-                                        this.server?.membership.login(this.session);
-
-                                    }).error( x=>
-                                    {
-                                        this._openReply?.triggerError(x);
-                                        this._openReply = null;
-                                    });
-                                }
-                                else
-                                {
-                                    this.ready = true;
-                                    this.status = ConnectionStatus.Connected;
-
-                                    this._openReply?.trigger(true);
-                                    this._openReply = null;
-
-                                    this._emit("ready", this);
-                                    this.server?.membership.login(this.session);
-                                }
-                            }
-                            else
-                            {
-                                this._sendParams()
-                                    .addUint8(0xc0)
-                                    .addUint8(ExceptionCode.GeneralFailure)
-                                    .addUint16(9)
-                                    .addString("Not ready")
-                                    .done();
-    
-                               //     this.close();
-                            }    
-                        }
-                    }
+                if (session.authenticationType == AuthenticationType.Host) {
+                    this.#processHostAuth(msg);
                 }
-                else if (this.session.localAuthentication.type == AuthenticationType.Client)
-                {
-                    if (authPacket.command == IIPAuthPacketCommand.Acknowledge)
-                    {
-                        if (authPacket.remoteMethod == AuthenticationMethod.None)
-                        {
-                            // send establish
-                            this._sendParams()
-                                        .addUint8(0x20)
-                                        .addUint16(0)
-                                        .done();
-                        }
-                        else if (authPacket.remoteMethod == AuthenticationMethod.Credentials
-                                || authPacket.remoteMethod == AuthenticationMethod.Token)
-                        {
-
-                            this._remoteNonce = authPacket.remoteNonce;
-
-                            // send our hash
-                            var localHash = SHA256.compute(BL()
-                                                                .addUint8Array(this._localPasswordOrToken)
-                                                                .addUint8Array(this._localNonce)
-                                                                .addUint8Array(this._remoteNonce)
-                                                                .toArray());
-
-                            this._sendParams()
-                                .addUint8(0)
-                                .addUint8Array(localHash)
-                                .done();
-                        }
-
-                    }
-                    else if (authPacket.command == IIPAuthPacketCommand.Action)
-                    {
-                        if (authPacket.action == IIPAuthPacketAction.AuthenticateHash)
-                        {
-                            // check if the server knows my password
-                            var remoteHash = SHA256.compute(BL()
-                                                                    .addUint8Array(this._remoteNonce)
-                                                                    .addUint8Array(this._localNonce)
-                                                                    .addUint8Array(this._localPasswordOrToken)
-                                                                    .toArray());
-
-
-                            if (remoteHash.sequenceEqual(authPacket.hash))
-                            {
-                                // send establish request
-                                //SendParams((byte)0x20, (ushort)0);
-                                this._sendParams()
-                                            .addUint8(0x20)
-                                            .addUint16(0)
-                                            .done();
-                            }
-                            else
-                            {
-                                this._sendParams()
-                                            .addUint8(0xc0)
-                                            .addUint8(ExceptionCode.ChallengeFailed)
-                                            .addUint16(16)
-                                            .addString("Challenge Failed")
-                                            .done();
-                            }
-                        }
-                        else if (authPacket.action == IIPAuthPacketAction.ConnectionEstablished)
-                        {
-                            this.session.id = authPacket.sessionId;
-                            this.ready = true;
-                            this.status = ConnectionStatus.Connected;
-
-                            
-                            // put it in the warehouse
-                            if (this.instance == null)
-                            {
-                                Warehouse.put(this.localUsername.replaceAll("/", "_"), this, null, this.server).then(x =>
-                                {
-                                    this._openReply?.trigger(true);
-                                    this._openReply = null;
-                                    this._emit("ready", this);
-                                }).error( x=> { 
-                                    this._openReply?.triggerError(x);
-                                    this._openReply = null;
-                                });
-                            }
-                            else
-                            {
-                                this._openReply?.trigger(true);
-                                this._openReply = null;
-                                this._emit("ready", this);
-                            }
-
-                            // start perodic keep alive timer
-                            this._keepAliveTimer = setTimeout(() => this._keepAliveTimerElapsed(), this.keepAliveInterval * 1000);
-                        }
-                    }
-                    else if (authPacket.command == IIPAuthPacketCommand.Error)
-                    {
-                        this._invalidCredentials = true;
-                        this._openReply?.triggerError(new AsyncException(ErrorType.Management, authPacket.errorCode, authPacket.errorMessage));
-                        this._openReply = null;
-
-                        this._emit("error", this, authPacket.errorCode, authPacket.errorMessage);
-                        this.close();
-                    }
+                else if (session.authenticationType == AuthenticationType.Client) {
+                    this.#processClientAuth(msg);
                 }
             }
         }
@@ -825,20 +487,719 @@ export default class DistributedConnection extends IStore {
         return offset;
 
     }
+
+
+    #processClientAuth(data)
+    {
+
+        let authPacket = this.#authPacket;
+        let session = this.#session;
+
+      if (authPacket.command == IIPAuthPacketCommand.Acknowledge)
+          {
+              // if there is a mismatch in authentication
+              if (session.localMethod != authPacket.remoteMethod
+                  || session.remoteMethod != authPacket.localMethod)
+              {
+                  this.#openReply?.triggerError(new Exception("Peer refused authentication method."));
+                  this.#openReply = null;
+              }
+  
+              // Parse remote headers
+  
+              var dataType = authPacket.dataType;
+  
+              var pr = Codec.parse(data, dataType.offset, this, null, dataType);
+  
+              var rt= pr.reply.result;
+  
+              session.remoteHeaders = rt;
+  
+              if (session.localMethod == AuthenticationMethod.None)
+              {
+                  // send establish
+                  this.#sendParams()
+                              .addUint8(IIPAuthPacketAction.EstablishNewSession)
+                              .done();
+              }
+              else if (session.localMethod == AuthenticationMethod.Credentials
+                      || session.localMethod == AuthenticationMethod.Token)
+              {
+                  var remoteNonce = session.remoteHeaders[IIPAuthPacketHeader.Nonce];
+                  var localNonce = session.localHeaders[IIPAuthPacketHeader.Nonce];
+  
+                  // send our hash
+                  // local nonce + password or token + remote nonce
+                  var challenge = SHA256.compute((new BinaryList()
+                                                      .addDC(localNonce)
+                                                      .addDC(this.#localPasswordOrToken)
+                                                      .addDC(remoteNonce))
+                                                      .toDC());
+  
+  
+                  this.#sendParams()
+                      .addUint8(IIPAuthPacketAction.AuthenticateHash)
+                      .addUint8(IIPAuthPacketHashAlgorithm.SHA256)
+                      .addUint16(challenge.length)
+                      .addDC(challenge)
+                      .done();
+              }
+  
+          }
+          else if (authPacket.command == IIPAuthPacketCommand.Action)
+          {
+              if (authPacket.action == IIPAuthPacketAction.AuthenticateHash)
+              {
+                  var remoteNonce = session.remoteHeaders[IIPAuthPacketHeader.Nonce];
+                  var localNonce = session.localHeaders[IIPAuthPacketHeader.Nonce];
+  
+                  // check if the server knows my password
+  
+                  var challenge = SHA256.compute((new BinaryList()
+                                                          .addDC(remoteNonce)
+                                                          .addDC(this.#localPasswordOrToken)
+                                                          .addDC(localNonce)
+                                                    ).toDC());
+  
+  
+                  if (challenge.sequenceEqual(authPacket.challenge))
+                  {
+                      // send establish request
+                      this.#sendParams()
+                                  .addUint8(IIPAuthPacketAction.EstablishNewSession)
+                                  .done();
+                  }
+                  else
+                  {
+                      this.#sendParams()
+                                  .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                                  .addUint8(ExceptionCode.ChallengeFailed.index)
+                                  .addUint16(16)
+                                  .addString("Challenge Failed")
+                                  .done();
+  
+                  }
+              }
+          }
+          else if (authPacket.command == IIPAuthPacketCommand.Event)
+          {
+              if (authPacket.event == IIPAuthPacketEvent.ErrorTerminate
+                  || authPacket.event == IIPAuthPacketEvent.ErrorMustEncrypt
+                  || authPacket.event == IIPAuthPacketEvent.ErrorRetry)
+              {
+                  this.#invalidCredentials = true;
+                  this.#openReply?.triggerError(new AsyncException(ErrorType.Management, authPacket.errorCode, authPacket.message));
+                  this.#openReply = null;
+  
+                  var ex = AsyncException(ErrorType.Management, authPacket.errorCode,
+                    authPacket.message);
+  
+                  this._emit("error", this, ex);
+  
+                  this.close();
+              }
+              else if (authPacket.event == IIPAuthPacketEvent.IndicationEstablished)
+              {
+                  session.id = authPacket.sessionId;
+  
+                  this.#ready = true;
+                  this.#status = ConnectionStatus.Connected;
+  
+                  // put it in the warehouse
+  
+                  if (this.instance == null)
+                  {
+                      Warehouse.put(this.hashCode.toString().replaceAll("/", "_"), this, null, this.#server).then((x) =>
+                      {
+                          this.#openReply?.trigger(true);
+  
+                          this._emit("ready", this);
+                          this.#openReply = null;
+  
+                      }).error((x) =>
+                      {
+                          this.#openReply?.triggerError(x);
+                          this.#openReply = null;
+                      });
+                  }
+                  else
+                  {
+                      this.#openReply?.trigger(true);
+                      this.#openReply = null;
+                      this._emit("ready", this);
+                  }
+  
+                  // start perodic keep alive timer
+                  this.#keepAliveTimer = setInterval(this.#keepAliveTimerElapsed, this.keepAliveInterval * 1000);  
+  
+              }
+              else if (authPacket.event == IIPAuthPacketEvent.IAuthPlain)
+              {
+                  let dataType = authPacket.dataType;
+                  let pr = Codec.parse(data, dataType.offset, this, null, dataType);
+                  let headers = pr.reply.result;
+  
+  
+                  if (authenticator == null)
+                  {
+                      this.#sendParams()
+                       .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                       .addUint8(ExceptionCode.NotSupported.index)
+                       .addUint16(13)
+                       .addString("Not supported")
+                       .done();
+                  }
+                  else
+                  {
+                      this.authenticator(headers).then((response) =>
+                      {
+                          this.#sendParams()
+                              .addUint8(IIPAuthPacketAction.IAuthPlain)
+                              .addUint32(headers[IIPAuthPacketIAuthHeader.Reference])
+                              .addDC(Codec.compose(response, this))
+                              .done();
+                      })
+                      .timeout(headers.containsKey(IIPAuthPacketIAuthHeader.Timeout) ? 
+                          headers[IIPAuthPacketIAuthHeader.Timeout] * 1000 : 30000,
+                           () => {
+                              this.#sendParams()
+                                  .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                                  .addUint8(ExceptionCode.Timeout.index)
+                                  .addUint16(7)
+                                  .addString("Timeout")
+                                  .done();
+                          }
+                         );
+                  }
+              }
+              else if (authPacket.event == IIPAuthPacketEvent.IAuthHashed)
+              {
+                  let dataType = authPacket.dataType;
+                  let parsed = Codec.parse(data, dataType.offset, this, null, dataType);
+                  let headers = parsed.reply.result;
+  
+                  if (this.authenticator == null)
+                  {
+                      this.#sendParams()
+                       .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                       .addUint8(ExceptionCode.NotSupported.index)
+                       .addUint16(13)
+                       .addString("Not supported")
+                       .done();
+                  }
+                  else
+                  {
+                      this.authenticator(headers).then((response) =>
+                      {
+  
+                          var hash = SHA256.compute((new BinaryList()
+                              .addDC(session.localHeaders[IIPAuthPacketHeader.Nonce])
+                              .addDC(Codec.compose(response, this))
+                              .addDC(session.remoteHeaders[IIPAuthPacketHeader.Nonce])
+                          ).toDC());
+  
+                          this.#sendParams()
+                              .addUint8(IIPAuthPacketAction.IAuthHashed)
+                              .addUint32(headers[IIPAuthPacketIAuthHeader.Reference])
+                              .addUint8(IIPAuthPacketHashAlgorithm.SHA256)
+                              .addUint16(hash.length)
+                              .addDC(hash)
+                              .done();
+                      })
+                      .timeout(headers.containsKey(IIPAuthPacketIAuthHeader.Timeout) ?
+                          headers[IIPAuthPacketIAuthHeader.Timeout] * 1000 : 30000,
+                           () => {
+                          this.#sendParams()
+                              .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                              .addUint8(ExceptionCode.Timeout.index)
+                              .addUint16(7)
+                              .addString("Timeout")
+                              .done();
+                      });
+                  }
+              }
+              else if (authPacket.event == IIPAuthPacketEvent.IAuthEncrypted)
+              {
+                  throw new Exception("IAuthEncrypted not implemented.");
+              }
+          }
+      }
+  
+      #processHostAuth(data)
+      {
+          let authPacket = this.#authPacket;
+          let session = this.#session;
+
+          if (authPacket.command == IIPAuthPacketCommand.Initialize)
+          {
+              // Parse headers
+  
+              var dataType = authPacket.dataType;
+  
+              var parsed = Codec.parse(data, dataType.offset, this, null, dataType);
+  
+              let rt = parsed.reply.result;
+  
+  
+              session.remoteHeaders = rt;
+              session.remoteMethod = authPacket.localMethod;
+  
+  
+              if (authPacket.initialization == IIPAuthPacketInitialize.CredentialsNoAuth)
+              {
+                  try
+                  {
+  
+                      var username = session.remoteHeaders[IIPAuthPacketHeader.Username];
+                      var domain = session.remoteHeaders[IIPAuthPacketHeader.Domain];
+  
+                      if (_server?.membership == null)
+                      {
+                          var errMsg = DC.stringToBytes("Membership not set.");
+  
+                          this.#sendParams()
+                              .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                              .addUint8(ExceptionCode.GeneralFailure.index)
+                              .addUint16(errMsg.length)
+                              .addDC(errMsg)
+                              .done();
+                      }
+                      else {
+                        this.#server.membership.userExists(username, domain).then((x) =>
+                        {
+                            if (x != null)
+                            {
+                                session.authorizedAccount = x;
     
-    _dataReceived(data)
+                                var localHeaders = session.localHeaders;
+    
+                                this.#sendParams()
+                                            .addUint8(IIPAuthPacketAcknowledge.NoAuthCredentials)
+                                            .addDC(Codec.compose(localHeaders, this))
+                                            .done();
+                            }
+                            else
+                            {
+                                // Send user not found error
+                                this.#sendParams()
+                                            .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                                            .addUint8(ExceptionCode.UserOrTokenNotFound.index)
+                                            .addUint16(14)
+                                            .addString("User not found")
+                                            .done();
+                            }
+                        });
+                     }
+                  }
+                  catch (ex)
+                  {
+                      // Send the server side error
+                      let errMsg = DC.stringToBytes(ex.toString());
+  
+                      this.#sendParams()
+                          .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                          .addUint8(ExceptionCode.GeneralFailure.index)
+                          .addUint16(errMsg.length)
+                          .addDC(errMsg)
+                          .done();
+                  }
+              }
+              else if (authPacket.initialization == IIPAuthPacketInitialize.TokenNoAuth)
+              {
+                  try
+                  {
+                      if (this.#server?.membership == null)
+                      {
+                          this.#sendParams()
+                              .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                              .addUint8(ExceptionCode.UserOrTokenNotFound.index)
+                              .addUint16(15)
+                              .addString("Token not found")
+                              .done();
+                      }
+                      // Check if user and token exists
+                      else
+                      {
+                          let tokenIndex = session.remoteHeaders[IIPAuthPacketHeader.TokenIndex];
+                          let domain = session.remoteHeaders[IIPAuthPacketHeader.Domain];
+  
+  
+                          this.#server?.membership?.tokenExists(tokenIndex, domain).then((x) =>
+                          {
+                              if (x != null)
+                              {
+                                  session.authorizedAccount = x;
+  
+                                  let localHeaders = session.localHeaders;
+  
+                                  this.#sendParams()
+                                              .addUint8(IIPAuthPacketAcknowledge.NoAuthToken)
+                                              .addDC(Codec.compose(localHeaders, this))
+                                              .done();
+  
+                              }
+                              else
+                              {
+                                  // Send token not found error.
+                                  this.#sendParams()
+                                              .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                                              .addUint8(ExceptionCode.UserOrTokenNotFound.index)
+                                              .addUint16(15)
+                                              .addString("Token not found")
+                                              .done();
+                              }
+                          });
+                      }
+                  }
+                  catch (ex)
+                  {
+                      // Sender server side error.
+  
+                      let errMsg = DC.stringToBytes(ex.toString());
+  
+                      this.#sendParams()
+                          .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                          .addUint8(ExceptionCode.GeneralFailure.index)
+                          .addUint16(errMsg.length)
+                          .addDC(errMsg)
+                          .done();
+                  }
+              }
+              else if (authPacket.initialization == IIPAuthPacketInitialize.NoAuthNoAuth)
+              {
+                  try
+                  {
+                      // Check if guests are allowed
+                      if (this.#server?.membership?.guestsAllowed ?? true)
+                      {
+                          let localHeaders = session.localHeaders;
+  
+                          session.authorizedAccount = "g-" + this.#generateCode();
+  
+                          this.#readyToEstablish = true;
+  
+                          this.#sendParams()
+                                      .addUint8(IIPAuthPacketAcknowledge.NoAuthNoAuth)
+                                      .addDC(Codec.compose(localHeaders, this))
+                                      .done();
+                      }
+                      else
+                      {
+                          // Send access denied error because the server does not allow guests.
+                          this.#sendParams()
+                                      .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                                      .addUint8(ExceptionCode.AccessDenied.index)
+                                      .addUint16(18)
+                                      .addString("Guests not allowed")
+                                      .done();
+                      }
+                  }
+                  catch (ex)
+                  {
+                      // Send the server side error.
+                      let errMsg = DC.stringToBytes(ex.toString());
+  
+                      this.#sendParams()
+                          .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                          .addUint8(ExceptionCode.GeneralFailure.index)
+                          .addUint16(errMsg.length)
+                          .addDC(errMsg)
+                          .done();
+                  }
+              }
+  
+          }
+          else if (authPacket.command == IIPAuthPacketCommand.Action)
+          {
+              if (authPacket.action == IIPAuthPacketAction.AuthenticateHash)
+              {
+                  let remoteHash = authPacket.challenge;
+                  let reply;
+  
+                  try
+                  {
+                      if (session.remoteMethod == AuthenticationMethod.Credentials)
+                      {
+                          reply = this.#server.membership.getPassword(session.remoteHeaders[IIPAuthPacketHeader.Username],
+                                                        session.remoteHeaders[IIPAuthPacketHeader.Domain]);
+                      }
+                      else if (session.remoteMethod == AuthenticationMethod.Token)
+                      {
+                          reply = this.#server.membership.getToken(session.remoteHeaders[IIPAuthPacketHeader.TokenIndex],
+                                                        session.remoteHeaders[IIPAuthPacketHeader.Domain]);
+                      }
+                      else
+                      {
+                        // Error
+                        throw Exception("Unsupported authentication method");
+                      }
+  
+                      reply.then((pw) => 
+                      {
+                          if (pw != null)
+                          {
+                              let localNonce = session.localHeaders[IIPAuthPacketHeader.Nonce];
+                              let remoteNonce = session.remoteHeaders[IIPAuthPacketHeader.Nonce];
+  
+  
+                              let hash = SHA256.compute((new BinaryList()
+                                                                  .addDC(remoteNonce)
+                                                                  .addDC(pw)
+                                                                  .addDC(localNonce)
+                                                         ).toDC());
+  
+                              if (hash.sequenceEqual(remoteHash))
+                              {
+                                  // send our hash
+                                  let localHash = SHA256.compute((new BinaryList()
+                                                      .addDC(localNonce)
+                                                      .addDC(pw)
+                                                      .addDC(remoteNonce)
+                                                    ).toDC());
+  
+                                  this.#sendParams()
+                                      .addUint8(IIPAuthPacketAction.AuthenticateHash)
+                                      .addUint8(IIPAuthPacketHashAlgorithm.SHA256)
+                                      .addUint16(localHash.length)
+                                      .addDC(localHash)
+                                      .done();
+  
+                                  this.#readyToEstablish = true;
+                              }
+                              else
+                              {
+                                  this.#sendParams()
+                                      .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                                      .addUint8(ExceptionCode.AccessDenied.index)
+                                      .addUint16(13)
+                                      .addString("Access Denied")
+                                      .done();
+                              }
+                          }
+                      });
+                  }
+                  catch (ex)
+                  {
+                      var errMsg = DC.stringToBytes(ex.toString());
+  
+                      this.#sendParams()
+                          .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                          .addUint8(ExceptionCode.GeneralFailure.index)
+                          .addUint16(errMsg.length)
+                          .addDC(errMsg)
+                          .done();
+                  }
+              }
+              else if (authPacket.action == IIPAuthPacketAction.IAuthPlain)
+              {
+                  var reference = authPacket.reference;
+                  var dataType = authPacket.dataType;
+  
+                  var parsed = Codec.parse(data, dataType.offset, this, null, dataType);
+  
+                  var value = parsed.reply.result;
+  
+                  this.#server?.membership?.authorizePlain(session, reference, value)
+                      .then((x) => this.#processAuthorization(x));
+  
+  
+              }
+              else if (authPacket.action == IIPAuthPacketAction.IAuthHashed)
+              {
+                  let reference = authPacket.reference;
+                  let value = authPacket.challenge;
+                  let algorithm = authPacket.hashAlgorithm;
+  
+                  let self = this;
+                  this.#server?.membership?.authorizeHashed(session, reference, algorithm, value)
+                      .then((x) => self.#processAuthorization(x));
+  
+              }
+              else if (authPacket.action == IIPAuthPacketAction.IAuthEncrypted)
+              {
+                  let reference = authPacket.reference;
+                  let value = authPacket.challenge;
+                  let algorithm = authPacket.publicKeyAlgorithm;
+                  let self = this;
+
+                  this.#server?.membership?.authorizeEncrypted(session, reference, algorithm, value)
+                      .then((x) => self.#processAuthorization(x));
+              }
+              else if (authPacket.action == IIPAuthPacketAction.EstablishNewSession)
+              {
+                  if (this.#readyToEstablish)
+                  {
+  
+                      if (this.#server?.membership == null)
+                      {
+                          this.#processAuthorization(null);
+                      }
+                      else
+                      {
+                          let self = this;
+                          this.#server?.membership?.authorize(session).then((x) =>
+                          {
+                              self.#processAuthorization(x);
+                          });
+                      }
+  
+                  }
+                  else
+                  {
+                      this.#sendParams()
+                          .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                          .addUint8(ExceptionCode.GeneralFailure.index)
+                          .addUint16(9)
+                          .addString("Not ready")
+                          .done();
+                  }
+              }
+          }
+      }
+  
+      #processAuthorization(results)
+      {
+          if (results == null || results.response == AuthorizationResultsResponse.Success)
+          {
+              
+              var r = new Random();
+              var n = new DC(32);
+              for (var i = 0; i < 32; i++) 
+                n[i] = r.nextInt(255);
+  
+              session.id = n;
+  
+              this.#sendParams()
+                  .addUint8(IIPAuthPacketEvent.IndicationEstablished)
+                  .addUint8(n.length)
+                  .addDC(n)
+                  .done();
+  
+              if (this.instance == null)
+              {
+                  Warehouse.put(this.#session.authorizedAccount.replaceAll("/", "_"), this, null, this.#server).then((x) =>
+                  {
+                      this.#ready = true;
+                      this.#status = ConnectionStatus.Connected;
+                      this.#openReply?.trigger(true);
+                      this.#openReply = null;
+                      this._emit("ready", this);
+  
+                      this.#server?.membership?.login(session);
+                      this.#loginDate = new Date();
+  
+                  }).error((x) =>
+                  {
+                      this.#openReply?.triggerError(x);
+                      this.#openReply = null;
+                  });
+              }
+              else
+              {
+                  this.#ready = true;
+                  this.#status = ConnectionStatus.Connected;
+  
+                  this.#openReply?.trigger(true);
+                  this.#openReply = null;
+  
+                  this._emit("ready", this);
+  
+                  this.#server?.membership?.login(session);
+              }
+          }
+          else if (results.response == AuthorizationResultsResponse.Failed)
+          {
+              this.#sendParams()
+                  .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                  .addUint8(ExceptionCode.ChallengeFailed.index)
+                  .addUint16(21)
+                  .addString("Authentication failed")
+                  .done();
+          }
+          else if (results.response == AuthorizationResultsResponse.Expired)
+          {
+              this.#sendParams()
+                  .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                  .addUint8(ExceptionCode.Timeout.index)
+                  .addUint16(22)
+                  .addString("Authentication expired")
+                  .done();
+          }
+          else if (results.response == AuthorizationResultsResponse.ServiceUnavailable)
+          {
+              this.#sendParams()
+                  .addUint8(IIPAuthPacketEvent.ErrorTerminate)
+                  .addUint8(ExceptionCode.GeneralFailure.index)
+                  .addUint16(19)
+                  .addString("Service unavailable")
+                  .done();
+          }
+          else if (results.response == AuthorizationResultsResponse.IAuthPlain)
+          {
+              var args = new (TypedMap.of(Number, Object))([
+         
+                  [IIPAuthPacketIAuthHeader.Reference, results.reference],
+                  [IIPAuthPacketIAuthHeader.Destination, results.destination],
+                  [IIPAuthPacketIAuthHeader.Timeout, results.timeout],
+                  [IIPAuthPacketIAuthHeader.Clue, results.clue],
+                  [IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat],
+              ]);
+  
+              this.#sendParams()
+                  .addUint8(IIPAuthPacketEvent.IAuthPlain)
+                  .addDC(Codec.compose(args, this))
+                  .done();
+  
+          }
+          else if (results.response == AuthorizationResultsResponse.IAuthHashed)
+          {
+            var args = new (TypedMap.of(Number, Object))([
+         
+                [IIPAuthPacketIAuthHeader.Reference, results.reference],
+                [IIPAuthPacketIAuthHeader.Destination, results.destination],
+                [IIPAuthPacketIAuthHeader.Timeout, results.timeout],
+                [IIPAuthPacketIAuthHeader.Clue, results.clue],
+                [IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat],
+            ]);
+
+              this.#sendParams()
+                  .addUint8(IIPAuthPacketEvent.IAuthHashed)
+                  .addDC(Codec.compose(args, this))
+                  .done();
+  
+          }
+          else if (results.response == AuthorizationResultsResponse.IAuthEncrypted)
+          {
+            var args = new (TypedMap.of(Number, Object))([
+         
+                [IIPAuthPacketIAuthHeader.Reference, results.reference],
+                [IIPAuthPacketIAuthHeader.Destination, results.destination],
+                [IIPAuthPacketIAuthHeader.Timeout, results.timeout],
+                [IIPAuthPacketIAuthHeader.Clue, results.clue],
+                [IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat],
+            ]);
+
+              this.#sendParams()
+                  .addUint8(IIPAuthPacketEvent.IAuthEncrypted)
+                  .addDC(Codec.compose(args, this))
+                  .done();
+          }
+    }
+  
+    
+    #dataReceived(data)
     {
         var msg = data.read();
         let offset = 0;
         let ends = msg.length;
 
-        this.socket.hold();
+        this.#socket.hold();
 
         try
         {
             while (offset < ends)
             {
-                offset = this._processPacket(msg, offset, ends, data);
+                offset = this.#processPacket(msg, offset, ends, data);
             }
         }
         catch (ex)
@@ -846,17 +1207,18 @@ export default class DistributedConnection extends IStore {
             console.log(ex);
         }
 
-        this.socket?.unhold();
+        this.#socket?.unhold();
     }
 
     close(event) {
         try {
-            this.socket.close();
+            this.#socket.close();
         }
         catch {
 
         }
     }
+
 
     async reconnect() {
 
@@ -869,9 +1231,9 @@ export default class DistributedConnection extends IStore {
             try {
     
                 let toBeRestored = [];
-                for(var i = 0 ; i < this._suspendedResources.length; i++)
+                for(var i = 0 ; i < this.#suspendedResources.length; i++)
                 {
-                    var r = this._suspendedResources.values[i].deref();
+                    var r = this.#suspendedResources.values[i].deref();
                     if (r != null)
                         toBeRestored.push(r);
                 }
@@ -883,7 +1245,7 @@ export default class DistributedConnection extends IStore {
 
                     try
                     {
-                        var ar = await this._sendRequest(IIPPacketAction.QueryLink)
+                        var ar = await this.#sendRequest(IIPPacketAction.QueryLink)
                                             .addUint16(link.length)
                                             .addUint8Array(link)
                                             .done();
@@ -895,7 +1257,7 @@ export default class DistributedConnection extends IStore {
                         || dataType.identifier == TransmissionTypeIdentifier.List)
                         {
                             // remove from suspended.
-                            this._suspendedResources.remove(r._p.instanceId);
+                            this.#suspendedResources.remove(r._p.instanceId);
 
                             // parse them as int
                             var id = data.getUint32(8);
@@ -904,7 +1266,7 @@ export default class DistributedConnection extends IStore {
                             if (id != r._p.instanceId)
                                 r._p.instanceId = id;
 
-                            this._neededResources.set(id, r);
+                            this.#neededResources.set(id, r);
 
                             await this.fetch(id, null);
 
@@ -1015,25 +1377,42 @@ export default class DistributedConnection extends IStore {
         username = null, tokenIndex = 0, passwordOrToken = null, domain = null, secure = false)
     {
         
-        if (this._openReply != null)
+        if (this.#openReply != null)
             throw new AsyncException(ErrorType.Exception, 0, "Connection in progress");
 
-        this.status = ConnectionStatus.Connecting;
+        this.#status = ConnectionStatus.Connecting;
 
-        this._openReply = new AsyncReply();
+        this.#openReply = new AsyncReply();
 
-        if (hostname != null)
-        {
-            this.session = new Session(new ClientAuthentication()
-                                        , new HostAuthentication());
-
-            this.session.localAuthentication.method = method;
-            this.session.localAuthentication.tokenIndex = tokenIndex;
-            this.session.localAuthentication.domain = domain;
-            this.session.localAuthentication.username = username;
-            this._localPasswordOrToken = passwordOrToken;
-            this._invalidCredentials = false;
+        if (hostname != null) {
+            this.#session = new Session();
+      
+            this.#session.authenticationType = AuthenticationType.Client;
+            this.#session.localMethod = method;
+            this.#session.remoteMethod = AuthenticationMethod.None;
+      
+            this.#session.localHeaders[IIPAuthPacketHeader.Domain] = domain;
+            this.#session.localHeaders[IIPAuthPacketHeader.Nonce] = this.#generateCode(32);
+      
+            if (method == AuthenticationMethod.Credentials)
+            {
+                this.#session.localHeaders[IIPAuthPacketHeader.Username] = username;
+            }
+            else if (method == AuthenticationMethod.Token)
+            {
+                this.#session.localHeaders[IIPAuthPacketHeader.TokenIndex] = tokenIndex;
+            }
+            else if (method == AuthenticationMethod.Certificate)
+            {
+              throw Exception("Unsupported authentication method.");
+            }
+      
+            this.#localPasswordOrToken = passwordOrToken;
+            this.#invalidCredentials = false;
+      
         }
+      
+
 
         if (this.session == null)
             throw new AsyncException(ErrorType.Exception, 0, "Session not initialized");
@@ -1042,24 +1421,24 @@ export default class DistributedConnection extends IStore {
             socket = new WSocket();// TCPSocket();
 
         if (port > 0)
-            this._port = port;
+            this.#port = port;
 
         if (hostname != null)
-            this._hostname = hostname;
+            this.#hostname = hostname;
 
         if (secure != null)
-            this._secure = secure;
+            this.#secure = secure;
 
-        this._connectSocket(socket);
+        this.#connectSocket(socket);
 
-        return this._openReply;
+        return this.#openReply;
 
     }
 
-    _connectSocket(socket){
+    #connectSocket(socket){
         let self = this;
 
-        socket.connect(this._hostname, this._port, this._secure).then(x =>
+        socket.connect(this.#hostname, this.#port, this.#secure).then(x =>
             {
                 self.assign(socket);
             }).error((x) =>
@@ -1067,109 +1446,119 @@ export default class DistributedConnection extends IStore {
                 if (self.autoReconnect){
                     console.log("Reconnecting socket...");
                     setTimeout(() => {
-                        self._connectSocket(socket);
+                        self.#connectSocket(socket);
                     }, self.reconnectInterval * 1000);
                 } else {
-                    self._openReply?.triggerError(x);
-                    self._openReply = null;
+                    self.#openReply?.triggerError(x);
+                    self.#openReply = null;
                 }
             });
     }
 
-    _declare() {
-        // declare (Credentials -> No Auth, No Enctypt)
-        var dmn = DC.stringToBytes(this.session.localAuthentication.domain);
+    #declare() {
 
-        if (this.session.localAuthentication.method == AuthenticationMethod.Credentials) {
-            var un = DC.stringToBytes(this.session.localAuthentication.username);
 
-            this._sendParams()
-                .addUint8(0x60)
-                .addUint8(dmn.length)
-                .addUint8Array(dmn)
-                .addUint8Array(this._localNonce)
-                .addUint8(un.length)
-                .addUint8Array(un)
+        if (this.#session.localMethod == AuthenticationMethod.Credentials
+            && this.#session.remoteMethod == AuthenticationMethod.None)
+        {
+            // change to Map<byte, object> for compatibility
+            let headers = Codec.compose(session.localHeaders, this);
+  
+            // declare (Credentials -> No Auth, No Enctypt)
+            this.#sendParams()
+                .addUint8(IIPAuthPacketInitialize.CredentialsNoAuth)
+                .addDC(headers)
                 .done();
-        } 
-        else if (this.session.localAuthentication.method == AuthenticationMethod.Token) {                
-            this._sendParams()
-                .addUint8(0x70)
-                .addUint8(dmn.length)
-                .addUint8Array(dmn)
-                .addUint8Array(this._localNonce)
-                .addUint64(this.session.localAuthentication.tokenIndex)
+  
+        }
+        else if (this.#session.localMethod == AuthenticationMethod.Token
+            && this.#session.remoteMethod == AuthenticationMethod.None)
+        {
+            // change to Map<byte, object> for compatibility
+            let headers = Codec.compose(session.localHeaders, this);
+  
+            this.#sendParams()
+                .addUint8(IIPAuthPacketInitialize.TokenNoAuth)
+                .addDC(headers)
                 .done();
-        } 
-        else if (this.session.localAuthentication.method == AuthenticationMethod.None) {
-            
-            this._sendParams()
-                .addUint8(0x40)
-                .addUint8(dmn.length)
-                .addUint8Array(dmn)
+        }
+        else if (session.localMethod == AuthenticationMethod.None
+            && session.remoteMethod == AuthenticationMethod.None)
+        {
+            // change to Map<byte, object> for compatibility
+            let headers = Codec.compose(session.localHeaders, this);
+  
+            // @REVIEW: MITM Attack can still occure
+            this.#sendParams()
+                .addUint8(IIPAuthPacketInitialize.NoAuthNoAuth)
+                .addDC(headers)
                 .done();
-        }        
+        }
+        else
+        {
+            throw new Exception("Authentication method is not implemented.");
+        }    
     }
 
     assign(socket)
     {
-        this.socket = socket;
+        this.#socket = socket;
         socket.receiver = this;
 
-        // this.session.remoteAuthentication.source.attributes[SourceAttributeType.IPv4] = socket.RemoteEndPoint.Address;
-        // this.session.remoteAuthentication.source.attributes[SourceAttributeType.Port] = socket.RemoteEndPoint.Port;
-        // this.session.localAuthentication.source.attributes[SourceAttributeType.IPv4] = socket.LocalEndPoint.Address;
-        // this.session.localAuthentication.source.attributes[SourceAttributeType.Port] = socket.LocalEndPoint.Port;
+        // @TODO: add referer
+        // this.#session.LocalHeaders[IIPAuthPacketHeader.IPv4] = socket.remoteEndPoint.Address.Address;
 
-        if (socket.state == SocketState.Established &&
-            this.session.localAuthentication.type == AuthenticationType.Client)
-            this._declare();
+        if (socket.State == SocketState.Established &&
+            this.#session.authenticationType == AuthenticationType.Client)
+        {
+            this.#declare();
+        }
     }
 
 
 
-    _unsubscribeAll()
+    #unsubscribeAll()
     {
-        for (let resource of this.subscriptions.keys()) {
+        for (let resource of this.#subscriptions.keys()) {
 
-            resource.instance.off("EventOccurred", this.#_instance_eventOccurred, this);
-            resource.instance.off("PropertyModified", this.#_instance_propertyModified, this);
-            resource.instance.off("ResourceDestroyed", this.#_instance_resourceDestroyed, this);    
+            resource.instance.off("EventOccurred", this.#instance_eventOccurred, this);
+            resource.instance.off("PropertyModified", this.#instance_propertyModified, this);
+            resource.instance.off("ResourceDestroyed", this.#instance_resourceDestroyed, this);    
         }
         
-        this.subscriptions.clear();
+        this.#subscriptions.clear();
     }
 
     destroy(){
-        this._unsubscribeAll();
+        this.#unsubscribeAll();
         super.destroy();
     }
 
     networkClose(socket)
     {
         // clean up
-        this.ready = false;
-        this.status = ConnectionStatus.Closed;
+        this.#ready = false;
+        this.#status = ConnectionStatus.Closed;
 
-        this.readyToEstablish = false;
+        this.#readyToEstablish = false;
 
-        clearTimeout(this._keepAliveTimer);
+        clearTimeout(this.#keepAliveTimer);
 
         try
         {
-            this.requests.values.forEach((x) => {
+            this.#requests.values.forEach((x) => {
                 try { 
                     x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed"));
                  } catch (ex) { }
             });
 
-            this.resourceRequests.values.forEach((x) => {
+            this.#resourceRequests.values.forEach((x) => {
                 try { 
                     x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed"));
                  } catch (ex) { }
             });
 
-            this.templateRequests.values.forEach((x) => {
+            this.#templateRequests.values.forEach((x) => {
                 try { 
                     x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed"));
                  } catch (ex) { }
@@ -1180,38 +1569,38 @@ export default class DistributedConnection extends IStore {
             // unhandled error
         }
 
-        this.requests.clear();
-        this.resourceRequests.clear();
-        this.templateRequests.clear();
+        this.#requests.clear();
+        this.#resourceRequests.clear();
+        this.#templateRequests.clear();
 
-        for (let x of this._attachedResources.values)
+        for (let x of this.#attachedResources.values)
         {
             let r = x.deref();
             if (r != null){
                 r._suspend();
-                this._suspendedResources.set(r._p.instanceId, x);
+                this.#suspendedResources.set(r._p.instanceId, x);
             }
         }
 
         if (this.server != null) {
 
-            this._suspendedResources.clear();
+            this.#suspendedResources.clear();
 
-            this._unsubscribeAll();
+            this.#unsubscribeAll();
             Warehouse.remove(this);
 
             if (this.ready)
                 this.server.membership.logout(this.session);
         }
-        else if (this.autoReconnect && !this._invalidCredentials){
+        else if (this.autoReconnect && !this.#invalidCredentials){
             let self = this;
             setTimeout(() => self.reconnect(), this.reconnectInterval * 1000);
         }
         else {
-            this._suspendedResources.clear();
+            this.#suspendedResources.clear();
         }
 
-        this._attachedResources.clear();
+        this.#attachedResources.clear();
         
         this._emit("close", this);
     }
@@ -1219,7 +1608,7 @@ export default class DistributedConnection extends IStore {
     networkConnect(socket)
     {
         if (this.session.localAuthentication.Type == AuthenticationType.Client)
-            this._declare();
+            this.#declare();
         
         this._emit("connect", this);
     }
@@ -1229,11 +1618,11 @@ export default class DistributedConnection extends IStore {
         try
         {
             // Unassigned ?
-            if (this.socket == null)
+            if (this.#socket == null)
                 return;
 
             // Closed ?
-            if (this.socket.state == SocketState.Closed)
+            if (this.#socket.state == SocketState.Closed)
                 return;
 
             //this.lastAction = DateTime.Now;
@@ -1247,7 +1636,7 @@ export default class DistributedConnection extends IStore {
                     while (buffer.available > 0 && !buffer.protected)
                     {
                         //console.log("RX", buffer.length );
-                        this._dataReceived(buffer);
+                        this.#dataReceived(buffer);
                     }
                 }
                 catch
@@ -1269,7 +1658,7 @@ export default class DistributedConnection extends IStore {
 
     put(resource) {
         if (Codec.isLocalResource(resource, this))
-            this._neededResources.add(resource._p.instanceId, resource);
+            this.#neededResources.add(resource._p.instanceId, resource);
 
         return new AsyncReply(true);
     }
@@ -1279,24 +1668,24 @@ export default class DistributedConnection extends IStore {
     }
 
     // Protocol Implementation
-    _sendRequest(action) {
+    #sendRequest(action) {
         var reply = new AsyncReply();
-        this.callbackCounter++;
-        this.requests.set(this.callbackCounter, reply);
-        return this._sendParams(reply).addUint8(0x40 | action).addUint32(this.callbackCounter);
+        this.#callbackCounter++;
+        this.#requests.set(this.#callbackCounter, reply);
+        return this.this.#sendParams(reply).addUint8(0x40 | action).addUint32(this.#callbackCounter);
     }
 
 
     async detachResource(instanceId){
         try
         {
-            if (this._attachedResources.containsKey(instanceId))
-                this._attachedResources.remove(instanceId);
+            if (this.#attachedResources.containsKey(instanceId))
+                this.#attachedResources.remove(instanceId);
 
-            if (this._suspendedResources.containsKey(instanceId))
-                this._suspendedResources.remove(instanceId);
+            if (this.#suspendedResources.containsKey(instanceId))
+                this.#suspendedResources.remove(instanceId);
 
-            await this._sendDetachRequest(instanceId);
+            await this.#sendDetachRequest(instanceId);
         }
         catch 
         {
@@ -1304,11 +1693,11 @@ export default class DistributedConnection extends IStore {
         }
     }
 
-    _sendDetachRequest(instanceId)
+    #sendDetachRequest(instanceId)
     {
         try
         {
-          return this._sendRequest(IIPPacketAction.DetachResource).addUint32(instanceId).done();
+          return this.#sendRequest(IIPPacketAction.DetachResource).addUint32(instanceId).done();
         }
         catch(ex)
         {
@@ -1316,13 +1705,13 @@ export default class DistributedConnection extends IStore {
         }
     }
     
-    _sendInvoke(instanceId, index, parameters) {
+    #sendInvoke(instanceId, index, parameters) {
         var reply = new AsyncReply();
 
         var pb = Codec.compose(parameters, this);
 
-        let callbackId = ++this.callbackCounter;
-        this._sendParams()
+        let callbackId = ++this.#callbackCounter;
+        this.this.#sendParams()
             .addUint8(0x40 | IIPPacketAction.InvokeFunction)
             .addUint32(callbackId)
             .addUint32(instanceId)
@@ -1330,22 +1719,22 @@ export default class DistributedConnection extends IStore {
             .addUint8Array(pb)
             .done();
 
-        this.requests.set(callbackId, reply);
+        this.#requests.set(callbackId, reply);
 
         return reply;
     }
 
 
-    _sendError(type, callbackId, errorCode, errorMessage = "") {
+    #sendError(type, callbackId, errorCode, errorMessage = "") {
         var msg = DC.stringToBytes(errorMessage);
         if (type == ErrorType.Management)
-            this._sendParams()
+            this.this.#sendParams()
                 .addUint8(0xC0 | IIPPacketReport.ManagementError)
                 .addUint32(callbackId)
                 .addUint16(errorCode)
                 .done();
         else if (type == ErrorType.Exception)
-            this._sendParams()
+            this.this.#sendParams()
                 .addUint8(0xC0 | IIPPacketReport.ExecutionError)
                 .addUint32(callbackId)
                 .addUint16(errorCode)
@@ -1354,8 +1743,8 @@ export default class DistributedConnection extends IStore {
                 .done();
     }
 
-    _sendProgress(callbackId, value, max) {
-        this._sendParams()
+    #sendProgress(callbackId, value, max) {
+        this.this.#sendParams()
             .addUint8(0xC0 | IIPPacketReport.ProgressReport)
             .addUint32(callbackId)
             .addInt32(value)
@@ -1363,9 +1752,9 @@ export default class DistributedConnection extends IStore {
             .done();
     }
 
-    _sendChunk(callbackId, chunk) {
+    #sendChunk(callbackId, chunk) {
         var c = Codec.compose(chunk, this);
-        this._sendParams()
+        this.this.#sendParams()
             .addUint8(0xC0 | IIPPacketReport.ChunkStream)
             .addUint32(callbackId)
             .addUint8Array(c)
@@ -1375,18 +1764,18 @@ export default class DistributedConnection extends IStore {
     IIPReply(callbackId) {
 
         var results = Array.prototype.slice.call(arguments, 1);
-        var req = this.requests.item(callbackId);
-        this.requests.remove(callbackId);
+        var req = this.#requests.item(callbackId);
+        this.#requests.remove(callbackId);
         req.trigger(results);
     }
 
     IIPReplyInvoke(callbackId, dataType, data) {
         
-        var req = this.requests.item(callbackId);
+        var req = this.#requests.item(callbackId);
 
         if (req != null) {
 
-            this.requests.remove(callbackId);
+            this.#requests.remove(callbackId);
 
             Codec.parse(data, 0, this, null, dataType).reply.then(function (rt) {
                 req.trigger(rt);
@@ -1395,22 +1784,22 @@ export default class DistributedConnection extends IStore {
     }
 
     IIPReportError(callbackId, errorType, errorCode, errorMessage) {
-        var req = this.requests.item(callbackId);
+        var req = this.#requests.item(callbackId);
         if (req != null)
         {
-            this.requests.remove(callbackId);
+            this.#requests.remove(callbackId);
             req.triggerError(errorType, errorCode, errorMessage);
         }
     }
 
     IIPReportProgress(callbackId, type, value, max) {
-        var req = this.requests.item(callbackId);
+        var req = this.#requests.item(callbackId);
         if (req != null)
             req.triggerProgress(type, value, max);
     }
 
     IIPReportChunk(callbackId, dataType, data) {
-        var req = this.requests.item(callbackId);
+        var req = this.#requests.item(callbackId);
         if (req != null) {
             Codec.parse(data, 0, this, null, dataType).reply.then(function (x) {
                 req.triggerChunk(x);
@@ -1424,17 +1813,17 @@ export default class DistributedConnection extends IStore {
 
     IIPEventResourceDestroyed(resourceId) {
 
-        if (this._attachedResources.contains(resourceId))
+        if (this.#attachedResources.contains(resourceId))
         {
-            let r = this._attachedResources.get(resourceId).deref();
+            let r = this.#attachedResources.get(resourceId).deref();
             r?.destroy();
 
-            this._attachedResources.remove(resourceId);
+            this.#attachedResources.remove(resourceId);
         }
-        else if (this._neededResources.contains(resourceId))
+        else if (this.#neededResources.contains(resourceId))
         {
             // @TODO: handle this mess
-            this._neededResources.remove(resourceId);
+            this.#neededResources.remove(resourceId);
         }
 
     }
@@ -1527,51 +1916,51 @@ export default class DistributedConnection extends IStore {
         });
     }
 
-    _sendReply(action, callbackId) {
-        return this._sendParams().addUint8(0x80 | action).addUint32(callbackId);
+    #sendReply(action, callbackId) {
+        return this.this.#sendParams().addUint8(0x80 | action).addUint32(callbackId);
     }
 
-    _sendEvent(evt) {
-        return this._sendParams().addUint8(evt);
+    #sendEvent(evt) {
+        return this.this.#sendParams().addUint8(evt);
     }
 
-    _sendListenRequest(instanceId, index)
+    #sendListenRequest(instanceId, index)
     {
         var reply = new AsyncReply();
-        let callbackId = ++this.callbackCounter;
+        let callbackId = ++this.#callbackCounter;
 
-        this._sendParams()
+        this.this.#sendParams()
             .addUint8(0x40 | IIPPacketAction.Listen)
             .addUint32(callbackId)
             .addUint32(instanceId)
             .addUint8(index)
             .done();
 
-        this.requests.set(callbackId, reply);
+        this.#requests.set(callbackId, reply);
 
         return reply;
     }
 
-    _sendUnlistenRequest(instanceId, index)
+    #sendUnlistenRequest(instanceId, index)
     {
         var reply = new AsyncReply();
-        let callbackId = ++this.callbackCounter;
+        let callbackId = ++this.#callbackCounter;
         
-        this._sendParams()
+        this.this.#sendParams()
             .addUint8(0x40 | IIPPacketAction.Unlisten)
             .addUint32(callbackId)
             .addUint32(instanceId)
             .addUint8(index)
             .done();
 
-        this.requests.set(callbackId, reply);
+        this.#requests.set(callbackId, reply);
 
         return reply;
     }
 
     IIPRequestAttachResource(callback, resourceId) {
 
-        //var sl = this._sendParams();
+        //var sl = this.this.#sendParams();
         var self = this;
 
         Warehouse.getById(resourceId).then(function (r) {
@@ -1579,17 +1968,17 @@ export default class DistributedConnection extends IStore {
 
 
                 if (r.instance.applicable(self.session, ActionType.Attach, null) == Ruling.Denied) {
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.AttachDenied);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.AttachDenied);
                     return;
                 }
 
-                self._unsubscribe(r);
+                self.#unsubscribe(r);
 
                 // reply ok
                 var link = DC.stringToBytes(r.instance.link);
 
                 if (r instanceof DistributedResource)
-                    self._sendReply(IIPPacketAction.AttachResource, callback)
+                    self.#sendReply(IIPPacketAction.AttachResource, callback)
                         .addUint8Array(r.instance.template.classId.value)
                         .addUint64(r.instance.age)
                         .addUint16(link.length)
@@ -1597,7 +1986,7 @@ export default class DistributedConnection extends IStore {
                         .addUint8Array(Codec.compose(r._serialize(), self))
                         .done();
                 else
-                    self._sendReply(IIPPacketAction.AttachResource, callback)
+                    self.#sendReply(IIPPacketAction.AttachResource, callback)
                         .addUint8Array(r.instance.template.classId.value)
                         .addUint64(r.instance.age)
                         .addUint16(link.length)
@@ -1606,31 +1995,31 @@ export default class DistributedConnection extends IStore {
                         .done();
 
         
-                self._subscribe(r);
+                self.#subscribe(r);
             }
             else {
                 // reply failed
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
 
-    _subscribe(resource)
+    #subscribe(resource)
     {
-        resource.instance.on("EventOccurred", this.#_instance_eventOccurred, this);
-        resource.instance.on("PropertyModified", this.#_instance_propertyModified, this);
-        resource.instance.on("ResourceDestroyed", this.#_instance_resourceDestroyed, this);
+        resource.instance.on("EventOccurred", this.#instance_eventOccurred, this);
+        resource.instance.on("PropertyModified", this.#instance_propertyModified, this);
+        resource.instance.on("ResourceDestroyed", this.#instance_resourceDestroyed, this);
 
-        this.subscriptions.set(resource, []);
+        this.#subscriptions.set(resource, []);
     }
 
-    _unsubscribe(resource)
+    #unsubscribe(resource)
     {
-        resource.instance.off("EventOccurred", this.#_instance_eventOccurred, this);
-        resource.instance.off("PropertyModified", this.#_instance_propertyModified, this);
-        resource.instance.off("ResourceDestroyed", this.#_instance_resourceDestroyed, this);
+        resource.instance.off("EventOccurred", this.#instance_eventOccurred, this);
+        resource.instance.off("PropertyModified", this.#instance_propertyModified, this);
+        resource.instance.off("ResourceDestroyed", this.#instance_resourceDestroyed, this);
 
-        this.subscriptions.delete(resource);
+        this.#subscriptions.delete(resource);
     }
 
 
@@ -1640,18 +2029,18 @@ export default class DistributedConnection extends IStore {
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
 
-                self._unsubscribe(r);
-                self._subscribe(r);
+                self.#unsubscribe(r);
+                self.#subscribe(r);
                 
                 // reply ok
-                self._sendReply(IIPPacketAction.ReattachResource, callback)
+                self.#sendReply(IIPPacketAction.ReattachResource, callback)
                     .addUint64(r.instance.age)
                     .addUint8Array(Codec.compose(r.instance.serialize(), self))
                     .done();
             }
             else {
                 // reply failed
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -1661,13 +2050,13 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null) {
-                self._unsubscribe(r);
+                self.#unsubscribe(r);
                 // reply ok
-                self._sendReply(IIPPacketAction.DetachResource, callback).done();
+                self.#sendReply(IIPPacketAction.DetachResource, callback).done();
             }
             else {
                 // reply failed
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -1676,18 +2065,18 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(storeId).then(function (store) {
             if (store == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.StoreNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.StoreNotFound);
                 return;
             }
 
             if (!(store instanceof IStore)) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceIsNotStore);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceIsNotStore);
                 return;
             }
 
             // check security
             if (store.instance.applicable(self.session, ActionType.CreateResource, null) != Ruling.Allowed) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.CreateDenied);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.CreateDenied);
                 return;
             }
 
@@ -1697,7 +2086,7 @@ export default class DistributedConnection extends IStore {
 
                 if (parent != null)
                     if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed) {
-                        self._sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                        self.#sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
                         return;
                     }
 
@@ -1716,7 +2105,7 @@ export default class DistributedConnection extends IStore {
                 var type = window[className];
 
                 if (type == null) {
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.ClassNotFound);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.ClassNotFound);
                     return;
                 }
 
@@ -1733,12 +2122,12 @@ export default class DistributedConnection extends IStore {
                             var resource = new (Function.prototype.bind.apply(type, values));
 
                             Warehouse.put(name, resource, store, parent).then(function(ok){
-                                self._sendReply(IIPPacketAction.CreateResource, callback)
+                                self.#sendReply(IIPPacketAction.CreateResource, callback)
                                 .addUint32(resource.Instance.Id)
                                 .done();
                             }).error(function(ex){
                                 // send some error
-                                self._sendError(ErrorType.Management, callback, ExceptionCode.AddToStoreFailed);
+                                self.#sendError(ErrorType.Management, callback, ExceptionCode.AddToStoreFailed);
                             });
                         });
                     });
@@ -1751,19 +2140,19 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(resourceId).then(function (r) {
             if (r == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             if (r.instance.store.instance.applicable(session, ActionType.Delete, null) != Ruling.Allowed) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.DeleteDenied);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.DeleteDenied);
                 return;
             }
 
             if (Warehouse.remove(r))
-                self._sendReply(IIPPacketAction.DeleteResource, callback).done();
+                self.#sendReply(IIPPacketAction.DeleteResource, callback).done();
             else
-                self._sendError(ErrorType.Management, callback, ExceptionCode.DeleteFailed);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.DeleteFailed);
         });
     }
 
@@ -1772,13 +2161,13 @@ export default class DistributedConnection extends IStore {
         var queryCallback = (r) =>
         {
             if (r == null)
-                this._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                this.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             else
             {
                 var list = r.filter(x => x.instance.applicable(this.session, ActionType.ViewTemplate, null) != Ruling.Denied);
 
                 if (list.length == 0)
-                    this._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    this.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 else
                 {
                     // get all templates related to this resource
@@ -1797,7 +2186,7 @@ export default class DistributedConnection extends IStore {
                     }
 
                     // send
-                    this._sendReply(IIPPacketAction.LinkTemplates, callback)
+                    this.#sendReply(IIPPacketAction.LinkTemplates, callback)
                         .addDC(TransmissionType.compose(TransmissionTypeIdentifier.RawData, msg))
                         .done();
                 }
@@ -1816,13 +2205,13 @@ export default class DistributedConnection extends IStore {
 
         var t = Warehouse.getTemplateByClassName(className);
         if (t != null) {
-            self._sendReply(IIPPacketAction.TemplateFromClassName, callback)
+            self.#sendReply(IIPPacketAction.TemplateFromClassName, callback)
                 .addUint32(t.content.length)
                 .addUint8Array(t.content)
                 .done();
         } else {
             // reply failed
-            self._sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+            self.#sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
         }
     }
 
@@ -1831,13 +2220,13 @@ export default class DistributedConnection extends IStore {
         var t = Warehouse.getTemplateByClassId(classId);
 
         if (t != null)
-            self._sendReply(IIPPacketAction.TemplateFromClassId, callback)
+            self.#sendReply(IIPPacketAction.TemplateFromClassId, callback)
                 .addDC(TransmissionType.compose(
                     TransmissionTypeIdentifier.RawData, t.content))
                 .done();
         else {
             // reply failed
-            self._sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+            self.#sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
         }
     }
 
@@ -1847,13 +2236,13 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (r) {
             if (r != null)
-                self._sendReply(IIPPacketAction.TemplateFromResourceId, callback)
+                self.#sendReply(IIPPacketAction.TemplateFromResourceId, callback)
                     .addDC(TransmissionType.compose(
                         TransmissionTypeIdentifier.RawData, r.instance.template.content))
                     .done();
             else {
                 // reply failed
-                self._sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
             }
         });
     }
@@ -1863,7 +2252,7 @@ export default class DistributedConnection extends IStore {
 
         if (this.server == null)
         {
-            this._sendError(ErrorType.Management, callback, ExceptionCode.GeneralFailure);
+            this.#sendError(ErrorType.Management, callback, ExceptionCode.GeneralFailure);
             return;
         }
 
@@ -1871,7 +2260,7 @@ export default class DistributedConnection extends IStore {
 
         if (call == null)
         {
-            this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+            this.#sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
             return;
         }
 
@@ -1881,7 +2270,7 @@ export default class DistributedConnection extends IStore {
         {
             
             // un hold the socket to send data immediately
-            this.socket.unhold();
+            this.#socket.unhold();
 
             // @TODO: Make managers for procedure calls
             //if (r.Instance.Applicable(session, ActionType.Execute, ft) == Ruling.Denied)
@@ -1891,11 +2280,11 @@ export default class DistributedConnection extends IStore {
             //    return;
             //}
 
-            this._invokeFunction(call.method, callback, results, IIPPacketAction.ProcedureCall, call.target);
+            this.#invokeFunction(call.method, callback, results, IIPPacketAction.ProcedureCall, call.target);
 
         }).error(x =>
         {
-            this._sendError(ErrorType.Management, callback, ExceptionCode.ParseError);
+            this.#sendError(ErrorType.Management, callback, ExceptionCode.ParseError);
         });
     }
 
@@ -1905,7 +2294,7 @@ export default class DistributedConnection extends IStore {
 
         if (template == null)
         {
-            this._sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
+            this.#sendError(ErrorType.Management, callback, ExceptionCode.TemplateNotFound);
             return;
         }
 
@@ -1914,7 +2303,7 @@ export default class DistributedConnection extends IStore {
         if (ft == null)
         {
             // no function at this index
-            this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+            this.#sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
             return;
         }
 
@@ -1923,14 +2312,14 @@ export default class DistributedConnection extends IStore {
         parsed.then(results =>
         {
             // un hold the socket to send data immediately
-            this.socket.unhold();
+            this.#socket.unhold();
 
             var fi = ft.methodInfo;
 
             if (fi == null)
             {
                 // ft found, fi not found, this should never happen
-                this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                this.#sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 return;
             }
 
@@ -1942,11 +2331,11 @@ export default class DistributedConnection extends IStore {
             //    return;
             //}
 
-            this._invokeFunction(fi, callback, results, IIPPacketAction.StaticCall, null);
+            this.#invokeFunction(fi, callback, results, IIPPacketAction.StaticCall, null);
 
         }).error(x =>
         {
-            this._sendError(ErrorType.Management, callback, ExceptionCode.ParseError);
+            this.#sendError(ErrorType.Management, callback, ExceptionCode.ParseError);
         });
     }
 
@@ -1958,7 +2347,7 @@ export default class DistributedConnection extends IStore {
         Warehouse.getById(resourceId).then(function (r) {
             
             if (r == null) {
-                this._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                this.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
             
@@ -1967,7 +2356,7 @@ export default class DistributedConnection extends IStore {
             if (ft == null)
             {
                 // no function at this index
-                this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                this.#sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 return;
             }
 
@@ -1976,14 +2365,14 @@ export default class DistributedConnection extends IStore {
                     var rt = r._invoke(index, args);
                     if (rt != null) {
                         rt.then(function (res) {
-                            self._sendReply(IIPPacketAction.InvokeFunction, callback)
+                            self.#sendReply(IIPPacketAction.InvokeFunction, callback)
                                 .addUint8Array(Codec.compose(res, self))
                                 .done();
                         });
                     }
                     else {
                         // function not found on a distributed object
-                        this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                        this.#sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                         return;
                     }
                 }
@@ -1993,23 +2382,23 @@ export default class DistributedConnection extends IStore {
 
                     if (!(fi instanceof Function)) {
                         // ft found, fi not found, this should never happen
-                        this._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                        this.#sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                         return;
                     }
 
                     if (r.instance.applicable(self.session, ActionType.Execute, ft) == Ruling.Denied) {
-                        self._sendError(ErrorType.Management, callback, ExceptionCode.InvokeDenied);
+                        self.#sendError(ErrorType.Management, callback, ExceptionCode.InvokeDenied);
                         return;
                     }
 
-                    self._invokeFunction(fi, callback, args, IIPPacketAction.InvokeFunction, r);
+                    self.#invokeFunction(fi, callback, args, IIPPacketAction.InvokeFunction, r);
 
                 }
             });
         });
     }
 
-    _invokeFunction(fi, callback, parameters, actionType, target = null)
+    #invokeFunction(fi, callback, parameters, actionType, target = null)
     {
 
         let self = this;
@@ -2028,46 +2417,46 @@ export default class DistributedConnection extends IStore {
         }
         catch(ex)
         {
-            this._sendError(ErrorType.Exception, callback, 0, ex.toString());
+            this.#sendError(ErrorType.Exception, callback, 0, ex.toString());
             return;
         }
 
         // Is iterator ?
         if (rt != null && rt[Symbol.iterator] instanceof Function) {
             for (let v of rt)
-            this._sendChunk(callback, v);
+            this.#sendChunk(callback, v);
 
-            this._sendReply(actionType, callback)
+            this.#sendReply(actionType, callback)
                 .addUint8(DataType.Void)
                 .done();
         }
         else if (rt instanceof AsyncReply) {
             rt.then(function (res) {
-                self._sendReply(actionType, callback)
+                self.#sendReply(actionType, callback)
                     .addUint8Array(Codec.compose(res, self))
                     .done();
             }).error(ex => {
-                self._sendError(ErrorType.Exception, callback, ex.code, ex.message);
+                self.#sendError(ErrorType.Exception, callback, ex.code, ex.message);
             }).progress((pt, pv, pm) =>
             {
-                self._sendProgress(callback, pv, pm);
+                self.#sendProgress(callback, pv, pm);
             }).chunk(v =>
             {
-                self._sendChunk(callback, v);
+                self.#sendChunk(callback, v);
             });
         }
         else if (rt instanceof Promise)
         {
             rt.then(function (res) {
-                self._sendReply(actionType, callback)
+                self.#sendReply(actionType, callback)
                     .addUint8Array(Codec.compose(res, self))
                     .done();
             }).catch(ex => {
-                self._sendError(ErrorType.Exception, callback, 0, ex.toString());
+                self.#sendError(ErrorType.Exception, callback, 0, ex.toString());
             });
         }
         else {
-            self._sendReply(actionType, callback)
+            self.#sendReply(actionType, callback)
                 .addUint8Array(Codec.compose(rt, self))
                 .done();
         }
@@ -2082,13 +2471,13 @@ export default class DistributedConnection extends IStore {
     //             var pt = r.instance.template.getFunctionTemplateByIndex(index);
     //             if (pt != null) {
     //                 if (r instanceof DistributedResource) {
-    //                     self._sendReply(IIPPacketAction.GetProperty, callback)
+    //                     self.#sendReply(IIPPacketAction.GetProperty, callback)
     //                         .addUint8Array(Codec.compose(r._get(pt.index), self))
     //                         .done();
     //                 }
     //                 else {
     //                     var pv = r[pt.name];
-    //                     self._sendReply(IIPPacketAction.GetProperty)
+    //                     self.#sendReply(IIPPacketAction.GetProperty)
     //                         .addUint8Array(Codec.compose(pv, self))
     //                         .done();
     //                 }
@@ -2113,12 +2502,12 @@ export default class DistributedConnection extends IStore {
     //             if (pt != null) {
     //                 if (r.instance.getAge(index) > age) {
     //                     var pv = r[pt.name];
-    //                     self._sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+    //                     self.#sendReply(IIPPacketAction.GetPropertyIfModified, callback)
     //                         .addUint8Array(Codec.compose(pv, self))
     //                         .done();
     //                 }
     //                 else {
-    //                     self._sendReply(IIPPacketAction.GetPropertyIfModified, callback)
+    //                     self.#sendReply(IIPPacketAction.GetPropertyIfModified, callback)
     //                         .addUint8(DataType.NotModified)
     //                         .done();
     //                 }
@@ -2149,38 +2538,38 @@ export default class DistributedConnection extends IStore {
                     {
                         r.listen(et).then(x =>
                        {
-                           self._sendReply(IIPPacketAction.Listen, callback).done();
-                       }).error(x => self._sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
+                           self.#sendReply(IIPPacketAction.Listen, callback).done();
+                       }).error(x => self.#sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
                     }
                     else
                     {
-                        if (!self.subscriptions.has(r))
+                        if (!self.#subscriptions.has(r))
                         {
-                            self._sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
+                            self.#sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
                             return;
                         }
 
-                        if (self.subscriptions.get(r).includes(index))
+                        if (self.#subscriptions.get(r).includes(index))
                         {
-                            self._sendError(ErrorType.Management, callback, ExceptionCode.AlreadyListened);
+                            self.#sendError(ErrorType.Management, callback, ExceptionCode.AlreadyListened);
                             return;
                         }
 
-                        self.subscriptions.get(r).push(index);
+                        self.#subscriptions.get(r).push(index);
 
-                        self._sendReply(IIPPacketAction.Listen, callback).done();
+                        self.#sendReply(IIPPacketAction.Listen, callback).done();
                     }
                 }
                 else
                 {
                     // pt not found
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 }
             }
             else
             {
                 // resource not found
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -2201,40 +2590,40 @@ export default class DistributedConnection extends IStore {
                     {
                         r.unlisten(et).then(x =>
                         {
-                            self._sendReply(IIPPacketAction.Unlisten, callback).done();
-                        }).error(x => self._sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
+                            self.#sendReply(IIPPacketAction.Unlisten, callback).done();
+                        }).error(x => self.#sendError(ErrorType.Exception, callback, ExceptionCode.GeneralFailure));
                     }
                     else
                     {
-                        if (!self.subscriptions.has(r))
+                        if (!self.#subscriptions.has(r))
                         {
-                            self._sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
+                            self.#sendError(ErrorType.Management, callback, ExceptionCode.NotAttached);
                             return;
                         }
 
-                        if (!self.subscriptions.get(r).includes(index))
+                        if (!self.#subscriptions.get(r).includes(index))
                         {
-                            self._sendError(ErrorType.Management, callback, ExceptionCode.AlreadyUnlistened);
+                            self.#sendError(ErrorType.Management, callback, ExceptionCode.AlreadyUnlistened);
                             return;
                         }
 
-                        let ar = self.subscriptions.get(r);
+                        let ar = self.#subscriptions.get(r);
                         let i = ar.indexOf(index);
                         ar.splice(i, 1);
                         
-                        self._sendReply(IIPPacketAction.Unlisten, callback).done();             
+                        self.#sendReply(IIPPacketAction.Unlisten, callback).done();             
                     }
                 }
                 else
                 {
                     // pt not found
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.MethodNotFound);
                 }
             }
             else
             {
                 // resource not found
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             }
         });
     }
@@ -2253,16 +2642,16 @@ export default class DistributedConnection extends IStore {
                         if (r instanceof DistributedResource) {
                             // propagation
                             r._set(index, value).then(function (x) {
-                                self._sendReply(IIPPacketAction.SetProperty, callback)
+                                self.#sendReply(IIPPacketAction.SetProperty, callback)
                                     .done();
                             }).error(function (x) {
-                                self._sendError(x.type, callback, x.code, x.message)
+                                self.#sendError(x.type, callback, x.code, x.message)
                                     .done();
                             });
                         }
                         else {
                             if (r.instance.applicable(self.session, ActionType.SetProperty, pt) == Ruling.Denied) {
-                                self._sendError(AsyncReply.ErrorType.Exception, callback, ExceptionCode.SetPropertyDenied);
+                                self.#sendError(AsyncReply.ErrorType.Exception, callback, ExceptionCode.SetPropertyDenied);
                                 return;
                             }
 
@@ -2271,10 +2660,10 @@ export default class DistributedConnection extends IStore {
                                     value = new DistributedPropertyContext(this, value);
 
                                 r[pt.name] = value;
-                                self._sendReply(IIPPacketAction.SetProperty, callback).done();
+                                self.#sendReply(IIPPacketAction.SetProperty, callback).done();
                             }
                             catch (ex) {
-                                self._sendError(AsyncReply.ErrorType.Exception, callback, 0, ex.toString()).done();
+                                self.#sendError(AsyncReply.ErrorType.Exception, callback, 0, ex.toString()).done();
                             }
                         }
 
@@ -2282,12 +2671,12 @@ export default class DistributedConnection extends IStore {
                 }
                 else {
                     // property not found
-                    self._sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
+                    self.#sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
                 }
             }
             else {
                 // resource not found
-                self._sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
+                self.#sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.PropertyNotFound).done();
             }
         });
     }
@@ -2298,7 +2687,7 @@ export default class DistributedConnection extends IStore {
             if (r != null) {
                 r.instance.store.getRecord(r, fromDate, toDate).then(function (results) {
                     var history = Codec.composeHistory(results, self, true);
-                    self._sendReply(IIPPacketAction.ResourceHistory, callback)
+                    self.#sendReply(IIPPacketAction.ResourceHistory, callback)
                         .addUint8Array(history)
                         .done();
                 });
@@ -2312,15 +2701,15 @@ export default class DistributedConnection extends IStore {
         let queryCallback = function (resources) {
 
             if (resources == null)
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
             else
             {
                 var list = resources.filter(function (r) { return r.instance.applicable(self.session, ActionType.Attach, null) != Ruling.Denied });
 
                 if (list.length == 0)
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 else
-                    self._sendReply(IIPPacketAction.QueryLink, callback)
+                    self.#sendReply(IIPPacketAction.QueryLink, callback)
                         .addUint8Array(Codec.compose(list, self))
                         .done();
             }
@@ -2350,7 +2739,7 @@ export default class DistributedConnection extends IStore {
 
         pkt.addUint32(pkt.length, 8);
 
-        this._sendRequest(IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
+        this.#sendRequest(IIPPacketAction.CreateResource).addUint8Array(pkt.ToArray()).done().then(function (args) {
             var rid = args[0];
 
             self.fetch(rid, null).then(function (r) {
@@ -2367,7 +2756,7 @@ export default class DistributedConnection extends IStore {
 
         var sb = DC.stringToBytes(resourceLink);
 
-        this._sendRequest(IIPPacketAction.QueryLink)
+        this.#sendRequest(IIPPacketAction.QueryLink)
             .addUint16(sb.length)
             .addUint8Array(sb)
             .done()
@@ -2390,27 +2779,27 @@ export default class DistributedConnection extends IStore {
 
     getTemplateByClassName(className) {
 
-        let templates = this.templates.filter({ className: className });
+        let templates = this.#templates.filter({ className: className });
 
         if (templates.length > 0)
             return new AsyncReply(templates[0]);
-        else if (this.templateByNameRequests.contains(className))
-            return this.templateByNameRequests.item(className);
+        else if (this.#templateByNameRequests.contains(className))
+            return this.#templateByNameRequests.item(className);
 
         var reply = new AsyncReply();
-        this.templateByNameRequests.add(className, reply);
+        this.#templateByNameRequests.add(className, reply);
 
         var self = this;
 
         let classNameBytes = DC.stringToBytes(className);
 
-        this._sendRequest(IIPPacketAction.TemplateFromClassName)
+        this.#sendRequest(IIPPacketAction.TemplateFromClassName)
             .addUint8(classNameBytes.length)
             .addUint8Array(classNameBytes)
             .done()
             .then(function (rt) {
-                self.templateByNameRequests.remove(className);
-                self.templates.add(rt[0].classId.valueOf(), rt[0]);
+                self.#templateByNameRequests.remove(className);
+                self.#templates.add(rt[0].classId.valueOf(), rt[0]);
                 Warehouse.putTemplate(rt[0]);
                 reply.trigger(rt[0]);
             });
@@ -2419,22 +2808,22 @@ export default class DistributedConnection extends IStore {
     }
 
     getTemplate(classId) {
-        if (this.templates.contains(classId))
-            return new AsyncReply(this.templates.item(classId));
-        else if (this.templateRequests.contains(classId))
-            return this.templateRequests.item(classId);
+        if (this.#templates.contains(classId))
+            return new AsyncReply(this.#templates.item(classId));
+        else if (this.#templateRequests.contains(classId))
+            return this.#templateRequests.item(classId);
 
         var reply = new AsyncReply();
-        this.templateRequests.add(classId.valueOf(), reply);
+        this.#templateRequests.add(classId.valueOf(), reply);
 
         var self = this;
 
-        this._sendRequest(IIPPacketAction.TemplateFromClassId)
+        this.#sendRequest(IIPPacketAction.TemplateFromClassId)
             .addUint8Array(classId.value)
             .done()
             .then(function (rt) {
-                self.templateRequests.remove(classId);
-                self.templates.add(rt[0].classId.valueOf(), rt[0]);
+                self.#templateRequests.remove(classId);
+                self.#templates.add(rt[0].classId.valueOf(), rt[0]);
                 Warehouse.putTemplate(rt[0]);
                 reply.trigger(rt[0]);
             });
@@ -2470,7 +2859,7 @@ export default class DistributedConnection extends IStore {
         var link = data.get
         var self = this;
 
-        this._sendRequest(IIPPacketAction.ResourceIdFromResourceLink)
+        this.#sendRequest(IIPPacketAction.ResourceIdFromResourceLink)
                         .addUint16(.then(function (rt) {
             delete self.pathRequests[path];
 
@@ -2502,7 +2891,7 @@ export default class DistributedConnection extends IStore {
 
         var l = DC.stringToBytes(link);
 
-        this._sendRequest(IIPPacketAction.LinkTemplates)
+        this.#sendRequest(IIPPacketAction.LinkTemplates)
         .addUint16(l.length)
         .addUint8Array(l)
         .done()
@@ -2538,14 +2927,14 @@ export default class DistributedConnection extends IStore {
     fetch(id, requestSequence) {
 
     
-        let resource = this._attachedResources.item(id)?.deref();
+        let resource = this.#attachedResources.item(id)?.deref();
 
         if (resource != null)
             return new AsyncReply(resource);
 
-        resource = this._neededResources.item(id);
+        resource = this.#neededResources.item(id);
 
-        let request = this.resourceRequests.item(id);
+        let request = this.#resourceRequests.item(id);
 
         if (request != null) {
             if (resource != null && (requestSequence?.includes(id) ?? false))
@@ -2562,14 +2951,14 @@ export default class DistributedConnection extends IStore {
 
         var reply = new AsyncReply();
 
-        this.resourceRequests.set(id, reply);
+        this.#resourceRequests.set(id, reply);
 
         var newSequence =
            requestSequence != null ? [...requestSequence, id] : [id];
 
         var self = this;
 
-        this._sendRequest(IIPPacketAction.AttachResource)
+        this.#sendRequest(IIPPacketAction.AttachResource)
             .addUint32(id)
             .done()
             .then(function (rt) {
@@ -2613,10 +3002,10 @@ export default class DistributedConnection extends IStore {
                                 ar[i + 2], ar[i], ar[i + 1]));
 
                         dr._attach(pvs);
-                        self.resourceRequests.remove(id);
+                        self.#resourceRequests.remove(id);
                         // move from needed to attached
-                        self._neededResources.remove(id);
-                        self._attachedResources.set(id, new WeakRef(dr));
+                        self.#neededResources.remove(id);
+                        self.#attachedResources.set(id, new WeakRef(dr));
                         reply.trigger(dr);
                     })
                     .error((ex) => reply.triggerError(ex));        
@@ -2667,7 +3056,7 @@ export default class DistributedConnection extends IStore {
 
             var self = this;
 
-            this._sendRequest(IIPPacketAction.ResourceHistory)
+            this.#sendRequest(IIPPacketAction.ResourceHistory)
                 .addUint32(resource._p.instanceId)
                 .addDateTime(fromDate).addDateTime(toDate)
                 .done()
@@ -2683,18 +3072,18 @@ export default class DistributedConnection extends IStore {
             return new AsyncReply(null);
     }
 
-    #_instance_resourceDestroyed = function(resource) {
+    #instance_resourceDestroyed = function(resource) {
 
-        this._unsubscribe(resource);
+        this.#unsubscribe(resource);
         // compose the packet
-        this._sendEvent(IIPPacketEvent.ResourceDestroyed)
+        this.#sendEvent(IIPPacketEvent.ResourceDestroyed)
             .addUint32(resource.instance.id)
             .done();
     }
 
-    #_instance_propertyModified = function(info) {
+    #instance_propertyModified = function(info) {
 
-        this._sendEvent(IIPPacketEvent.PropertyUpdated)
+        this.#sendEvent(IIPPacketEvent.PropertyUpdated)
             .addUint32(info.resource.instance?.id)
             .addUint8(info.propertyTemplate.index)
             .addUint8Array(Codec.compose(info.value, this))
@@ -2702,16 +3091,16 @@ export default class DistributedConnection extends IStore {
       
     }
 
-    #_instance_eventOccurred = function(info) {
+    #instance_eventOccurred = function(info) {
  
  
         if (info.eventTemplate.listenable)
         {
             // check the client requested listen
-            if (!this.subscriptions.has(resource))
+            if (!this.#subscriptions.has(resource))
                 return;
 
-            if (!this.subscriptions.get(resource).includes(et.index))
+            if (!this.#subscriptions.get(resource).includes(et.index))
                 return;
         }
 
@@ -2725,7 +3114,7 @@ export default class DistributedConnection extends IStore {
 
 
         // compose the packet
-        this._sendEvent(IIPPacketEvent.EventOccurred)
+        this.#sendEvent(IIPPacketEvent.EventOccurred)
             .addUint32(info.resource.instance.id)
             .addUint8(info.eventTemplate.index)
             .addUint8Array(Codec.compose(info.value, this))
@@ -2739,29 +3128,29 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(parentId).then(function (parent) {
             if (parent == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             Warehouse.getById(childId).then(function (child) {
                 if (child == null) {
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                     return;
                 }
 
                 if (parent.instance.applicable(self.session, ActionType.AddChild, null) != Ruling.Allowed) {
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
                     return;
                 }
 
                 if (child.instance.applicable(self.session, ActionType.AddParent, null) != Ruling.Allowed) {
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
                     return;
                 }
 
                 parent.instance.children.add(child);
 
-                self._sendReply(IIPPacketAction.AddChild, callback)
+                self.#sendReply(IIPPacketAction.AddChild, callback)
                     .done();
                 //child.Instance.Parents
             });
@@ -2774,29 +3163,29 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(parentId).then(function (parent) {
             if (parent == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             Warehouse.getById(childId).then(function (child) {
                 if (child == null) {
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                     return;
                 }
 
                 if (parent.instance.applicable(self.session, ActionType.RemoveChild, null) != Ruling.Allowed) {
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.AddChildDenied);
                     return;
                 }
 
                 if (child.instance.applicable(self.session, ActionType.RemoveParent, null) != Ruling.Allowed) {
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.AddParentDenied);
                     return;
                 }
 
                 parent.instance.children.remove(child);
 
-                self._sendReply(IIPPacketAction.RemoveChild, callback)
+                self.#sendReply(IIPPacketAction.RemoveChild, callback)
                     .done();
                 //child.Instance.Parents
             });
@@ -2808,17 +3197,17 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(resourceId).then(function (resource) {
             if (resource == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             if (resource.instance.applicable(self.session, ActionType.Rename, null) != Ruling.Allowed) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.RenameDenied);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.RenameDenied);
                 return;
             }
 
             resource.instance.name = name;
-            self._sendReply(IIPPacketAction.RenameResource, callback)
+            self.#sendReply(IIPPacketAction.RenameResource, callback)
                 .done();
         });
     }
@@ -2827,11 +3216,11 @@ export default class DistributedConnection extends IStore {
         var self = this;
         Warehouse.getById(resourceId).then(function (resource) {
             if (resource == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
-            self._sendReply(IIPPacketAction.ResourceChildren, callback)
+            self.#sendReply(IIPPacketAction.ResourceChildren, callback)
                 .addUint8Array(Codec.compose(resource.instance.children.toArray(), self))
                 .done();
 
@@ -2843,25 +3232,28 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (resource) {
             if (resource == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
-            self._sendReply(IIPPacketAction.ResourceParents, callback)
+            self.#sendReply(IIPPacketAction.ResourceParents, callback)
                 .addUint8Array(Codec.compose(resource.instance.parents.toArray(), self))
                 .done();
         });
     }
 
     IIPRequestClearAttributes(callback, resourceId, attributes, all = false) {
+
+        let self = this;
+
         Warehouse.getById(resourceId).then(function (r) {
             if (r == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
                 return;
             }
 
@@ -2871,10 +3263,10 @@ export default class DistributedConnection extends IStore {
                 attrs = attributes.getStringArray(0, attributes.length);
 
             if (r.instance.removeAttributes(attrs))
-                self._sendReply(all ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes, callback)
+                self.#sendReply(all ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes, callback)
                     .done();
             else
-                self._sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
+                self.#sendError(AsyncReply.ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
 
         });
     }
@@ -2884,23 +3276,23 @@ export default class DistributedConnection extends IStore {
 
         Warehouse.getById(resourceId).then(function (r) {
             if (r == null) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.ResourceNotFound);
                 return;
             }
 
             if (r.instance.store.instance.applicable(self.session, ActionType.UpdateAttributes, null) != Ruling.Allowed) {
-                self._sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
+                self.#sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeDenied);
                 return;
             }
 
             DataDeserializer.typedListParser(attributes, 0, attributes.length, this, null)
                 .then(function (attrs) {
                 if (r.instance.setAttributes(attrs, clearAttributes))
-                    self._sendReply(clearAttributes ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes,
+                    self.#sendReply(clearAttributes ? IIPPacketAction.ClearAllAttributes : IIPPacketAction.ClearAttributes,
                         callback)
                         .done();
                 else
-                    self._sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
+                    self.#sendError(ErrorType.Management, callback, ExceptionCode.UpdateAttributeFailed);
             });
 
         });
@@ -2916,7 +3308,7 @@ export default class DistributedConnection extends IStore {
         var rt = new AsyncReply();
         var self = this;
 
-        this._sendRequest(IIPPacketAction.ResourceChildren)
+        this.#sendRequest(IIPPacketAction.ResourceChildren)
             .addUint32(resource._p.instanceId)
             .done()
             .then(function (ar) {
@@ -2941,7 +3333,7 @@ export default class DistributedConnection extends IStore {
         var rt = new AsyncReply();
         var self = this;
 
-        this._sendRequest(IIPPacketAction.ResourceParents)
+        this.#sendRequest(IIPPacketAction.ResourceParents)
             .addUint32(resource._p.instanceId)
             .done()
             .then(function (ar) {
@@ -2965,7 +3357,7 @@ export default class DistributedConnection extends IStore {
         var rt = new AsyncReply();
 
         if (attributes == null)
-            this._sendRequest(IIPPacketAction.ClearAllAttributes)
+            this.#sendRequest(IIPPacketAction.ClearAllAttributes)
                 .addUint32(resource._p.instanceId)
                 .done()
                 .then(function (ar) {
@@ -2973,7 +3365,7 @@ export default class DistributedConnection extends IStore {
                 }).error(function (ex) { rt.triggerError(ex); });
         else {
             var attrs = DC.stringArrayToBytes(attributes);
-            this._sendRequest(IIPPacketAction.ClearAttributes)
+            this.#sendRequest(IIPPacketAction.ClearAttributes)
                 .addUint32(resource.instance.id)
                 .addUint32(attrs.length)
                 .addUint8Array(attrs)
@@ -2992,7 +3384,7 @@ export default class DistributedConnection extends IStore {
 
         var rt = new AsyncReply();
 
-        this._sendRequest(clearAttributes ? IIPPacketAction.UpdateAllAttributes : IIPPacketAction.UpdateAttributes)
+        this.#sendRequest(clearAttributes ? IIPPacketAction.UpdateAllAttributes : IIPPacketAction.UpdateAttributes)
             .addUint32(resource._p.instanceId)
             .addUint8Array(Codec.compose(attributes, this))
             .done()
@@ -3011,7 +3403,7 @@ export default class DistributedConnection extends IStore {
             let self = this;
 
         if (attributes == null) {
-            this._sendRequest(IIPPacketAction.GetAllAttributes)
+            this.#sendRequest(IIPPacketAction.GetAllAttributes)
                 .addUint32(resource._p.instanceId)
                 .done()
                 .then(function (ar) {
@@ -3029,7 +3421,7 @@ export default class DistributedConnection extends IStore {
         }
         else {
             let attrs = DC.stringArrayToBytes(attributes);
-            this._sendRequest(IIPPacketAction.GetAttributes)
+            this.#sendRequest(IIPPacketAction.GetAttributes)
                 .addUint32(resource._p.instanceId)
                 .addUint32(attrs.length)
                 .addUint8Array(attrs)
@@ -3054,7 +3446,7 @@ export default class DistributedConnection extends IStore {
     }
 
 
-    _keepAliveTimerElapsed()
+    #keepAliveTimerElapsed()
     {
         // @TODO: port this
         // if (!this.isConnected)
@@ -3063,31 +3455,31 @@ export default class DistributedConnection extends IStore {
         let self = this;
         let now = new Date();
 
-        let interval = this._lastKeepAliveSent == null ? 0 :
-                        (now - this._lastKeepAliveSent);
+        let interval = this.#lastKeepAliveSent == null ? 0 :
+                        (now - this.#lastKeepAliveSent);
 
-        this._lastKeepAliveSent = now;
+        this.#lastKeepAliveSent = now;
 
-        this._sendRequest(IIPPacketAction.KeepAlive)
+        this.#sendRequest(IIPPacketAction.KeepAlive)
                 .addDateTime(now)
                 .addUint32(interval)
                 .done()
                 .then(x =>
                 {
                     self.jitter = x[1];
-                    self._keepAliveTimer = setTimeout(() => self._keepAliveTimerElapsed(), self.keepAliveInterval * 1000);
+                    self.#keepAliveTimer = setTimeout(() => self.#keepAliveTimerElapsed(), self.keepAliveInterval * 1000);
                     //console.log("Keep Alive Received " + self.jitter);
                     
                     // run GC
                     let toBeRemoved =[];
                     
-                    for(let i = 0; i < self._attachedResources.length; i++){
-                        let r = self._attachedResources.values[i].deref();
+                    for(let i = 0; i < self.#attachedResources.length; i++){
+                        let r = self.#attachedResources.values[i].deref();
 
                         if (r == null) {
-                            let id = self._attachedResources.keys[i];
+                            let id = self.#attachedResources.keys[i];
                             // send detach
-                            self._sendDetachRequest(id);
+                            self.#sendDetachRequest(id);
                             toBeRemoved.push(id);
                         }
                     }
@@ -3096,7 +3488,7 @@ export default class DistributedConnection extends IStore {
                         console.log("GC: " + toBeRemoved.length);
                         
                     for(let id of toBeRemoved)
-                        self._attachedResources.remove(id);
+                        self.#attachedResources.remove(id);
 
                 }).error((ex) =>
                 {
@@ -3114,11 +3506,11 @@ export default class DistributedConnection extends IStore {
         var pb = Codec.compose(parameters, this); 
 
         var reply = new AsyncReply();
-        var c = this.callbackCounter++;
-        this.requests.add(c, reply);
+        var c = this.#callbackCounter++;
+        this.#requests.add(c, reply);
 
 
-        this._sendParams()
+        this.this.#sendParams()
             .addUint8(0x40 | IIPPacketAction.StaticCall)
             .addUint32(c)
             .addGuid(classId)
@@ -3143,8 +3535,8 @@ export default class DistributedConnection extends IStore {
         var pb = Codec.Compose(parameters, this);
 
         var reply = new AsyncReply();
-        var c = this.callbackCounter++;
-        this.requests.add(c, reply);
+        var c = this.#callbackCounter++;
+        this.#requests.add(c, reply);
 
         var callName = DC.stringToBytes(procedureCall);
 
@@ -3167,22 +3559,22 @@ export default class DistributedConnection extends IStore {
 
         let now = new Date();
 
-        if (this._lastKeepAliveReceived != null)
+        if (this.#lastKeepAliveReceived != null)
         {
-            var diff = now - this._lastKeepAliveReceived;
+            var diff = now - this.#lastKeepAliveReceived;
             //Console.WriteLine("Diff " + diff + " " + interval);
 
             jitter = Math.abs(diff - interval);
         }
 
-        this._sendParams()
+        this.this.#sendParams()
             .addUint8(0x80 | IIPPacketAction.KeepAlive)
             .addUint32(callbackId)
             .addDateTime(now)
             .addUint32(jitter)
             .done();
 
-        this._lastKeepAliveReceived = now;
+        this.#lastKeepAliveReceived = now;
     }
 
 

@@ -26,16 +26,27 @@
  */
 
 "use strict";  
+import AuthenticationType from "./AuthenticationType.js";
+import AuthenticationMethod from "./AuthenticationMethod.js";
+import KeyList from "../../Data/KeyList.js";
 
 export default class Session
 {
-    constructor(localAuthentication, remoteAuthentication)
-    {
-         
-        this.localAuthentication = localAuthentication;
-        this.remoteAuthentication = remoteAuthentication;
-        this.id = null;
-        this.creation = null;
-        this.modification = null;
-    }
+
+    id;
+    creation = Date();
+    modification = Date();
+    
+    variables = new KeyList();
+
+    localHeaders = new Map();
+    remoteHeaders = new Map();
+
+    localMethod = AuthenticationMethod.None;
+    remoteMethod = AuthenticationMethod.None;
+
+    authenticationType = AuthenticationType.Host ;
+
+    authorizedAccount;
+
 }
