@@ -30,6 +30,7 @@
 import IIPAuthPacketCommand from "./IIPAuthPacketCommand.js";
 import IIPAuthPacketAction from "./IIPAuthPacketAction.js";
 import AuthenticationMethod from "../../Security/Authority/AuthenticationMethod.js";
+import TransmissionType from '../../Data/TransmissionType.js';
 
 export default class IIPAuthPacket
 {
@@ -52,6 +53,7 @@ export default class IIPAuthPacket
     challenge = null;
     asymetricEncryptionKey = null;
     sessionId = null;
+    accountId = null;
   
     dataType = null;
   
@@ -300,7 +302,7 @@ export default class IIPAuthPacket
       
             } else if (this.event == IIPAuthPacketEvent.IndicationEstablished) {
       
-              if (this.#notEnough(offset, ends, 1)) 
+              if (this.#notEnough(offset, ends, 2)) 
                   return -this.#dataLengthNeeded;
       
               let sessionLength = data[offset++];
@@ -311,6 +313,19 @@ export default class IIPAuthPacket
               this.sessionId = data.clip(offset, sessionLength);
       
               offset += sessionLength;
+
+              if (this.#notEnough(offset, ends, 1)) 
+                return -this.#dataLengthNeeded;
+
+              let accountLength = data[offset++];
+
+              if (this.#notEnough(offset, ends, accountLength)) 
+                return -this.#dataLengthNeeded;
+
+              this.accountId = data.clip(offset, accountLength);
+      
+              offset += accountLength;
+
       
             } else if (this.event == IIPAuthPacketEvent.IAuthPlain ||
                 this.event == IIPAuthPacketEvent.IAuthHashed ||

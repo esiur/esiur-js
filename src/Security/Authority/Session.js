@@ -29,7 +29,8 @@
 import AuthenticationType from "./AuthenticationType.js";
 import AuthenticationMethod from "./AuthenticationMethod.js";
 import KeyList from "../../Data/KeyList.js";
-
+import { UInt8 } from "../../Data/ExtendedTypes.js";
+import TypedMap from "../../Data/TypedMap.js";
 export default class Session
 {
 
@@ -39,8 +40,8 @@ export default class Session
     
     variables = new KeyList();
 
-    localHeaders = new Map();
-    remoteHeaders = new Map();
+    localHeaders = new (TypedMap.of(UInt8, Object))();
+    remoteHeaders = new (TypedMap.of(UInt8, Object))();
 
     localMethod = AuthenticationMethod.None;
     remoteMethod = AuthenticationMethod.None;

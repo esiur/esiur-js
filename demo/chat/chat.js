@@ -26,7 +26,7 @@ const wss = new WebSocket.Server({port: 8001});
 
 class MyMembership extends IMembership {
   userExists(username, domain) {
-    return new AsyncReply(true);
+    return new AsyncReply(username);
   }
   getPassword(username, domain) {
     return new AsyncReply(DC.stringToBytes("1234"));
@@ -83,9 +83,9 @@ wss.on('connection', function connection(ws)
   let con = server.add();
   con.assign(new WSocket(ws));
   con.on("ready", (x)=>{
-    chat._emit("login", x.session.remoteAuthentication.username);
+    chat._emit("login", x.session.authorizedAccount);
   }).on("close", (x)=>{
-    chat._emit("logout", x.session.remoteAuthentication.username);
+    chat._emit("logout", x.session.authorizedAccount);
   });
 });
 

@@ -39,7 +39,7 @@ export default class SendList extends BinaryList
 
     done()
     {
-        this.connection.sendAll(this.toArray());
+        this.connection._sendAll(this.toArray());
         return this.reply;
     }
 }

@@ -13,10 +13,11 @@ import TypedMap from './TypedMap.js';
 import PropertyValueArray from './PropertyValueArray.js';
 import PropertyValue from './PropertyValue.js';
 import Record from './Record.js';
-import { UInt64, Int64 } from '../Data/ExtendedTypes.js';
 import AsyncException from '../Core/AsyncException.js';
 import ExceptionCode from '../Core/ExceptionCode.js';
 import ErrorType from '../Core/ErrorType.js';
+
+import {Int8, UInt8, Int16, UInt16, Int32, UInt32, Float32, Float64, UInt64, Int64} from './ExtendedTypes.js';
 
 export class PropertyValueParserResults {
   //final int size;
@@ -50,13 +51,13 @@ export default class DataDeserializer {
 
   static byteParser(
        data,  offset,  length,  connection, requestSequence) {
-        return new AsyncReply(data[offset]);
+        return new AsyncReply(new UInt8(data[offset]));
   }
 
   static sByteParser(
        data, offset, length,  connection, requestSequence) {
         return new AsyncReply(
-        data[offset] > 127 ? data[offset] - 256 : data[offset]);
+       new Int8(data[offset] > 127 ?data[offset] - 256 : data[offset]));
   }
 
   static char16Parser(
@@ -71,27 +72,27 @@ export default class DataDeserializer {
 
   static int16Parser(
       data, offset, length, connection, requestSequence) {
-        return new AsyncReply(data.getInt16(offset));
+        return new AsyncReply(new Int16(data.getInt16(offset)));
   }
 
   static  uInt16Parser(
       data, offset,  length, connection, requestSequence) {
-        return new AsyncReply(data.getUint16(offset));
+        return new AsyncReply(new UInt16(data.getUint16(offset)));
   }
 
   static int32Parser(
       data, offset, length,  connection, requestSequence) {
-        return new AsyncReply(data.getInt32(offset));
+        return new AsyncReply(new Int32(data.getInt32(offset)));
   }
 
   static  uInt32Parser(
       data, offset, length,  connection, requestSequence) {
-        return new AsyncReply(data.getUint32(offset));
+        return new AsyncReply(new UInt32(data.getUint32(offset)));
   }
 
   static float32Parser(
       data, offset, length,  connection, requestSequence) {
-        return new AsyncReply(data.getFloat32(offset));
+        return new AsyncReply(new Float32(data.getFloat32(offset)));
   }
 
   static float64Parser(

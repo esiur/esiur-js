@@ -42,11 +42,18 @@ import AsyncQueue from '../../Core/AsyncQueue.js';
 import Warehouse from '../../Resource/Warehouse.js';
 
 import IIPAuthPacket from "../Packets/IIPAuthPacket.js";
-import IIPPacket from "../Packets/IIPPacket.js";
-import IIPAuthPacketAction from "../Packets/IIPAuthPacketAction.js";
 import IIPAuthPacketCommand from "../Packets/IIPAuthPacketCommand.js";
+import IIPAuthPacketHeader from '../../Net/Packets/IIPAuthPacketHeader.js';
+import IIPAuthPacketInitialize from '../../Net/Packets/IIPAuthPacketInitialize.js';
+import IIPAuthPacketAcknowledge from '../../Net/Packets/IIPAuthPacketAcknowledge.js';
+import IIPAuthPacketAction from '../../Net/Packets/IIPAuthPacketAction.js';
+import IIPAuthPacketEvent from '../../Net/Packets/IIPAuthPacketEvent.js';
+
+
+
 import AuthenticationMethod from "../../Security/Authority/AuthenticationMethod.js";
 
+import IIPPacket from "../Packets/IIPPacket.js";
 import IIPPacketAction from "../Packets/IIPPacketAction.js";
 import IIPPacketCommand from "../Packets/IIPPacketCommand.js";
 import IIPPacketEvent from "../Packets/IIPPacketEvent.js";
@@ -84,8 +91,6 @@ import { UInt8 } from '../../Data/ExtendedTypes.js';
 import ConnectionStatus from './ConnectionStatus.js';
 import { Prop, TemplateDescriber } from '../../Resource/Template/TemplateDescriber.js';
 import TypedMap from '../../Data/TypedMap.js';
-
-import IIPAuthPacketHeader from '../../Net/Packets/IIPAuthPacketHeader.js';
 
 export default class DistributedConnection extends IStore {
 
@@ -147,7 +152,7 @@ export default class DistributedConnection extends IStore {
         return this.#status;
     }
 
-    #sendAll(data) {
+    _sendAll(data) {
         this.#socket.sendAll(data.buffer);
     }
 
@@ -475,10 +480,10 @@ export default class DistributedConnection extends IStore {
             else {
                 offset += rt;
 
-                if (session.authenticationType == AuthenticationType.Host) {
+                if (this.#session.authenticationType == AuthenticationType.Host) {
                     this.#processHostAuth(msg);
                 }
-                else if (session.authenticationType == AuthenticationType.Client) {
+                else if (this.#session.authenticationType == AuthenticationType.Client) {
                     this.#processClientAuth(msg);
                 }
             }
@@ -525,12 +530,12 @@ export default class DistributedConnection extends IStore {
               else if (session.localMethod == AuthenticationMethod.Credentials
                       || session.localMethod == AuthenticationMethod.Token)
               {
-                  var remoteNonce = session.remoteHeaders[IIPAuthPacketHeader.Nonce];
-                  var localNonce = session.localHeaders[IIPAuthPacketHeader.Nonce];
+                  var remoteNonce = session.remoteHeaders.get(IIPAuthPacketHeader.Nonce);
+                  var localNonce = session.localHeaders.get(IIPAuthPacketHeader.Nonce);
   
                   // send our hash
                   // local nonce + password or token + remote nonce
-                  var challenge = SHA256.compute((new BinaryList()
+                  var challenge = SHA256.compute((BL()
                                                       .addDC(localNonce)
                                                       .addDC(this.#localPasswordOrToken)
                                                       .addDC(remoteNonce))
@@ -550,12 +555,12 @@ export default class DistributedConnection extends IStore {
           {
               if (authPacket.action == IIPAuthPacketAction.AuthenticateHash)
               {
-                  var remoteNonce = session.remoteHeaders[IIPAuthPacketHeader.Nonce];
-                  var localNonce = session.localHeaders[IIPAuthPacketHeader.Nonce];
+                  var remoteNonce = session.remoteHeaders.get(IIPAuthPacketHeader.Nonce);
+                  var localNonce = session.localHeaders.get(IIPAuthPacketHeader.Nonce);
   
                   // check if the server knows my password
   
-                  var challenge = SHA256.compute((new BinaryList()
+                  var challenge = SHA256.compute((BL()
                                                           .addDC(remoteNonce)
                                                           .addDC(this.#localPasswordOrToken)
                                                           .addDC(localNonce)
@@ -601,7 +606,8 @@ export default class DistributedConnection extends IStore {
               else if (authPacket.event == IIPAuthPacketEvent.IndicationEstablished)
               {
                   session.id = authPacket.sessionId;
-  
+                  session.authorizedAccount = authPacket.accountId.getString(0, authPacket.accountId.length);
+
                   this.#ready = true;
                   this.#status = ConnectionStatus.Connected;
   
@@ -609,7 +615,7 @@ export default class DistributedConnection extends IStore {
   
                   if (this.instance == null)
                   {
-                      Warehouse.put(this.hashCode.toString().replaceAll("/", "_"), this, null, this.#server).then((x) =>
+                      Warehouse.put(session.authorizedAccount.replaceAll("/", "_"), this, null, this.#server).then((x) =>
                       {
                           this.#openReply?.trigger(true);
   
@@ -692,10 +698,10 @@ export default class DistributedConnection extends IStore {
                       this.authenticator(headers).then((response) =>
                       {
   
-                          var hash = SHA256.compute((new BinaryList()
-                              .addDC(session.localHeaders[IIPAuthPacketHeader.Nonce])
+                          var hash = SHA256.compute((BL()
+                              .addDC(session.localHeaders.get(IIPAuthPacketHeader.Nonce))
                               .addDC(Codec.compose(response, this))
-                              .addDC(session.remoteHeaders[IIPAuthPacketHeader.Nonce])
+                              .addDC(session.remoteHeaders.get(IIPAuthPacketHeader.Nonce))
                           ).toDC());
   
                           this.#sendParams()
@@ -750,10 +756,10 @@ export default class DistributedConnection extends IStore {
                   try
                   {
   
-                      var username = session.remoteHeaders[IIPAuthPacketHeader.Username];
-                      var domain = session.remoteHeaders[IIPAuthPacketHeader.Domain];
+                      var username = session.remoteHeaders.get(IIPAuthPacketHeader.Username);
+                      var domain = session.remoteHeaders.get(IIPAuthPacketHeader.Domain);
   
-                      if (_server?.membership == null)
+                      if (this.#server?.membership == null)
                       {
                           var errMsg = DC.stringToBytes("Membership not set.");
   
@@ -820,8 +826,8 @@ export default class DistributedConnection extends IStore {
                       // Check if user and token exists
                       else
                       {
-                          let tokenIndex = session.remoteHeaders[IIPAuthPacketHeader.TokenIndex];
-                          let domain = session.remoteHeaders[IIPAuthPacketHeader.Domain];
+                          let tokenIndex = session.remoteHeaders.get(IIPAuthPacketHeader.TokenIndex);
+                          let domain = session.remoteHeaders.get(IIPAuthPacketHeader.Domain);
   
   
                           this.#server?.membership?.tokenExists(tokenIndex, domain).then((x) =>
@@ -920,13 +926,13 @@ export default class DistributedConnection extends IStore {
                   {
                       if (session.remoteMethod == AuthenticationMethod.Credentials)
                       {
-                          reply = this.#server.membership.getPassword(session.remoteHeaders[IIPAuthPacketHeader.Username],
-                                                        session.remoteHeaders[IIPAuthPacketHeader.Domain]);
+                          reply = this.#server.membership.getPassword(session.remoteHeaders.get(IIPAuthPacketHeader.Username),
+                                                        session.remoteHeaders.get(IIPAuthPacketHeader.Domain));
                       }
                       else if (session.remoteMethod == AuthenticationMethod.Token)
                       {
-                          reply = this.#server.membership.getToken(session.remoteHeaders[IIPAuthPacketHeader.TokenIndex],
-                                                        session.remoteHeaders[IIPAuthPacketHeader.Domain]);
+                          reply = this.#server.membership.getToken(session.remoteHeaders.get(IIPAuthPacketHeader.TokenIndex),
+                                                        session.remoteHeaders.get(IIPAuthPacketHeader.Domain));
                       }
                       else
                       {
@@ -938,11 +944,11 @@ export default class DistributedConnection extends IStore {
                       {
                           if (pw != null)
                           {
-                              let localNonce = session.localHeaders[IIPAuthPacketHeader.Nonce];
-                              let remoteNonce = session.remoteHeaders[IIPAuthPacketHeader.Nonce];
+                              let localNonce = session.localHeaders.get(IIPAuthPacketHeader.Nonce);
+                              let remoteNonce = session.remoteHeaders.get(IIPAuthPacketHeader.Nonce);
   
   
-                              let hash = SHA256.compute((new BinaryList()
+                              let hash = SHA256.compute((BL()
                                                                   .addDC(remoteNonce)
                                                                   .addDC(pw)
                                                                   .addDC(localNonce)
@@ -951,7 +957,7 @@ export default class DistributedConnection extends IStore {
                               if (hash.sequenceEqual(remoteHash))
                               {
                                   // send our hash
-                                  let localHash = SHA256.compute((new BinaryList()
+                                  let localHash = SHA256.compute((BL()
                                                       .addDC(localNonce)
                                                       .addDC(pw)
                                                       .addDC(remoteNonce)
@@ -1069,10 +1075,14 @@ export default class DistributedConnection extends IStore {
   
               session.id = n;
   
+              let accountId = DC.stringToBytes(session.authorizedAccount);
+
               this.#sendParams()
                   .addUint8(IIPAuthPacketEvent.IndicationEstablished)
                   .addUint8(n.length)
-                  .addDC(n)
+                  .addUint8Array(n)
+                  .addUint8(accountId.length)
+                  .addUint8Array(accountId)
                   .done();
   
               if (this.instance == null)
@@ -1391,16 +1401,16 @@ export default class DistributedConnection extends IStore {
             this.#session.localMethod = method;
             this.#session.remoteMethod = AuthenticationMethod.None;
       
-            this.#session.localHeaders[IIPAuthPacketHeader.Domain] = domain;
-            this.#session.localHeaders[IIPAuthPacketHeader.Nonce] = this.#generateCode(32);
+            this.#session.localHeaders.set(IIPAuthPacketHeader.Domain, domain);
+            this.#session.localHeaders.set(IIPAuthPacketHeader.Nonce, this.#generateCode(32));
       
             if (method == AuthenticationMethod.Credentials)
             {
-                this.#session.localHeaders[IIPAuthPacketHeader.Username] = username;
+                this.#session.localHeaders.set(IIPAuthPacketHeader.Username, username);
             }
             else if (method == AuthenticationMethod.Token)
             {
-                this.#session.localHeaders[IIPAuthPacketHeader.TokenIndex] = tokenIndex;
+                this.#session.localHeaders.set(IIPAuthPacketHeader.TokenIndex, tokenIndex);
             }
             else if (method == AuthenticationMethod.Certificate)
             {
@@ -1462,7 +1472,7 @@ export default class DistributedConnection extends IStore {
             && this.#session.remoteMethod == AuthenticationMethod.None)
         {
             // change to Map<byte, object> for compatibility
-            let headers = Codec.compose(session.localHeaders, this);
+            let headers = Codec.compose(this.#session.localHeaders, this);
   
             // declare (Credentials -> No Auth, No Enctypt)
             this.#sendParams()
@@ -1508,7 +1518,7 @@ export default class DistributedConnection extends IStore {
         // @TODO: add referer
         // this.#session.LocalHeaders[IIPAuthPacketHeader.IPv4] = socket.remoteEndPoint.Address.Address;
 
-        if (socket.State == SocketState.Established &&
+        if (socket.state == SocketState.Established &&
             this.#session.authenticationType == AuthenticationType.Client)
         {
             this.#declare();
@@ -2172,7 +2182,7 @@ export default class DistributedConnection extends IStore {
                 {
                     // get all templates related to this resource
 
-                    var msg = new BinaryList();
+                    var msg = BL();
 
                     var templates = [];
                     for (var i = 0; i < list.length; i++)

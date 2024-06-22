@@ -1,22 +1,24 @@
+import { UInt8 } from "../../Data/ExtendedTypes.js";
+
 // IIPAuthPacketHeader
 export default {
-    Version: 0,
-    Domain: 1,
-    SupportedAuthentications: 2,
-    SupportedHashAlgorithms: 3,
-    SupportedCiphers: 4,
-    SupportedCompression: 5,
-    SupportedPersonalAuth: 6,
-    Nonce: 7,
-    Username: 8,
-    TokenIndex: 9,
-    CertificateId: 10,
-    CachedCertificates: 11,
-    CipherType: 12,
-    CipherKey: 13,
-    SoftwareIdentity: 14,
-    Referrer: 15,
-    Time: 16,
-    Certificate: 17,
-    IPv4: 18
+    Version: new UInt8(0),
+    Domain: new UInt8(1),
+    SupportedAuthentications: new UInt8(2),
+    SupportedHashAlgorithms: new UInt8(3),
+    SupportedCiphers: new UInt8(4),
+    SupportedCompression: new UInt8(5),
+    SupportedPersonalAuth: new UInt8(6),
+    Nonce: new UInt8(7),
+    Username: new UInt8(8),
+    TokenIndex: new UInt8(9),
+    CertificateId: new UInt8(10),
+    CachedCertificates: new UInt8(11),
+    CipherType: new UInt8(12),
+    CipherKey: new UInt8(13),
+    SoftwareIdentity: new UInt8(14),
+    Referrer: new UInt8(15),
+    Time: new UInt8(16),
+    Certificate: new UInt8(17),
+    IPv4: new UInt8(18)
 }
