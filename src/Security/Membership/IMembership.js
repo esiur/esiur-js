@@ -1,5 +1,6 @@
 import AsyncReply from "../../Core/AsyncReply.js";
 import IResource from "../../Resource/IResource.js";
+import AuthorizationResults from '../../Security/Membership/AuthorizationResults.js';
 
 export default class IMembership extends IResource
 {

@@ -6,6 +6,15 @@
             var service;
             let $ = document.querySelector;
 
+            function authenticator(x)
+            {
+                debugger;
+                let challenge = prompt(x.clue);
+                if (challenge != null) {
+                    return new Esiur.Core.AsyncReply(parseInt(challenge));
+                }
+            }
+
             async function connect(){
 
                 let status = document.getElementById("status");
@@ -15,7 +24,7 @@
 
                 try {
                     status.innerHTML = "Connecting...";
-                    service = await wh.get("iip://localhost:8001/chat", {username, password: "1234", autoReconnect: true});
+                    service = await wh.get("iip://localhost:8001/sys/chat", {username, password: "1234", autoReconnect: true, authenticator: authenticator});
                     login.style.display = "none";
                     service.on("message", appendMessage)
                            .on(":title", updateTitle)

@@ -27,9 +27,10 @@
 "use strict";  
 
 
+import AuthenticationMethod from "../../Security/Authority/AuthenticationMethod.js";
 import IIPAuthPacketCommand from "./IIPAuthPacketCommand.js";
 import IIPAuthPacketAction from "./IIPAuthPacketAction.js";
-import AuthenticationMethod from "../../Security/Authority/AuthenticationMethod.js";
+import IIPAuthPacketEvent from "./IIPAuthPacketEvent.js";
 import TransmissionType from '../../Data/TransmissionType.js';
 
 export default class IIPAuthPacket
@@ -117,7 +118,7 @@ export default class IIPAuthPacket
             this.dataType = parsed.type;
             offset += parsed.size;
       
-          } else if (command == IIPAuthPacketCommand.Action) {
+          } else if (this.command == IIPAuthPacketCommand.Action) {
       
             this.action = (data[offset++]);
 
@@ -140,7 +141,7 @@ export default class IIPAuthPacket
               this.challenge = data.clip(offset, hashLength);
               offset += hashLength;
       
-            } else if (action == IIPAuthPacketAction.AuthenticatePrivateHashCert ||
+            } else if (this.action == IIPAuthPacketAction.AuthenticatePrivateHashCert ||
                this.action == IIPAuthPacketAction.AuthenticatePublicPrivateHashCert) {
       
               if (this.#notEnough(offset, ends, 3)) 
@@ -170,7 +171,7 @@ export default class IIPAuthPacket
       
               offset += certLength;
       
-            } else if (action == IIPAuthPacketAction.IAuthPlain) {
+            } else if (this.action == IIPAuthPacketAction.IAuthPlain) {
               
               if (this.#notEnough(offset, ends, 5)) 
                   return -this.#dataLengthNeeded;
@@ -186,7 +187,7 @@ export default class IIPAuthPacket
               this.dataType = parsed.type;
               offset += parsed.size;
       
-            } else if (action == IIPAuthPacketAction.IAuthHashed) {
+            } else if (this.action == IIPAuthPacketAction.IAuthHashed) {
       
               if (this.#notEnough(offset, ends, 7)) 
                   return -this.#dataLengthNeeded;
@@ -206,7 +207,7 @@ export default class IIPAuthPacket
       
               offset += cl;
       
-            } else if (action == IIPAuthPacketAction.IAuthEncrypted) {
+            } else if (this.action == IIPAuthPacketAction.IAuthEncrypted) {
       
               if (this.#notEnough(offset, ends, 7)) 
                   return -this.#dataLengthNeeded;
@@ -226,9 +227,9 @@ export default class IIPAuthPacket
       
               offset += cl;
       
-            } else if (action == IIPAuthPacketAction.EstablishNewSession) {
+            } else if (this.action == IIPAuthPacketAction.EstablishNewSession) {
               // Nothing here
-            } else if (action == IIPAuthPacketAction.EstablishResumeSession) {
+            } else if (this.action == IIPAuthPacketAction.EstablishResumeSession) {
       
                 if (this.#notEnough(offset, ends, 1)) 
                     return -this.#dataLengthNeeded;
@@ -242,7 +243,7 @@ export default class IIPAuthPacket
         
                 offset += sessionLength;
   
-            } else if (action == IIPAuthPacketAction.EncryptKeyExchange) {
+            } else if (this.action == IIPAuthPacketAction.EncryptKeyExchange) {
       
               if (this.#notEnough(offset, ends, 2)) 
                   return -this.#dataLengthNeeded;
@@ -258,7 +259,7 @@ export default class IIPAuthPacket
       
               offset += keyLength;
       
-            } else if (action == IIPAuthPacketAction.RegisterEndToEndKey ||
+            } else if (this.action == IIPAuthPacketAction.RegisterEndToEndKey ||
                this.action == IIPAuthPacketAction.RegisterHomomorphic) {
       
               if (this.#notEnough(offset, ends, 3)) 
@@ -278,7 +279,7 @@ export default class IIPAuthPacket
               offset += keyLength;
       
             }
-          } else if (command == IIPAuthPacketCommand.Event) {
+          } else if (this.command == IIPAuthPacketCommand.Event) {
       
             this.event = data[offset++];
       

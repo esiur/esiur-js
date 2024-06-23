@@ -1,19 +1,33 @@
 
 //AuthorizationResults
 
-export default class {
-    response;
-    destination;
-    requiredFormat;
-    clue;
-    
-    timeout; // 0 means no timeout
-    reference; 
-    
-    issue = new Date();
+import AuthorizationResultsResponse from './AuthorizationResultsResponse.js';
 
+export default class AuthorizationResults {
+    response = AuthorizationResultsResponse.Failed;
+    reference;
+    destination;
+    clue;
+    requiredFormat;
+    contentFormat;
+    content;
+    trials;
+    issue = new Date();
+    expire;
+    
     get expired (){
-        this.timeout == 0 ? false : ((new Date() - this.issue) / 1000) > this.timeout;
-    }   
+        return new Date() > this.expire;
+    }
+
+    get timeout() {
+        if (this.expire != null)
+            return (this.expire - new Date()) / 1000;
+        else
+            return 30;
+    }
+
+    constructor(response = AuthorizationResultsResponse.Failed){
+        this.response = response;
+    }
 }
 

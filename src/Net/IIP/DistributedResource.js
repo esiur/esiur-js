@@ -45,7 +45,7 @@ export default class DistributedResource extends IResource
     {
         this._p.destroyed = true;
         this._p.attached = false;
-        this._p.connection.detachResource(this._p.instanceId);
+        this._p.connection._sendDetachRequest(this._p.instanceId);
         this._emit("destroy", this);
     }
 
@@ -297,20 +297,17 @@ export default class DistributedResource extends IResource
         if (this._p.properties[index] == value)
             return null;
 
-        var reply = new AsyncReply();
+        let reply = new AsyncReply();
 
-        var parameters = Codec.compose(value, this._p.connection);
-        var self = this;
+        let self = this;
 
-        this._p.connection._sendRequest(IIPPacketAction.SetProperty)
-            .addUint32(self._p.instanceId).addUint8(index).addUint8Array(parameters)
-            .done()
-            .then(function(res)
-        {
-            // not really needed, server will always send property modified, this only happens if the programmer forgot to emit in property setter
-            self._p.properties[index] = value;
-            reply.trigger(null);
-        });
+        this._p.connection._sendSetProperty(self._p.instanceId, index, value)
+                            .then(function(res)
+                            {
+                                // not really needed, server will always send property modified, this only happens if the programmer forgot to emit in property setter
+                                //self._p.properties[index] = value;
+                                reply.trigger(null);
+                            });
 
         return reply;
     }
