@@ -30,22 +30,22 @@ export default class AuthorizationRequest {
         this.clue = headers.get(IIPAuthPacketIAuthHeader.Clue);
     
         if (headers.has(IIPAuthPacketIAuthHeader.RequiredFormat))
-          requiredFormat = headers.get(IIPAuthPacketIAuthHeader.RequiredFormat);
+            this.requiredFormat = headers.get(IIPAuthPacketIAuthHeader.RequiredFormat);
     
         if (headers.has(IIPAuthPacketIAuthHeader.ContentFormat))
-          contentFormat = headers.get(IIPAuthPacketIAuthHeader.ContentFormat);
+            this.contentFormat = headers.get(IIPAuthPacketIAuthHeader.ContentFormat);
     
         if (headers.has(IIPAuthPacketIAuthHeader.Content))
-          content = headers.get(IIPAuthPacketIAuthHeader.Content);
+            this.content = headers.get(IIPAuthPacketIAuthHeader.Content);
     
         if (headers.has(IIPAuthPacketIAuthHeader.Trials))
-          trials = headers.get(IIPAuthPacketIAuthHeader.Trials);
+            this.trials = headers.get(IIPAuthPacketIAuthHeader.Trials);
 
         if (headers.has(IIPAuthPacketIAuthHeader.Issue))
             this.issue = headers.get(IIPAuthPacketIAuthHeader.Issue);
 
         if (headers.has(IIPAuthPacketIAuthHeader.Expire))
-          expire = headers.get(IIPAuthPacketIAuthHeader.Expire);
+            this.expire = headers.get(IIPAuthPacketIAuthHeader.Expire);
       
     }
 }

@@ -607,7 +607,7 @@ export default class DistributedConnection extends IStore {
                   this.#openReply?.triggerError(new AsyncException(ErrorType.Management, authPacket.errorCode, authPacket.message));
                   this.#openReply = null;
   
-                  var ex = AsyncException(ErrorType.Management, authPacket.errorCode,
+                  var ex = new AsyncException(ErrorType.Management, authPacket.errorCode,
                     authPacket.message);
   
                   this._emit("error", this, ex);

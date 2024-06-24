@@ -19,6 +19,8 @@ import IIPAuthPacketIAuthDestination from '../../src/Net/Packets/IIPAuthPacketIA
 import IIPAuthPacketIAuthFormat from '../../src/Net/Packets/IIPAuthPacketIAuthFormat.js';
 import IIPAuthPacketHeader from '../../src/Net/Packets/IIPAuthPacketHeader.js';
 import Codec from '../../src/Data/Codec.js';
+import BinaryList from "../../src/Data/BinaryList.js";
+import SHA256 from "../../src/Security/Integrity/SHA256.js";
 
 const require = createRequire(import.meta.url);
 
@@ -74,9 +76,8 @@ class MyMembership extends IMembership {
       let remoteNonce = session.remoteHeaders.get(IIPAuthPacketHeader.Nonce);
       let localNonce = session.localHeaders.get(IIPAuthPacketHeader.Nonce);
 
-      var hashFunc = SHA256.Create();
       // local nonce + password or token + remote nonce
-      var challenge = hashFunc.ComputeHash(new BinaryList()
+      var challenge = SHA256.compute(new BinaryList()
                                           .addUint8Array(remoteNonce)
                                           .addUint8Array(Codec.compose(7, null)) // answer is 7
                                           .addUint8Array(localNonce)

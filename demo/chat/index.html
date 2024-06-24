@@ -8,7 +8,6 @@
 
             function authenticator(x)
             {
-                debugger;
                 let challenge = prompt(x.clue);
                 if (challenge != null) {
                     return new Esiur.Core.AsyncReply(parseInt(challenge));
