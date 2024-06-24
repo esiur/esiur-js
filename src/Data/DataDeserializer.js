@@ -329,7 +329,9 @@ export default class DataDeserializer {
 
     
 
-    var map = new TypedMap();
+    var map = new (TypedMap.of(keyRep.type.getRuntimeType() ?? Object, 
+                         valueRep.type.getRuntimeType() ?? Object))();
+
     var rt = new AsyncReply();
 
     var results = new AsyncBag();

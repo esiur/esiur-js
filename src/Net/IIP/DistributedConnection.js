@@ -1151,14 +1151,12 @@ export default class DistributedConnection extends IStore {
           }
           else if (results.response == AuthorizationResultsResponse.IAuthPlain)
           {
-              var args = new (TypedMap.of(UInt8, Object))([
-         
-                  [IIPAuthPacketIAuthHeader.Reference, results.reference],
-                  [IIPAuthPacketIAuthHeader.Destination, results.destination],
-                  [IIPAuthPacketIAuthHeader.Expire, results.expire],
-                  [IIPAuthPacketIAuthHeader.Clue, results.clue],
-                  [IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat],
-              ]);
+              var args = new (TypedMap.of(UInt8, Object))();
+              args.set(IIPAuthPacketIAuthHeader.Reference, results.reference);
+              args.set(IIPAuthPacketIAuthHeader.Destination, results.destination);
+              args.set(IIPAuthPacketIAuthHeader.Expire, results.expire);
+              args.set(IIPAuthPacketIAuthHeader.Clue, results.clue);
+              args.set(IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat);
   
               this.#sendParams()
                   .addUint8(IIPAuthPacketEvent.IAuthPlain)
@@ -1168,14 +1166,12 @@ export default class DistributedConnection extends IStore {
           }
           else if (results.response == AuthorizationResultsResponse.IAuthHashed)
           {
-            var args = new (TypedMap.of(Number, Object))([
-         
-                [IIPAuthPacketIAuthHeader.Reference, results.reference],
-                [IIPAuthPacketIAuthHeader.Destination, results.destination],
-                [IIPAuthPacketIAuthHeader.Expire, results.expire],
-                [IIPAuthPacketIAuthHeader.Clue, results.clue],
-                [IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat],
-            ]);
+            var args = new (TypedMap.of(UInt8, Object))();
+            args.set(IIPAuthPacketIAuthHeader.Reference, results.reference);
+            args.set(IIPAuthPacketIAuthHeader.Destination, results.destination);
+            args.set(IIPAuthPacketIAuthHeader.Expire, results.expire);
+            args.set(IIPAuthPacketIAuthHeader.Clue, results.clue);
+            args.set(IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat);
 
               this.#sendParams()
                   .addUint8(IIPAuthPacketEvent.IAuthHashed)
@@ -1185,14 +1181,12 @@ export default class DistributedConnection extends IStore {
           }
           else if (results.response == AuthorizationResultsResponse.IAuthEncrypted)
           {
-            var args = new (TypedMap.of(Number, Object))([
-         
-                [IIPAuthPacketIAuthHeader.Reference, results.reference],
-                [IIPAuthPacketIAuthHeader.Destination, results.destination],
-                [IIPAuthPacketIAuthHeader.Expire, results.expire],
-                [IIPAuthPacketIAuthHeader.Clue, results.clue],
-                [IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat],
-            ]);
+            var args = new (TypedMap.of(UInt8, Object))();
+            args.set(IIPAuthPacketIAuthHeader.Reference, results.reference);
+            args.set(IIPAuthPacketIAuthHeader.Destination, results.destination);
+            args.set(IIPAuthPacketIAuthHeader.Expire, results.expire);
+            args.set(IIPAuthPacketIAuthHeader.Clue, results.clue);
+            args.set(IIPAuthPacketIAuthHeader.RequiredFormat, results.requiredFormat);
 
               this.#sendParams()
                   .addUint8(IIPAuthPacketEvent.IAuthEncrypted)
