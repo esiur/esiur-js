@@ -11,10 +11,26 @@ import ResourceProxy from './Proxy/ResourceProxy.js';
 import TemplateGenerator from './Proxy/TemplateGenerator.js';
 
 import DistributedConnection from './Net/IIP/DistributedConnection.js';
+
 import IIPAuthPacket from './Net/Packets/IIPAuthPacket.js';
+import IIPAuthPacketCommand from './Net/Packets/IIPAuthPacketCommand.js';
+import IIPAuthPacketAction from './Net/Packets/IIPAuthPacketAction.js';
+import IIPAuthPacketAcknowledge from './Net/Packets/IIPAuthPacketAcknowledge.js';
+import IIPAuthPacketInitialize from './Net/Packets/IIPAuthPacketInitialize.js';
+import IIPAuthPacketEvent from './Net/Packets/IIPAuthPacketEvent.js';
+import IIPAuthPacketHashAlgorithm from './Net/Packets/IIPAuthPacketHashAlgorithm.js';
+import IIPAuthPacketHeader from './Net/Packets/IIPAuthPacketHeader.js';
+import IIPAuthPacketIAuthDestination from './Net/Packets/IIPAuthPacketIAuthDestination.js';
+import IIPAuthPacketIAuthFormat from './Net/Packets/IIPAuthPacketIAuthFormat.js';
+import IIPAuthPacketIAuthHeader from './Net/Packets/IIPAuthPacketIAuthHeader.js';
+import IIPAuthPacketPublicKeyAlgorithm from './Net/Packets/IIPAuthPacketPublicKeyAlgorithm.js'
+
+import IIPPacket from './Net/Packets/IIPPacket.js';
 import IIPPacketCommand from './Net/Packets/IIPPacketCommand.js';
+import IIPPacketAction from './Net/Packets/IIPPacketAction.js';
 import IIPPacketEvent from './Net/Packets/IIPPacketEvent.js';
 import IIPPacketReport from './Net/Packets/IIPPacketReport.js';
+
 import ISocket from './Net/Sockets/ISocket.js';
 import SocketState from './Net/Sockets/SocketState.js';
 import WSocket from './Net/Sockets/WSocket.js';
@@ -51,10 +67,6 @@ import DistributedResourceQueueItem from './Net/IIP/DistributedResourceQueueItem
 import DistributedResourceQueueItemType from './Net/IIP/DistributedResourceQueueItemType.js';
 import DistributedServer from './Net/IIP/DistributedServer.js';
 import EntryPoint from './Net/IIP/EntryPoint.js';
-import IIPAuthePacketAction from './Net/Packets/IIPAuthPacketAction.js';
-import IIPAuthPacketCommand from './Net/Packets/IIPAuthPacketCommand.js';
-import IIPPacketAction from './Net/Packets/IIPPacketAction.js';
-import IIPPacket from './Net/Packets/IIPPacket.js';
 
 import CustomResourceEvent from './Resource/CustomResourceEvent.js';
 import Instance from './Resource/Instance.js';
@@ -80,7 +92,12 @@ import ClientAuthentication from './Security/Authority/ClientAuthentication.js';
 import HostAuthentication from './Security/Authority/HostAuthentication.js';
 import Session from './Security/Authority/Session.js';
 import SHA256 from './Security/Integrity/SHA256.js';
+
 import IMembership from './Security/Membership/IMembership.js';
+import AuthorizationRequest from './Security/Membership/AuthorizationRequest.js';
+import AuthorizationResults from './Security/Membership/AuthorizationResults.js';
+import AuthorizationResultsResponse from './Security/Membership/AuthorizationResultsResponse.js';
+
 
 import ActionType from './Security/Permissions/ActionType.js';
 import IPermissionsManager from './Security/Permissions/IPermissionsManager.js';
@@ -103,9 +120,11 @@ const namespace = {
     Net: {INetworkReceiver, NetworkBuffer, NetworkConnections, NetworkServer, NetworkSession, SendList,        
             IIP: {DistributedConnection, DistributedPropertyContext, DistributedResource, DistributedResourceQueueItem, 
                 DistributedResourceQueueItemType, DistributedServer, EntryPoint},
-            Packets: {IIPAuthPacket, IIPAuthePacketAction, IIPAuthPacketCommand, IIPPacket, IIPPacketAction, IIPPacketCommand, IIPPacketEvent, IIPPacketReport},
+            Packets: {IIPAuthPacket, IIPAuthPacketCommand, IIPAuthPacketAction, IIPAuthPacketAcknowledge,
+                 IIPAuthPacketInitialize, IIPAuthPacketEvent, IIPAuthPacketHashAlgorithm, IIPAuthPacketHeader, 
+                 IIPAuthPacketIAuthDestination, IIPAuthPacketIAuthFormat, IIPAuthPacketIAuthHeader, IIPAuthPacketPublicKeyAlgorithm,                
+                IIPPacket, IIPPacketAction, IIPPacketCommand, IIPPacketEvent, IIPPacketReport},
             Sockets: {ISocket, SocketState, WSocket}
-        
     },
     Proxy: {ResourceProxy, TemplateGenerator},
     Resource: {CustomResourceEvent, Instance, IResource, IStore, Warehouse,
@@ -121,7 +140,7 @@ const namespace = {
         Integrity: {
             SHA256
         },
-        Membership: {IMembership},
+        Membership: {IMembership, AuthorizationRequest, AuthorizationResults, AuthorizationResultsResponse},
         Permissions: {ActionType, IPermissionsManager, Ruling},
     },
     Stores: {IndexedDBStore, MemoryStore},
