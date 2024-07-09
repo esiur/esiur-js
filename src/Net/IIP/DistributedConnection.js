@@ -1693,15 +1693,22 @@ export default class DistributedConnection extends IStore {
     {
         try
         {
-            if (this.#attachedResources.containsKey(instanceId))
+            let sendDetach = false;
+
+            if (this.#attachedResources.containsKey(instanceId)){
                 this.#attachedResources.remove(instanceId);
+                sendDetach = true;
+            }
 
-            if (this.#suspendedResources.containsKey(instanceId))
+            if (this.#suspendedResources.containsKey(instanceId)){
                 this.#suspendedResources.remove(instanceId);
+                sendDetach = true;
+            }
 
-            return this.#sendRequest(IIPPacketAction.DetachResource)
-                        .addUint32(instanceId)
-                        .done();
+            if (sendDetach)
+                return this.#sendRequest(IIPPacketAction.DetachResource)
+                            .addUint32(instanceId)
+                            .done();
         }
         catch(ex)
         {
@@ -1832,9 +1839,9 @@ export default class DistributedConnection extends IStore {
         if (this.#attachedResources.contains(resourceId))
         {
             let r = this.#attachedResources.get(resourceId).deref();
-            r?.destroy();
-
+            // remove from attached to avoid sending unnecessary deattach request when destroy() is called
             this.#attachedResources.remove(resourceId);
+            r?.destroy();
         }
         else if (this.#neededResources.contains(resourceId))
         {

@@ -6058,9 +6058,16 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
     key: "_sendDetachRequest",
     value: function _sendDetachRequest(instanceId) {
       try {
-        if ((0, _classPrivateFieldGet25["default"])(this, _attachedResources).containsKey(instanceId)) (0, _classPrivateFieldGet25["default"])(this, _attachedResources).remove(instanceId);
-        if ((0, _classPrivateFieldGet25["default"])(this, _suspendedResources).containsKey(instanceId)) (0, _classPrivateFieldGet25["default"])(this, _suspendedResources).remove(instanceId);
-        return _classPrivateMethodGet(this, _sendRequest, _sendRequest2).call(this, _IIPPacketAction["default"].DetachResource).addUint32(instanceId).done();
+        var sendDetach = false;
+        if ((0, _classPrivateFieldGet25["default"])(this, _attachedResources).containsKey(instanceId)) {
+          (0, _classPrivateFieldGet25["default"])(this, _attachedResources).remove(instanceId);
+          sendDetach = true;
+        }
+        if ((0, _classPrivateFieldGet25["default"])(this, _suspendedResources).containsKey(instanceId)) {
+          (0, _classPrivateFieldGet25["default"])(this, _suspendedResources).remove(instanceId);
+          sendDetach = true;
+        }
+        if (sendDetach) return _classPrivateMethodGet(this, _sendRequest, _sendRequest2).call(this, _IIPPacketAction["default"].DetachResource).addUint32(instanceId).done();
       } catch (ex) {
         return null;
       }
@@ -6134,8 +6141,9 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
     value: function IIPEventResourceDestroyed(resourceId) {
       if ((0, _classPrivateFieldGet25["default"])(this, _attachedResources).contains(resourceId)) {
         var r = (0, _classPrivateFieldGet25["default"])(this, _attachedResources).get(resourceId).deref();
-        r === null || r === void 0 || r.destroy();
+        // remove from attached to avoid sending unnecessary deattach request when destroy() is called
         (0, _classPrivateFieldGet25["default"])(this, _attachedResources).remove(resourceId);
+        r === null || r === void 0 || r.destroy();
       } else if ((0, _classPrivateFieldGet25["default"])(this, _neededResources).contains(resourceId)) {
         // @TODO: handle this mess
         (0, _classPrivateFieldGet25["default"])(this, _neededResources).remove(resourceId);
