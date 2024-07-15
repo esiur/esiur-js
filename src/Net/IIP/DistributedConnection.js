@@ -2967,7 +2967,7 @@ export default class DistributedConnection extends IStore {
         else if (resource != null && !resource._p.suspended) {
 
             // @REVIEW: this should never happen
-            console.log("DCON", LogType.Error, "Resource not moved to attached.");
+            console.log("DCON: Resource not moved to attached.", resource);
             return new AsyncReply(resource);
         }
 
