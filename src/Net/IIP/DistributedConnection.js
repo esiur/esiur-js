@@ -97,6 +97,8 @@ import AuthorizationResultsResponse from '../../Security/Membership/Authorizatio
 import IIPAuthPacketIAuthHeader from '../../Net/Packets/IIPAuthPacketIAuthHeader.js';
 import AuthorizationRequest from '../../Security/Membership/AuthorizationRequest.js';
 
+import DistributedResourceAttachRequestInfo from './DistributedResourceAttachRequestInfo.js';
+
 export default class DistributedConnection extends IStore {
 
     // fields
@@ -1486,18 +1488,18 @@ export default class DistributedConnection extends IStore {
             && this.#session.remoteMethod == AuthenticationMethod.None)
         {
             // change to Map<byte, object> for compatibility
-            let headers = Codec.compose(session.localHeaders, this);
+            let headers = Codec.compose(this.#session.localHeaders, this);
   
             this.#sendParams()
                 .addUint8(IIPAuthPacketInitialize.TokenNoAuth)
                 .addDC(headers)
                 .done();
         }
-        else if (session.localMethod == AuthenticationMethod.None
-            && session.remoteMethod == AuthenticationMethod.None)
+        else if (this.#session.localMethod == AuthenticationMethod.None
+            && this.#session.remoteMethod == AuthenticationMethod.None)
         {
             // change to Map<byte, object> for compatibility
-            let headers = Codec.compose(session.localHeaders, this);
+            let headers = Codec.compose(this.#session.localHeaders, this);
   
             // @REVIEW: MITM Attack can still occure
             this.#sendParams()
@@ -1565,7 +1567,7 @@ export default class DistributedConnection extends IStore {
 
             this.#resourceRequests.values.forEach((x) => {
                 try { 
-                    x.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed"));
+                    x.reply.triggerError(new AsyncException(ErrorType.Management, 0, "Connection closed"));
                  } catch (ex) { }
             });
 
@@ -2956,13 +2958,19 @@ export default class DistributedConnection extends IStore {
 
         resource = this.#neededResources.item(id);
 
-        let request = this.#resourceRequests.item(id);
+        let requestInfo = this.#resourceRequests.item(id);
 
-        if (request != null) {
-            if (resource != null && (requestSequence?.includes(id) ?? false))
+        if (requestInfo != null) {
+            if (resource != null && (requestSequence?.includes(id) ?? false)){
                 return new AsyncReply(resource);
-            else
-                return request;
+            }
+            else if (resource != null && requestInfo.requestSequence.includes(id)) {
+                console.log("Avoid deadlock...", id, requestSequence, requestInfo.requestSequence );
+                return new AsyncReply(resource);
+            }
+            else {
+                return requestInfo.reply;
+            }
         }
         else if (resource != null && !resource._p.suspended) {
 
@@ -2973,10 +2981,11 @@ export default class DistributedConnection extends IStore {
 
         var reply = new AsyncReply();
 
-        this.#resourceRequests.set(id, reply);
 
         var newSequence =
            requestSequence != null ? [...requestSequence, id] : [id];
+
+        this.#resourceRequests.set(id, new DistributedResourceAttachRequestInfo(reply, newSequence));
 
         var self = this;
 
