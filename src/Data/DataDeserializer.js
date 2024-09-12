@@ -182,6 +182,8 @@ export default class DataDeserializer {
           record[template.properties[i].name] = ar[i]; 
 
         reply.trigger(record);
+      }).error((x)=> {
+        reply.triggerError(x);
       });
     };
 
