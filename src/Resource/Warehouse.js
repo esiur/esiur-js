@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2017 - 2022 Ahmed Kh. Zamil
+* Copyright (c) 2017 - 2024 Ahmed Kh. Zamil
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -211,7 +211,12 @@ export class WH extends IEventHandler
 
     put(name, resource, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
         
-        var rt = new AsyncReply();
+        if (resource.instance != null)
+            throw new Error("Resource has a store.");
+
+        let path = (name.startsWith("/") ? name.substr(1) : name).split("/");
+
+        var rt = new AsyncReply();      
 
         resource.instance = new Instance(this.resourceCounter++, name, resource, store, customTemplate, age);
 
