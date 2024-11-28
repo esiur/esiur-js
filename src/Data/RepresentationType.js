@@ -84,6 +84,7 @@ IdentifierToTypeMap[RepresentationTypeIdentifier.List] = Array;
 IdentifierToTypeMap[RepresentationTypeIdentifier.Map] = Map;
 IdentifierToTypeMap[RepresentationTypeIdentifier.ResourceArray] = ResourceArray;
 IdentifierToTypeMap[RepresentationTypeIdentifier.RecordArray] = RecordArray;
+IdentifierToTypeMap[RepresentationTypeIdentifier.RawData] = Uint8Array;
 
 const TypeToIdentifierMap = {};
 TypeToIdentifierMap[Void] = RepresentationTypeIdentifier.Void;
@@ -112,6 +113,7 @@ TypeToIdentifierMap[Array] = RepresentationTypeIdentifier.List;
 TypeToIdentifierMap[Map] = RepresentationTypeIdentifier.Map;
 TypeToIdentifierMap[RecordArray] = RepresentationTypeIdentifier.RecordArray;
 TypeToIdentifierMap[ResourceArray] = RepresentationTypeIdentifier.ResourceArray;
+TypeToIdentifierMap[Uint8Array] = RepresentationTypeIdentifier.RawData;
 
 const TupleIdentifierByLength = {
   2: RepresentationTypeIdentifier.Tuple2,
