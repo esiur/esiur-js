@@ -172,9 +172,14 @@ export default class DataDeserializer {
         DataDeserializer.listParser(data, offset, length, connection, requestSequence).then((ar) => {
         let record;
 
+        if (template == null){
+          reply.triggerError(new AsyncException(ErrorType.Management, ExceptionCode.TemplateNotFound, "Template not found for record."));
+          return;
+        }
+
         if (template.definedType != null) {
           record = new template.definedType();
-        } else {
+        } else if (template != null) {
           record = new Record();
         }
 
@@ -189,22 +194,13 @@ export default class DataDeserializer {
 
     if (template != null) {
       initRecord(template);
-    } else {
-      if (connection == null)
-        throw Error("Can't parse record with no connection");
-
+    } else if (connection != null){
       connection.getTemplate(classId).then((tmp) => {
-        if (tmp == null)
-        {
-            reply.triggerError(new AsyncException(
-              ErrorType.Management,
-              ExceptionCode.TemplateNotFound.index,
-              "Template not found for record."));
-        } else {
           initRecord(tmp);
-        }
-     
       }).error((x) => reply.triggerError(x));
+    }
+    else {
+      initRecord(null);
     }
 
     return reply;
