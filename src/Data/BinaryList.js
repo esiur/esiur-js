@@ -57,13 +57,13 @@ export default class BinaryList
         return this;
     }
     
-    addGuid(value) {
-        this.addDC(DC.guidToBytes(value));
+    addUUID(value) {
+        this.addDC(DC.uuidToBytes(value));
         return this;
     }
     
-    insertGuid(position, value) {
-        this.insertDC(position, DC.guidToBytes(value));
+    insertUUID(position, value) {
+        this.insertDC(position, DC.uuidToBytes(value));
         return this;
     }
     

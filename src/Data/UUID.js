@@ -26,7 +26,7 @@
 
 
 import DC from './DC.js';
-export default class Guid
+export default class UUID
 {
     constructor(dc)
     {
@@ -39,7 +39,7 @@ export default class Guid
     }
 
     static parse(data) {
-        return new Guid(DC.fromHex(data, ''))
+        return new UUID(DC.fromHex(data, ''))
     }
 
     toString() {

@@ -47,7 +47,7 @@ import AutoMap from './Data/AutoMap.js';
 import BinaryList from './Data/BinaryList.js';
 import Codec from './Data/Codec.js';
 import DC from './Data/DC.js';
-import Guid from './Data/Guid.js';
+import UUID from './Data/UUID.js';
 import IRecord from './Data/IRecord.js';
 import KeyList from './Data/KeyList.js';
 import NotModified from './Data/NotModified.js';
@@ -112,7 +112,7 @@ import {TemplateDescriber, Prop, Func, Evt, Const, Arg} from './Resource/Templat
 
 const namespace = {
     Core: { AsyncReply, AsyncException, AsyncQueue, ErrorType, ExceptionCode, IDestructible, IEventHandler, ProgressType},
-    Data: {AutoList, AutoMap, BinaryList, Codec, DC, TypedList, TypedMap, Guid, IRecord, KeyList, NotModified, ResourceArrayType,
+    Data: {AutoList, AutoMap, BinaryList, Codec, DC, TypedList, TypedMap, UUID, IRecord, KeyList, NotModified, ResourceArrayType,
         PropertyValue, Record, ResourceArray, RepresentationType, RepresentationTypeIdentifier, TransmissionType, TransmissionTypeIdentifier,
         Int8, UInt8, Int16, UInt16, Int32, UInt32, Int64, UInt64, Int128, UInt128, Float32, Float64, Float128, Char16, Char8, Tuple, 
         Nullable, Void, IEnum

@@ -27,7 +27,7 @@
 "use strict";
 
 import BinaryList from './BinaryList.js';
-import Guid from './Guid.js';
+import UUID from './UUID.js';
 
 export const UNIX_EPOCH = 621355968000000000;
 export const TWO_PWR_32 = (1 << 16) * (1 << 16);
@@ -54,7 +54,7 @@ export default class DC extends Uint8Array
     }
 
 
-    static guidToBytes(value){
+    static uuidToBytes(value){
         return value.value;
     }
     
@@ -677,9 +677,9 @@ export default class DC extends Uint8Array
         return rt;
     }
 
-    getGuid(offset)
+    getUUID(offset)
     {
-        return new Guid(this.clip(offset, 16));
+        return new UUID(this.clip(offset, 16));
 
         /*
         var d = this.getUint8Array(offset, 16);
@@ -692,11 +692,11 @@ export default class DC extends Uint8Array
         */
     }
 
-    getGuidArray(offset, length)
+    getUUIDArray(offset, length)
     {
         var rt = [];
         for(var i = 0; i < length; i+=16)
-            rt.push(this.getGuid(offset+i));
+            rt.push(this.getUUID(offset+i));
         return rt;
     }
 

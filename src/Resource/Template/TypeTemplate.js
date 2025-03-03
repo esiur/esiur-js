@@ -122,13 +122,18 @@ export default class TypeTemplate {
      */
 
      
-     static getTypeGuid(type) {
-        return this.getTypeGuidByName(type.template.namespace + "." + type.prototype.constructor.name);
+     static getTypeUUID(type) {
+        return this.getTypeUUIDByName(type.template.namespace + "." + type.prototype.constructor.name);
      }
 
-     static getTypeGuidByName(typeName)
+     static getTypeUUIDByName(typeName)
      {
-         return SHA256.compute(DC.stringToBytes(typeName)).getGuid(0);
+         let hash =  SHA256.compute(DC.stringToBytes(typeName));
+ 
+         hash.setUint8(6, (hash.getUint8(6) & 0xF) | 0x80);
+         hash.setUint8(8, (hash.getUint8(8) & 0xF) | 0x80);
+
+         return hash.getUUID(0);
      }
 
 
@@ -259,9 +264,9 @@ export default class TypeTemplate {
 
         let describer = type.template;
 
-        // set guid
+        // set UUID
         this.className = describer.namespace + "." + (describer.className ?? type.prototype.constructor.name);
-        this.classId = describer.classId ?? SHA256.compute(DC.stringToBytes(this.className)).getGuid(0);
+        this.classId = describer.classId ?? SHA256.compute(DC.stringToBytes(this.className)).getUUID(0);
 
 
         if (addToWarehouse)
@@ -419,13 +424,13 @@ export default class TypeTemplate {
         od.templateType = data.getUint8(offset++) & 0xF;
     
 
-        od.classId = data.getGuid(offset);
+        od.classId = data.getUUID(offset);
         offset += 16;
         od.className = data.getString(offset + 1, data.getUint8(offset));
         offset += data.getUint8(offset) + 1;
 
         if (hasParent) {
-            od.parentId = data.getGuid(offset);
+            od.parentId = data.getUUID(offset);
             offset += 16;
         }
 

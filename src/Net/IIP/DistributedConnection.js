@@ -3544,7 +3544,7 @@ export default class DistributedConnection extends IStore {
         this.#sendParams()
             .addUint8(0x40 | IIPPacketAction.StaticCall)
             .addUint32(c)
-            .addGuid(classId)
+            .addUUID(classId)
             .addUint8(index)
             .addUint8Array(pb)
             .done();

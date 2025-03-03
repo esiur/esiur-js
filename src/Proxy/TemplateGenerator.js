@@ -90,7 +90,7 @@ export default class TemplateGenerator {
     let cls = template.className.split('.');
     let namespace = cls.slice(0, cls.length - 1).join('.');
 
-    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${descProps.join(',\r\n')}], \r\n\t\t\t${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
+    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${descProps.join(',\r\n')}], \r\n\t\t\t${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.UUID.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
 
     rt += "\r\n}";
 
@@ -112,36 +112,36 @@ export default class TemplateGenerator {
     let name;
 
     if (representationType.identifier == RepresentationTypeIdentifier.TypedResource) {
-      if (representationType.guid.valueOf() == forTemplate.classId.valueOf())
+      if (representationType.uuid.valueOf() == forTemplate.classId.valueOf())
         name = forTemplate.className.split('.').slice(-1)[0];
       else {
             let className = templates
             .find((x) =>
-                x.classId.valueOf() == representationType.guid.valueOf() &&
+                x.classId.valueOf() == representationType.uuid.valueOf() &&
                 (x.type == TemplateType.Resource))
             .className;
             if (!dependencies?.includes(className)) dependencies?.push(className);
             name = this._translateClassName(className);
         }
     } else if (representationType.identifier == RepresentationTypeIdentifier.TypedRecord) {
-      if (representationType.guid.valueOf() == forTemplate.classId.valueOf())
+      if (representationType.uuid.valueOf() == forTemplate.classId.valueOf())
         name = forTemplate.className.split('.').slice(-1)[0];
       else {
           let className = templates
             .find((x) =>
-                x.classId.valueOf() == representationType.guid.valueOf() &&
+                x.classId.valueOf() == representationType.uuid.valueOf() &&
                 x.type == TemplateType.Record)
             .className;
             if (!dependencies?.includes(className)) dependencies?.push(className);
             name = this._translateClassName(className);
         }
     } else if (representationType.identifier == RepresentationTypeIdentifier.Enum) {
-     if (representationType.guid.valueOf() == forTemplate.classId.valueOf())
+     if (representationType.uuid.valueOf() == forTemplate.classId.valueOf())
       name = forTemplate.className.split('.').slice(-1)[0];
     else {
         let className = templates
           .find((x) =>
-              x.classId.valueOf() == representationType.guid.valueOf() &&
+              x.classId.valueOf() == representationType.uuid.valueOf() &&
               x.type == TemplateType.Enum)
           .className;
           if (!dependencies?.includes(className)) dependencies?.push(className);
@@ -357,7 +357,7 @@ export default class TemplateGenerator {
     let cls = template.className.split('.');
     let namespace = cls.slice(0, cls.length - 1).join('.');
 
-    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${descConsts.join(',\r\n')}], \r\n\t\t\tnull, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
+    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${descConsts.join(',\r\n')}], \r\n\t\t\tnull, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.UUID.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
 
     rt += "\r\n}";
 
@@ -450,7 +450,7 @@ export default class TemplateGenerator {
       //rt += `var rt = new AsyncReply<${rtTypeName}>();\r\n`;
       rt += `\t\tvar rt = new Esiur.Core.AsyncReply();\r\n`;
       if (f.isStatic) {
-        rt += `\t\tconnection.staticCall(Esiur.Data.Guid.parse('${template.classId.toString()}'), ${f.index}, args)\r\n`;
+        rt += `\t\tconnection.staticCall(Esiur.Data.UUID.parse('${template.classId.toString()}'), ${f.index}, args)\r\n`;
       } else {
         rt += `\t\tthis._invoke(${f.index}, args)\r\n`;
       }
@@ -516,7 +516,7 @@ export default class TemplateGenerator {
     let cls = template.className.split('.');
     let namespace = cls.slice(0, cls.length - 1).join('.');
 
-    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${[...descProps, ...descFuncs, ...descEvents, ...descConsts].join(',\r\n')}], \r\n\t\t\t${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.Guid.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
+    rt += `\r\n\tstatic get template() {\r\n\t\treturn new Esiur.Resource.Template.TemplateDescriber('${namespace}', [\r\n${[...descProps, ...descFuncs, ...descEvents, ...descConsts].join(',\r\n')}], \r\n\t\t\t${parentName}, ${template.version}, ${this.toLiteral(template.annotation)}, Esiur.Data.UUID.parse('${template.classId.toString()}'), '${className}');\r\n\t}`;
 
     rt += "\r\n}\r\n";
     
