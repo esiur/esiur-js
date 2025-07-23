@@ -266,7 +266,7 @@ export default class TypeTemplate {
 
         // set UUID
         this.className = describer.namespace + "." + (describer.className ?? type.prototype.constructor.name);
-        this.classId = describer.classId ?? SHA256.compute(DC.stringToBytes(this.className)).getUUID(0);
+        this.classId = describer.classId ?? TypeTemplate.getTypeUUIDByName(this.className);// SHA256.compute(DC.stringToBytes(this.className)).getUUID(0);
 
 
         if (addToWarehouse)
