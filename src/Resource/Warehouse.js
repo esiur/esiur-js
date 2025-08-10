@@ -43,6 +43,8 @@ import IRecord from '../Data/IRecord.js';
 import TemplateType from './Template/TemplateType.js';
 import DistributedResource from '../Net/IIP/DistributedResource.js';
 import IEnum from '../Data/IEnum.js';
+import AsyncException from '../Core/AsyncException.js';
+import ExceptionCode from '../Core/ExceptionCode.js';
  
 export class WH extends IEventHandler
 {
@@ -212,8 +214,12 @@ export class WH extends IEventHandler
 
     async put(name, resource, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
         
-        if (resource.instance != null)
-            throw new Error("Resource has a store.");
+        let rt = new AsyncReply();
+
+        if (resource.instance != null){
+            rt.triggerError(new AsyncException(0, ExceptionCode.GeneralFailure, "Resource has a store"));
+            return rt;
+        }
 
         let path = name.replace(/^\\/g, "").split("/");
 
