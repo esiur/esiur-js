@@ -104,7 +104,6 @@ export default class DistributedConnection extends IStore {
     // fields
     #port;
     #hostname;
-    #secure;
     #socket;
 
     #lastKeepAliveSent;
@@ -1347,7 +1346,8 @@ export default class DistributedConnection extends IStore {
                 keepAliveInterval = 30,
                 keepAliveTime = 10,
                 reconnectInterval = 5,
-                authenticator = null} = this.instance.attributes.toObject();
+                authenticator = null,
+                wsUrl = ""} = this.instance.attributes.toObject();
 
 
             this.authenticator = authenticator;
@@ -1369,16 +1369,16 @@ export default class DistributedConnection extends IStore {
                 && password != null)
             {
                 var pw = DC.stringToBytes(password);
-                return this.connect(AuthenticationMethod.Credentials, null, address, port, username, null, pw, domain, secure);
+                return this.connect(AuthenticationMethod.Credentials, null, address, port, username, null, pw, domain, secure, wsUrl);
             }
             else if (token != null)
             {
                 var tk = token instanceof Uint8Array ? token : DC.stringToBytes(token);
-                return this.connect(AuthenticationMethod.Token, null, address, port, null, tokenIndex, tk, domain, secure);
+                return this.connect(AuthenticationMethod.Token, null, address, port, null, tokenIndex, tk, domain, secure, wsUrl);
             }
             else
             {
-                return this.connect(AuthenticationMethod.None, null, address, port, null, 0, null, domain, secure);
+                return this.connect(AuthenticationMethod.None, null, address, port, null, 0, null, domain, secure, wsUrl);
             }
         }
 
@@ -1387,7 +1387,7 @@ export default class DistributedConnection extends IStore {
 
 
     connect(method = AuthenticationMethod.Certificate, socket = null, hostname = null, port = 0, 
-        username = null, tokenIndex = 0, passwordOrToken = null, domain = null, secure = false)
+        username = null, tokenIndex = 0, passwordOrToken = null, domain = null, secure = false, wsUrl = "")
     {
         
         if (this.#openReply != null)
@@ -1440,7 +1440,10 @@ export default class DistributedConnection extends IStore {
             this.#hostname = hostname;
 
         if (secure != null)
-            this.#secure = secure;
+            socket.secure = secure;
+
+        if (wsUrl != null)
+            socket.wsUrl = wsUrl;
 
         this.#connectSocket(socket);
 
@@ -1451,7 +1454,7 @@ export default class DistributedConnection extends IStore {
     #connectSocket(socket){
         let self = this;
 
-        socket.connect(this.#hostname, this.#port, this.#secure).then(x =>
+        socket.connect(this.#hostname, this.#port).then(x =>
             {
                 self.assign(socket);
             }).error((x) =>
@@ -3544,7 +3547,7 @@ export default class DistributedConnection extends IStore {
         this.#sendParams()
             .addUint8(0x40 | IIPPacketAction.StaticCall)
             .addUint32(c)
-            .addGuid(classId)
+            .addUUID(classId)
             .addUint8(index)
             .addUint8Array(pb)
             .done();

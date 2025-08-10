@@ -297,7 +297,7 @@ export default class IIPPacket
                 if (this.notEnough(offset, ends, 16))
                     return -this.dataLengthNeeded;
 
-                this.classId = data.getGuid(offset);
+                this.classId = data.getUUID(offset);
                 offset += 16;
             }
             else if (this.action == IIPPacketAction.TemplateFromResourceId)
@@ -471,7 +471,7 @@ export default class IIPPacket
                 if (this.notEnough(offset, ends, 18))
                     return -this.dataLengthNeeded;
 
-                this.classId = data.getGuid(offset);
+                this.classId = data.getUUID(offset);
                 offset += 16;
 
                 this.methodIndex = data[offset++];
@@ -495,7 +495,7 @@ export default class IIPPacket
                 if (this.notEnough(offset, ends, 26))
                     return -this.dataLengthNeeded;
 
-                this.classId = data.getGuid(offset);
+                this.classId = data.getUUID(offset);
                 offset += 16;
 
                 this.resourceAge = data.getUint64(offset);

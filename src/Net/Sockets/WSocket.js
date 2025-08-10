@@ -13,6 +13,8 @@ export default class WSocket extends ISocket
         this.receiveNetworkBuffer = new NetworkBuffer();
         this.sendNetworkBuffer = new NetworkBuffer();
         this.held = false;
+        this.wsUrl = "";
+        this.secure = false;
 
         if (websocket != null)
         {
@@ -84,12 +86,12 @@ export default class WSocket extends ISocket
         return WSocket.webSocket;
     }
 
-    connect(hostname, port, secure = false) {
+    connect(hostname, port) {
 
         let self = this;
         var rt = new AsyncReply();
         this.state = SocketState.Connecting;
-        this.url = `ws${secure ? 's' : ''}://${hostname}:${port}`;
+        this.url = `ws${this.secure ? 's' : ''}://${hostname}:${port}/${this.wsUrl}`;
 
         WSocket.getWebScoket().then(webSocket => 
         {

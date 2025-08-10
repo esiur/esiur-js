@@ -162,7 +162,7 @@ export default class DataDeserializer {
       data, offset, length, connection, requestSequence) {
     var reply = new AsyncReply();
 
-    var classId = data.getGuid(offset);
+    var classId = data.getUUID(offset);
     offset += 16;
     length -= 16;
 
@@ -212,7 +212,7 @@ export default class DataDeserializer {
   }
 
   static enumParser(data, offset, length,  connection, requestSequence) {
-    var classId = data.getGuid(offset);
+    var classId = data.getUUID(offset);
     offset += 16;
     var index = data[offset++];
 

@@ -25,17 +25,17 @@ export const RepresentationTypeIdentifier = {
       UInt8 : 0x3,
       Int8 : 0x4,
       Char : 0x5,
-      Int16 : 0x6,
-      UInt16 : 0x7,
-      Int32 : 0x8,
-      UInt32 : 0x9,
+      UInt16 : 0x6,
+      Int16 : 0x7,
+      UInt32 : 0x8,
+      Int32 : 0x9,
       Float32 : 0xA,
-      Int64 : 0xB,
-      UInt64 : 0xC,
+      UInt64 : 0xB,
+      Int64 : 0xC,
       Float64 : 0xD,
       DateTime : 0xE,
-      Int128 : 0xF,
-      UInt128 : 0x10,
+      UInt128 : 0xF,
+      Int128 : 0x10,
       Decimal : 0x11,
       String : 0x12,
       RawData : 0x13,
@@ -141,11 +141,11 @@ export default class RepresentationType {
     if (IdentifierToTypeMap[this.identifier] != undefined)
       runtimeType = IdentifierToTypeMap[this.identifier]
     if (this.identifier == RepresentationTypeIdentifier.TypedResource) {
-      runtimeType = Warehouse.getTemplateByClassId(this.guid, TemplateType.Resource)?.definedType;
+      runtimeType = Warehouse.getTemplateByClassId(this.uuid, TemplateType.Resource)?.definedType;
     } else if (this.identifier == RepresentationTypeIdentifier.TypedRecord) {
-      runtimeType = Warehouse.getTemplateByClassId(this.guid, TemplateType.Record)?.definedType;
+      runtimeType = Warehouse.getTemplateByClassId(this.uuid, TemplateType.Record)?.definedType;
     } else if (this.identifier == RepresentationTypeIdentifier.Enum) {
-      runtimeType = Warehouse.getTemplateByClassId(this.guid, TemplateType.Enum)?.definedType;
+      runtimeType = Warehouse.getTemplateByClassId(this.uuid, TemplateType.Enum)?.definedType;
     }  else if (this.identifier == RepresentationTypeIdentifier.TypedList){
       let elementType = this.subTypes[0].getRuntimeType();
       runtimeType = TypedList.of(elementType);
@@ -171,7 +171,7 @@ export default class RepresentationType {
   }
 
   toNullable() {
-    return new RepresentationType(this.identifier, true, this.guid, this.subTypes);
+    return new RepresentationType(this.identifier, true, this.uuid, this.subTypes);
   }
 
   static get Void () { return new RepresentationType(RepresentationTypeIdentifier.Void, true, null, null);}
@@ -232,10 +232,10 @@ export default class RepresentationType {
   }
   
  
-  constructor(identifier, nullable, guid, subTypes) {
+  constructor(identifier, nullable, uuid, subTypes) {
         this.identifier = identifier;
         this.nullable = nullable;
-        this.guid = guid;
+        this.uuid = uuid;
         this.subTypes = subTypes;
     }
 
@@ -247,7 +247,7 @@ export default class RepresentationType {
     else
       rt.addUint8(this.identifier);
 
-    if (this.guid != null) rt.addDC(DC.guidToBytes(this.guid));
+    if (this.uuid != null) rt.addDC(DC.uuidToBytes(this.uuid));
 
     if (this.subTypes != null)
       for (var i = 0; i < this.subTypes.length; i++)
@@ -267,13 +267,13 @@ export default class RepresentationType {
     let identifier = (header & 0x7F);
 
     if ((header & 0x40) > 0) {
-        let hasGUID = (header & 0x4) > 0;
+        let hasUUID = (header & 0x4) > 0;
       let subsCount = (header >> 3) & 0x7;
 
-      let guid = null;
+      let uuid = null;
 
-      if (hasGUID) {
-        guid = data.getGuid(offset);
+      if (hasUUID) {
+        uuid = data.getUUID(offset);
         offset += 16;
       }
 
@@ -286,7 +286,7 @@ export default class RepresentationType {
       }
 
       return new RepresentationTypeParseResults(offset - oOffset,
-          new RepresentationType(identifier, nullable, guid, subs));
+          new RepresentationType(identifier, nullable, uuid, subs));
     } else {
       return new RepresentationTypeParseResults(
           1, new RepresentationType(identifier, nullable, null, null));

@@ -143,7 +143,7 @@ export default class DataSerializer {
 
     var rt = new BinaryList();
 
-    rt.addGuid(template.classId);
+    rt.addUUID(template.classId);
     rt.addUint8(cts[0].index);
 
     return new DataSerializerComposeResults(
@@ -361,7 +361,7 @@ export default class DataSerializer {
       return new DataSerializerComposeResults(
           TransmissionTypeIdentifier.Null, new DC(0));
 
-    rt.addDC(DC.guidToBytes(template.classId));
+    rt.addDC(DC.uuidToBytes(template.classId));
 
     for (let pt of template.properties) {
       let propValue = value[pt.name];
