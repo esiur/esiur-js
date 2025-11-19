@@ -12654,7 +12654,7 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
               store = (_store = store) !== null && _store !== void 0 ? _store : parent.instance.store;
             case 18:
               instanceName = path[path.length - 1];
-              resourceReference = new WekRef(resource);
+              resourceReference = new WeakRef(resource);
               if (!(store == null)) {
                 _context.next = 30;
                 break;
