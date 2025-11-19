@@ -238,7 +238,7 @@ export class WH extends IEventHandler
 
         let instanceName = path[path.length - 1];
 
-        let resourceReference = new WekRef(resource);
+        let resourceReference = new WeakRef(resource);
 
         if (store == null)
         {

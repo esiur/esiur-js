@@ -5442,7 +5442,6 @@ function _checkPrivateRedeclaration(obj, privateCollection) { if (privateCollect
 function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
 var _port = /*#__PURE__*/new WeakMap();
 var _hostname = /*#__PURE__*/new WeakMap();
-var _secure = /*#__PURE__*/new WeakMap();
 var _socket = /*#__PURE__*/new WeakMap();
 var _lastKeepAliveSent = /*#__PURE__*/new WeakMap();
 var _lastKeepAliveReceived = /*#__PURE__*/new WeakMap();
@@ -5524,10 +5523,6 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
       value: void 0
     });
     _classPrivateFieldInitSpec((0, _assertThisInitialized2["default"])(_this), _hostname, {
-      writable: true,
-      value: void 0
-    });
-    _classPrivateFieldInitSpec((0, _assertThisInitialized2["default"])(_this), _secure, {
       writable: true,
       value: void 0
     });
@@ -5869,7 +5864,9 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
           _this$instance$attrib15 = _this$instance$attrib.reconnectInterval,
           reconnectInterval = _this$instance$attrib15 === void 0 ? 5 : _this$instance$attrib15,
           _this$instance$attrib16 = _this$instance$attrib.authenticator,
-          authenticator = _this$instance$attrib16 === void 0 ? null : _this$instance$attrib16;
+          authenticator = _this$instance$attrib16 === void 0 ? null : _this$instance$attrib16,
+          _this$instance$attrib17 = _this$instance$attrib.wsUrl,
+          wsUrl = _this$instance$attrib17 === void 0 ? "" : _this$instance$attrib17;
         this.authenticator = authenticator;
         this.debug = debug;
         this.checkInterval = checkInterval * 1000; // check every 30 seconds
@@ -5884,12 +5881,12 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
         var port = host.length > 1 ? parseInt(host[1]) : 10518;
         if (username != null && password != null) {
           var pw = _DC.DC.stringToBytes(password);
-          return this.connect(_AuthenticationMethod["default"].Credentials, null, address, port, username, null, pw, domain, secure);
+          return this.connect(_AuthenticationMethod["default"].Credentials, null, address, port, username, null, pw, domain, secure, wsUrl);
         } else if (token != null) {
           var tk = token instanceof Uint8Array ? token : _DC.DC.stringToBytes(token);
-          return this.connect(_AuthenticationMethod["default"].Token, null, address, port, null, tokenIndex, tk, domain, secure);
+          return this.connect(_AuthenticationMethod["default"].Token, null, address, port, null, tokenIndex, tk, domain, secure, wsUrl);
         } else {
-          return this.connect(_AuthenticationMethod["default"].None, null, address, port, null, 0, null, domain, secure);
+          return this.connect(_AuthenticationMethod["default"].None, null, address, port, null, 0, null, domain, secure, wsUrl);
         }
       }
       return new _AsyncReply["default"](true);
@@ -5906,6 +5903,7 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
       var passwordOrToken = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
       var domain = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
       var secure = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : false;
+      var wsUrl = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : "";
       if ((0, _classPrivateFieldGet25["default"])(this, _openReply) != null) throw new _AsyncException["default"](_ErrorType["default"].Exception, 0, "Connection in progress");
       (0, _classPrivateFieldSet2["default"])(this, _status, _ConnectionStatus["default"].Connecting);
       (0, _classPrivateFieldSet2["default"])(this, _openReply, new _AsyncReply["default"]());
@@ -5931,7 +5929,8 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
 
       if (port > 0) (0, _classPrivateFieldSet2["default"])(this, _port, port);
       if (hostname != null) (0, _classPrivateFieldSet2["default"])(this, _hostname, hostname);
-      if (secure != null) (0, _classPrivateFieldSet2["default"])(this, _secure, secure);
+      if (secure != null) socket.secure = secure;
+      if (wsUrl != null) socket.wsUrl = wsUrl;
       _classPrivateMethodGet(this, _connectSocket, _connectSocket2).call(this, socket);
       return (0, _classPrivateFieldGet25["default"])(this, _openReply);
     }
@@ -7921,7 +7920,7 @@ function _dataReceived2(data) {
 }
 function _connectSocket2(socket) {
   var self = this;
-  socket.connect((0, _classPrivateFieldGet25["default"])(this, _hostname), (0, _classPrivateFieldGet25["default"])(this, _port), (0, _classPrivateFieldGet25["default"])(this, _secure)).then(function (x) {
+  socket.connect((0, _classPrivateFieldGet25["default"])(this, _hostname), (0, _classPrivateFieldGet25["default"])(this, _port)).then(function (x) {
     self.assign(socket);
   }).error(function (x) {
     if (self.autoReconnect) {
@@ -9994,6 +9993,8 @@ var WSocket = exports["default"] = /*#__PURE__*/function (_ISocket) {
     _this.receiveNetworkBuffer = new _NetworkBuffer["default"]();
     _this.sendNetworkBuffer = new _NetworkBuffer["default"]();
     _this.held = false;
+    _this.wsUrl = "";
+    _this.secure = false;
     if (websocket != null) {
       websocket.onopen = function () {
         self.state = _SocketState["default"].Established;
@@ -10045,11 +10046,10 @@ var WSocket = exports["default"] = /*#__PURE__*/function (_ISocket) {
     key: "connect",
     value: function connect(hostname, port) {
       var _this2 = this;
-      var secure = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       var self = this;
       var rt = new _AsyncReply["default"]();
       this.state = _SocketState["default"].Connecting;
-      this.url = "ws".concat(secure ? 's' : '', "://").concat(hostname, ":").concat(port);
+      this.url = "ws".concat(this.secure ? 's' : '', "://").concat(hostname, ":").concat(port, "/").concat(this.wsUrl);
       WSocket.getWebScoket().then(function (webSocket) {
         var ws;
         ws = new webSocket(_this2.url, "iip");
@@ -11987,7 +11987,8 @@ var TypeTemplate = exports["default"] = /*#__PURE__*/function () {
 
     // set UUID
     this.className = describer.namespace + "." + ((_describer$className = describer.className) !== null && _describer$className !== void 0 ? _describer$className : type.prototype.constructor.name);
-    this.classId = (_describer$classId = describer.classId) !== null && _describer$classId !== void 0 ? _describer$classId : _SHA["default"].compute(_DC.DC.stringToBytes(this.className)).getUUID(0);
+    this.classId = (_describer$classId = describer.classId) !== null && _describer$classId !== void 0 ? _describer$classId : TypeTemplate.getTypeUUIDByName(this.className); // SHA256.compute(DC.stringToBytes(this.className)).getUUID(0);
+
     if (addToWarehouse) _Warehouse["default"].putTemplate(this);
 
     //byte currentIndex = 0;
@@ -12461,6 +12462,8 @@ var _IRecord = _interopRequireDefault(require("../Data/IRecord.js"));
 var _TemplateType = _interopRequireDefault(require("./Template/TemplateType.js"));
 var _DistributedResource = _interopRequireDefault(require("../Net/IIP/DistributedResource.js"));
 var _IEnum = _interopRequireDefault(require("../Data/IEnum.js"));
+var _AsyncException = _interopRequireDefault(require("../Core/AsyncException.js"));
+var _ExceptionCode = _interopRequireDefault(require("../Core/ExceptionCode.js"));
 function _getRequireWildcardCache(e) { if ("function" != typeof WeakMap) return null; var r = new WeakMap(), t = new WeakMap(); return (_getRequireWildcardCache = function _getRequireWildcardCache(e) { return e ? t : r; })(e); }
 function _interopRequireWildcard(e, r) { if (!r && e && e.__esModule) return e; if (null === e || "object" != _typeof(e) && "function" != typeof e) return { "default": e }; var t = _getRequireWildcardCache(r); if (t && t.has(e)) return t.get(e); var n = { __proto__: null }, a = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var u in e) if ("default" !== u && Object.prototype.hasOwnProperty.call(e, u)) { var i = a ? Object.getOwnPropertyDescriptor(e, u) : null; i && (i.get || i.set) ? Object.defineProperty(n, u, i) : n[u] = e[u]; } return n["default"] = e, t && t.set(e, n), n; }
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
@@ -12604,6 +12607,7 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
           age,
           manager,
           attributes,
+          rt,
           path,
           _store,
           instanceName,
@@ -12618,43 +12622,45 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
               age = _args.length > 5 && _args[5] !== undefined ? _args[5] : 0;
               manager = _args.length > 6 && _args[6] !== undefined ? _args[6] : null;
               attributes = _args.length > 7 && _args[7] !== undefined ? _args[7] : null;
+              rt = new _AsyncReply["default"]();
               if (!(resource.instance != null)) {
-                _context.next = 6;
+                _context.next = 8;
                 break;
               }
-              throw new Error("Resource has a store.");
-            case 6:
+              rt.triggerError(new _AsyncException["default"](0, _ExceptionCode["default"].GeneralFailure, "Resource has a store"));
+              return _context.abrupt("return", rt);
+            case 8:
               path = name.replace(/^\\/g, "").split("/");
               if (!(path.length > 1)) {
-                _context.next = 16;
+                _context.next = 18;
                 break;
               }
               if (!(parent != null)) {
-                _context.next = 10;
+                _context.next = 12;
                 break;
               }
               throw new Error("Parent can't be set when using path in instance name");
-            case 10:
-              _context.next = 12;
-              return Warehouse.get(path.slice(0, path.length - 1).join("/"));
             case 12:
+              _context.next = 14;
+              return Warehouse.get(path.slice(0, path.length - 1).join("/"));
+            case 14:
               parent = _context.sent;
               if (!(parent == null)) {
-                _context.next = 15;
+                _context.next = 17;
                 break;
               }
               throw new Error("Can't find parent");
-            case 15:
+            case 17:
               store = (_store = store) !== null && _store !== void 0 ? _store : parent.instance.store;
-            case 16:
+            case 18:
               instanceName = path[path.length - 1];
               resourceReference = new WekRef(resource);
               if (!(store == null)) {
-                _context.next = 28;
+                _context.next = 30;
                 break;
               }
               if (!(parent != null)) {
-                _context.next = 23;
+                _context.next = 25;
                 break;
               }
               // assign parent as a store
@@ -12667,74 +12673,74 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
                 _list = Warehouse.stores.get(store);
                 if (_list) _list.add(resourceReference);
               }
-              _context.next = 28;
+              _context.next = 30;
               break;
-            case 23:
+            case 25:
               if (!(resource instanceof _IStore["default"])) {
-                _context.next = 27;
+                _context.next = 29;
                 break;
               }
               store = resource;
-              _context.next = 28;
+              _context.next = 30;
               break;
-            case 27:
+            case 29:
               throw new Error("Can't find a store for the resource.");
-            case 28:
+            case 30:
               resource.instance = new _Instance["default"](Warehouse.resourceCounter++, instanceName, resource, store, customTemplate, age);
               if (attributes != null) resource.instance.setAttributes(attributes);
               if (manager != null) resource.instance.managers.add(manager);
               if (store == parent) parent = null;
-              _context.prev = 32;
+              _context.prev = 34;
               if (resource instanceof _IStore["default"]) stores.add(resource, []);
-              _context.next = 36;
+              _context.next = 38;
               return store.put(resource);
-            case 36:
+            case 38:
               if (_context.sent) {
-                _context.next = 38;
+                _context.next = 40;
                 break;
               }
               throw new Error("Store failed to put the resource");
-            case 38:
+            case 40:
               if (!(parent != null)) {
-                _context.next = 43;
+                _context.next = 45;
                 break;
               }
-              _context.next = 41;
-              return parent.instance.store.addChild(parent, resource);
-            case 41:
               _context.next = 43;
-              return store.addParent(resource, parent);
+              return parent.instance.store.addChild(parent, resource);
             case 43:
+              _context.next = 45;
+              return store.addParent(resource, parent);
+            case 45:
               Warehouse.resources.add(resource.instance.Id, resourceReference);
               if (!Warehouse.warehouseIsOpen) {
-                _context.next = 50;
+                _context.next = 52;
                 break;
               }
-              _context.next = 47;
+              _context.next = 49;
               return resource.trigger(_IResource.ResourceTrigger.Initialize);
-            case 47:
+            case 49:
               if (!(resource instanceof _IStore["default"])) {
-                _context.next = 50;
+                _context.next = 52;
                 break;
               }
-              _context.next = 50;
+              _context.next = 52;
               return resource.trigger(_IResource.ResourceTrigger.Open);
-            case 50:
+            case 52:
               if (resource instanceof _IStore["default"]) Warehouse._emit("StoreConnected", resource);
-              _context.next = 57;
+              _context.next = 59;
               break;
-            case 53:
-              _context.prev = 53;
-              _context.t0 = _context["catch"](32);
+            case 55:
+              _context.prev = 55;
+              _context.t0 = _context["catch"](34);
               Warehouse.remove(resource);
               throw _context.t0;
-            case 57:
+            case 59:
               return _context.abrupt("return", resource);
-            case 58:
+            case 60:
             case "end":
               return _context.stop();
           }
-        }, _callee, null, [[32, 53]]);
+        }, _callee, null, [[34, 55]]);
       }));
       function put(_x, _x2, _x3, _x4) {
         return _put.apply(this, arguments);
@@ -13004,7 +13010,7 @@ Warehouse.protocols.add("db", function (name, attributes) {
 });
 var _default = exports["default"] = Warehouse;
 
-},{"../Core/AsyncBag.js":39,"../Core/AsyncReply.js":42,"../Core/IEventHandler.js":46,"../Data/AutoList.js":48,"../Data/IEnum.js":56,"../Data/IRecord.js":57,"../Data/KeyList.js":58,"../Net/IIP/DistributedConnection.js":77,"../Net/IIP/DistributedResource.js":79,"../Proxy/ResourceProxy.js":111,"../Resource/Instance.js":117,"../Resource/Template/TypeTemplate.js":128,"../Stores/IndexedDBStore.js":144,"../Stores/MemoryStore.js":145,"./IResource.js":115,"./IStore.js":116,"./Template/TemplateType.js":127,"@babel/runtime/helpers/asyncToGenerator":5,"@babel/runtime/helpers/classCallCheck":8,"@babel/runtime/helpers/createClass":13,"@babel/runtime/helpers/getPrototypeOf":16,"@babel/runtime/helpers/inherits":17,"@babel/runtime/helpers/interopRequireDefault":18,"@babel/runtime/helpers/possibleConstructorReturn":25,"@babel/runtime/helpers/typeof":33,"@babel/runtime/regenerator":36}],130:[function(require,module,exports){
+},{"../Core/AsyncBag.js":39,"../Core/AsyncException.js":40,"../Core/AsyncReply.js":42,"../Core/ExceptionCode.js":44,"../Core/IEventHandler.js":46,"../Data/AutoList.js":48,"../Data/IEnum.js":56,"../Data/IRecord.js":57,"../Data/KeyList.js":58,"../Net/IIP/DistributedConnection.js":77,"../Net/IIP/DistributedResource.js":79,"../Proxy/ResourceProxy.js":111,"../Resource/Instance.js":117,"../Resource/Template/TypeTemplate.js":128,"../Stores/IndexedDBStore.js":144,"../Stores/MemoryStore.js":145,"./IResource.js":115,"./IStore.js":116,"./Template/TemplateType.js":127,"@babel/runtime/helpers/asyncToGenerator":5,"@babel/runtime/helpers/classCallCheck":8,"@babel/runtime/helpers/createClass":13,"@babel/runtime/helpers/getPrototypeOf":16,"@babel/runtime/helpers/inherits":17,"@babel/runtime/helpers/interopRequireDefault":18,"@babel/runtime/helpers/possibleConstructorReturn":25,"@babel/runtime/helpers/typeof":33,"@babel/runtime/regenerator":36}],130:[function(require,module,exports){
 /*
 * Copyright (c) 2017 Ahmed Kh. Zamil
 *
