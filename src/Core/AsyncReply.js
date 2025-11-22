@@ -56,6 +56,9 @@ export default class AsyncReply extends Promise
         this.then(callback);
     }
 
+    catch(callback){
+        this.error(callback);
+    }
         
     error(callback)
     {

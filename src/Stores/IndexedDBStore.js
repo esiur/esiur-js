@@ -211,9 +211,9 @@ export default class IndexedDBStore extends IStore
                         }
 
                         rt.trigger(resource);
-                    }).error(ex => rt.triggerError(ex));
-                }).error(ex => rt.triggerError(ex));
-            }).error(ex => rt.triggerError(ex));
+                    }).catch(ex => rt.triggerError(ex));
+                }).catch(ex => rt.triggerError(ex));
+            }).catch(ex => rt.triggerError(ex));
         };
 
         return rt;

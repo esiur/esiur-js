@@ -1074,6 +1074,11 @@ var AsyncReply = exports["default"] = /*#__PURE__*/function (_Promise) {
       this.then(callback);
     }
   }, {
+    key: "catch",
+    value: function _catch(callback) {
+      this.error(callback);
+    }
+  }, {
     key: "error",
     value: function error(callback) {
       this.errorCallbacks.push(callback);
@@ -6356,7 +6361,7 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
                 var resource = new (Function.prototype.bind.apply(type, values))();
                 _Warehouse["default"].put(name, resource, store, parent).then(function (ok) {
                   _classPrivateMethodGet(self, _sendReply, _sendReply2).call(self, _IIPPacketAction["default"].CreateResource, callback).addUint32(resource.Instance.Id).done();
-                }).error(function (ex) {
+                })["catch"](function (ex) {
                   // send some error
                   _classPrivateMethodGet(self, _sendError, _sendError2).call(self, _ErrorType["default"].Management, callback, _ExceptionCode["default"].AddToStoreFailed);
                 });
@@ -6973,7 +6978,7 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
             if (resource == null) {
               _Warehouse["default"].put(id.toString(), dr, self, null, tmp).then(function (ok) {
                 initResource(ok);
-              }).error(function (ex) {
+              })["catch"](function (ex) {
                 reply.triggerError(ex);
               });
             } else {
@@ -6984,7 +6989,7 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
           });
         } else {
           if (resource == null) {
-            _Warehouse["default"].put(id.toString(), dr, self, null, template).then(initResource).error(function (ex) {
+            _Warehouse["default"].put(id.toString(), dr, self, null, template).then(initResource)["catch"](function (ex) {
               return reply.triggerError(ex);
             });
           } else {
@@ -7632,7 +7637,7 @@ function _processClientAuth2(data) {
           (_classPrivateFieldGet5 = (0, _classPrivateFieldGet25["default"])(_this5, _openReply)) === null || _classPrivateFieldGet5 === void 0 || _classPrivateFieldGet5.trigger(true);
           _this5._emit("ready", _this5);
           (0, _classPrivateFieldSet2["default"])(_this5, _openReply, null);
-        }).error(function (x) {
+        })["catch"](function (x) {
           var _classPrivateFieldGet6;
           (_classPrivateFieldGet6 = (0, _classPrivateFieldGet25["default"])(_this5, _openReply)) === null || _classPrivateFieldGet6 === void 0 || _classPrivateFieldGet6.triggerError(x);
           (0, _classPrivateFieldSet2["default"])(_this5, _openReply, null);
@@ -7857,7 +7862,7 @@ function _processAuthorization2(results) {
         _this7._emit("ready", _this7);
         (_classPrivateFieldGet19 = (0, _classPrivateFieldGet25["default"])(_this7, _server)) === null || _classPrivateFieldGet19 === void 0 || (_classPrivateFieldGet19 = _classPrivateFieldGet19.membership) === null || _classPrivateFieldGet19 === void 0 || _classPrivateFieldGet19.login((0, _classPrivateFieldGet25["default"])(_this7, _session));
         (0, _classPrivateFieldSet2["default"])(_this7, _loginDate, new Date());
-      }).error(function (x) {
+      })["catch"](function (x) {
         var _classPrivateFieldGet20;
         (_classPrivateFieldGet20 = (0, _classPrivateFieldGet25["default"])(_this7, _openReply)) === null || _classPrivateFieldGet20 === void 0 || _classPrivateFieldGet20.triggerError(x);
         (0, _classPrivateFieldSet2["default"])(_this7, _openReply, null);
@@ -12516,7 +12521,7 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
         var rt = new _AsyncReply["default"]();
         this.put(name, res, store, parent, null, 0, manager, attributes).then(function () {
           return rt.trigger(res);
-        }).error(function (ex) {
+        })["catch"](function (ex) {
           return rt.triggerError(ex);
         });
         return rt;
@@ -12527,7 +12532,9 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
   }, {
     key: "getById",
     value: function getById(id) {
-      return new _AsyncReply["default"](this.resources.item(id));
+      var _this$resources$item;
+      var r = (_this$resources$item = this.resources.item(id)) === null || _this$resources$item === void 0 ? void 0 : _this$resources$item.deref();
+      return new _AsyncReply["default"](r);
     }
   }, {
     key: "get",
@@ -12627,120 +12634,127 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
                 _context.next = 8;
                 break;
               }
-              rt.triggerError(new _AsyncException["default"](0, _ExceptionCode["default"].GeneralFailure, "Resource has a store"));
+              rt.triggerError(0, _ExceptionCode["default"].GeneralFailure, "Resource has a store");
               return _context.abrupt("return", rt);
             case 8:
-              path = name.replace(/^\\/g, "").split("/");
+              // trim '/' character 
+              path = name.replace(/^[\/]+/, '').split('/');
               if (!(path.length > 1)) {
-                _context.next = 18;
+                _context.next = 20;
                 break;
               }
               if (!(parent != null)) {
-                _context.next = 12;
+                _context.next = 13;
                 break;
               }
-              throw new Error("Parent can't be set when using path in instance name");
-            case 12:
-              _context.next = 14;
-              return Warehouse.get(path.slice(0, path.length - 1).join("/"));
-            case 14:
+              rt.triggerError(0, _ExceptionCode["default"].GeneralFailure, "Parent can't be set when using path in instance name");
+              return _context.abrupt("return", rt);
+            case 13:
+              _context.next = 15;
+              return Warehouse.get(path.slice(0, -1).join("/"));
+            case 15:
               parent = _context.sent;
               if (!(parent == null)) {
-                _context.next = 17;
+                _context.next = 19;
                 break;
               }
-              throw new Error("Can't find parent");
-            case 17:
-              store = (_store = store) !== null && _store !== void 0 ? _store : parent.instance.store;
-            case 18:
-              instanceName = path[path.length - 1];
+              rt.triggerError(0, _ExceptionCode["default"].GeneralFailure, "Can't find parent.");
+              return _context.abrupt("return", rt);
+            case 19:
+              store = (_store = store) !== null && _store !== void 0 ? _store : parent.Instance.Store;
+            case 20:
+              instanceName = path.at(-1);
               resourceReference = new WeakRef(resource);
               if (!(store == null)) {
-                _context.next = 30;
+                _context.next = 33;
                 break;
               }
               if (!(parent != null)) {
-                _context.next = 25;
+                _context.next = 27;
                 break;
               }
               // assign parent as a store
               if (parent instanceof _IStore["default"]) {
                 store = parent;
-                list = Warehouse.stores.get(store);
+                list = this.stores.get(store);
                 if (list) list.add(resourceReference);
               } else {
                 store = parent.instance.store;
-                _list = Warehouse.stores.get(store);
+                _list = this.stores.get(store);
                 if (_list) _list.add(resourceReference);
               }
-              _context.next = 30;
+              _context.next = 33;
               break;
-            case 25:
+            case 27:
               if (!(resource instanceof _IStore["default"])) {
-                _context.next = 29;
+                _context.next = 31;
                 break;
               }
               store = resource;
-              _context.next = 30;
+              _context.next = 33;
               break;
-            case 29:
-              throw new Error("Can't find a store for the resource.");
-            case 30:
-              resource.instance = new _Instance["default"](Warehouse.resourceCounter++, instanceName, resource, store, customTemplate, age);
+            case 31:
+              rt.triggerError(0, _ExceptionCode["default"].GeneralFailure, "Can't find a store for the resource.");
+              return _context.abrupt("return", rt);
+            case 33:
+              resource.instance = new _Instance["default"](this.resourceCounter++, instanceName, resource, store, customTemplate, age);
               if (attributes != null) resource.instance.setAttributes(attributes);
               if (manager != null) resource.instance.managers.add(manager);
               if (store == parent) parent = null;
-              _context.prev = 34;
-              if (resource instanceof _IStore["default"]) stores.add(resource, []);
-              _context.next = 38;
+              _context.prev = 37;
+              if (resource instanceof _IStore["default"]) this.stores.add(resource, []);
+              _context.next = 41;
               return store.put(resource);
-            case 38:
+            case 41:
               if (_context.sent) {
-                _context.next = 40;
+                _context.next = 44;
                 break;
               }
-              throw new Error("Store failed to put the resource");
-            case 40:
+              rt.triggerError(0, _ExceptionCode["default"].GeneralFailure, "Store failed to put the resource.");
+              return _context.abrupt("return", rt);
+            case 44:
               if (!(parent != null)) {
-                _context.next = 45;
+                _context.next = 49;
                 break;
               }
-              _context.next = 43;
+              _context.next = 47;
               return parent.instance.store.addChild(parent, resource);
-            case 43:
-              _context.next = 45;
-              return store.addParent(resource, parent);
-            case 45:
-              Warehouse.resources.add(resource.instance.Id, resourceReference);
-              if (!Warehouse.warehouseIsOpen) {
-                _context.next = 52;
-                break;
-              }
+            case 47:
               _context.next = 49;
-              return resource.trigger(_IResource.ResourceTrigger.Initialize);
+              return store.addParent(resource, parent);
             case 49:
-              if (!(resource instanceof _IStore["default"])) {
-                _context.next = 52;
+              this.resources.add(resource.instance.id, resourceReference);
+              if (!this.warehouseIsOpen) {
+                _context.next = 56;
                 break;
               }
-              _context.next = 52;
+              _context.next = 53;
+              return resource.trigger(_IResource.ResourceTrigger.Initialize);
+            case 53:
+              if (!(resource instanceof _IStore["default"])) {
+                _context.next = 56;
+                break;
+              }
+              _context.next = 56;
               return resource.trigger(_IResource.ResourceTrigger.Open);
-            case 52:
-              if (resource instanceof _IStore["default"]) Warehouse._emit("StoreConnected", resource);
-              _context.next = 59;
+            case 56:
+              if (resource instanceof _IStore["default"]) this._emit("StoreConnected", resource);
+              _context.next = 64;
               break;
-            case 55:
-              _context.prev = 55;
-              _context.t0 = _context["catch"](34);
-              Warehouse.remove(resource);
-              throw _context.t0;
             case 59:
-              return _context.abrupt("return", resource);
-            case 60:
+              _context.prev = 59;
+              _context.t0 = _context["catch"](37);
+              this.remove(resource);
+              rt.triggerError(_context.t0);
+              return _context.abrupt("return", rt);
+            case 64:
+              rt.trigger(resource);
+              return _context.abrupt("return", rt);
+            case 66:
             case "end":
               return _context.stop();
           }
-        }, _callee, null, [[34, 55]]);
+        }, _callee, this, [[37, 59]]);
       }));
       function put(_x, _x2, _x3, _x4) {
         return _put.apply(this, arguments);
@@ -12855,7 +12869,7 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
           while (1) switch (_context2.prev = _context2.next) {
             case 0:
               p = path.replace(/^\\/g, "").split("/");
-              _iterator = _createForOfIteratorHelper(Warehouse.stores.keys);
+              _iterator = _createForOfIteratorHelper(this.stores.keys);
               _context2.prev = 2;
               _iterator.s();
             case 4:
@@ -12937,7 +12951,7 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
             case "end":
               return _context2.stop();
           }
-        }, _callee2, null, [[2, 37, 40, 43]]);
+        }, _callee2, this, [[2, 37, 40, 43]]);
       }));
       function query(_x5) {
         return _query.apply(this, arguments);
@@ -12953,8 +12967,10 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
       var rt = new _AsyncReply["default"]();
       var self = this;
       for (var i = 0; i < this.resources.length; i++) {
-        var r = this.resources.at(i);
-        initBag.add(r.trigger(_IResource.ResourceTrigger.Initialize));
+        var r = this.resources.at(i).deref();
+        if (r) {
+          initBag.add(r.trigger(_IResource.ResourceTrigger.Initialize));
+        }
         //if (!rt)
         //  console.log(`Resource failed at Initialize ${r.Instance.Name} [${r.Instance.Template.ClassName}]`);
       }
@@ -12963,8 +12979,10 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
         for (var _i4 = 0; _i4 < ar.length; _i4++) if (!ar[_i4]) console.log("Resource failed at Initialize ".concat(self.resources.at(_i4).instance.name, " [").concat(self.resources.at(_i4).instance.template.className, "]"));
         var sysBag = new _AsyncBag["default"]();
         for (var _i5 = 0; _i5 < _this2.resources.length; _i5++) {
-          var r = _this2.resources.at(_i5);
-          sysBag.add(r.trigger(_IResource.ResourceTrigger.SystemInitialized));
+          var r = _this2.resources.at(_i5).deref();
+          if (r) {
+            sysBag.add(r.trigger(_IResource.ResourceTrigger.SystemInitialized));
+          }
         }
         sysBag.seal();
         sysBag.then(function (ar2) {
@@ -13896,13 +13914,13 @@ var IndexedDBStore = exports["default"] = /*#__PURE__*/function (_IStore) {
                 resource.instance.loadProperty(_v.name, _v.age, _v.modification, ar[i]);
               }
               rt.trigger(resource);
-            }).error(function (ex) {
+            })["catch"](function (ex) {
               return rt.triggerError(ex);
             });
-          }).error(function (ex) {
+          })["catch"](function (ex) {
             return rt.triggerError(ex);
           });
-        }).error(function (ex) {
+        })["catch"](function (ex) {
           return rt.triggerError(ex);
         });
       };

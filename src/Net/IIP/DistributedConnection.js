@@ -634,7 +634,7 @@ export default class DistributedConnection extends IStore {
                           this._emit("ready", this);
                           this.#openReply = null;
   
-                      }).error((x) =>
+                      }).catch((x) =>
                       {
                           this.#openReply?.triggerError(x);
                           this.#openReply = null;
@@ -1104,7 +1104,7 @@ export default class DistributedConnection extends IStore {
                       this.#server?.membership?.login(this.#session);
                       this.#loginDate = new Date();
   
-                  }).error((x) =>
+                  }).catch((x) =>
                   {
                       this.#openReply?.triggerError(x);
                       this.#openReply = null;
@@ -2153,7 +2153,7 @@ export default class DistributedConnection extends IStore {
                                 self.#sendReply(IIPPacketAction.CreateResource, callback)
                                 .addUint32(resource.Instance.Id)
                                 .done();
-                            }).error(function(ex){
+                            }).catch(function(ex){
                                 // send some error
                                 self.#sendError(ErrorType.Management, callback, ExceptionCode.AddToStoreFailed);
                             });
@@ -3052,7 +3052,7 @@ export default class DistributedConnection extends IStore {
                         if (resource == null) {
                             Warehouse.put(id.toString(), dr, self, null, tmp).then(function(ok){
                                 initResource(ok);
-                            }).error(function(ex){
+                            }).catch(function(ex){
                                 reply.triggerError(ex);
                             });
                         }
@@ -3067,7 +3067,7 @@ export default class DistributedConnection extends IStore {
                     if (resource == null) {
                         Warehouse.put(id.toString(), dr, self, null, template)
                           .then(initResource)
-                          .error((ex) => reply.triggerError(ex));
+                          .catch((ex) => reply.triggerError(ex));
                       } else {
                         initResource(resource);
                       }        

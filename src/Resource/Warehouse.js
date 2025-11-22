@@ -99,7 +99,7 @@ export class WH extends IEventHandler
 
             this.put(name, res, store, parent, null, 0, manager, attributes)
                         .then(()=>rt.trigger(res))
-                        .error((ex)=>rt.triggerError(ex));
+                        .catch((ex)=>rt.triggerError(ex));
 
             return rt;
         }
@@ -111,7 +111,8 @@ export class WH extends IEventHandler
 
     getById(id)
     {
-        return new AsyncReply(this.resources.item(id));
+        let r = this.resources.item(id)?.deref();
+        return new AsyncReply(r);
     }
     
     get(path, attributes = null)//, parent = null, manager = null)
@@ -214,29 +215,36 @@ export class WH extends IEventHandler
 
     async put(name, resource, store, parent, customTemplate = null, age = 0, manager = null, attributes = null){
         
+
         let rt = new AsyncReply();
 
         if (resource.instance != null){
-            rt.triggerError(new AsyncException(0, ExceptionCode.GeneralFailure, "Resource has a store"));
+            rt.triggerError(0, ExceptionCode.GeneralFailure, "Resource has a store");
             return rt;
         }
 
-        let path = name.replace(/^\\/g, "").split("/");
+         // trim '/' character 
+        let path = name.replace(/^[\/]+/, '').split('/');
 
         if (path.length > 1)
         {
-            if (parent != null)
-                throw new Error("Parent can't be set when using path in instance name");
+            if (parent != null){
+                rt.triggerError(0, ExceptionCode.GeneralFailure, "Parent can't be set when using path in instance name");
+                return rt;
+            }
 
-            parent = await Warehouse.get(path.slice(0, path.length - 1).join("/"));
+            parent = await Warehouse.get(path.slice(0, -1).join("/"));
 
-            if (parent == null)
-                throw new Error("Can't find parent");
+            if (parent == null){
+                rt.triggerError(0, ExceptionCode.GeneralFailure, "Can't find parent.");
+                return rt;
+            }
 
-            store = store ?? parent.instance.store;
+            store = store ?? parent.Instance.Store;
         }
 
-        let instanceName = path[path.length - 1];
+        let instanceName = path.at(-1);
+
 
         let resourceReference = new WeakRef(resource);
 
@@ -249,7 +257,7 @@ export class WH extends IEventHandler
                 if (parent instanceof IStore)
                 {
                     store = parent;
-                    let list = Warehouse.stores.get(store); 
+                    let list = this.stores.get(store); 
                     if (list)
                         list.add(resourceReference);
                 }
@@ -257,7 +265,7 @@ export class WH extends IEventHandler
                 {
                     store = parent.instance.store;
 
-                    let list = Warehouse.stores.get(store); 
+                    let list = this.stores.get(store); 
                     if (list)
                         list.add(resourceReference);
                 }
@@ -268,10 +276,13 @@ export class WH extends IEventHandler
                 store = resource;
             }
             else
-                throw new Error("Can't find a store for the resource.");
+            {
+                rt.triggerError(0, ExceptionCode.GeneralFailure, "Can't find a store for the resource.");
+                return rt;
+            }
         }
 
-        resource.instance = new Instance(Warehouse.resourceCounter++, instanceName, resource, store, customTemplate, age);
+        resource.instance = new Instance(this.resourceCounter++, instanceName, resource, store, customTemplate, age);
 
         if (attributes != null)
             resource.instance.setAttributes(attributes);
@@ -285,22 +296,25 @@ export class WH extends IEventHandler
         try
         {
             if (resource instanceof IStore)
-                stores.add(resource, []);
+                this.stores.add(resource, []);
 
 
-            if (!await store.put(resource))
-                throw new Error("Store failed to put the resource");
-
+            if (!await store.put(resource)){
+                rt.triggerError(0, ExceptionCode.GeneralFailure, "Store failed to put the resource.");
+                return rt;
+            }
 
             if (parent != null)
             {
                 await parent.instance.store.addChild(parent, resource);
                 await store.addParent(resource, parent);
-            }    
+            }
 
-            Warehouse.resources.add(resource.instance.Id, resourceReference);
 
-            if (Warehouse.warehouseIsOpen)
+
+            this.resources.add(resource.instance.id, resourceReference);
+
+            if (this.warehouseIsOpen)
             {
                 await resource.trigger(ResourceTrigger.Initialize);
                 if (resource instanceof IStore)
@@ -308,15 +322,127 @@ export class WH extends IEventHandler
             }
 
             if (resource instanceof IStore)
-                Warehouse._emit("StoreConnected", resource);
+                this._emit("StoreConnected", resource);
         }
         catch (ex)
         {
-            Warehouse.remove(resource);
-            throw ex;
+            this.remove(resource);            
+            rt.triggerError(ex);
+            return rt;
         }
 
-        return resource;
+        rt.trigger(resource);
+        return rt;
+
+
+
+
+
+
+
+        // let rt = new AsyncReply();
+
+        // if (resource.instance != null){
+        //     rt.triggerError(new AsyncException(0, ExceptionCode.GeneralFailure, "Resource has a store"));
+        //     return rt;
+        // }
+
+        // let path = name.replace(/^\\/g, "").split("/");
+
+        // if (path.length > 1)
+        // {
+        //     if (parent != null)
+        //         throw new Error("Parent can't be set when using path in instance name");
+
+        //     parent = await Warehouse.get(path.slice(0, path.length - 1).join("/"));
+
+        //     if (parent == null)
+        //         throw new Error("Can't find parent");
+
+        //     store = store ?? parent.instance.store;
+        // }
+
+        // let instanceName = path[path.length - 1];
+
+        // let resourceReference = new WeakRef(resource);
+
+        // if (store == null)
+        // {
+        //     // assign parent's store as a store
+        //     if (parent != null)
+        //     {
+        //         // assign parent as a store
+        //         if (parent instanceof IStore)
+        //         {
+        //             store = parent;
+        //             let list = Warehouse.stores.get(store); 
+        //             if (list)
+        //                 list.add(resourceReference);
+        //         }
+        //         else
+        //         {
+        //             store = parent.instance.store;
+
+        //             let list = Warehouse.stores.get(store); 
+        //             if (list)
+        //                 list.add(resourceReference);
+        //         }
+        //     }
+        //     // assign self as a store (root store)
+        //     else if (resource instanceof IStore)
+        //     {
+        //         store = resource;
+        //     }
+        //     else
+        //         throw new Error("Can't find a store for the resource.");
+        // }
+
+        // resource.instance = new Instance(Warehouse.resourceCounter++, instanceName, resource, store, customTemplate, age);
+
+        // if (attributes != null)
+        //     resource.instance.setAttributes(attributes);
+
+        // if (manager != null)
+        //     resource.instance.managers.add(manager);
+
+        // if (store == parent)
+        //     parent = null;
+
+        // try
+        // {
+        //     if (resource instanceof IStore)
+        //         this.stores.add(resource, []);
+
+
+        //     if (!await store.put(resource))
+        //         throw new Error("Store failed to put the resource");
+
+
+        //     if (parent != null)
+        //     {
+        //         await parent.instance.store.addChild(parent, resource);
+        //         await store.addParent(resource, parent);
+        //     }    
+
+        //     Warehouse.resources.add(resource.instance.Id, resourceReference);
+
+        //     if (Warehouse.warehouseIsOpen)
+        //     {
+        //         await resource.trigger(ResourceTrigger.Initialize);
+        //         if (resource instanceof IStore)
+        //             await resource.trigger(ResourceTrigger.Open);
+        //     }
+
+        //     if (resource instanceof IStore)
+        //         Warehouse._emit("StoreConnected", resource);
+        // }
+        // catch (ex)
+        // {
+        //     Warehouse.remove(resource);
+        //     throw ex;
+        // }
+
+        // return resource;
 
 
 
@@ -528,7 +654,7 @@ export class WH extends IEventHandler
         let p = path.replace(/^\\/g, "").split("/");
         let resource;
 
-        for(let store of Warehouse.stores.keys)
+        for(let store of this.stores.keys)
         {
             if (p[0] == store.instance.name)
             {
@@ -576,8 +702,10 @@ export class WH extends IEventHandler
 
         for (var i = 0; i < this.resources.length; i++)
         {
-            var r = this.resources.at(i);
-            initBag.add(r.trigger(ResourceTrigger.Initialize));
+            let r = this.resources.at(i).deref();
+            if (r) {
+                initBag.add(r.trigger(ResourceTrigger.Initialize));
+            }
             //if (!rt)
               //  console.log(`Resource failed at Initialize ${r.Instance.Name} [${r.Instance.Template.ClassName}]`);
         }
@@ -594,8 +722,10 @@ export class WH extends IEventHandler
 
             for (let i = 0; i < this.resources.length; i++)
             {
-                var r = this.resources.at(i);
-                sysBag.add(r.trigger(ResourceTrigger.SystemInitialized));
+                var r = this.resources.at(i).deref();
+                if (r){
+                    sysBag.add(r.trigger(ResourceTrigger.SystemInitialized));
+                }
             }
     
             sysBag.seal();
