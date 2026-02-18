@@ -12592,7 +12592,8 @@ var WH = exports.WH = /*#__PURE__*/function (_IEventHandler) {
         // remove all objects associated with the store
         var toBeRemoved = null;
         for (var i = 0; i < this.resources.length; i++) {
-          var o = this.resources.at(i);
+          var o = this.resources.at(i).deref();
+          if (o == null) continue;
           if (o.instance.store == resource) {
             if (toBeRemoved == null) toBeRemoved = [];
             toBeRemoved.push(o);

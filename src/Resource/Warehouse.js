@@ -187,7 +187,10 @@ export class WH extends IEventHandler
 
             for (var i = 0; i < this.resources.length; i++)
             {
-                var o = this.resources.at(i);
+                var o = this.resources.at(i).deref();
+                if (o == null)
+                    continue;
+                
                 if (o.instance.store == resource)
                 {
                     if (toBeRemoved == null)
