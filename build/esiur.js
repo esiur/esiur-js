@@ -5725,7 +5725,7 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
     key: "reconnect",
     value: function () {
       var _reconnect = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee() {
-        var toBeRestored, i, r, _i, _toBeRestored, _r, link, ar, dataType, data, id;
+        var toBeRestored, i, r, toBeFetched, _i, _toBeRestored, _r, link, ar, dataType, data, id, _i2, _toBeFetched, _r2;
         return _regenerator["default"].wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
@@ -5746,77 +5746,104 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
                 r = (0, _classPrivateFieldGet25["default"])(this, _suspendedResources).values[i].deref();
                 if (r != null) toBeRestored.push(r);
               }
+              toBeFetched = [];
               _i = 0, _toBeRestored = toBeRestored;
-            case 10:
+            case 11:
               if (!(_i < _toBeRestored.length)) {
-                _context.next = 39;
+                _context.next = 36;
                 break;
               }
               _r = _toBeRestored[_i];
               link = _DC.DC.stringToBytes(_r._p.link);
-              console.log("Restoring " + _r._p.link);
-              _context.prev = 14;
-              _context.next = 17;
-              return _classPrivateMethodGet(this, _sendRequest, _sendRequest2).call(this, _IIPPacketAction["default"].QueryLink).addUint16(link.length).addUint8Array(link).done();
+              if (!_r._p.attached) {
+                _context.next = 17;
+                break;
+              }
+              console.log("Already restored " + _r._p.link);
+              return _context.abrupt("continue", 33);
             case 17:
+              console.log("Relinking " + _r._p.link);
+              _context.prev = 18;
+              _context.next = 21;
+              return _classPrivateMethodGet(this, _sendRequest, _sendRequest2).call(this, _IIPPacketAction["default"].QueryLink).addUint16(link.length).addUint8Array(link).done();
+            case 21:
               ar = _context.sent;
               dataType = ar[0];
               data = ar[1];
-              if (!(dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.ResourceList || dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.List)) {
-                _context.next = 28;
-                break;
-              }
-              // remove from suspended.
-              (0, _classPrivateFieldGet25["default"])(this, _suspendedResources).remove(_r._p.instanceId);
+              if (dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.ResourceList || dataType.identifier == _TransmissionType.TransmissionTypeIdentifier.List) {
+                // remove from suspended.
+                (0, _classPrivateFieldGet25["default"])(this, _suspendedResources).remove(_r._p.instanceId);
 
-              // parse them as int
-              id = data.getUint32(8); // id changed ?
-              if (id != _r._p.instanceId) _r._p.instanceId = id;
-              (0, _classPrivateFieldGet25["default"])(this, _neededResources).set(id, _r);
-              _context.next = 27;
-              return this.fetch(id, null);
-            case 27:
-              console.log("Restored " + id);
-            case 28:
-              _context.next = 36;
+                // parse them as int
+                id = data.getUint32(8); // id changed ?
+                if (id != _r._p.instanceId) _r._p.instanceId = id;
+                (0, _classPrivateFieldGet25["default"])(this, _neededResources).set(id, _r);
+                toBeFetched.push(id);
+              }
+              _context.next = 33;
               break;
-            case 30:
-              _context.prev = 30;
-              _context.t0 = _context["catch"](14);
+            case 27:
+              _context.prev = 27;
+              _context.t0 = _context["catch"](18);
               if (!(_context.t0.code == _ExceptionCode["default"].ResourceNotFound)) {
-                _context.next = 35;
+                _context.next = 32;
                 break;
               }
-              _context.next = 36;
+              _context.next = 33;
               break;
-            case 35:
-              return _context.abrupt("break", 39);
-            case 36:
+            case 32:
+              return _context.abrupt("break", 36);
+            case 33:
               _i++;
-              _context.next = 10;
+              _context.next = 11;
               break;
-            case 39:
-              _context.next = 44;
-              break;
-            case 41:
-              _context.prev = 41;
-              _context.t1 = _context["catch"](6);
-              console.log(_context.t1);
-            case 44:
+            case 36:
+              // fetch needed resources
+              console.log("Fetching...");
+              _i2 = 0, _toBeFetched = toBeFetched;
+            case 38:
+              if (!(_i2 < _toBeFetched.length)) {
+                _context.next = 52;
+                break;
+              }
+              _r2 = _toBeFetched[_i2];
+              _context.prev = 40;
+              _context.next = 43;
+              return this.fetch(id, null);
+            case 43:
+              console.log("Restored " + id);
               _context.next = 49;
               break;
             case 46:
               _context.prev = 46;
-              _context.t2 = _context["catch"](1);
-              return _context.abrupt("return", false);
+              _context.t1 = _context["catch"](40);
+              console.log(_context.t1);
             case 49:
+              _i2++;
+              _context.next = 38;
+              break;
+            case 52:
+              _context.next = 57;
+              break;
+            case 54:
+              _context.prev = 54;
+              _context.t2 = _context["catch"](6);
+              console.log(_context.t2);
+            case 57:
+              _context.next = 62;
+              break;
+            case 59:
+              _context.prev = 59;
+              _context.t3 = _context["catch"](1);
+              return _context.abrupt("return", false);
+            case 62:
               this._emit("resumed", this);
               return _context.abrupt("return", true);
-            case 51:
+            case 64:
             case "end":
               return _context.stop();
           }
-        }, _callee, this, [[1, 46], [6, 41], [14, 30]]);
+        }, _callee, this, [[1, 59], [6, 54], [18, 27], [40, 46]]);
       }));
       function reconnect() {
         return _reconnect.apply(this, arguments);
@@ -8105,8 +8132,8 @@ function _keepAliveTimerElapsed2() {
       }
     }
     if (toBeRemoved.length > 0) console.log("GC: " + toBeRemoved.length);
-    for (var _i2 = 0, _toBeRemoved = toBeRemoved; _i2 < _toBeRemoved.length; _i2++) {
-      var _id = _toBeRemoved[_i2];
+    for (var _i3 = 0, _toBeRemoved = toBeRemoved; _i3 < _toBeRemoved.length; _i3++) {
+      var _id = _toBeRemoved[_i3];
       (0, _classPrivateFieldGet25["default"])(self, _attachedResources).remove(_id);
     }
   }).error(function (ex) {

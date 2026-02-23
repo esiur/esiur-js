@@ -1248,10 +1248,19 @@ export default class DistributedConnection extends IStore {
                         toBeRestored.push(r);
                 }
 
+                var toBeFetched = [];
+
                 for(let r of toBeRestored)
                 {
                     let link = DC.stringToBytes(r._p.link);
-                    console.log("Restoring " + r._p.link);
+
+                    if (r._p.attached)
+                    {
+                        console.log("Already restored " + r._p.link);
+                        continue;
+                    }
+
+                    console.log("Relinking " + r._p.link);
 
                     try
                     {
@@ -1278,9 +1287,7 @@ export default class DistributedConnection extends IStore {
 
                             this.#neededResources.set(id, r);
 
-                            await this.fetch(id, null);
-
-                            console.log("Restored " + id);
+                            toBeFetched.push(id);
                         } 
                     }
                     catch (ex)
@@ -1293,6 +1300,19 @@ export default class DistributedConnection extends IStore {
                         {
                             break;
                         }
+                    }
+                }
+
+                // fetch needed resources
+                console.log("Fetching...");
+                
+                for(let r of toBeFetched)
+                {
+                    try {
+                        await this.fetch(id, null);
+                        console.log("Restored " + id);
+                    } catch (exFetch){
+                        console.log(exFetch);
                     }
                 }
             }
