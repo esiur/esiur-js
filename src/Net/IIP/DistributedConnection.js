@@ -1407,7 +1407,7 @@ export default class DistributedConnection extends IStore {
 
 
     connect(method = AuthenticationMethod.Certificate, socket = null, hostname = null, port = 0, 
-        username = null, tokenIndex = 0, passwordOrToken = null, domain = null, secure = false, wsUrl = "")
+        username = null, tokenIndex = 0, passwordOrToken = null, domain = null, secure = false, wsUrl = null)
     {
         
         if (this.#openReply != null)
@@ -1463,7 +1463,7 @@ export default class DistributedConnection extends IStore {
             socket.secure = secure;
 
         if (wsUrl != null)
-            socket.wsUrl = wsUrl;
+            socket.wsUrl = wsUrl;            
 
         this.#connectSocket(socket);
 

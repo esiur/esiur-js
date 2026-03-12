@@ -5935,7 +5935,7 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
       var passwordOrToken = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : null;
       var domain = arguments.length > 7 && arguments[7] !== undefined ? arguments[7] : null;
       var secure = arguments.length > 8 && arguments[8] !== undefined ? arguments[8] : false;
-      var wsUrl = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : "";
+      var wsUrl = arguments.length > 9 && arguments[9] !== undefined ? arguments[9] : null;
       if ((0, _classPrivateFieldGet25["default"])(this, _openReply) != null) throw new _AsyncException["default"](_ErrorType["default"].Exception, 0, "Connection in progress");
       (0, _classPrivateFieldSet2["default"])(this, _status, _ConnectionStatus["default"].Connecting);
       (0, _classPrivateFieldSet2["default"])(this, _openReply, new _AsyncReply["default"]());
