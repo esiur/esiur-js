@@ -5809,9 +5809,9 @@ var DistributedConnection = exports["default"] = /*#__PURE__*/function (_IStore)
               _r2 = _toBeFetched[_i2];
               _context.prev = 40;
               _context.next = 43;
-              return this.fetch(id, null);
+              return this.fetch(_r2, null);
             case 43:
-              console.log("Restored " + id);
+              console.log("Restored " + _r2);
               _context.next = 49;
               break;
             case 46:

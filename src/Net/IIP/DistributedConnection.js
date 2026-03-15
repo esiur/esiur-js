@@ -1309,8 +1309,8 @@ export default class DistributedConnection extends IStore {
                 for(let r of toBeFetched)
                 {
                     try {
-                        await this.fetch(id, null);
-                        console.log("Restored " + id);
+                        await this.fetch(r, null);
+                        console.log("Restored " + r);
                     } catch (exFetch){
                         console.log(exFetch);
                     }
